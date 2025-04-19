@@ -6,6 +6,19 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating dropdown menus using Radix UI.
+ *
+ * @module DropdownMenu
+ *
+ * @description This module exports the DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+ * DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioItem, DropdownMenuLabel,
+ * DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuGroup, DropdownMenuPortal,
+ * DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, and DropdownMenuRadioGroup
+ * components, which are styled wrappers around Radix UI primitives for creating accessible
+ * and customizable dropdown menus.
+ */
+
 const DropdownMenu = DropdownMenuPrimitive.Root
 
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger

@@ -5,6 +5,15 @@ import * as SwitchPrimitives from "@radix-ui/react-switch"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating switches using Radix UI.
+ *
+ * @module Switch
+ *
+ * @description This module exports the Switch component, which is a styled wrapper
+ * around the Radix UI Switch primitive for creating accessible and customizable switches.
+ */
+
 const Switch = React.forwardRef<
   React.ElementRef<typeof SwitchPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>

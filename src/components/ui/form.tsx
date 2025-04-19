@@ -15,6 +15,16 @@ import {
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
 
+/**
+ * @fileOverview Provides UI components for creating forms using react-hook-form.
+ *
+ * @module Form
+ *
+ * @description This module exports the Form, FormItem, FormLabel, FormControl, FormDescription,
+ * FormMessage, and FormField components, which are styled components and hooks for integrating
+ * with react-hook-form to create accessible and customizable forms.
+ */
+
 const Form = FormProvider
 
 type FormFieldContextValue<

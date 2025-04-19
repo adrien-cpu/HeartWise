@@ -5,6 +5,15 @@ import * as SeparatorPrimitive from "@radix-ui/react-separator"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides a UI component for creating separators using Radix UI.
+ *
+ * @module Separator
+ *
+ * @description This module exports the Separator component, which is a styled wrapper
+ * around the Radix UI Separator primitive.
+ */
+
 const Separator = React.forwardRef<
   React.ElementRef<typeof SeparatorPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>

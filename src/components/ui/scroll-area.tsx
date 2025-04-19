@@ -5,6 +5,15 @@ import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating scrollable areas using Radix UI.
+ *
+ * @module ScrollArea
+ *
+ * @description This module exports the ScrollArea and ScrollBar components,
+ * which are styled wrappers around Radix UI primitives for creating accessible and customizable scrollable areas.
+ */
+
 const ScrollArea = React.forwardRef<
   React.ElementRef<typeof ScrollAreaPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root>

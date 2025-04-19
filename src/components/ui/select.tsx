@@ -6,6 +6,17 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating select elements using Radix UI.
+ *
+ * @module Select
+ *
+ * @description This module exports the Select, SelectGroup, SelectValue, SelectTrigger,
+ * SelectContent, SelectLabel, SelectItem, SelectSeparator, SelectScrollUpButton,
+ * and SelectScrollDownButton components, which are styled wrappers around Radix UI primitives
+ * for creating accessible and customizable select elements.
+ */
+
 const Select = SelectPrimitive.Root
 
 const SelectGroup = SelectPrimitive.Group

@@ -2,6 +2,14 @@ import * as React from 'react';
 
 import {cn} from '@/lib/utils';
 
+/**
+ * @fileOverview Provides a UI component for creating textarea input fields.
+ *
+ * @module Textarea
+ *
+ * @description This module exports the Textarea component, which is a styled textarea element.
+ */
+
 const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<'textarea'>>(
   ({className, ...props}, ref) => {
     return (

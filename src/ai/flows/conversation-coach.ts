@@ -2,14 +2,25 @@
 /**
  * @fileOverview An AI conversation coach that analyzes messages and suggests improvements.
  *
- * - conversationCoach - A function that analyzes a message and suggests improvements.
- * - ConversationCoachInput - The input type for the conversationCoach function.
- * - ConversationCoachOutput - The return type for the conversationCoach function.
+ * @module ConversationCoach
+ *
+ * @description This module defines the AI conversation coach functionality, including input/output schemas,
+ * AI flow, and functions for analyzing messages and suggesting improvements.
+ *
+ * @exports {function} conversationCoach - A function that analyzes a message and suggests improvements.
+ * @exports {ConversationCoachInput} ConversationCoachInput - The input type for the conversationCoach function.
+ * @exports {ConversationCoachOutput} ConversationCoachOutput - The return type for the conversationCoach function.
  */
 
 import {ai} from '@/ai/ai-instance';
 import {z} from 'genkit';
 
+/**
+ * @typedef {object} ConversationCoachInput
+ * @property {string} message - The message to analyze.
+ * @property {string} [partnerCharacteristics] - Characteristics of the conversation partner.
+ * @property {string} [userStyle] - The user style (e.g., romantic, direct, poetic).
+ */
 const ConversationCoachInputSchema = z.object({
   message: z.string().describe('The message to analyze.'),
   partnerCharacteristics: z.string().optional().describe('Characteristics of the conversation partner.'),
@@ -17,12 +28,25 @@ const ConversationCoachInputSchema = z.object({
 });
 export type ConversationCoachInput = z.infer<typeof ConversationCoachInputSchema>;
 
+/**
+ * @typedef {object} ConversationCoachOutput
+ * @property {string} suggestion - The suggested reformulation of the message, if any.
+ * @property {string} explanation - The explanation for the suggestion, if any.
+ */
 const ConversationCoachOutputSchema = z.object({
   suggestion: z.string().describe('The suggested reformulation of the message, if any.'),
   explanation: z.string().describe('The explanation for the suggestion, if any.'),
 });
 export type ConversationCoachOutput = z.infer<typeof ConversationCoachOutputSchema>;
 
+/**
+ * Analyzes a message and suggests improvements using AI.
+ *
+ * @async
+ * @function conversationCoach
+ * @param {ConversationCoachInput} input - The input data for analyzing the message.
+ * @returns {Promise<ConversationCoachOutput>} The analysis result with suggestion and explanation.
+ */
 export async function conversationCoach(input: ConversationCoachInput): Promise<ConversationCoachOutput> {
   return conversationCoachFlow(input);
 }

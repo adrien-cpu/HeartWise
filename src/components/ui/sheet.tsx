@@ -7,6 +7,16 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating sheets (side panels) using Radix UI.
+ *
+ * @module Sheet
+ *
+ * @description This module exports the Sheet, SheetTrigger, SheetClose, SheetPortal, SheetOverlay,
+ * SheetContent, SheetHeader, SheetFooter, SheetTitle, and SheetDescription components,
+ * which are styled wrappers around Radix UI primitives for creating accessible and customizable sheets.
+ */
+
 const Sheet = SheetPrimitive.Root
 
 const SheetTrigger = SheetPrimitive.Trigger

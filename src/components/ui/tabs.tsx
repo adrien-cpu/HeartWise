@@ -5,6 +5,15 @@ import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating tabs using Radix UI.
+ *
+ * @module Tabs
+ *
+ * @description This module exports the Tabs, TabsList, TabsTrigger, and TabsContent components,
+ * which are styled wrappers around Radix UI primitives for creating accessible and customizable tabs.
+ */
+
 const Tabs = TabsPrimitive.Root
 
 const TabsList = React.forwardRef<

@@ -3,6 +3,15 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating alerts.
+ *
+ * @module Alert
+ *
+ * @description This module exports the Alert, AlertTitle, and AlertDescription components,
+ * which are styled components for creating accessible and customizable alerts.
+ */
+
 const alertVariants = cva(
   "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
   {

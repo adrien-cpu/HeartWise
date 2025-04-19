@@ -3,6 +3,15 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides a UI component for creating badges.
+ *
+ * @module Badge
+ *
+ * @description This module exports the Badge component and the badgeVariants function,
+ * which are used to create styled badges with different variants.
+ */
+
 const badgeVariants = cva(
   "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
   {

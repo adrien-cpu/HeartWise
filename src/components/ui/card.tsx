@@ -2,6 +2,15 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating cards.
+ *
+ * @module Card
+ *
+ * @description This module exports the Card, CardHeader, CardFooter, CardTitle, CardDescription, and CardContent components,
+ * which are styled components for creating accessible and customizable cards.
+ */
+
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

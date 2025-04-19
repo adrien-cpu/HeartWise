@@ -6,6 +6,15 @@ import { ChevronDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating accordions using Radix UI.
+ *
+ * @module Accordion
+ *
+ * @description This module exports the Accordion, AccordionItem, AccordionTrigger, and AccordionContent components,
+ * which are styled wrappers around Radix UI primitives for creating accessible and customizable accordions.
+ */
+
 const Accordion = AccordionPrimitive.Root
 
 const AccordionItem = React.forwardRef<

@@ -6,6 +6,15 @@ import { Check } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating checkboxes using Radix UI.
+ *
+ * @module Checkbox
+ *
+ * @description This module exports the Checkbox component, which is a styled wrapper
+ * around the Radix UI Checkbox primitive for creating accessible and customizable checkboxes.
+ */
+
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>

@@ -6,6 +6,17 @@ import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
+/**
+ * @fileOverview Provides UI components for creating alert dialogs using Radix UI.
+ *
+ * @module AlertDialog
+ *
+ * @description This module exports the AlertDialog, AlertDialogTrigger, AlertDialogPortal, AlertDialogOverlay,
+ * AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription,
+ * AlertDialogAction, and AlertDialogCancel components, which are styled wrappers around Radix UI primitives
+ * for creating accessible and customizable alert dialogs.
+ */
+
 const AlertDialog = AlertDialogPrimitive.Root
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger

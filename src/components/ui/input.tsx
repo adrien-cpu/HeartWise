@@ -2,6 +2,14 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides a UI component for creating input fields.
+ *
+ * @module Input
+ *
+ * @description This module exports the Input component, which is a styled input element.
+ */
+
 const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
   ({ className, type, ...props }, ref) => {
     return (

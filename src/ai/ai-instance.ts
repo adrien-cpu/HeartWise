@@ -1,6 +1,13 @@
+/**
+ * @fileOverview Configures and exports the Genkit AI instance for the application.
+ */
+
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 
+/**
+ * The Genkit AI instance configured for this application.
+ */
 export const ai = genkit({
   promptDir: './prompts',
   plugins: [

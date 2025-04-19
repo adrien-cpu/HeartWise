@@ -1,5 +1,45 @@
+/**
+ * @fileOverview Exports a set of icons from the `lucide-react` library.
+ *
+ * @module Icons
+ *
+ * @description This module provides a central place to import and export icons,
+ * making it easier to use them throughout the application.
+ */
+
 import {ArrowRight, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, File, HelpCircle, Home, Loader2, Mail, MessageSquare, Moon, PanelLeft, Plus, PlusCircle, Search, Server, Settings, Share2, Shield, Sun, Trash, User, X, Workflow} from 'lucide-react';
 
+/**
+ * @typedef {object} Icons
+ * @property {LucideIcon} arrowRight - Arrow right icon.
+ * @property {LucideIcon} check - Check icon.
+ * @property {LucideIcon} chevronDown - Chevron down icon.
+ * @property {LucideIcon} circle - Circle icon.
+ * @property {LucideIcon} workflow - Workflow icon.
+ * @property {LucideIcon} close - Close icon.
+ * @property {LucideIcon} copy - Copy icon.
+ * @property {LucideIcon} dark - Dark mode icon.
+ * @property {LucideIcon} edit - Edit icon.
+ * @property {LucideIcon} externalLink - External link icon.
+ * @property {LucideIcon} file - File icon.
+ * @property {LucideIcon} help - Help icon.
+ * @property {LucideIcon} home - Home icon.
+ * @property {LucideIcon} light - Light mode icon.
+ * @property {LucideIcon} loader - Loader icon.
+ * @property {LucideIcon} mail - Mail icon.
+ * @property {LucideIcon} messageSquare - Message square icon.
+ * @property {LucideIcon} plus - Plus icon.
+ * @property {LucideIcon} plusCircle - Plus circle icon.
+ * @property {LucideIcon} search - Search icon.
+ * @property {LucideIcon} server - Server icon.
+ * @property {LucideIcon} settings - Settings icon.
+ * @property {LucideIcon} share - Share icon.
+ * @property {LucideIcon} shield - Shield icon.
+ * @property {LucideIcon} spinner - Spinner icon.
+ * @property {LucideIcon} trash - Trash icon.
+ * @property {LucideIcon} user - User icon.
+ * @property {LucideIcon} panelLeft - Panel left icon.
+ */
 const Icons = {
   arrowRight: ArrowRight,
   check: Check,

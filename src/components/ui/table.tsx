@@ -2,6 +2,16 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating tables.
+ *
+ * @module Table
+ *
+ * @description This module exports the Table, TableHeader, TableBody, TableFooter, TableHead,
+ * TableRow, TableCell, and TableCaption components, which are styled components for creating
+ * accessible and customizable tables.
+ */
+
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>

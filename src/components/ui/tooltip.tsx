@@ -5,6 +5,15 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating tooltips using Radix UI.
+ *
+ * @module Tooltip
+ *
+ * @description This module exports the Tooltip, TooltipTrigger, TooltipContent, and TooltipProvider
+ * components, which are styled wrappers around Radix UI primitives for creating accessible and customizable tooltips.
+ */
+
 const TooltipProvider = TooltipPrimitive.Provider
 
 const Tooltip = TooltipPrimitive.Root

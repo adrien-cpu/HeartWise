@@ -6,6 +6,18 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating menubars using Radix UI.
+ *
+ * @module Menubar
+ *
+ * @description This module exports the Menubar, MenubarMenu, MenubarTrigger, MenubarContent,
+ * MenubarItem, MenubarSeparator, MenubarLabel, MenubarCheckboxItem, MenubarRadioGroup,
+ * MenubarRadioItem, MenubarPortal, MenubarSubContent, MenubarSubTrigger, MenubarGroup,
+ * MenubarSub, and MenubarShortcut components, which are styled wrappers around Radix UI primitives
+ * for creating accessible and customizable menubars.
+ */
+
 function MenubarMenu({
   ...props
 }: React.ComponentProps<typeof MenubarPrimitive.Menu>) {

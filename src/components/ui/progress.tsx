@@ -5,6 +5,15 @@ import * as ProgressPrimitive from "@radix-ui/react-progress"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides a UI component for creating progress bars using Radix UI.
+ *
+ * @module Progress
+ *
+ * @description This module exports the Progress component, which is a styled wrapper
+ * around the Radix UI Progress primitive.
+ */
+
 const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>

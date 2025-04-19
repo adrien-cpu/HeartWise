@@ -1,17 +1,30 @@
-// This is a server-side file
 'use server';
 /**
  * @fileOverview Generates a compatible profile for Blind Exchange Mode based on facial and emotional matching, common interests, and opposite traits.
  *
- * - generateBlindExchangeProfile - A function that generates the blind exchange profile.
- * - BlindExchangeProfileInput - The input type for the generateBlindExchangeProfile function.
- * - BlindExchangeProfileOutput - The return type for the generateBlindExchangeProfile function.
+ * @module BlindExchangeProfile
+ *
+ * @description This module defines the Blind Exchange Mode functionality, including input/output schemas,
+ * AI flow, and supporting functions for calculating compatibility and generating profile descriptions.
+ *
+ * @exports {function} generateBlindExchangeProfile - A function that generates the blind exchange profile.
+ * @exports {BlindExchangeProfileInput} BlindExchangeProfileInput - The input type for the generateBlindExchangeProfile function.
+ * @exports {BlindExchangeProfileOutput} BlindExchangeProfileOutput - The return type for the generateBlindExchangeProfile function.
  */
 
 import {ai} from '@/ai/ai-instance';
 import {z} from 'genkit';
 import {FaceData, getPsychologicalTraits} from '@/services/face-analysis';
 
+/**
+ * @typedef {object} BlindExchangeProfileInput
+ * @property {object} faceData1 - Face data of the first user.
+ * @property {string} faceData1.imageUrl - URL of the first user's face image.
+ * @property {object} faceData2 - Face data of the second user.
+ * @property {string} faceData2.imageUrl - URL of the second user's face image.
+ * @property {string[]} interests1 - List of interests of the first user.
+ * @property {string[]} interests2 - List of interests of the second user.
+ */
 const BlindExchangeProfileInputSchema = z.object({
   faceData1: z.object({
     imageUrl: z.string().describe('URL of the first user\'s face image.'),
@@ -25,6 +38,11 @@ const BlindExchangeProfileInputSchema = z.object({
 
 export type BlindExchangeProfileInput = z.infer<typeof BlindExchangeProfileInputSchema>;
 
+/**
+ * @typedef {object} BlindExchangeProfileOutput
+ * @property {number} compatibilityScore - A percentage indicating the compatibility between the two users.
+ * @property {string} profileDescription - A short, neutral description of the potential connection between the two users, highlighting commonalities and differences.
+ */
 const BlindExchangeProfileOutputSchema = z.object({
   compatibilityScore: z.number().describe('A percentage indicating the compatibility between the two users.'),
   profileDescription: z.string().describe('A short, neutral description of the potential connection between the two users, highlighting commonalities and differences.'),
@@ -32,6 +50,14 @@ const BlindExchangeProfileOutputSchema = z.object({
 
 export type BlindExchangeProfileOutput = z.infer<typeof BlindExchangeProfileOutputSchema>;
 
+/**
+ * Generates a blind exchange profile based on input data.
+ *
+ * @async
+ * @function generateBlindExchangeProfile
+ * @param {BlindExchangeProfileInput} input - The input data for generating the profile.
+ * @returns {Promise<BlindExchangeProfileOutput>} The generated blind exchange profile.
+ */
 export async function generateBlindExchangeProfile(input: BlindExchangeProfileInput): Promise<BlindExchangeProfileOutput> {
   return blindExchangeProfileFlow(input);
 }
@@ -84,7 +110,15 @@ const blindExchangeProfileFlow = ai.defineFlow<
   }
 );
 
-// Placeholder functions for calculating compatibility and generating profile descriptions.
+/**
+ * Placeholder function for calculating compatibility score.
+ *
+ * @param {any} traits1 - Traits of the first user.
+ * @param {any} traits2 - Traits of the second user.
+ * @param {string[]} interests1 - Interests of the first user.
+ * @param {string[]} interests2 - Interests of the second user.
+ * @returns {number} The calculated compatibility score.
+ */
 function calculateCompatibilityScore(
   traits1: any,
   traits2: any,
@@ -96,6 +130,15 @@ function calculateCompatibilityScore(
   return 75; // Example compatibility score.
 }
 
+/**
+ * Placeholder function for generating profile description.
+ *
+ * @param {string[]} interests1 - Interests of the first user.
+ * @param {string[]} interests2 - Interests of the second user.
+ * @param {any} traits1 - Traits of the first user.
+ * @param {any} traits2 - Traits of the second user.
+ * @returns {string} The generated profile description.
+ */
 function generateProfileDescription(
   interests1: string[],
   interests2: string[],
@@ -107,6 +150,3 @@ function generateProfileDescription(
   // This is just a placeholder, replace with your actual implementation.
   return 'These two users may find common ground in their love for the outdoors, while their contrasting personalities could lead to interesting conversations.';
 }
-
-
-

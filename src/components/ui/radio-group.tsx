@@ -6,6 +6,15 @@ import { Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating radio groups using Radix UI.
+ *
+ * @module RadioGroup
+ *
+ * @description This module exports the RadioGroup and RadioGroupItem components,
+ * which are styled wrappers around Radix UI primitives for creating accessible and customizable radio groups.
+ */
+
 const RadioGroup = React.forwardRef<
   React.ElementRef<typeof RadioGroupPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>

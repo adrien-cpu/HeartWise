@@ -8,6 +8,16 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
+/**
+ * @fileOverview Provides a hook for managing toast notifications.
+ *
+ * @module useToast
+ *
+ * @description This module exports the useToast hook, which allows components to
+ * add, update, dismiss, and remove toast notifications. It also exports the Toaster
+ * component, which displays the active toast notifications.
+ */
+
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
 
@@ -142,6 +152,12 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, "id">
 
+/**
+ * Adds a toast notification.
+ *
+ * @param {Toast} props - The properties of the toast notification.
+ * @returns {object} An object containing the toast's ID and functions to update or dismiss it.
+ */
 function toast({ ...props }: Toast) {
   const id = genId()
 
@@ -171,6 +187,12 @@ function toast({ ...props }: Toast) {
   }
 }
 
+/**
+ * Custom hook for managing toast notifications.
+ *
+ * @function useToast
+ * @returns {object} An object containing the current state of toast notifications and functions to manage them.
+ */
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState)
 

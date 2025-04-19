@@ -10,6 +10,22 @@ import {
   ToastViewport,
 } from "@/components/ui/toast"
 
+/**
+ * @fileOverview Provides a component for displaying toast notifications.
+ *
+ * @module Toaster
+ *
+ * @description This module exports the Toaster component, which uses the useToast hook
+ * to display toast notifications.
+ */
+
+/**
+ * Toaster component.
+ *
+ * @component
+ * @description A component that displays toast notifications.
+ * @returns {JSX.Element} The rendered Toaster component.
+ */
 export function Toaster() {
   const { toasts } = useToast()
 

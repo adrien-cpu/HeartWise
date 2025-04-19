@@ -5,6 +5,15 @@ import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating avatars using Radix UI.
+ *
+ * @module Avatar
+ *
+ * @description This module exports the Avatar, AvatarImage, and AvatarFallback components,
+ * which are styled wrappers around Radix UI primitives for creating accessible and customizable avatars.
+ */
+
 const Avatar = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root>

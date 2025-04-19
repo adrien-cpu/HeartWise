@@ -1,4 +1,13 @@
 /**
+ * @fileOverview Provides services for performing face analysis.
+ *
+ * @module face-analysis
+ *
+ * @description This module defines the FaceData and PsychologicalTraits interfaces,
+ * and the getPsychologicalTraits function for retrieving psychological traits from face data.
+ */
+
+/**
  * Represents facial morphology data.
  */
 export interface FaceData {
@@ -25,8 +34,10 @@ export interface PsychologicalTraits {
 /**
  * Asynchronously retrieves psychological traits for a given face.
  *
- * @param faceData The face data for which to retrieve psychological traits.
- * @returns A promise that resolves to a list of psychological traits.
+ * @async
+ * @function getPsychologicalTraits
+ * @param {FaceData} faceData - The face data for which to retrieve psychological traits.
+ * @returns {Promise<PsychologicalTraits>} A promise that resolves to a list of psychological traits.
  */
 export async function getPsychologicalTraits(faceData: FaceData): Promise<PsychologicalTraits> {
   // TODO: Implement this by calling an API.

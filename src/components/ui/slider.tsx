@@ -5,6 +5,15 @@ import * as SliderPrimitive from "@radix-ui/react-slider"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating sliders using Radix UI.
+ *
+ * @module Slider
+ *
+ * @description This module exports the Slider component, which is a styled wrapper
+ * around the Radix UI Slider primitive for creating accessible and customizable sliders.
+ */
+
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>

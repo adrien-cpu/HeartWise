@@ -5,6 +5,15 @@ import * as PopoverPrimitive from "@radix-ui/react-popover"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating popovers using Radix UI.
+ *
+ * @module Popover
+ *
+ * @description This module exports the Popover, PopoverTrigger, and PopoverContent components,
+ * which are styled wrappers around Radix UI primitives for creating accessible and customizable popovers.
+ */
+
 const Popover = PopoverPrimitive.Root
 
 const PopoverTrigger = PopoverPrimitive.Trigger

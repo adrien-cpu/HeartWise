@@ -5,6 +5,16 @@ import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating charts using recharts.
+ *
+ * @module Chart
+ *
+ * @description This module exports the ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend,
+ * ChartLegendContent, and ChartStyle components, which are styled wrappers around recharts primitives
+ * for creating accessible and customizable charts.
+ */
+
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
 

@@ -6,6 +6,16 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Provides UI components for creating dialogs using Radix UI.
+ *
+ * @module Dialog
+ *
+ * @description This module exports the Dialog, DialogTrigger, DialogPortal, DialogClose, DialogOverlay,
+ * DialogContent, DialogHeader, DialogFooter, DialogTitle, and DialogDescription components,
+ * which are styled wrappers around Radix UI primitives for creating accessible and customizable dialogs.
+ */
+
 const Dialog = DialogPrimitive.Root
 
 const DialogTrigger = DialogPrimitive.Trigger
