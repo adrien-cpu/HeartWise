@@ -1,10 +1,12 @@
-import type { Metadata } from 'next';
+import type {Metadata} from 'next';
 import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
 import {SidebarProvider} from "@/components/ui/sidebar";
-import {NextIntlClientProvider} from 'next-intl';
+import {useLocale, NextIntlClientProvider} from 'next-intl';
 import {notFound} from 'next/navigation';
-import i18n from '@/i18n/i18n';
+import {messages as enMessages} from '@/messages/en.json';
+import {messages as frMessages} from '@/messages/fr.json';
+import { setRequestLocale } from 'next-intl/server';
 
 /**
  * @fileOverview Root layout for the application.
@@ -12,7 +14,7 @@ import i18n from '@/i18n/i18n';
  * @module RootLayout
  *
  * @description This module defines the root layout for the HeartWise application,
- * including font configuration, metadata, and internationalization support.
+ * including font configuration, metadata, and sidebar.
  */
 
 const geistSans = Geist({
@@ -31,43 +33,62 @@ export const metadata: Metadata = {
 };
 
 /**
- * RootLayout component.
+ * ClientLayout component.
  *
- * @component
- * @description The root layout for the application, providing font styles, sidebar, and internationalization.
  * @param {object} props - The component props.
+ * @param {string} props.locale - The locale of the app
  * @param {React.ReactNode} props.children - The children to render.
  * @returns {JSX.Element} The rendered RootLayout component.
  */
-export default async function RootLayout({
-                                     children,
-                                     params,
-                                   }: Readonly<{
+function ClientLayout({
+                        locale,
+                        children,
+                      }: {
+  locale: string;
   children: React.ReactNode;
-  params: { locale: string }
-}>) {
-  const locale = params.locale;
-  let messages;
-  try {
-    messages = (await import(`../messages/${locale}.json`)).default;
-  } catch (error) {
-    notFound();
-  }
+}) {
+  const messages = locale === 'en' ? enMessages : frMessages;
 
   return (
-      <html lang={locale}>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <SidebarProvider>{children}</SidebarProvider>
-          </NextIntlClientProvider>
-        </body>
-      </html>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <SidebarProvider>
+        {children}
+      </SidebarProvider>
+    </NextIntlClientProvider>
   );
 }
 
 /**
- * Generate static params for i18n routes
+ * RootLayout component.
+ *
+ * @component
+ * @description The root layout for the application, providing font styles and sidebar.
+ * @param {object} props - The component props.
+ * @param {React.ReactNode} props.children - The children to render.
+ * @returns {JSX.Element} The rendered RootLayout component.
  */
-export function generateStaticParams() {
-  return i18n.locales.map(locale => ({ locale }));
+export default function RootLayout({
+                                     children,
+                                     params,
+                                   }: Readonly<{
+  children: React.ReactNode;
+  params: { locale: string };
+}>) {
+
+  const locale = useLocale();
+
+  // Validate that the current locale is supported.
+  if (params.locale !== locale) {
+    return notFound();
+  }
+
+  setRequestLocale(locale);
+
+  return (
+    <html lang={locale}>
+    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <ClientLayout locale={locale}>{children}</ClientLayout>
+    </body>
+    </html>
+  );
 }
