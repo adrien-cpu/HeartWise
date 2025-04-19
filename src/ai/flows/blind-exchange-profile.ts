@@ -150,3 +150,34 @@ function generateProfileDescription(
   // This is just a placeholder, replace with your actual implementation.
   return 'These two users may find common ground in their love for the outdoors, while their contrasting personalities could lead to interesting conversations.';
 }
+
+interface User {
+  id: string;
+  interests: string[];
+  profileRevealed: boolean;
+}
+
+interface UserPair {
+  user1: User;
+  user2: User;
+}
+
+/**
+ * Matches users based on shared interests.
+ *
+ * @param {User[]} users - An array of user profiles.
+ * @returns {UserPair[]} An array of user pairs with shared interests.
+ */
+function matchUsersByInterest(users: User[]): UserPair[] {
+  const matchedPairs: UserPair[] = [];
+  for (let i = 0; i < users.length; i++) {
+    for (let j = i + 1; j < users.length; j++) {
+      const user1 = users[i];
+      const user2 = users[j];
+      if (user1.interests.some(interest => user2.interests.includes(interest))) {
+        matchedPairs.push({user1, user2});
+      }
+    }
+  }
+  return matchedPairs;
+}

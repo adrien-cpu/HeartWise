@@ -1,4 +1,4 @@
-;"use client";
+"use client";
 
 import {useEffect, useState} from 'react';
 import {Location, MeetingPlace, getMeetingPlaces} from '@/services/geolocation';
@@ -69,7 +69,7 @@ export default function GeolocationMeeting() {
     }
 
     fetchMeetingPlaces();
-  }, [location]);
+  }, [location, t]);
 
   return (
     <div className="container mx-auto p-4">

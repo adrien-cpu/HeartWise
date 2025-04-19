@@ -97,3 +97,24 @@ const conversationCoachFlow = ai.defineFlow<
     return output!;
   }
 );
+
+/**
+ * Provides conversation tips based on the last user message.
+ *
+ * @function getConversationTips
+ * @param {string} lastMessage - The last message sent by the user.
+ * @returns {string} - A string containing conversation tips.
+ */
+export function getConversationTips(lastMessage: string): string {
+  if (!lastMessage) {
+    // Generic advice when there's no message
+    return "To keep the conversation flowing, try asking open-ended questions or sharing something interesting about your day.";
+  }
+
+  // Specific advice based on the message content (example)
+  if (lastMessage.toLowerCase().includes("how are you")) {
+    return "Since your partner asked about you, remember to ask them the same question and show genuine interest in their response.";
+  }
+
+  return "Consider asking a follow-up question or relating to something your partner has said to maintain engagement.";
+}

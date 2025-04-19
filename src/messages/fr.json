@@ -1,0 +1,44 @@
+{
+  "Home": {
+    "tagline": "Trouvez des connexions significatives.",
+    "features": "Fonctionnalités",
+    "geolocationMeeting": "Rencontres Géolocalisées",
+    "facialAnalysisMatching": "Analyse Faciale et Correspondance",
+    "aiConversationCoach": "Coach IA Conversationnel",
+    "blindExchangeMode": "Mode d'échange à l'aveugle",
+    "myAccount": "Mon Compte",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "dashboardTitle": "Bienvenue sur HeartWise",
+    "dashboardDescription": "Explorez nos fonctionnalités et trouvez votre partenaire idéal :"
+  },
+  "GeolocationMeeting": {
+    "title": "Rencontres Géolocalisées",
+    "geolocationNotSupported": "La géolocalisation n'est pas supportée par votre navigateur.",
+    "yourLocation": "Votre position",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "meetingPlacesTitle": "Lieux de rencontre à proximité",
+    "loadingLocation": "Chargement de la position..."
+  },
+  "FacialAnalysisMatching": {
+    "title": "Analyse Faciale et Correspondance",
+    "imageUrlPlaceholder": "Entrez l'URL de l'image",
+    "analyzeSimilarityButton": "Analyser la similarité",
+    "similarFacesTitle": "Visages similaires"
+  },
+  "AIConversationCoach": {
+    "enterMessage": "Entrez votre message",
+    "getTips": "Obtenir des conseils",
+    "tips": "Conseils"
+  },
+  "BlindExchangeMode": {
+    "title": "Mode d'échange à l'aveugle",
+    "match": "Correspondance",
+    "user1": "Utilisateur 1",
+    "user2": "Utilisateur 2",
+    "sharedInterests": "Intérêts communs",
+    "noMatches": "Aucune correspondance trouvée."
+  }
+}

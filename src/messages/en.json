@@ -1,0 +1,44 @@
+{{
+  "Home": {
+    "tagline": "Find meaningful connections.",
+    "features": "Features",
+    "geolocationMeeting": "Geolocation Meeting",
+    "facialAnalysisMatching": "Facial Analysis Matching",
+    "aiConversationCoach": "AI Conversation Coach",
+    "blindExchangeMode": "Blind Exchange Mode",
+    "myAccount": "My Account",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "dashboardTitle": "Welcome to HeartWise",
+    "dashboardDescription": "Explore our features and find your perfect match:"
+  },
+  "GeolocationMeeting": {
+    "title": "Geolocation Meeting",
+    "geolocationNotSupported": "Geolocation is not supported by your browser.",
+    "yourLocation": "Your location",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "meetingPlacesTitle": "Meeting Places Nearby",
+    "loadingLocation": "Loading location..."
+  },
+  "FacialAnalysisMatching": {
+    "title": "Facial Analysis & Matching",
+    "imageUrlPlaceholder": "Enter image URL",
+    "analyzeSimilarityButton": "Analyze Similarity",
+    "similarFacesTitle": "Similar Faces"
+  },
+  "AIConversationCoach": {
+    "enterMessage": "Enter your message",
+    "getTips": "Get Tips",
+    "tips": "Tips"
+  },
+  "BlindExchangeMode": {
+    "title": "Blind Exchange Mode",
+    "match": "Match",
+    "user1": "User 1",
+    "user2": "User 2",
+    "sharedInterests": "Shared Interests",
+    "noMatches": "No matches found."
+  }
+}

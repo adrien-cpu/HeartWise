@@ -1,126 +1,96 @@
-;"use client";
+"use client";
 
-import {useState} from 'react';
-import {generateBlindExchangeProfile} from '@/ai/flows/blind-exchange-profile';
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
-import {Input} from "@/components/ui/input";
-import {useTranslations} from 'next-intl';
+import { matchUsersByInterest } from "@/ai/flows/blind-exchange-profile";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslations } from 'next-intl';
 
 /**
- * @fileOverview Blind Exchange Mode page component.
+ * @fileOverview Blind Exchange Mode page.
  *
  * @module BlindExchangeMode
  *
- * @description This component provides an interface for users to input image URLs and interests,
- * then generates a blind exchange profile using AI.  It uses the `generateBlindExchangeProfile`
- * flow from the AI module.
+ * @description This page displays matched user pairs based on shared interests using a mock dataset.
  */
 
 /**
- * BlindExchangeMode component.
+ * @typedef {Object} User
+ * @property {string} id - The unique identifier of the user.
+ * @property {string[]} interests - An array of strings representing the user's interests.
+ * @property {boolean} profileRevealed - A boolean indicating whether the user's profile is revealed.
+ */
+
+/**
+ * @typedef {Object} UserPair
+ * @property {User} user1 - The first user in the pair.
+ * @property {User} user2 - The second user in the pair.
+ */
+
+/**
+ * BlindExchangeModePage Component.
  *
  * @component
- * @description A client component that generates a blind exchange profile based on user inputs.
- * @returns {JSX.Element} The rendered Blind Exchange Mode page.
+ * @description Generates a mock dataset of users, matches them by interest, and displays the matched pairs.
+ * If a profile is revealed, it displays the user's name; otherwise, it indicates the profile is hidden.
+ * @returns {JSX.Element} The rendered JSX element.
  */
-export default function BlindExchangeMode() {
-  const [imageUrl1, setImageUrl1] = useState('');
-  const [imageUrl2, setImageUrl2] = useState('');
-  const [interests1, setInterests1] = useState('');
-  const [interests2, setInterests2] = useState('');
-  const [profile, setProfile] = useState(null);
-  const [error, setError] = useState(null);
-  const t = useTranslations('BlindExchangeMode');
+export default function BlindExchangeModePage() {
+  /**
+   * Generates a mock dataset of users.
+   *
+   * @function generateMockUsers
+   * @returns {User[]} An array of mock users.
+   */
+  const generateMockUsers = (): { id: string; interests: string[]; profileRevealed: boolean; }[] => [
+    { id: "1", interests: ["reading", "hiking", "photography"], profileRevealed: false },
+    { id: "2", interests: ["hiking", "cooking", "traveling"], profileRevealed: false },
+    { id: "3", interests: ["photography", "painting", "music"], profileRevealed: true },
+    { id: "4", interests: ["dancing", "movies", "reading"], profileRevealed: false },
+    { id: "5", interests: ["cooking", "gardening", "hiking"], profileRevealed: true },
+  ];
 
   /**
-   * Handles the generation of the blind exchange profile.
-   * @async
-   * @function handleGenerateProfile
-   * @returns {Promise<void>}
+   * Displays user information based on whether their profile is revealed.
+   *
+   * @function displayUser
+   * @param {User} user - The user object.
+   * @returns {JSX.Element | string} The JSX element or string to display.
    */
-  const handleGenerateProfile = async () => {
-    try {
-      const result = await generateBlindExchangeProfile({
-        faceData1: {imageUrl: imageUrl1},
-        faceData2: {imageUrl: imageUrl2},
-        interests1: interests1.split(',').map((item) => item.trim()),
-        interests2: interests2.split(',').map((item) => item.trim()),
-      });
-      setProfile(result);
-      setError(null);
-    } catch (error: any) {
-      setProfile(null);
-      setError(error.message);
-    }
+  const displayUser = (user: { id: string; interests: string[]; profileRevealed: boolean; }): JSX.Element | string => {
+    return user.profileRevealed ? `User ${user.id}` : "Profile Hidden";
   };
 
+  const users = generateMockUsers();
+  const matchedPairs = matchUsersByInterest(users);
+    const t = useTranslations('BlindExchangeMode');
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">{t('title')}</h1>
-      <div className="mb-4">
-        <label className="block text-sm font-medium leading-6 text-gray-900">
-          {t('imageUrl1Label')}:
-        </label>
-        <Input
-          type="text"
-          placeholder={t('imageUrl1Placeholder')}
-          value={imageUrl1}
-          onChange={(e) => setImageUrl1(e.target.value)}
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block text-sm font-medium leading-6 text-gray-900">
-          {t('imageUrl2Label')}:
-        </label>
-        <Input
-          type="text"
-          placeholder={t('imageUrl2Placeholder')}
-          value={imageUrl2}
-          onChange={(e) => setImageUrl2(e.target.value)}
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block text-sm font-medium leading-6 text-gray-900">
-          {t('interests1Label')} ({t('commaSeparated')}):
-        </label>
-        <Input
-          type="text"
-          placeholder={t('interests1Placeholder')}
-          value={interests1}
-          onChange={(e) => setInterests1(e.target.value)}
-        />
-      </div>
-      <div className="mb-4">
-        <label className="block text-sm font-medium leading-6 text-gray-900">
-          {t('interests2Label')} ({t('commaSeparated')}):
-        </label>
-        <Input
-          type="text"
-          placeholder={t('interests2Placeholder')}
-          value={interests2}
-          onChange={(e) => setInterests2(e.target.value)}
-        />
-      </div>
-      <Button onClick={handleGenerateProfile}>{t('generateProfileButton')}</Button>
-      {error && <div className="text-red-500 mt-4">Error: {error}</div>}
-      {profile && (
-        <div className="mt-4">
-          <h2 className="text-xl font-semibold mb-2">{t('generatedProfileTitle')}:</h2>
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('compatibilityProfileTitle')}</CardTitle>
-              <CardDescription>
-                {profile.profileDescription || t('noProfileProvided')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>
-                {t('compatibilityScoreLabel')}: {profile.compatibilityScore}%
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+    <div>
+      <h1>{t('title')}</h1>
+      {matchedPairs.length > 0 ? (
+        <ul>
+          {matchedPairs.map((pair, index) => (
+            <li key={index}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('match')} {index + 1}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>
+                    {t('user1')}: {displayUser(pair.user1)}
+                  </p>
+                  <p>
+                    {t('user2')}: {displayUser(pair.user2)}
+                  </p>
+                </CardContent>
+                <CardDescription>
+                  {t('sharedInterests')}: {pair.user1.interests.filter(interest => pair.user2.interests.includes(interest)).join(", ")}
+                </CardDescription>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>{t('noMatches')}</p>
       )}
     </div>
   );

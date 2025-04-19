@@ -1,9 +1,10 @@
-import type {Metadata} from 'next';
+import type { Metadata } from 'next';
 import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
 import {SidebarProvider} from "@/components/ui/sidebar";
-import {NextIntlClientProvider, useLocale} from 'next-intl';
+import {NextIntlClientProvider} from 'next-intl';
 import {notFound} from 'next/navigation';
+import { i18n } from '@/i18n/i18n';
 
 /**
  * @fileOverview Root layout for the application.
@@ -39,41 +40,34 @@ export const metadata: Metadata = {
  * @returns {JSX.Element} The rendered RootLayout component.
  */
 export default function RootLayout({
-  children,
-  params: {locale},
-}: Readonly<{
+                                     children,
+                                     params,
+                                   }: Readonly<{
   children: React.ReactNode;
-  params: { locale: string };
+  params: { locale: string }
 }>) {
-  // Validate that the current locale is supported.
-  const localeFn = useLocale();
-  if (localeFn && locale !== localeFn) {
+  const locale = params.locale;
+  let messages;
+  try {
+    messages = (await import(`../messages/${locale}.json`)).default;
+  } catch (error) {
     notFound();
   }
 
   return (
-    <html lang={locale}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NextIntlClientProvider locale={locale} messages={messages[locale]}>
-          <SidebarProvider>
-            {children}
-          </SidebarProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+      <html lang={locale}>
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <SidebarProvider>{children}</SidebarProvider>
+          </NextIntlClientProvider>
+        </body>
+      </html>
   );
 }
 
 /**
  * Generate static params for i18n routes
  */
-export async function generateStaticParams() {
-  return [{locale: 'en'}, {locale: 'fr'}];
+export function generateStaticParams() {
+  return i18n.locales.map(locale => ({ locale }));
 }
-
-import { getMessages } from 'next-intl/server';
-
-const messages = {
-  en: () => import('../locales/en.json').then(m => m.default),
-  fr: () => import('../locales/fr.json').then(m => m.default)
-};
