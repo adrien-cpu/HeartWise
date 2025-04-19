@@ -1,7 +1,9 @@
-export const i18n = {
+const i18n = {
   defaultLocale: 'en',
   locales: ['en', 'fr'],
 } as const;
+
+export default i18n;
 
 export const pathnames = {
   '/': '/',

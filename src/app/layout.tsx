@@ -4,7 +4,7 @@ import './globals.css';
 import {SidebarProvider} from "@/components/ui/sidebar";
 import {NextIntlClientProvider} from 'next-intl';
 import {notFound} from 'next/navigation';
-import { i18n } from '@/i18n/i18n';
+import i18n from '@/i18n/i18n';
 
 /**
  * @fileOverview Root layout for the application.
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
  * @param {React.ReactNode} props.children - The children to render.
  * @returns {JSX.Element} The rendered RootLayout component.
  */
-export default function RootLayout({
+export default async function RootLayout({
                                      children,
                                      params,
                                    }: Readonly<{
