@@ -1,12 +1,11 @@
+
 import type {Metadata} from 'next';
 import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
 import {SidebarProvider} from "@/components/ui/sidebar";
-import {useLocale, NextIntlClientProvider} from 'next-intl';
-import {notFound} from 'next/navigation';
-import {messages as enMessages} from '@/messages/en.json';
-import {messages as frMessages} from '@/messages/fr.json';
-import { setRequestLocale } from 'next-intl/server';
+import { useLocale, NextIntlClientProvider } from 'next-intl';
+import { notFound } from 'next/navigation';
+import {Locales} from "@/i18n/settings";
 
 /**
  * @fileOverview Root layout for the application.
@@ -41,16 +40,15 @@ export const metadata: Metadata = {
  * @returns {JSX.Element} The rendered RootLayout component.
  */
 function ClientLayout({
-                        locale,
                         children,
+                        messages,
                       }: {
-  locale: string;
   children: React.ReactNode;
+  messages: any;
 }) {
-  const messages = locale === 'en' ? enMessages : frMessages;
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={useLocale()} messages={messages}>
       <SidebarProvider>
         {children}
       </SidebarProvider>
@@ -67,7 +65,7 @@ function ClientLayout({
  * @param {React.ReactNode} props.children - The children to render.
  * @returns {JSX.Element} The rendered RootLayout component.
  */
-export default function RootLayout({
+export default async function RootLayout({
                                      children,
                                      params,
                                    }: Readonly<{
@@ -75,19 +73,24 @@ export default function RootLayout({
   params: { locale: string };
 }>) {
 
-  const locale = useLocale();
+  const locale = params.locale as Locales;
 
-  // Validate that the current locale is supported.
-  if (params.locale !== locale) {
-    return notFound();
+  let messages;
+  try {
+    messages = (await import(`../messages/${locale}.json`)).default;
+  } catch (error) {
+    notFound();
   }
 
-  setRequestLocale(locale);
+  // Validate that the current locale is supported.
+  if (!Locales.includes(locale)) {
+    return notFound();
+  }
 
   return (
     <html lang={locale}>
     <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-    <ClientLayout locale={locale}>{children}</ClientLayout>
+    <ClientLayout messages={messages}>{children}</ClientLayout>
     </body>
     </html>
   );

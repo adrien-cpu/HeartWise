@@ -19,7 +19,7 @@ import {useTranslations} from 'next-intl';
 const ConversationTips = () => {
   const [message, setMessage] = useState('');
   const [tips, setTips] = useState('');
-    const t = useTranslations('AIConversationCoach');
+  const t = useTranslations('AIConversationCoach');
 
   /**
    * @function handleGetTips
@@ -40,7 +40,7 @@ const ConversationTips = () => {
         placeholder={t('enterMessage')}
         className="mb-2"
       />
-      <Button onClick={handleGetTips}>{t('getTips')}</Button>
+      <Button onClick={handleGetTips}>{t('getTipsButton')}</Button>
       {tips && <p className="mt-2">{t('tips')}: {tips}</p>}
     </div>
   );

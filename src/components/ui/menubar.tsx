@@ -176,7 +176,7 @@ const MenubarCheckboxItem = React.forwardRef<
       </MenubarPrimitive.ItemIndicator>
     </span>
     {children}
-  </MenubarPrimitive.CheckboxItem>
+  </MenubarCheckboxItem>
 ))
 MenubarCheckboxItem.displayName = MenubarPrimitive.CheckboxItem.displayName
 
@@ -198,7 +198,7 @@ const MenubarRadioItem = React.forwardRef<
       </MenubarPrimitive.ItemIndicator>
     </span>
     {children}
-  </MenubarPrimitive.RadioItem>
+  </MenubarRadioItem>
 ))
 MenubarRadioItem.displayName = MenubarPrimitive.RadioItem.displayName
 

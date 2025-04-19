@@ -61,7 +61,7 @@ export default function BlindExchangeModePage() {
 
   const users = generateMockUsers();
   const matchedPairs = matchUsersByInterest(users);
-    const t = useTranslations('BlindExchangeMode');
+  const t = useTranslations('BlindExchangeMode');
 
   return (
     <div>

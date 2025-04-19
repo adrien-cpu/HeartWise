@@ -30,7 +30,7 @@
   },
   "AIConversationCoach": {
     "enterMessage": "Entrez votre message",
-    "getTips": "Obtenir des conseils",
+    "getTipsButton": "Obtenir des conseils",
     "tips": "Conseils"
   },
   "BlindExchangeMode": {
