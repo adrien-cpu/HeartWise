@@ -29,8 +29,6 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export {metadata};
-
 /**
  * ClientLayout component.
  *
