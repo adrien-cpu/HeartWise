@@ -7,6 +7,7 @@
     "facialAnalysisMatching": "Analyse Faciale et Correspondance",
     "aiConversationCoach": "Coach IA Conversationnel",
     "blindExchangeMode": "Mode d'échange à l'aveugle",
+    "game": "Jeu",
     "myAccount": "Mon Compte",
     "profile": "Profil",
     "settings": "Paramètres",
@@ -41,5 +42,13 @@
     "user2": "Utilisateur 2",
     "sharedInterests": "Intérêts communs",
     "noMatches": "Aucune correspondance trouvée."
+  },
+  "Game": {
+    "title": "Jeu de culture générale",
+    "randomPartner": "Jouer avec un partenaire aléatoire",
+    "matchPartner": "Jouer avec un match",
+    "question": "Question",
+    "answer": "Réponse",
+    "nextQuestion": "Question suivante"
   }
 }

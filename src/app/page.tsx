@@ -59,6 +59,9 @@ function HomeClient() {
                 <Link href="/blind-exchange-mode">
                     <Button className="w-full">{t('blindExchangeMode')}</Button>
                 </Link>
+                <Link href="/game">
+                    <Button className="w-full">{t('game')}</Button>
+                </Link>
             </div>
         </>
     );
@@ -112,6 +115,14 @@ export default function Home() {
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
+               <SidebarMenuItem>
+                <Link href="/game">
+                  <SidebarMenuButton>
+                    <Icons.circle className="mr-2 h-4 w-4"/>
+                    <span>{t('game')}</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
@@ -144,3 +155,4 @@ export default function Home() {
     </>
   );
 }
+

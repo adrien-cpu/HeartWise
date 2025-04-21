@@ -7,6 +7,7 @@
     "facialAnalysisMatching": "Facial Analysis Matching",
     "aiConversationCoach": "AI Conversation Coach",
     "blindExchangeMode": "Blind Exchange Mode",
+    "game": "Game",
     "myAccount": "My Account",
     "profile": "Profile",
     "settings": "Settings",
@@ -41,5 +42,13 @@
     "user2": "User 2",
     "sharedInterests": "Shared Interests",
     "noMatches": "No matches found."
+  },
+  "Game": {
+    "title": "General Knowledge Game",
+    "randomPartner": "Play with Random Partner",
+    "matchPartner": "Play with Match",
+    "question": "Question",
+    "answer": "Answer",
+    "nextQuestion": "Next Question"
   }
 }
