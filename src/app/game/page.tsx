@@ -6,6 +6,8 @@ import {useState, useEffect} from "react";
 import {
   CountdownCircleTimer
 } from "react-countdown-circle-timer";
+import { useToast } from "@/hooks/use-toast"
+import { Checkbox } from "@/components/ui/checkbox"
 
 const questions = [
   {
@@ -31,6 +33,9 @@ const GamePage = () => {
   const [timeRemaining, setTimeRemaining] = useState(15);
   const [gameOver, setGameOver] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false); // Track if a game is in progress
+  const [gamePreferences, setGamePreferences] = useState<string[]>([]);
+    const { toast } = useToast()
+
 
   useEffect(() => {
     if (isPlaying && timeRemaining > 0 && !gameOver) {
@@ -40,6 +45,10 @@ const GamePage = () => {
       return () => clearTimeout(timer); // Cleanup the timer
     } else if (timeRemaining === 0 && isPlaying) {
       setGameOver(true); // End game if time runs out
+            toast({
+                title: "Time's up!",
+                description: "You ran out of time for this question.",
+            })
     }
   }, [timeRemaining, isPlaying, gameOver]);
 
@@ -61,6 +70,12 @@ const GamePage = () => {
       }
 
       setGameOver(true);
+            toast({
+                title: correct ? "Correct!" : "Incorrect!",
+                description: correct
+                    ? "You got the right answer."
+                    : `The correct answer was ${questions[currentQuestionIndex].answer}.`,
+            })
     }
   };
   const handleNextQuestion = () => {
@@ -81,11 +96,45 @@ const GamePage = () => {
     setCurrentQuestionIndex(0);
   };
 
+    const toggleGamePreference = (gameId: string) => {
+        if (gamePreferences.includes(gameId)) {
+            setGamePreferences(gamePreferences.filter((id) => id !== gameId));
+        } else {
+            setGamePreferences([...gamePreferences, gameId]);
+        }
+    };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{t("title")}</h1>
       {!isPlaying ? (
         <div className="flex justify-center space-x-4 mb-4">
+                    <div className="flex flex-col items-center">
+                        <p className="mb-2">Select Game Preferences:</p>
+                        <div className="flex space-x-2">
+                            <label className="flex items-center space-x-2">
+                                <Checkbox
+                                    checked={gamePreferences.includes("history")}
+                                    onCheckedChange={() => toggleGamePreference("history")}
+                                />
+                                <span>History</span>
+                            </label>
+                            <label className="flex items-center space-x-2">
+                                <Checkbox
+                                    checked={gamePreferences.includes("science")}
+                                    onCheckedChange={() => toggleGamePreference("science")}
+                                />
+                                <span>Science</span>
+                            </label>
+                            <label className="flex items-center space-x-2">
+                                <Checkbox
+                                    checked={gamePreferences.includes("geography")}
+                                    onCheckedChange={() => toggleGamePreference("geography")}
+                                />
+                                <span>Geography</span>
+                            </label>
+                        </div>
+                    </div>
           <Button onClick={startGame}>{t("randomPartner")}</Button>
           <Button onClick={startGame}>{t("matchPartner")}</Button>
         </div>

@@ -47,14 +47,20 @@
 * **Style Bonus :** Suggestions personnalisées du coach IA en fonction de votre niveau de confort et de votre style.
 * **Système de récompenses :** Badges, accès à des modes cachés, speed dating premium, etc.
 
+### Implemented Features:
 
+*   **Correspondance par Analyse Faciale :** Les utilisateurs peuvent télécharger leurs photos de profil. L'application analyse les traits du visage pour trouver des sosies potentiels et affiche une liste de profils avec des traits similaires, classés par similitude.
+*   **Mode d'Échange à l'Aveugle :** Les utilisateurs sont mis en relation avec d'autres personnes en fonction de leurs intérêts ou critères communs, sans voir leurs profils au départ. Facilite l'interaction et la révélation du profil après une période ou une action spécifique.
+*   **Coach Conversationnel IA :** Fournit des conseils et des suggestions basés sur l'IA pour améliorer les conversations des utilisateurs et offre un retour d'information en temps réel sur la qualité et l'engagement de la conversation.
+*   **Game:** L'utilisateur ou utilisatrices pourrait avoir un partenaire de jeux pris au hasard ou un match et pouvoir jouer à des jeux de culture général, en s'inspirant de tim's up.
 
+### Features to Implement:
 
+*   **Rencontre Géolocalisée :** Permet aux utilisateurs de trouver et de rencontrer d'autres utilisateurs dans un rayon géographique spécifié. Intègre des services de cartographie pour afficher les utilisateurs proches et les lieux de rencontre potentiels.
+*   **Gestion Améliorée des Profils :** Les utilisateurs peuvent créer des profils détaillés avec leurs intérêts, leurs hobbies et leurs préférences. Options pour les paramètres de confidentialité et la visibilité du profil.
+*   **Outils de Communication Intégrés à l'Application :** Fonctionnalités de messagerie directe, de chats de groupe et d'activités virtuelles de brise-glace.
+*   **Speed Dating digital :** sessions rapides avec matching + feedback immédiat
+*   **Système de récompenses :** Badges, accès à des modes cachés, speed dating premium, etc.
+*   **Style Bonus :** Suggestions personnalisées du coach IA en fonction de votre niveau de confort et de votre style.
+*   **Dictionnaire IA des Mots à Risque :** Base de données dynamique qui repère les expressions ambiguës ou sensibles.
 
-
-* [implemented] **Correspondance par Analyse Faciale :** Les utilisateurs peuvent télécharger leurs photos de profil. L'application analyse les traits du visage pour trouver des sosies potentiels et affiche une liste de profils avec des traits similaires, classés par similitude.
-* [implemented] **Mode d'Échange à l'Aveugle :** Les utilisateurs sont mis en relation avec d'autres personnes en fonction de leurs intérêts ou critères communs, sans voir leurs profils au départ. Facilite l'interaction et la révélation du profil après une période ou une action spécifique.
-* [implemented] **Coach Conversationnel IA :** Fournit des conseils et des suggestions basés sur l'IA pour améliorer les conversations des utilisateurs et offre un retour d'information en temps réel sur la qualité et l'engagement de la conversation.
-* [not implemented] **Rencontre Géolocalisée :** Permet aux utilisateurs de trouver et de rencontrer d'autres utilisateurs dans un rayon géographique spécifié. Intègre des services de cartographie pour afficher les utilisateurs proches et les lieux de rencontre potentiels.
-* [not implemented] **Gestion Améliorée des Profils :** Les utilisateurs peuvent créer des profils détaillés avec leurs intérêts, leurs hobbies et leurs préférences. Options pour les paramètres de confidentialité et la visibilité du profil.
-* [not implemented] **Outils de Communication Intégrés à l'Application :** Fonctionnalités de messagerie directe, de chats de groupe et d'activités virtuelles de brise-glace.
