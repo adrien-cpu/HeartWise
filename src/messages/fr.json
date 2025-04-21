@@ -49,6 +49,9 @@
     "matchPartner": "Jouer avec un match",
     "question": "Question",
     "answer": "Réponse",
-    "nextQuestion": "Question suivante"
+    "nextQuestion": "Question suivante",
+    "submitAnswer": "Soumettre la réponse",
+    "correctAnswer": "Réponse correcte",
+    "incorrectAnswer": "Réponse incorrecte"
   }
 }
