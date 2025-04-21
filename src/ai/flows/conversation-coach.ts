@@ -105,7 +105,7 @@ const conversationCoachFlow = ai.defineFlow<
  * @param {string} lastMessage - The last message sent by the user.
  * @returns {string} - A string containing conversation tips.
  */
-export function getConversationTips(lastMessage: string): string {
+export async function getConversationTips(lastMessage: string): Promise<string> {
   if (!lastMessage) {
     // Generic advice when there's no message
     return "To keep the conversation flowing, try asking open-ended questions or sharing something interesting about your day.";
@@ -118,3 +118,4 @@ export function getConversationTips(lastMessage: string): string {
 
   return "Consider asking a follow-up question or relating to something your partner has said to maintain engagement.";
 }
+

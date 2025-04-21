@@ -1,6 +1,5 @@
 "use client";
 
-import { matchUsersByInterest } from "@/ai/flows/blind-exchange-profile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslations } from 'next-intl';
 
@@ -60,38 +59,13 @@ export default function BlindExchangeModePage() {
   };
 
   const users = generateMockUsers();
-  const matchedPairs = matchUsersByInterest(users);
   const t = useTranslations('BlindExchangeMode');
 
   return (
     <div>
       <h1>{t('title')}</h1>
-      {matchedPairs.length > 0 ? (
-        <ul>
-          {matchedPairs.map((pair, index) => (
-            <li key={index}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('match')} {index + 1}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>
-                    {t('user1')}: {displayUser(pair.user1)}
-                  </p>
-                  <p>
-                    {t('user2')}: {displayUser(pair.user2)}
-                  </p>
-                </CardContent>
-                <CardDescription>
-                  {t('sharedInterests')}: {pair.user1.interests.filter(interest => pair.user2.interests.includes(interest)).join(", ")}
-                </CardDescription>
-              </Card>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>{t('noMatches')}</p>
-      )}
+      <p>This feature is currently under development</p>
     </div>
   );
 }
+
