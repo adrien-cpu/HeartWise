@@ -38,6 +38,32 @@ import {useTranslations} from 'next-intl';
  * @description The main dashboard of the HeartWise application.
  * @returns {JSX.Element} The rendered Home page.
  */
+
+function HomeClient() {
+    const t = useTranslations('Home');
+
+    return (
+        <>
+            <h1 className="text-4xl font-bold mb-4">{t('dashboardTitle')}</h1>
+            <p className="text-lg mb-8">{t('dashboardDescription')}:</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <Link href="/geolocation-meeting">
+                    <Button className="w-full">{t('geolocationMeeting')}</Button>
+                </Link>
+                <Link href="/facial-analysis-matching">
+                    <Button className="w-full">{t('facialAnalysisMatching')}</Button>
+                </Link>
+                <Link href="/ai-conversation-coach">
+                    <Button className="w-full">{t('aiConversationCoach')}</Button>
+                </Link>
+                <Link href="/blind-exchange-mode">
+                    <Button className="w-full">{t('blindExchangeMode')}</Button>
+                </Link>
+            </div>
+        </>
+    );
+}
+
 export default function Home() {
   const t = useTranslations('Home');
 
@@ -113,22 +139,7 @@ export default function Home() {
       </Sidebar>
 
       <main className="flex flex-col items-center justify-center min-h-screen p-8 ml-64">
-        <h1 className="text-4xl font-bold mb-4">{t('dashboardTitle')}</h1>
-        <p className="text-lg mb-8">{t('dashboardDescription')}:</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link href="/geolocation-meeting">
-            <Button className="w-full">{t('geolocationMeeting')}</Button>
-          </Link>
-          <Link href="/facial-analysis-matching">
-            <Button className="w-full">{t('facialAnalysisMatching')}</Button>
-          </Link>
-          <Link href="/ai-conversation-coach">
-            <Button className="w-full">{t('aiConversationCoach')}</Button>
-          </Link>
-          <Link href="/blind-exchange-mode">
-            <Button className="w-full">{t('blindExchangeMode')}</Button>
-          </Link>
-        </div>
+          <HomeClient />
       </main>
     </>
   );
