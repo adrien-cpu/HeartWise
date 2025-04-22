@@ -62,8 +62,8 @@ export default function GeolocationMeeting() {
         try {
           const places = await getMeetingPlaces(location);
           setMeetingPlaces(places);
-        } catch (e: any) {
-          setError(e.message);
+        } catch (e: unknown) { // Changed from any to unknown
+          setError(e instanceof Error ? e.message : 'An unknown error occurred'); // Handle unknown error type
         }
       }
     }

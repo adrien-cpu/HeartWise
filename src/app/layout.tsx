@@ -1,23 +1,11 @@
-'use server';
-
-/**
- * @fileOverview Root layout for the application.
- *
- * @module app/layout
- *
- * @description This module defines the root layout for the application, including global styles,
- * font configuration, and internationalization setup.  It uses the NextIntlClientProvider
- * to provide internationalization support to client components.
- */
-
 import type {Metadata} from 'next';
 import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
 import {SidebarProvider} from "@/components/ui/sidebar";
 import { NextIntlClientProvider} from 'next-intl';
-import i18n from '@/i18n/settings';
 import {notFound} from "next/navigation";
 import {Locales} from "@/i18n/settings";
+// import { useLocale } from 'next-intl'; // Cannot be used in async component
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -39,19 +27,23 @@ export const metadata: Metadata = {
  * @function RootLayout
  * @param {object} props - The component props.
  * @param {React.ReactNode} props.children - The children to render.
- * @param {object} props.params - The parameters passed from Next.js routing.
+ * @param {object} props.params - The parameters passed from Next.js routing. (Kept for locale)
  * @param {string} props.params.locale - The locale of the current route.
  * @returns {JSX.Element} The rendered RootLayout component.
  */
-export async function RootLayout({
+export default async function RootLayout({
   children,
-  params,
+  params, // Keep params for locale extraction
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale?: string };
+  params: { locale?: string }; // Type params explicitly
 }>) {
-  const locale = params.locale || i18n.defaultLocale;
-  if (!Locales.includes(locale as any)) {
+  // Attempt to get locale from params BEFORE the async function uses hooks
+  const locale = params.locale; // Directly access locale from params
+
+  // Validate that the current locale is supported.
+  // Use type assertion carefully. Ensure Locales array matches possible locale types.
+  if (!locale || !Locales.includes(locale as any)) { // Reverted unknown to any for simplicity, review Locales type if possible
     notFound();
   }
 
@@ -59,7 +51,7 @@ export async function RootLayout({
 
   try {
     messages = (await import(`../messages/${locale}.json`)).default;
-  } catch (error) {
+  } catch /* Removed unused 'error' variable */ {
     console.error(`Failed to load translation file for locale: ${locale}`);
     notFound();
   }
@@ -76,5 +68,3 @@ export async function RootLayout({
     </html>
   );
 }
-
-// export default RootLayout;

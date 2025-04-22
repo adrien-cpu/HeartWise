@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+// Removed unused Card components
 import { useTranslations } from 'next-intl';
 
 /**
@@ -43,4 +43,3 @@ export default function BlindExchangeModePage() {
     </div>
   );
 }
-

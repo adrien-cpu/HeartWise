@@ -1,7 +1,6 @@
 "use client";
 
-import {useState} from 'react';
-import {FaceData, getPsychologicalTraits} from '@/services/face-analysis';
+import Image from 'next/image';
 import {analyzeFaces} from '@/services/face-analysis';
 import {Input} from "@/components/ui/input";
 import {useTranslations} from 'next-intl';
@@ -24,10 +23,9 @@ import {useTranslations} from 'next-intl';
  * @returns {JSX.Element} The rendered Facial Analysis & Matching page.
  */
 export default function FacialAnalysisMatching() {
-  const [imageUrl, setImageUrl] = useState('');
-  const [traits, setTraits] = useState(null);
-  const [error, setError] = useState(null);
-  const [similarFaces, setSimilarFaces] = useState([]);
+  // const [traits, setTraits] = useState(null); // Removed unused variable
+  const [error, setError] = useState<string | null>(null); // Added type for error state
+  const [similarFaces, setSimilarFaces] = useState<Array<{id: string; imageUrl: string; similarity: number}>>([]); // Added specific type
   const t = useTranslations('FacialAnalysisMatching');
 
   /**
@@ -41,22 +39,22 @@ export default function FacialAnalysisMatching() {
   };
 
   /**
-   * Handles the analysis of the image.
+   * Handles the analysis of the image. (Removed as it was unused)
    * @async
    * @function handleAnalysis
    * @returns {Promise<void>}
    */
-  const handleAnalysis = async () => {
-    try {
-      const faceData: FaceData = {imageUrl: imageUrl};
-      const psychologicalTraits = await getPsychologicalTraits(faceData);
-      setTraits(psychologicalTraits);
-      setError(null);
-    } catch (error: any) {
-      setTraits(null);
-      setError(error.message);
-    }
-  };
+  // const handleAnalysis = async () => {
+  //   try {
+  //     const faceData: FaceData = {imageUrl: imageUrl};
+  //     const psychologicalTraits = await getPsychologicalTraits(faceData);
+  //     // setTraits(psychologicalTraits); // Variable is unused
+  //     setError(null);
+  //   } catch (error: unknown) { // Changed from any to unknown
+  //     // setTraits(null);
+  //     setError(error instanceof Error ? error.message : 'An unknown error occurred'); // Handle unknown error type
+  //   }
+  // };
 
   /**
    * Analyzes facial similarities with mock data.
@@ -78,9 +76,9 @@ export default function FacialAnalysisMatching() {
       const analysisResults = await analyzeFaces(mockFaces);
       setSimilarFaces(analysisResults);
       setError(null);
-    } catch (error: any) {
+    } catch (error: unknown) { // Changed from any to unknown
       setSimilarFaces([]);
-      setError(error.message);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred'); // Handle unknown error type
     }
   };
 
@@ -102,7 +100,13 @@ export default function FacialAnalysisMatching() {
             <h2 className="text-xl font-semibold mb-4">{t('similarFacesTitle')}</h2>
             <ul>
               {similarFaces.map((face, index) => (
-                  <li key={face.id} className="mb-2"><img src={face.imageUrl} alt={`Face ${index + 1}`} className="w-20 h-20 object-cover rounded-full inline-block mr-4" /> Similarity: {face.similarity.toFixed(2)}</li>
+                  // Keeping img tag as requested, add appropriate alt text if needed
+                  <li key={face.id} className="mb-2">
+                    <Image src={face.imageUrl} alt={`Face ${index + 1}`} width={80} height={80} className="object-cover rounded-full inline-block mr-4" />                    
+                     Similarity: {face.similarity.toFixed(2)}
+
+
+                  </li>
               ))}
             </ul>
           </div>

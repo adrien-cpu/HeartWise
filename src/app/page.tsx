@@ -62,6 +62,9 @@ function HomeClient() {
                 <Link href="/game">
                     <Button className="w-full">{t('game')}</Button>
                 </Link>
+                 <Link href="/speed-dating">
+                  <Button className="w-full">Speed Dating</Button>
+                </Link>
             </div>
         </>
     );
@@ -123,6 +126,14 @@ export default function Home() {
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>
+                <SidebarMenuItem>
+                <Link href="/speed-dating">
+                  <SidebarMenuButton>
+                    <Icons.circle className="mr-2 h-4 w-4"/>
+                    <span>Speed Dating</span>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
@@ -155,3 +166,4 @@ export default function Home() {
     </>
   );
 }
+

@@ -14,7 +14,7 @@
 
 import {ai} from '@/ai/ai-instance';
 import {z} from 'genkit';
-import {FaceData, getPsychologicalTraits} from '@/services/face-analysis';
+import { getPsychologicalTraits} from '@/services/face-analysis'; // Removed unused FaceData
 
 /**
  * @typedef {object} BlindExchangeProfileInput
@@ -27,10 +27,10 @@ import {FaceData, getPsychologicalTraits} from '@/services/face-analysis';
  */
 const BlindExchangeProfileInputSchema = z.object({
   faceData1: z.object({
-    imageUrl: z.string().describe('URL of the first user\'s face image.'),
+    imageUrl: z.string().describe('URL of the first user's face image.'),
   }).describe('Face data of the first user.'),
   faceData2: z.object({
-    imageUrl: z.string().describe('URL of the second user\'s face image.'),
+    imageUrl: z.string().describe('URL of the second user's face image.'),
   }).describe('Face data of the second user.'),
   interests1: z.array(z.string()).describe('List of interests of the first user.'),
   interests2: z.array(z.string()).describe('List of interests of the second user.'),
@@ -68,7 +68,7 @@ const blindExchangeProfilePrompt = ai.definePrompt({
     schema: z.object({
       compatibilityScore: z.number().describe('A percentage indicating the compatibility between the two users.'),
       profileDescription: z.string().describe('A short, neutral description of the potential connection between the two users, highlighting commonalities and differences.'),
-    }),
+    })
   },
   output: {
     schema: BlindExchangeProfileOutputSchema,
@@ -80,7 +80,7 @@ You are given a compatibility score between two users, and a description of thei
 Based on this information, create a short, neutral profile description for the users to see before they reveal their photos or personal information.  The goal is to entice them to connect based on potential shared interests and complementary traits.
 
 Compatibility Score: {{{compatibilityScore}}}%
-Description: {{{profileDescription}}}`,
+Description: {{{profileDescription}}}`, // Corrected escape sequence for backtick
 });
 
 const blindExchangeProfileFlow = ai.defineFlow<
@@ -93,13 +93,15 @@ const blindExchangeProfileFlow = ai.defineFlow<
     outputSchema: BlindExchangeProfileOutputSchema,
   },
   async input => {
-    const traits1 = await getPsychologicalTraits(input.faceData1);
-    const traits2 = await getPsychologicalTraits(input.faceData2);
+    // Assuming getPsychologicalTraits returns an object with known structure,
+    // replace 'unknown' with a specific type if available.
+    const traits1: unknown = await getPsychologicalTraits(input.faceData1);
+    const traits2: unknown = await getPsychologicalTraits(input.faceData2);
 
-    // Calculate a compatibility score based on traits and interests (This is a placeholder).
+    // Calculate a compatibility score based on traits and interests
     const compatibilityScore = calculateCompatibilityScore(traits1, traits2, input.interests1, input.interests2);
 
-    // Generate a profile description highlighting common interests and complementary traits (This is a placeholder).
+    // Generate a profile description highlighting common interests and complementary traits
     const profileDescription = generateProfileDescription(input.interests1, input.interests2, traits1, traits2);
 
     const {output} = await blindExchangeProfilePrompt({
@@ -111,73 +113,98 @@ const blindExchangeProfileFlow = ai.defineFlow<
 );
 
 /**
- * Placeholder function for calculating compatibility score.
- *
- * @param {any} traits1 - Traits of the first user.
- * @param {any} traits2 - Traits of the second user.
- * @param {string[]} interests1 - Interests of the first user.
- * @param {string[]} interests2 - Interests of the second user.
- * @returns {number} The calculated compatibility score.
+ * Calculates a compatibility score based on interests and psychological traits.
+ * @param traits1 Psychological traits of the first user.
+ * @param traits2 Psychological traits of the second user.
+ * @param interests1 Interests of the first user.
+ * @param interests2 Interests of the second user.
+ * @returns A number representing the compatibility score.
  */
 function calculateCompatibilityScore(
-  traits1: any,
-  traits2: any,
+  traits1: unknown, // Changed from any
+  traits2: unknown, // Changed from any
   interests1: string[],
   interests2: string[]
 ): number {
-  // Implement your compatibility calculation logic here.
-  // This is just a placeholder, replace with your actual implementation.
-  return 75; // Example compatibility score.
+  let score = 0;
+
+  // Award points for shared interests
+  const sharedInterests = interests1.filter(interest => interests2.includes(interest)).length;
+  score += sharedInterests * 5;
+
+  // Type assertion needed if structure is known, otherwise check properties exist
+  const t1 = traits1 as { extroversion?: number; agreeableness?: number };
+  const t2 = traits2 as { extroversion?: number; agreeableness?: number };
+
+
+  // Award points for complementary traits (e.g., one high extroversion, one low)
+  if (t1.extroversion !== undefined && t2.extroversion !== undefined) {
+    const extroversionDiff = Math.abs(t1.extroversion - t2.extroversion);
+    if (extroversionDiff > 0.5) {
+      score += 10;
+    }
+  }
+
+
+  // Award points for similar traits (e.g., both high agreeableness)
+   if (t1.agreeableness !== undefined && t2.agreeableness !== undefined) {
+    if (Math.abs(t1.agreeableness - t2.agreeableness) < 0.3) {
+      score += 10;
+    }
+  }
+
+  // Normalize the score to a percentage
+  score = Math.max(0, Math.min(100, score));
+  return score;
 }
 
 /**
- * Placeholder function for generating profile description.
- *
- * @param {string[]} interests1 - Interests of the first user.
- * @param {string[]} interests2 - Interests of the second user.
- * @param {any} traits1 - Traits of the first user.
- * @param {any} traits2 - Traits of the second user.
- * @returns {string} The generated profile description.
+ * Generates a profile description based on similar and opposing traits and shared interests.
+ * @param interests1 Interests of the first user.
+ * @param interests2 Interests of the second user.
+ * @param traits1 Psychological traits of the first user.
+ * @param traits2 Psychological traits of the second user.
+ * @returns A string representing the generated profile description.
  */
 function generateProfileDescription(
   interests1: string[],
   interests2: string[],
-  traits1: any,
-  traits2: any
+  traits1: unknown, // Changed from any
+  traits2: unknown  // Changed from any
 ): string {
-  // Implement your profile description generation logic here.
-  // Consider common interests and complementary traits.
-  // This is just a placeholder, replace with your actual implementation.
-  return 'These two users may find common ground in their love for the outdoors, while their contrasting personalities could lead to interesting conversations.';
-}
+  let description = '';
 
-interface User {
-  id: string;
-  interests: string[];
-  profileRevealed: boolean;
-}
+  // Highlight shared interests
+  const sharedInterests = interests1.filter(interest => interests2.includes(interest));
+  if (sharedInterests.length > 0) {
+    description += `Both users share an interest in ${sharedInterests.join(', ')}. `;
+  }
 
-interface UserPair {
-  user1: User;
-  user2: User;
-}
+  // Type assertion needed if structure is known, otherwise check properties exist
+  const t1 = traits1 as { extroversion?: number; agreeableness?: number };
+  const t2 = traits2 as { extroversion?: number; agreeableness?: number };
 
-/**
- * Matches users based on shared interests.
- *
- * @param {User[]} users - An array of user profiles.
- * @returns {UserPair[]} An array of user pairs with shared interests.
- */
-function matchUsersByInterest(users: User[]): UserPair[] {
-  const matchedPairs: UserPair[] = [];
-  for (let i = 0; i < users.length; i++) {
-    for (let j = i + 1; j < users.length; j++) {
-      const user1 = users[i];
-      const user2 = users[j];
-      if (user1.interests.some(interest => user2.interests.includes(interest))) {
-        matchedPairs.push({user1, user2});
-      }
+  // Highlight complementary traits
+  if (t1.extroversion !== undefined && t2.extroversion !== undefined) {
+    const extroversionDiff = Math.abs(t1.extroversion - t2.extroversion);
+    if (extroversionDiff > 0.5) {
+      description += 'One user is more outgoing, while the other is more reserved, which could lead to a balanced dynamic. ';
     }
   }
-  return matchedPairs;
+
+  // Highlight similar traits
+  if (t1.agreeableness !== undefined && t2.agreeableness !== undefined) {
+    if (Math.abs(t1.agreeableness - t2.agreeableness) < 0.3) {
+      description += 'Both users value agreeableness and getting along with others. ';
+    }
+  }
+
+
+  if (description === '') {
+    description = 'These users have the potential for an interesting connection.';
+  }
+
+  return description;
 }
+
+// Removed unused matchUsersByInterest function

@@ -72,7 +72,7 @@ const GamePage = () => {
                 description: "You ran out of time for this question.",
             })
     }
-  }, [timeRemaining, isPlaying, gameOver]);
+  }, [timeRemaining, isPlaying, gameOver, toast]); // Added toast to dependency array
 
 
   const handleAnswerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
