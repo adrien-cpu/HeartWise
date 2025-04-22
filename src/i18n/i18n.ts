@@ -17,18 +17,3 @@ export const defaultLocale = 'en';
 export function isValidLocale(locale: string): boolean {
   return locales.includes(locale as any);
 }
-
-const i18nConfig = {
-  locales,
-  defaultLocale,
-  localePrefix,
-  onError: (error: any) => {
-    console.error(error)
-  },
-  messages: {
-    en: () => import('@/messages/en.json').then(module => module.default),
-    fr: () => import('@/messages/fr.json').then(module => module.default),
-  }
-}
-
-export default i18nConfig;
