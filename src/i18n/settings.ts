@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * @fileOverview Configuration settings for internationalization (i18n) using next-intl.
  *
