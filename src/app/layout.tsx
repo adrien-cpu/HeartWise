@@ -17,6 +17,7 @@ import {SidebarProvider} from "@/components/ui/sidebar";
 import { NextIntlClientProvider} from 'next-intl';
 import i18n from '@/i18n/settings';
 import {notFound} from "next/navigation";
+import {Locales} from "@/i18n/settings";
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -42,14 +43,18 @@ export const metadata: Metadata = {
  * @param {string} props.params.locale - The locale of the current route.
  * @returns {JSX.Element} The rendered RootLayout component.
  */
-async function RootLayout({
+export async function RootLayout({
   children,
   params,
 }: Readonly<{
   children: React.ReactNode;
   params: { locale?: string };
 }>) {
-  const locale = params.locale || i18n.DefaultLocale;
+  const locale = params.locale || i18n.defaultLocale;
+  if (!Locales.includes(locale as any)) {
+    notFound();
+  }
+
   let messages;
 
   try {
@@ -72,4 +77,4 @@ async function RootLayout({
   );
 }
 
-export default RootLayout;
+// export default RootLayout;
