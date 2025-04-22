@@ -16,8 +16,7 @@ import './globals.css';
 import {SidebarProvider} from "@/components/ui/sidebar";
 import { NextIntlClientProvider} from 'next-intl';
 import i18n from '@/i18n/settings';
-import {metadata} from './metadata';
-
+import {notFound} from "next/navigation";
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,11 +28,10 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-// export async function generateStaticParams() {
-//   return i18n.Locales.map((locale) => ({locale}))
-// }
-
-export {metadata};
+export const metadata: Metadata = {
+  title: 'HeartWise App',
+  description: 'A heart health and social app using GenAI',
+};
 
 /**
  * @async
@@ -51,19 +49,20 @@ async function RootLayout({
   children: React.ReactNode;
   params: { locale?: string };
 }>) {
+  const locale = params.locale || i18n.DefaultLocale;
   let messages;
+
   try {
-    messages = (await import(`../messages/${params.locale || i18n.DefaultLocale}.json`)).default;
+    messages = (await import(`../messages/${locale}.json`)).default;
   } catch (error) {
-    console.error(`Failed to load translation file for locale: ${params.locale || i18n.DefaultLocale}`);
-    messages = (await import(`../messages/${i18n.DefaultLocale}.json`)).default;
+    console.error(`Failed to load translation file for locale: ${locale}`);
+    notFound();
   }
 
-
   return (
-    <html lang={params.locale}>
+    <html lang={locale}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NextIntlClientProvider locale={params.locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <SidebarProvider>
             {children}
           </SidebarProvider>

@@ -6,3 +6,4 @@ export const metadata: Metadata = {
   description: 'A heart health and social app using GenAI',
 };
 
+
