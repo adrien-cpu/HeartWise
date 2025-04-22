@@ -18,7 +18,7 @@ export function isValidLocale(locale: string): boolean {
   return locales.includes(locale as any);
 }
 
-export default {
+const i18nConfig = {
   locales,
   defaultLocale,
   localePrefix,
@@ -31,3 +31,4 @@ export default {
   }
 }
 
+export default i18nConfig;

@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Root layout for the application.
  *
@@ -7,7 +6,6 @@
  * @description This module defines the root layout for the HeartWise application,
  * including font configuration, metadata, and sidebar.
  */
-"use client";
 
 import type {Metadata} from 'next';
 import {Geist, Geist_Mono} from 'next/font/google';
@@ -16,8 +14,9 @@ import {SidebarProvider} from "@/components/ui/sidebar";
 import { NextIntlClientProvider } from 'next-intl';
 import {Locales} from "@/i18n/settings";
 import {DefaultLocale} from "@/i18n/settings";
-import i18n from '@/i18n/i18n';
-import {metadata} from './metadata';
+import {getRequestConfig} from 'next-intl/server';
+import {notFound} from 'next/navigation';
+import { useLocale } from 'next-intl';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,28 +28,27 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-/**
- * RootLayout component.
- *
- * @component
- * @description The root layout for the application, providing font styles and sidebar.
- * @param {object} props - The component props.
- * @param {React.ReactNode} props.children - The children to render.
- * @returns {JSX.Element} The rendered RootLayout component.
- */
-export default async function RootLayout({
-                                     children,
-                                     params,
-                                   }: Readonly<{
+export async function generateStaticParams() {
+  return Locales.map((locale) => ({locale}))
+}
+
+export const metadata: Metadata = {
+  title: 'HeartWise App',
+  description: 'A heart health and social app using GenAI',
+};
+
+async function RootLayout({
+  children,
+  params,
+}: Readonly<{
   children: React.ReactNode;
   params: { locale?: string };
 }>) {
-
   // Validate that the current locale is supported.
   let locale = params?.locale || DefaultLocale;
 
   if (!Locales.includes(locale as any)) {
-    locale = DefaultLocale;
+    notFound();
   }
 
   let messages;
@@ -63,37 +61,15 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
-    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-    <ClientLayout messages={messages} locale={locale}>{children}</ClientLayout>
-    </body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <SidebarProvider>
+            {children}
+          </SidebarProvider>
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }
 
-/**
- * ClientLayout component.
- *
- * @param {object} props - The component props.
- * @param {string} props.locale - The locale of the app
- * @param {React.ReactNode} props.children - The children to render.
- * @returns {JSX.Element} The rendered RootLayout component.
- */
-
-function ClientLayout({
-                        children,
-                        messages,
-                        locale,
-                      }: {
-  children: React.ReactNode;
-  messages: any;
-  locale: string;
-}) {
-
-  return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      <SidebarProvider>
-        {children}
-      </SidebarProvider>
-    </NextIntlClientProvider>
-  );
-}
+export default RootLayout;
