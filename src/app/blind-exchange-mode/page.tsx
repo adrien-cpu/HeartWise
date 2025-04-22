@@ -33,32 +33,7 @@ import { useTranslations } from 'next-intl';
  * @returns {JSX.Element} The rendered JSX element.
  */
 export default function BlindExchangeModePage() {
-  /**
-   * Generates a mock dataset of users.
-   *
-   * @function generateMockUsers
-   * @returns {User[]} An array of mock users.
-   */
-  const generateMockUsers = (): { id: string; interests: string[]; profileRevealed: boolean; }[] => [
-    { id: "1", interests: ["reading", "hiking", "photography"], profileRevealed: false },
-    { id: "2", interests: ["hiking", "cooking", "traveling"], profileRevealed: false },
-    { id: "3", interests: ["photography", "painting", "music"], profileRevealed: true },
-    { id: "4", interests: ["dancing", "movies", "reading"], profileRevealed: false },
-    { id: "5", interests: ["cooking", "gardening", "hiking"], profileRevealed: true },
-  ];
 
-  /**
-   * Displays user information based on whether their profile is revealed.
-   *
-   * @function displayUser
-   * @param {User} user - The user object.
-   * @returns {JSX.Element | string} The JSX element or string to display.
-   */
-  const displayUser = (user: { id: string; interests: string[]; profileRevealed: boolean; }): JSX.Element | string => {
-    return user.profileRevealed ? `User ${user.id}` : "Profile Hidden";
-  };
-
-  const users = generateMockUsers();
   const t = useTranslations('BlindExchangeMode');
 
   return (
@@ -68,3 +43,4 @@ export default function BlindExchangeModePage() {
     </div>
   );
 }
+
