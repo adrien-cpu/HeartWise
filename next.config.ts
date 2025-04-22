@@ -1,5 +1,5 @@
-const nextIntl = require('next-intl/plugin')('./src/i18n/settings.ts');
+import nextIntl from 'next-intl/plugin';
 
-module.exports = nextIntl({
+export default nextIntl('./src/i18n/settings.ts')({
   // Other Next.js configuration ...
 });

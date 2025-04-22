@@ -1,10 +1,11 @@
+
 export const Locales = ['en', 'fr'] as const;
 
 export const localePrefix = 'as-needed';
 
 export type Locale = typeof Locales[number];
 
-export const Pathnames = {
+export const pathnames = {
   '/': '/',
 } as const;
 
@@ -18,11 +19,12 @@ export function isValidLocale(locale: string): boolean {
   return Locales.includes(locale as any);
 }
 
-export const i18n = {
+const i18n = {
   Locales,
   DefaultLocale,
   localePrefix,
-  Pathnames,
+  pathnames,
   isValidLocale,
-}
+};
 
+export default i18n;

@@ -14,9 +14,9 @@ import {SidebarProvider} from "@/components/ui/sidebar";
 import { NextIntlClientProvider } from 'next-intl';
 import {Locales} from "@/i18n/settings";
 import {DefaultLocale} from "@/i18n/settings";
-import {getRequestConfig} from 'next-intl/server';
 import {notFound} from 'next/navigation';
 import { useLocale } from 'next-intl';
+import i18n from '@/i18n/settings';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -58,6 +58,7 @@ async function RootLayout({
     console.error(`Failed to load translation file for locale: ${locale}`);
     messages = (await import(`../messages/${DefaultLocale}.json`)).default;
   }
+
 
   return (
     <html lang={locale}>
