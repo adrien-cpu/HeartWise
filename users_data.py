@@ -1,4 +1,8 @@
-je teusers_consent = {}
+"""
+This module manages user-related data, including consent for geolocation, blocked users, and game preferences.
+"""
+
+users_consent = {}
 blocked_users = {}
 
 user_data = {}
@@ -25,6 +29,7 @@ def get_user_geolocation_consent(user_id):
         users_consent[user_id] = False
     return users_consent[user_id]
 
+
 def set_user_geolocation_consent(user_id, consent):
     """
     Sets the user's geolocation consent to the specified value.
@@ -34,6 +39,7 @@ def set_user_geolocation_consent(user_id, consent):
         consent: True to grant consent, False to deny.
     """
     users_consent[user_id] = consent
+
 
 def request_user_geolocation_consent(user_id):
     """
@@ -90,6 +96,7 @@ def unblock_user(user_id):
         del blocked_users[user_id]
     else:
         print(f"Error: User {user_id} is not currently blocked.")
+
 
 def get_user_game_preferences(user_id):
     """
@@ -166,6 +173,7 @@ def set_user_speed_dating_schedule(user_id, schedule):
         }
     user_data[user_id]["speed_dating_schedule"] = schedule
 
+
 def get_user_blind_matching_schedule(user_id):
     if user_id not in user_data:
         user_data[user_id] = {
@@ -175,6 +183,7 @@ def get_user_blind_matching_schedule(user_id):
             "games_schedule": [],
         }
     return user_data[user_id]["blind_matching_schedule"]
+
 
 def set_user_blind_matching_schedule(user_id, schedule):
     if user_id not in user_data:

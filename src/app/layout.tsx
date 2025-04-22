@@ -1,8 +1,20 @@
+'use server';
+
+/**
+ * @fileOverview Root layout for the application.
+ *
+ * @module app/layout
+ *
+ * @description This module defines the root layout for the application, including global styles,
+ * font configuration, and internationalization setup.  It uses the NextIntlClientProvider
+ * to provide internationalization support to client components.
+ */
+
 import type {Metadata} from 'next';
 import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
 import {SidebarProvider} from "@/components/ui/sidebar";
-import { NextIntlClientProvider, useLocale } from 'next-intl';
+import { NextIntlClientProvider} from 'next-intl';
 import i18n from '@/i18n/settings';
 import {metadata} from './metadata';
 
@@ -23,6 +35,15 @@ const geistMono = Geist_Mono({
 
 export {metadata};
 
+/**
+ * @async
+ * @function RootLayout
+ * @param {object} props - The component props.
+ * @param {React.ReactNode} props.children - The children to render.
+ * @param {object} props.params - The parameters passed from Next.js routing.
+ * @param {string} props.params.locale - The locale of the current route.
+ * @returns {JSX.Element} The rendered RootLayout component.
+ */
 async function RootLayout({
   children,
   params,

@@ -8,6 +8,8 @@ import {
 } from "react-countdown-circle-timer";
 import { useToast } from "@/hooks/use-toast"
 import { Checkbox } from "@/components/ui/checkbox"
+import { get_user_game_preferences, set_user_game_preferences } from "users_data";
+
 
 const questions = [
   {
@@ -24,6 +26,15 @@ const questions = [
   },
 ];
 
+/**
+ * @fileOverview Implements the GamePage component with general knowledge questions and user preferences.
+ */
+
+/**
+ * @function GamePage
+ * @description A component for playing a general knowledge game with random questions and user-specific preferences.
+ * @returns {JSX.Element} The rendered GamePage component.
+ */
 const GamePage = () => {
   const t = useTranslations("Game");
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -35,6 +46,17 @@ const GamePage = () => {
   const [isPlaying, setIsPlaying] = useState(false); // Track if a game is in progress
   const [gamePreferences, setGamePreferences] = useState<string[]>([]);
     const { toast } = useToast()
+
+  useEffect(() => {
+        // Load game preferences from user data on mount
+        const storedPreferences = get_user_game_preferences(1); // Assuming user ID is 1
+        setGamePreferences(storedPreferences);
+    }, []);
+
+    useEffect(() => {
+        // Save game preferences to user data whenever they change
+        set_user_game_preferences(1, gamePreferences); // Assuming user ID is 1
+    }, [gamePreferences]);
 
 
   useEffect(() => {
@@ -96,6 +118,11 @@ const GamePage = () => {
     setCurrentQuestionIndex(0);
   };
 
+    /**
+     * @function toggleGamePreference
+     * @description Toggles the game preference for the user.
+     * @param {string} gameId - The ID of the game preference to toggle.
+     */
     const toggleGamePreference = (gameId: string) => {
         if (gamePreferences.includes(gameId)) {
             setGamePreferences(gamePreferences.filter((id) => id !== gameId));
