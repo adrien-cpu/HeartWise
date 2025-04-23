@@ -152,6 +152,25 @@ function calculateCompatibilityScore(
 }
 
 /**
+ * Calculates a compatibility rate based on the number of common interests and opposite interests.
+ * @param {string[]} interests1 - The interests of the first user.
+ * @param {string[]} interests2 - The interests of the second user.
+ * @param {PsychologicalTraits} traits1 - The psychological traits of the first user.
+ * @param {PsychologicalTraits} traits2 - The psychological traits of the second user.
+ * @returns {number} The compatibility rate.
+ */
+function calculateCompatibilityRate(interests1: string[], interests2: string[], traits1: PsychologicalTraits, traits2: PsychologicalTraits): number {
+  const commonInterests = interests1.filter(interest => interests2.includes(interest)).length;
+  const oppositeTraits = Math.abs(traits1.extroversion - traits2.extroversion) > 0.5 ? 1 : 0;
+
+  // Consider the number of interests and opposite traits to calculate the compatibility rate.
+  const totalInterests = Math.max(interests1.length, interests2.length);
+  const compatibilityRate = (commonInterests + oppositeTraits) / (totalInterests + 1); // Adding 1 to the denominator to avoid division by zero.
+
+  return compatibilityRate;
+}
+
+/**
  * Generates a profile description based on similar and opposing traits and shared interests.
  * @param interests1 Interests of the first user.
  * @param interests2 Interests of the second user.

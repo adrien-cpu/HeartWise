@@ -1,4 +1,3 @@
-"use client";
 
 import {Button} from '@/components/ui/button';
 import Link from 'next/link';
@@ -39,7 +38,7 @@ import {useTranslations} from 'next-intl';
  * @returns {JSX.Element} The rendered Home page.
  */
 
-function HomeClient() {
+async function HomeClient() {
     const t = useTranslations('Home');
 
     return (
@@ -166,3 +165,4 @@ export default function Home() {
     </>
   );
 }
+

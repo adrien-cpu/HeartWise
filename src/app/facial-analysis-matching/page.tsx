@@ -1,115 +1,135 @@
 "use client";
 
 import Image from 'next/image';
-import {analyzeFaces} from '@/services/face-analysis';
-import {Input} from "@/components/ui/input";
+import {analyzeFaceData, compareFaces} from '@/services/face-analysis';
+import {Input} from '@/components/ui/input';
+import {Button} from '@/components/ui/button';
+import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card';
 import {useTranslations} from 'next-intl';
+import {useState} from 'react';
+
+interface FaceData {
+  imageUrl: string;
+}
+
+interface AnalysisResult {
+  age?: number;
+  gender?: string;
+  emotion?: string;
+}
 
 /**
- * @fileOverview Facial Analysis & Matching page component.
- *
- * @module FacialAnalysisMatching
- * @description This component provides an interface for users to input an image URL,
- * then analyzes the image to determine psychological traits.  It uses the
- * `getPsychologicalTraits` function from the face-analysis service.
- */
-
-/**
- * FacialAnalysisMatching component.
- * This component allows users to analyze facial similarities between a given image and a set of mock faces.
- *
- * @component
- * @description A client component that analyzes facial images and determines psychological traits.
- * @returns {JSX.Element} The rendered Facial Analysis & Matching page.
+ * Facial Analysis and Matching Component
+ * This component allows users to input two image URLs, analyze the faces in the images,
+ * and compare their compatibility based on facial and emotional features.
  */
 export default function FacialAnalysisMatching() {
-  // const [traits, setTraits] = useState(null); // Removed unused variable
-  const [error, setError] = useState<string | null>(null); // Added type for error state
-  const [similarFaces, setSimilarFaces] = useState<Array<{id: string; imageUrl: string; similarity: number}>>([]); // Added specific type
+  const [image1Url, setImage1Url] = useState('');
+  const [image2Url, setImage2Url] = useState('');
+  const [analysis1, setAnalysis1] = useState<AnalysisResult | null>(null);
+  const [analysis2, setAnalysis2] = useState<AnalysisResult | null>(null);
+  const [compatibility, setCompatibility] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const t = useTranslations('FacialAnalysisMatching');
 
   /**
-   * Handles the change of the image URL input.
-   * @function handleImageUrlChange
-   * @param {React.ChangeEvent<HTMLInputElement>} event - The change event.
-   * @returns {void}
+   * Handles input change for the first image URL.
+   * @param event - The change event.
    */
-  const handleImageUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setImageUrl(event.target.value);
+  const handleImage1UrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setImage1Url(event.target.value);
   };
 
   /**
-   * Handles the analysis of the image. (Removed as it was unused)
-   * @async
-   * @function handleAnalysis
-   * @returns {Promise<void>}
+   * Handles input change for the second image URL.
+   * @param event - The change event.
    */
-  // const handleAnalysis = async () => {
-  //   try {
-  //     const faceData: FaceData = {imageUrl: imageUrl};
-  //     const psychologicalTraits = await getPsychologicalTraits(faceData);
-  //     // setTraits(psychologicalTraits); // Variable is unused
-  //     setError(null);
-  //   } catch (error: unknown) { // Changed from any to unknown
-  //     // setTraits(null);
-  //     setError(error instanceof Error ? error.message : 'An unknown error occurred'); // Handle unknown error type
-  //   }
-  // };
+  const handleImage2UrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setImage2Url(event.target.value);
+  };
 
   /**
-   * Analyzes facial similarities with mock data.
-   * @async
-   * @function handleSimilarityAnalysis
-   * @description Creates mock face data, analyzes similarities, and updates the state with the results.
-   * @returns {Promise<void>}
+   * Handles the analysis of the faces and their comparison.
    */
-  const handleSimilarityAnalysis = async () => {
+  const handleAnalysis = async () => {
     try {
-      const mockFaces = [
-        { id: '1', imageUrl: imageUrl },
-        { id: '2', imageUrl: 'https://picsum.photos/50/50' },
-        { id: '3', imageUrl: 'https://picsum.photos/50/50' },
-        { id: '4', imageUrl: 'https://picsum.photos/50/50' },
-        { id: '5', imageUrl: 'https://picsum.photos/50/50' },
-      ];
-
-      const analysisResults = await analyzeFaces(mockFaces);
-      setSimilarFaces(analysisResults);
       setError(null);
-    } catch (error: unknown) { // Changed from any to unknown
-      setSimilarFaces([]);
-      setError(error instanceof Error ? error.message : 'An unknown error occurred'); // Handle unknown error type
+      setAnalysis1(null);
+      setAnalysis2(null);
+      setCompatibility(null);
+
+      if (!image1Url || !image2Url) {
+        setError(t('errorMissingImageUrl'));
+        return;
+      }
+
+      // Analyze the first face
+      const faceData1: FaceData = {imageUrl: image1Url};
+      const analysisResult1 = await analyzeFaceData(faceData1);
+      setAnalysis1(analysisResult1);
+
+      // Analyze the second face
+      const faceData2: FaceData = {imageUrl: image2Url};
+      const analysisResult2 = await analyzeFaceData(faceData2);
+      setAnalysis2(analysisResult2);
+
+      // Compare the faces if both analyses are successful
+      if (analysisResult1 && analysisResult2) {
+        const compatibilityScore = await compareFaces(faceData1, faceData2);
+        setCompatibility(compatibilityScore);
+      }
+    } catch (error: any) {
+      setError(t('errorAnalysisFailed', {message: error.message || t('unknownError')}));
     }
   };
 
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">{t('title')}</h1>
-      <div className="mb-4">
-        <Input type="text" placeholder={t('imageUrlPlaceholder')} value={imageUrl} onChange={handleImageUrlChange} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <Input type="text" placeholder={t('image1UrlPlaceholder')} value={image1Url} onChange={handleImage1UrlChange}/>
+        <Input type="text" placeholder={t('image2UrlPlaceholder')} value={image2Url} onChange={handleImage2UrlChange}/>
       </div>
 
-      <button onClick={handleSimilarityAnalysis} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        {t('analyzeSimilarityButton')}
-      </button>
+      <Button onClick={handleAnalysis}>{t('analyzeAndCompareButton')}</Button>
 
-      {error && <div className="text-red-500 mt-4">Error: {error}</div>}
+      {error && <p className="text-red-500 mt-4">{error}</p>}
 
-      {similarFaces.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">{t('similarFacesTitle')}</h2>
-            <ul>
-              {similarFaces.map((face, index) => (
-                  // Keeping img tag as requested, add appropriate alt text if needed
-                  <li key={face.id} className="mb-2">
-                    <Image src={face.imageUrl} alt={`Face ${index + 1}`} width={80} height={80} className="object-cover rounded-full inline-block mr-4" />                    
-                     Similarity: {face.similarity.toFixed(2)}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {analysis1 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('analysisResult1')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Image src={image1Url} alt="Face 1" width={200} height={200} className="rounded-md mb-2"/>
+              <p>{t('age')}: {analysis1.age}</p>
+              <p>{t('gender')}: {analysis1.gender}</p>
+              <p>{t('emotion')}: {analysis1.emotion}</p>
+            </CardContent>
+          </Card>
+        )}
 
+        {analysis2 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('analysisResult2')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Image src={image2Url} alt="Face 2" width={200} height={200} className="rounded-md mb-2"/>
+              <p>{t('age')}: {analysis2.age}</p>
+              <p>{t('gender')}: {analysis2.gender}</p>
+              <p>{t('emotion')}: {analysis2.emotion}</p>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
-                  </li>
-              ))}
-            </ul>
-          </div>
+      {compatibility !== null && (
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold">{t('compatibilityScore')}</h2>
+          <p className="text-3xl font-bold">{compatibility.toFixed(2)}</p>
+        </div>
       )}
     </div>
   );

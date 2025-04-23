@@ -2,10 +2,38 @@
 This module manages user-related data, including consent for geolocation, blocked users, and game preferences.
 """
 
+user_data = {}
 users_consent = {}
 blocked_users = {}
 
-user_data = {}
+
+def create_user(user_id, user_info):
+    """
+    Creates a new user with the given ID and information.
+
+    Args:
+        user_id: The ID of the user.
+        user_info: A dictionary containing user information such as name, age, interests, etc.
+    """
+    if user_id not in user_data:
+        user_data[user_id] = user_info
+        user_data[user_id]["interests"] = []  # Initialize interests as an empty list
+    else:
+        print(f"Error: User with ID {user_id} already exists.")
+
+
+def get_user(user_id):
+    """
+    Retrieves the information for a given user ID.
+
+    Args:
+        user_id: The ID of the user.
+
+    Returns:
+        A dictionary containing the user's information, or None if the user does not exist.
+    """
+    return user_data.get(user_id)
+
 
 
 def get_user_geolocation_consent(user_id):

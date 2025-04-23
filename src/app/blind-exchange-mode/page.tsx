@@ -1,45 +1,86 @@
 "use client";
 
-// Removed unused Card components
-import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { useTranslations } from "next-intl";
+import { analyzeFaceData } from "@/services/face-analysis";
+import { generateBlindExchangeProfile } from "@/ai/flows/blind-exchange-profile";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
-/**
- * @fileOverview Blind Exchange Mode page.
- *
- * @module BlindExchangeMode
- *
- * @description This page displays matched user pairs based on shared interests using a mock dataset.
- */
+interface User {
+  id: string;
+  name: string;
+  image: string;
+  interests: string[];
+}
 
-/**
- * @typedef {Object} User
- * @property {string} id - The unique identifier of the user.
- * @property {string[]} interests - An array of strings representing the user's interests.
- * @property {boolean} profileRevealed - A boolean indicating whether the user's profile is revealed.
- */
+const mockUsers: User[] = [
+  {
+    id: "1",
+    name: "Alice",
+    image: "/images/alice.jpg",
+    interests: ["Reading", "Hiking", "Photography"],
+  },
+  {
+    id: "2",
+    name: "Bob",
+    image: "/images/bob.jpg",
+    interests: ["Hiking", "Cooking", "Travel"],
+  },
+  {
+    id: "3",
+    name: "Charlie",
+    image: "/images/charlie.jpg",
+    interests: ["Photography", "Travel", "Music"],
+  },
+];
 
-/**
- * @typedef {Object} UserPair
- * @property {User} user1 - The first user in the pair.
- * @property {User} user2 - The second user in the pair.
- */
-
-/**
- * BlindExchangeModePage Component.
- *
- * @component
- * @description Generates a mock dataset of users, matches them by interest, and displays the matched pairs.
- * If a profile is revealed, it displays the user's name; otherwise, it indicates the profile is hidden.
- * @returns {JSX.Element} The rendered JSX element.
- */
 export default function BlindExchangeModePage() {
+  const t = useTranslations("BlindExchangeMode");
+  const [matchedProfile, setMatchedProfile] = useState<{
+    compatibility: number;
+    description: string;
+  } | null>(null);
 
-  const t = useTranslations('BlindExchangeMode');
+  useEffect(() => {
+    const fetchAndMatch = async () => {
+      const user1 = mockUsers[0];
+      const user2 = mockUsers[1];
+
+      const faceData1 = await analyzeFaceData(user1.image);
+      const faceData2 = await analyzeFaceData(user2.image);
+
+      if (faceData1 && faceData2) {
+        const profile = await generateBlindExchangeProfile(
+          faceData1,
+          faceData2,
+          user1.interests,
+          user2.interests
+        );
+        setMatchedProfile(profile);
+      }
+    };
+
+    fetchAndMatch();
+  }, []);
 
   return (
-    <div>
-      <h1>{t('title')}</h1>
-      <p>This feature is currently under development</p>
+    <div className="container mx-auto mt-10">
+      <h1 className="text-3xl font-bold text-center mb-5">{t("title")}</h1>
+      {matchedProfile ? (
+        <Card className="max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle>{t("matchedProfile")}</CardTitle>
+            <CardDescription>
+              {matchedProfile.description} (
+              {matchedProfile.compatibility.toFixed(2)}% {t("compatibility")})
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : (
+        <p className="text-center">{t("loading")}</p>
+      )}
     </div>
   );
 }
+

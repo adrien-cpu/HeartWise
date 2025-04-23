@@ -1,11 +1,10 @@
 # **App Name**: HeartWise
 
 ## Core Features:
-
-- Geolocation Based Meeting: Enable users to find geolocated meetings in public places.
-- Facial Analysis and Matching: Analyze facial morphology (with consent) and cross-reference with psychological traits to find natural affinities, considering both similarities and opposites.
-- AI Conversation Coach: Analyse the messages written by the user and suggest reformulations if needed to create a good conversation. The LLM acts as a tool and will decide when to intervene.
-- Blind Exchange Mode: Offer a mode of meeting without photo, profile or information. The AI proposes a profile based on facial and emotional matching, common points and opposite polarities.
+- [ ] Geolocation Based Meeting: Enable users to find geolocated meetings in public places.
+- [ ] Facial Analysis and Matching: Analyze facial morphology (with consent) and cross-reference with psychological traits to find natural affinities, considering both similarities and opposites.
+- [ ] AI Conversation Coach: Analyse the messages written by the user and suggest reformulations if needed to create a good conversation. The LLM acts as a tool and will decide when to intervene.
+- [ ] Blind Exchange Mode: Offer a mode of meeting without photo, profile or information. The AI proposes a profile based on facial and emotional matching, common points and opposite polarities.
 
 ## Style Guidelines:
 
@@ -31,14 +30,14 @@ Une application de rencontre à la croisee de l'humain et de l'intelligence arti
 ## 🌐 Fonctionnalités principales
 
 ### 1. 📲 Rencontres hybrides (virtuelles & réelles)
-- **Rencontres géolocalisées** dans des lieux publics (cafés partenaires, événements)
-- **Rencontres virtuelles classiques** via l'application
-- **Speed Dating digital** : sessions rapides avec matching + feedback immédiat
+- [ ] **Rencontres géolocalisées** dans des lieux publics (cafés partenaires, événements)
+- [ ] **Rencontres virtuelles classiques** via l'application
+- [ ] **Speed Dating digital** : sessions rapides avec matching + feedback immédiat
 
 ### 2. 👁‍🗨️ Reconnaissance faciale + IA de Matching
-- Analyse morphologique faciale (avec consentement)
-- Croisement avec les traits psychologiques pour affinités "naturelles"
-- Capacité à jouer sur les similarités ET les opposés
+- [ ] Analyse morphologique faciale (avec consentement)
+- [ ] Croisement avec les traits psychologiques pour affinités "naturelles"
+- [ ] Capacité à jouer sur les similarités ET les opposés
 
 ### 3. 💬 Coach IA conversationnel
 Un assistant intelligent intégré au tchat pour aider à créer une vraie alchimie.
@@ -56,7 +55,7 @@ Un assistant intelligent intégré au tchat pour aider à créer une vraie alchi
 Une base dynamique qui identifie les expressions ambiguës ou sensibles.
 
 #### Contenu :
-- “Câlin”, “Je veux te voir”, “T’es sexy”, “Envie de te connaître”, etc.
+- [ ] “Câlin”, “Je veux te voir”, “T’es sexy”, “Envie de te connaître”, etc.
 - Interprétations possibles + suggestions de clarification
 - Mise à jour par : IA auto-apprenante + signalements utilisateurs
 
@@ -65,7 +64,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**.
 
 #### Déroulé :
 - L'IA propose un profil compatible basé sur :
-  - Matching facial et émotionnel
+  - [ ] Matching facial et émotionnel
   - Points communs et polarités contraires
 - L'utilisateur ne voit que :
   - Un pourcentage de compatibilité
@@ -82,13 +81,13 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**.
 - IA au service des **valeurs de respect, d'authenticité et de lien vrai**
 
 ## 🚧 Modules à développer
-1. Moteur de matching (IA émotionnelle + reconnaissance faciale + logique "semblable/contraire")
-2. Coach IA conversationnel temps réel
-3. Dictionnaire d'expressions sensibles
-4. Mode "Rencontre à l'aveugle"
-5. Système de gamification
-6. Interface speed dating dynamique
-7. Tableau de bord utilisateur intelligent (conseils personnalisés)
+- [ ] 1. Moteur de matching (IA émotionnelle + reconnaissance faciale + logique "semblable/contraire")
+- [ ] 2. Coach IA conversationnel temps réel
+- [ ] 3. Dictionnaire d'expressions sensibles
+- [ ] 4. Mode "Rencontre à l'aveugle"
+- [ ] 5. Système de gamification
+- [ ] 6. Interface speed dating dynamique
+- [ ] 7. Tableau de bord utilisateur intelligent (conseils personnalisés)
 
 ## 💼 Pour le développement IA
 Le cahier des charges est prêt à être transmis à une IA spécialisée dans le code afin de générer :

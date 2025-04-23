@@ -57,3 +57,34 @@ export async function getMeetingPlaces(location: Location): Promise<MeetingPlace
     },
   ];
 }
+
+/**
+ * Retrieves the location of a user.
+ *
+ * @param userId - The ID of the user.
+ * @returns A promise that resolves to the user's location.
+ */
+export async function getUserLocation(userId: string): Promise<Location | null> {
+  // TODO: Implement this by calling an API or database.
+
+  // Placeholder implementation: Return a fixed location for demonstration purposes.
+  if (userId === 'user1') {
+    return { lat: 37.7749, lng: -122.4194 }; // Example location 1: San Francisco
+  } else if (userId === 'user2') {
+    return { lat: 34.0522, lng: -118.2437 }; // Example location 2: Los Angeles
+  }
+  return null;
+}
+
+/**
+ * Calculates the distance between two locations using the Haversine formula.
+ *
+ * @param location1 - The first location.
+ * @param location2 - The second location.
+ * @returns The distance between the two locations in kilometers.
+ */
+export function calculateDistance(location1: Location, location2: Location): number {
+  // TODO: Implement the Haversine formula to calculate the distance between two locations.
+  // Placeholder implementation: Return a fixed distance for demonstration purposes.
+  return 559; // Approximate distance between San Francisco and Los Angeles
+}

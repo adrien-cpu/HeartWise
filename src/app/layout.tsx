@@ -1,11 +1,11 @@
-import type {Metadata} from 'next';
-import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
+import {Geist, Geist_Mono} from 'next/font/google';
+import type {Metadata} from 'next';
 import {SidebarProvider} from "@/components/ui/sidebar";
-import {NextIntlClientProvider, useLocale} from 'next-intl';
-import {notFound} from "next/navigation";
-// import { i18n } from '@/i18n/i18n'; // Avoid direct import
-import {Locales} from "@/i18n/settings";
+import {notFound} from 'next/navigation';
+import {Locales, config, handleI18n} from "@/i18n/settings";
+import {NextIntlClientProvider} from 'next-intl';
+import { useLocale } from 'next-intl';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -40,29 +40,33 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
+
+  const i18n = await handleI18n();
+
   const locale = params.locale;
 
   if (!Locales.includes(locale as any)) {
+    console.log("locale not found", locale);
     notFound();
   }
 
+  let messages;
   try {
-    const messages = (await import(`../messages/${locale}.json`)).default;
-
-    return (
-      <html lang={locale}>
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <SidebarProvider>
-              {children}
-            </SidebarProvider>
-          </NextIntlClientProvider>
-        </body>
-      </html>
-    );
+    messages = (await import(`../messages/${locale}.json`)).default;
   } catch (error) {
     console.error(`Failed to load translation file for locale: ${locale}`);
     notFound();
   }
-}
 
+  return (
+    <html lang={locale}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <SidebarProvider>
+            {children}
+          </SidebarProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
+}

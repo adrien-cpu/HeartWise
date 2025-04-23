@@ -6,8 +6,10 @@
  * @description This module defines the FaceData and PsychologicalTraits interfaces,
  * and the getPsychologicalTraits function for retrieving psychological traits from face data.
  */
+import { generateResponse } from "@/ai/ai-instance";
 
 /**
+ * @interface
  * Represents facial morphology data.
  */
 export interface FaceData {
@@ -17,6 +19,7 @@ export interface FaceData {
   imageUrl: string;
 }
 
+/**
 /**
  * Represents psychological traits.
  */
