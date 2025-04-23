@@ -3,7 +3,7 @@ import {Geist, Geist_Mono} from 'next/font/google';
 import type {Metadata} from 'next';
 import {SidebarProvider} from "@/components/ui/sidebar";
 import {notFound} from 'next/navigation';
-import {Locales, config, handleI18n} from "@/i18n/settings";
+import {locales, config, handleI18n} from "@/i18n/settings";
 import {NextIntlClientProvider} from 'next-intl';
 import { useLocale } from 'next-intl';
 
@@ -45,7 +45,7 @@ export default async function RootLayout({
 
   const locale = params.locale;
 
-  if (!Locales.includes(locale as any)) {
+  if (!locales.includes(locale as any)) {
     console.log("locale not found", locale);
     notFound();
   }
