@@ -1,28 +1,18 @@
 /**
  * @fileOverview Root layout for the application.
- *
- * @module RootLayout
- * @description This component defines the root layout for the entire application. It sets up the font,
- * internationalization, and sidebar provider. It's primarily a Server Component, splitting client-specific
- * logic into ClientLayout.
- * @param {object} props - The props for the RootLayout component.
- * @param {React.ReactNode} props.children - The children to render within the layout.
- * @param {object} props.params - The route parameters.
- * @param {string} props.params.locale - The current locale.
- * @returns {JSX.Element} The rendered RootLayout component.
  */
+import type {Metadata} from 'next';
+import {Geist, Geist_Mono} from 'next/font/google';
+import {ReactNode} from 'react';
+import {NextIntlClientProvider, useMessages} from 'next-intl';
+import {locales} from "@/i18n/settings"; // Import from the correct location
+import {notFound} from 'next/navigation'; // Import notFound
 
-import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
-import { ReactNode } from 'react';
-import { NextIntlClientProvider, useMessages } from 'next-intl';
-import { locales } from "@/i18n/settings"; // Import from the correct location
-import { notFound } from 'next/navigation'; // Import notFound
-
-import { SidebarProvider } from "@/components/ui/sidebar";
+import {SidebarProvider} from "@/components/ui/sidebar";
 
 import './globals.css';
-import { metadata as appMetadata } from './metadata'; // Import metadata
+import {metadata as appMetadata} from './metadata'; // Import metadata
+import {useLocale} from 'next-intl'; // Import useLocale
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -37,33 +27,47 @@ const geistMono = Geist_Mono({
 // Use imported metadata
 export const metadata: Metadata = appMetadata;
 
+
 /**
- * RootLayout component - Server Component.
- * Sets up the basic HTML structure and passes locale to ClientLayout.
- * @param {object} props - The props.
- * @param {ReactNode} props.children - Child components.
- * @param {object} props.params - Route parameters.
+ * RootLayout component (Server Component).
+ * Sets up the basic HTML structure, fonts, and passes locale information
+ * down to the ClientLayout boundary.
+ *
+ * @module RootLayout
+ * @description This component defines the root layout for the entire application. It sets up the font,
+ * internationalization provider, and sidebar provider.
+ * @param {object} props - The props for the RootLayout component.
+ * @param {React.ReactNode} props.children - The children to render within the layout.
+ * @param {object} props.params - The route parameters.
  * @param {string} props.params.locale - The current locale.
- * @returns {JSX.Element} The root layout element.
+ * @returns {JSX.Element} The rendered RootLayout component.
  */
 export default function RootLayout({
                                      children,
-                                     params: { locale }, // Destructure locale directly
+                                     params, // Destructure params object
                                    }: {
   children: ReactNode;
   params: { locale: string };
 }) {
-  // Validate locale - Basic check, middleware should handle redirects/defaults
-  if (!locales.includes(locale as any)) {
-     // This log indicates an issue potentially upstream (middleware)
-     // Avoid calling notFound() here in the root layout.
-     console.error(`RootLayout received potentially invalid locale: ${locale}. This should ideally be handled by middleware.`);
-     // Render a basic fallback or let ClientLayout handle it further if appropriate
-     // For now, we proceed, but this indicates a potential config or routing issue.
-  }
+
+   const locale = params.locale; // Get locale from params
+
+   // Validate locale - Basic check. Let middleware handle redirects/defaults.
+   // next-intl middleware should ensure a valid locale is passed.
+   // If an invalid locale reaches here, it might indicate a config issue,
+   // but we let ClientLayout handle potential message loading errors.
+   if (!locales.includes(locale as any)) {
+     // Log a warning instead of erroring or calling notFound here.
+     // Using console.warn as console.error might be too alarming for a recoverable state
+     // handled by middleware/client layout.
+     console.warn(`RootLayout received potentially invalid locale: ${locale}. Middleware should ideally handle redirection or provide a default.`);
+     // Proceeding, assuming ClientLayout or subsequent logic might handle it,
+     // or hoping middleware corrects the route. Calling notFound() here is not allowed.
+   }
 
   return (
-    <html lang={locale}>
+    // Use the validated locale for the lang attribute, fallback to default if needed early.
+    <html lang={locales.includes(locale as any) ? locale : 'en'}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* Pass locale down to the client boundary */}
         <ClientLayout locale={locale}>
@@ -74,11 +78,12 @@ export default function RootLayout({
   );
 }
 
-// Separating Client-Side Logic into its own component marked with "use client"
+
 /**
- * ClientLayout component - Client Component.
+ * ClientLayout component (Client Component Boundary).
+ * Handles client-side initialization like NextIntlClientProvider and SidebarProvider.
  *
- * @component
+ * @function ClientLayout
  * @description Establishes the client boundary, sets up NextIntlClientProvider with messages,
  * and provides the Sidebar context. This must be a Client Component.
  * @param {object} props - The props for the ClientLayout component.
@@ -86,35 +91,42 @@ export default function RootLayout({
  * @param {string} props.locale - The current locale passed from RootLayout.
  * @returns {JSX.Element} The rendered ClientLayout component.
  */
+"use client";
 function ClientLayout({
                         children,
                         locale
                       }: {
   children: ReactNode;
-  locale: string;
+  locale: string; // Expect locale to be a string, even if potentially invalid initially
 }) {
-  "use client"; // Directive must be at the top
+
 
   // useMessages hook is safe to use here within the Client Component boundary
   const messages = useMessages();
 
-  // Further validation or fallback on the client side
+  // Basic check on the client side for locale validity *before* provider.
+  // If middleware failed, this might catch it.
    if (!locales.includes(locale as any)) {
-     // If an invalid locale somehow reaches the client, show an error or redirect
-     console.warn("ClientLayout received invalid locale:", locale, ". Displaying fallback.");
-      // Render a simple fallback on the client side.
-      return <div>Unsupported language: {locale}. Please check the URL or contact support.</div>;
+     // Render a client-side fallback if the locale is fundamentally wrong here.
+     // This shouldn't happen if middleware is correct, but acts as a safeguard.
+     console.error("ClientLayout received invalid locale:", locale, ". Displaying fallback.");
+      return <div>Unsupported language: {locale || 'undefined'}. Please check the URL or contact support.</div>;
    }
 
-  if (!messages) {
+  // Check if messages were loaded correctly by getRequestConfig / useMessages
+  // This can fail if the JSON file is missing or corrupt for the *resolved* locale.
+  if (!messages || Object.keys(messages).length === 0) {
     // Handle case where messages might not be available (e.g., error during fetch/build)
-    console.error("ClientLayout: Messages not available for locale:", locale);
+    console.error("ClientLayout: Messages not available or empty for locale:", locale);
     // Render fallback UI or throw error
     return <div>Error loading translations for locale '{locale}'. Please try again or contact support.</div>;
   }
 
 
   return (
+    // Provide the potentially invalid locale to NextIntlClientProvider,
+    // letting it handle message resolution based on its internal logic/fallbacks
+    // if getRequestConfig didn't throw earlier.
     <NextIntlClientProvider locale={locale} messages={messages}>
       <SidebarProvider>
         {children}
