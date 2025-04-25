@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Provides services for managing user profile data.
  * @module user_profile

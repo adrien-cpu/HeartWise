@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from "next-intl";
-import { analyzeFaceData } from "@/services/face-analysis";
 import { generateBlindExchangeProfile } from "@/ai/flows/blind-exchange-profile";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -35,6 +34,18 @@ const mockUsers: User[] = [
   },
 ];
 
+// Function to convert image to data URI
+const getImageDataUri = async (url: string): Promise<string> => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
 export default function BlindExchangeModePage() {
   const t = useTranslations("BlindExchangeMode");
   const [matchedProfile, setMatchedProfile] = useState<{
@@ -47,17 +58,20 @@ export default function BlindExchangeModePage() {
       const user1 = mockUsers[0];
       const user2 = mockUsers[1];
 
-      const faceData1 = await analyzeFaceData(user1.image);
-      const faceData2 = await analyzeFaceData(user2.image);
+      try {
+        const faceDataUri1 = await getImageDataUri(user1.image);
+        const faceDataUri2 = await getImageDataUri(user2.image);
 
-      if (faceData1 && faceData2) {
-        const profile = await generateBlindExchangeProfile(
-          faceData1,
-          faceData2,
-          user1.interests,
-          user2.interests
-        );
+        const profile = await generateBlindExchangeProfile({
+          faceData1: { imageUrl: faceDataUri1 },
+          faceData2: { imageUrl: faceDataUri2 },
+          interests1: user1.interests,
+          interests2: user2.interests
+        });
+
         setMatchedProfile(profile);
+      } catch (error) {
+        console.error("Error in blind exchange mode:", error);
       }
     };
 
@@ -72,8 +86,8 @@ export default function BlindExchangeModePage() {
           <CardHeader>
             <CardTitle>{t("matchedProfile")}</CardTitle>
             <CardDescription>
-              {matchedProfile.description} (
-              {matchedProfile.compatibility.toFixed(2)}% {t("compatibility")})
+              {matchedProfile.profileDescription} (
+              {matchedProfile.compatibilityScore.toFixed(2)}% {t("compatibility")})
             </CardDescription>
           </CardHeader>
         </Card>
@@ -83,4 +97,3 @@ export default function BlindExchangeModePage() {
     </div>
   );
 }
-
