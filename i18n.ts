@@ -15,7 +15,7 @@ import { locales, defaultLocale, pathnames, isValidLocale } from './src/i18n/set
  *
  * @param {object} params - The parameters object.
  * @param {string} params.locale - The current locale provided by the middleware or URL.
- * @returns {Promise<object>} The configuration object with messages for the specified or default locale.
+ * @returns {Promise<object>} The configuration object with messages and locale for the specified or default locale.
  * @throws {Error} If the messages file for the default locale cannot be loaded or is invalid.
  */
 export default getRequestConfig(async ({ locale }) => {
@@ -60,8 +60,9 @@ export default getRequestConfig(async ({ locale }) => {
      // notFound(); // Use cautiously, might hide underlying issues.
   }
 
-  // Return the messages for the client provider.
+  // Return the locale and messages for the client provider.
   return {
+    locale: resolvedLocale, // <<< Add the resolved locale here
     messages
   };
 });
