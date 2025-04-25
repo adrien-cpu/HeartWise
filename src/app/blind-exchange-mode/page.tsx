@@ -46,6 +46,15 @@ const getImageDataUri = async (url: string): Promise<string> => {
   });
 };
 
+/**
+ * @fileOverview Implements the Blind Exchange Mode page.
+ */
+
+/**
+ * @function BlindExchangeModePage
+ * @description A component for the Blind Exchange Mode page, generating and displaying a matched profile.
+ * @returns {JSX.Element} The rendered BlindExchangeModePage component.
+ */
 export default function BlindExchangeModePage() {
   const t = useTranslations("BlindExchangeMode");
   const [matchedProfile, setMatchedProfile] = useState<{

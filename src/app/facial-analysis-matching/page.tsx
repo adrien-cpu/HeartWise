@@ -19,9 +19,13 @@ interface AnalysisResult {
 }
 
 /**
- * Facial Analysis and Matching Component
- * This component allows users to input two image URLs, analyze the faces in the images,
- * and compare their compatibility based on facial and emotional features.
+ * @fileOverview Implements the Facial Analysis and Matching page.
+ */
+
+/**
+ * @function FacialAnalysisMatching
+ * @description A component for the Facial Analysis and Matching page, allowing users to analyze and compare faces in two images.
+ * @returns {JSX.Element} The rendered FacialAnalysisMatching component.
  */
 export default function FacialAnalysisMatching() {
   const [image1Url, setImage1Url] = useState('');
@@ -33,23 +37,27 @@ export default function FacialAnalysisMatching() {
   const t = useTranslations('FacialAnalysisMatching');
 
   /**
-   * Handles input change for the first image URL.
-   * @param event - The change event.
+   * @function handleImage1UrlChange
+   * @description Handles the input change event for the first image URL.
+   * @param {React.ChangeEvent<HTMLInputElement>} event - The change event.
    */
   const handleImage1UrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setImage1Url(event.target.value);
   };
 
   /**
-   * Handles input change for the second image URL.
-   * @param event - The change event.
+   * @function handleImage2UrlChange
+   * @description Handles the input change event for the second image URL.
+   * @param {React.ChangeEvent<HTMLInputElement>} event - The change event.
    */
   const handleImage2UrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setImage2Url(event.target.value);
   };
 
   /**
-   * Handles the analysis of the faces and their comparison.
+   * @async
+   * @function handleAnalysis
+   * @description Handles the analysis of the faces and their comparison.
    */
   const handleAnalysis = async () => {
     try {

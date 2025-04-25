@@ -46,6 +46,10 @@
 * **Blind Exchange Mode:** Innovative meeting mode without photos, profiles, or information.
 * **Style Bonus :** Suggestions personnalisées du coach IA en fonction de votre niveau de confort et de votre style.
 * **Système de récompenses :** Badges, accès à des modes cachés, speed dating premium, etc.
+* **Dictionnaire IA des Mots à Risque :** Base de données dynamique qui repère les expressions ambiguës ou sensibles.
+* **Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer des fonctionnalités d'appel.
+* **Améliorations des Jeux:** Ajouter plus de jeux, de la variété, des scores persistants et des classements.
+* **Feedback Post-Speed Dating:** Permettre aux utilisateurs de donner un feedback après les sessions.
 
 ### Implemented Features:
 
@@ -70,3 +74,4 @@
 *   **Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer des fonctionnalités d'appel.
 *   **Améliorations des Jeux:** Ajouter plus de jeux, de la variété, des scores persistants et des classements.
 *   **Feedback Post-Speed Dating:** Permettre aux utilisateurs de donner un feedback après les sessions.
+

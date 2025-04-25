@@ -10,6 +10,15 @@ import { useTranslations } from 'next-intl';
 import {Separator} from "@/components/ui/separator";
 import { getConversationAdvice } from "@/ai/flows/conversation-coach";
 
+/**
+ * @fileOverview Implements the AI Conversation Coach page.
+ */
+
+/**
+ * @function AIConversationCoachPage
+ * @description A component that provides AI-powered conversation advice to users based on their conversation history and profiles.
+ * @returns {JSX.Element} The rendered AIConversationCoach page.
+ */
 const AIConversationCoachPage: React.FC = () => {
   const [conversationHistory, setConversationHistory] = useState('');
   const [advice, setAdvice] = useState('');
@@ -18,6 +27,12 @@ const AIConversationCoachPage: React.FC = () => {
   const { toast } = useToast();
   const t = useTranslations('AIConversationCoachPage');
 
+  /**
+   * @async
+   * @function handleGetAdvice
+   * @description Retrieves conversation advice from the AI and updates the state with the received advice.
+   * @throws {Error} If there is an error generating the advice.
+   */
   const handleGetAdvice = async () => {
     try {
       const generatedAdvice = await getConversationAdvice({

@@ -9,36 +9,35 @@
 import { generateResponse } from "@/ai/ai-instance";
 
 /**
- * @interface
- * Represents facial morphology data.
+ * @interface FaceData
+ * @description Represents facial morphology data.
  */
 export interface FaceData {
   /**
-   * The url of the image to process.
+   * @property {string} imageUrl - The URL of the image to process.
    */
   imageUrl: string;
 }
 
 /**
-/**
- * Represents psychological traits.
+ * @interface PsychologicalTraits
+ * @description Represents psychological traits.
  */
 export interface PsychologicalTraits {
   /**
-   * The extroversion score.
+   * @property {number} extroversion - The extroversion score.
    */
   extroversion: number;
   /**
-   * The agreeableness score.
+   * @property {number} agreeableness - The agreeableness score.
    */
   agreeableness: number;
 }
 
 /**
- * Asynchronously retrieves psychological traits for a given face.
- *
  * @async
  * @function getPsychologicalTraits
+ * @description Asynchronously retrieves psychological traits for a given face.
  * @param {FaceData} faceData - The face data for which to retrieve psychological traits.
  * @returns {Promise<PsychologicalTraits>} A promise that resolves to a list of psychological traits.
  */
@@ -52,23 +51,23 @@ export async function getPsychologicalTraits(faceData: FaceData): Promise<Psycho
 }
 
 /**
- * Represents a face object with an ID and image URL.
+ * @interface Face
+ * @description Represents a face object with an ID and image URL.
  */
 export interface Face {
   /**
-   * The unique identifier of the face.
+   * @property {string} id - The unique identifier of the face.
    */
   id: string;
   /**
-   * The URL of the image representing the face.
+   * @property {string} imageUrl - The URL of the image representing the face.
    */
   imageUrl: string;
 }
 
 /**
- * Analyzes an array of faces and returns them sorted by similarity to the first face.
- *
  * @function analyzeFaces
+ * @description Analyzes an array of faces and returns them sorted by similarity to the first face.
  * @param {Face[]} faces - An array of face objects to analyze.
  * @returns {Face[]} - An array of faces sorted by similarity, with the most similar face first. Each face object includes a 'similarity' property.
  */
