@@ -166,14 +166,14 @@
     "clarificationSuggestion": "Clarification Suggestion",
     "analysisComplete": "Analysis Complete",
     "noRiskyWordsFound": "No potentially risky words found in the text.",
-     "riskyWordsFound": "{count, plural, =1 {One potentially risky phrase found.} other {# potentially risky phrases found.}}",
+    "riskyWordsFound": "{count, plural, =1 {One potentially risky phrase found.} other {# potentially risky phrases found.}}",
     "errorTitle": "Error",
     "emptyInputError": "Please enter some text to analyze.",
     "analysisError": "An error occurred while analyzing the text. Please try again."
   },
   "RewardsPage": {
     "title": "Your Rewards",
-    "description": "Check out the badges you've earned!",
+    "description": "Check out the badges you've earned and your current points!",
     "myBadges": "My Badges",
     "earnedBadgesDesc": "Badges earned through your activity in the app.",
     "noBadges": "You haven't earned any badges yet. Keep exploring!",
@@ -193,6 +193,10 @@
     "badge_blind_exchange_participant_name": "Mystery Seeker",
     "badge_blind_exchange_participant_desc": "Tried the Blind Exchange mode.",
     "badge_explorer_name": "Local Explorer",
-    "badge_explorer_desc": "Checked out the Geolocation feature."
+    "badge_explorer_desc": "Checked out the Geolocation feature.",
+    "yourPoints": "Your Points",
+    "pointsDesc": "Points earned for activities and achievements.",
+    "noPoints": "You haven't earned any points yet.",
+    "pointsSuffix": "points"
   }
 }

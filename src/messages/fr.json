@@ -173,7 +173,7 @@
   },
   "RewardsPage": {
     "title": "Vos Récompenses",
-    "description": "Découvrez les badges que vous avez gagnés !",
+    "description": "Découvrez les badges que vous avez gagnés et vos points actuels !",
     "myBadges": "Mes Badges",
     "earnedBadgesDesc": "Badges gagnés grâce à votre activité dans l'application.",
     "noBadges": "Vous n'avez pas encore gagné de badges. Continuez à explorer !",
@@ -193,6 +193,10 @@
     "badge_blind_exchange_participant_name": "Chercheur de Mystère",
     "badge_blind_exchange_participant_desc": "A essayé le mode Échange à l'Aveugle.",
     "badge_explorer_name": "Explorateur Local",
-    "badge_explorer_desc": "A utilisé la fonctionnalité de Géolocalisation."
+    "badge_explorer_desc": "A utilisé la fonctionnalité de Géolocalisation.",
+    "yourPoints": "Vos Points",
+    "pointsDesc": "Points gagnés pour les activités et les succès.",
+    "noPoints": "Vous n'avez pas encore gagné de points.",
+    "pointsSuffix": "points"
   }
 }

@@ -1,8 +1,7 @@
-
 /**
- * @fileOverview Provides services for managing user profile data, including rewards.
+ * @fileOverview Provides services for managing user profile data, including rewards and points.
  * @module user_profile
- * @description This module defines the UserProfile and UserReward interfaces and functions for retrieving/updating profiles and rewards.
+ * @description This module defines the UserProfile and UserReward interfaces and functions for retrieving/updating profiles, rewards, and points.
  *              Uses a mock in-memory store for demonstration.
  */
 
@@ -19,7 +18,8 @@ export interface UserProfile {
     showLocation?: boolean;
     showOnlineStatus?: boolean;
   };
-  rewards?: UserReward[]; // Added rewards array
+  rewards?: UserReward[]; // User's earned badges/rewards
+  points?: number; // Gamification points
   speedDatingSchedule?: string[]; // Added for Speed Dating feature
   gamePreferences?: string[]; // Added for Game feature
   // Add other fields like age, preferences, etc. as needed
@@ -53,8 +53,9 @@ const mockUserData: { [key: string]: UserProfile } = {
     rewards: [
         { id: 'r1', name: 'Profile Complete', description: 'Filled out your profile details.', type: 'profile_complete', dateEarned: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
         { id: 'r2', name: 'First Chat', description: 'Initiated your first chat.', type: 'first_chat', dateEarned: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
-         { id: 'r3', name: 'Explorer', description: 'Checked out the geolocation feature.', type: 'explorer', dateEarned: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
+        { id: 'r3', name: 'Explorer', description: 'Checked out the geolocation feature.', type: 'explorer', dateEarned: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
     ],
+    points: 150, // Initial points for Alice
     speedDatingSchedule: [],
     gamePreferences: ["history", "geography"],
   },
@@ -71,6 +72,7 @@ const mockUserData: { [key: string]: UserProfile } = {
     rewards: [
         { id: 'r4', name: 'Profile Complete', description: 'Filled out your profile details.', type: 'profile_complete', dateEarned: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) }
     ],
+    points: 50, // Initial points for Bob
     speedDatingSchedule: [],
     gamePreferences: ["science"],
   },
@@ -93,9 +95,12 @@ export async function get_user(userId: string): Promise<UserProfile> {
     throw new Error(`User with ID ${userId} not found.`);
   }
   console.log("Fetched profile:", user);
-  // Ensure rewards is initialized if missing
+  // Ensure rewards and points are initialized if missing
   if (!user.rewards) {
       user.rewards = [];
+  }
+  if (user.points === undefined) {
+      user.points = 0;
   }
   return user;
 }
@@ -131,6 +136,7 @@ export async function update_user_profile(userId: string, profileData: Partial<U
      interests: profileData.interests !== undefined ? profileData.interests : mockUserData[userId].interests,
      speedDatingSchedule: profileData.speedDatingSchedule !== undefined ? profileData.speedDatingSchedule : mockUserData[userId].speedDatingSchedule,
      gamePreferences: profileData.gamePreferences !== undefined ? profileData.gamePreferences : mockUserData[userId].gamePreferences,
+     points: profileData.points !== undefined ? profileData.points : mockUserData[userId].points, // Merge points
   };
 
   console.log("Updated profile:", mockUserData[userId]);
@@ -160,6 +166,7 @@ export async function get_user_rewards(userId: string): Promise<UserReward[]> {
 
 /**
  * Adds a reward to a user's profile (if they haven't earned it already).
+ * Also adds points associated with the reward type.
  * @async
  * @function add_user_reward
  * @param {string} userId - The ID of the user.
@@ -179,6 +186,9 @@ export async function add_user_reward(userId: string, rewardData: Omit<UserRewar
     if (!user.rewards) {
         user.rewards = [];
     }
+     if (user.points === undefined) {
+        user.points = 0;
+    }
 
     // Check if the user already has this type of reward
     const hasReward = user.rewards.some(r => r.type === rewardData.type);
@@ -190,7 +200,12 @@ export async function add_user_reward(userId: string, rewardData: Omit<UserRewar
             dateEarned: new Date(),
         };
         user.rewards.push(newReward);
-        console.log(`Reward ${rewardData.type} added for user ${userId}`);
+
+        // Add points based on reward type (example values)
+        const pointsToAdd = getPointsForReward(rewardData.type);
+        user.points += pointsToAdd;
+
+        console.log(`Reward ${rewardData.type} added for user ${userId}. Points added: ${pointsToAdd}. Total points: ${user.points}`);
         return true;
     } else {
          console.log(`User ${userId} already has reward ${rewardData.type}`);
@@ -242,3 +257,55 @@ export async function set_user_game_preferences(userId: string, preferences: str
     await update_user_profile(userId, { gamePreferences: preferences });
 }
 
+/**
+ * Retrieves the user's current points.
+ * @async
+ * @function get_user_points
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<number>} A promise resolving to the user's points.
+ */
+export async function get_user_points(userId: string): Promise<number> {
+  const user = await get_user(userId);
+  return user.points || 0;
+}
+
+/**
+ * Adds points to a user's profile.
+ * @async
+ * @function add_user_points
+ * @param {string} userId - The ID of the user.
+ * @param {number} pointsToAdd - The number of points to add.
+ * @returns {Promise<number>} A promise resolving to the user's new total points.
+ * @throws {Error} If the user is not found.
+ */
+export async function add_user_points(userId: string, pointsToAdd: number): Promise<number> {
+  console.log(`Adding ${pointsToAdd} points to user: ${userId}`);
+  await new Promise(resolve => setTimeout(resolve, 50)); // Simulate network delay
+
+  if (!mockUserData[userId]) {
+    throw new Error(`User with ID ${userId} not found.`);
+  }
+
+  if (mockUserData[userId].points === undefined) {
+    mockUserData[userId].points = 0;
+  }
+
+  mockUserData[userId].points! += pointsToAdd;
+  console.log(`User ${userId} new total points: ${mockUserData[userId].points}`);
+  return mockUserData[userId].points!;
+}
+
+
+// Helper function to determine points for a reward type
+function getPointsForReward(rewardType: string): number {
+    switch (rewardType) {
+        case 'profile_complete': return 50;
+        case 'first_chat': return 20;
+        case 'first_match': return 30;
+        case 'speed_dater': return 25;
+        case 'game_winner': return 15;
+        case 'blind_exchange_participant': return 20;
+        case 'explorer': return 10;
+        default: return 5; // Default points for unknown badges
+    }
+}
