@@ -31,7 +31,7 @@ Une application de rencontre à la croisee de l'humain et de l'intelligence arti
 
 ### 1. 📲 Rencontres hybrides (virtuelles & réelles)
 - [x] **Rencontres géolocalisées** dans des lieux publics (cafés partenaires, événements) (`/geolocation-meeting`)
-- [ ] **Rencontres virtuelles classiques** via l'application (`/chat` exists but is basic)
+- [ ] **Rencontres virtuelles classiques** via l'application (`/chat` exists, basic UI enhanced, but needs real-time backend and advanced features)
 - [x] **Speed Dating digital** : sessions rapides avec matching + feedback immédiat (`/speed-dating`)
 
 ### 2. 👁‍🗨️ Reconnaissance faciale + IA de Matching
@@ -73,7 +73,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 
 ## 🚀 Bonus et gamification
 - [ ] 🌟 Bonus de style : suggestions personnalisées du coach IA selon ton niveau de confort, ton style (romantique, direct, poétique, etc.) (Enhancement to AI Coach)
-- [x] 🎖️ Système de récompenses : badges, accès à des modes cachés, speed-dating premium, etc. (`/rewards` exists but basic)
+- [x] 🎖️ Système de récompenses : badges, accès à des modes cachés, speed-dating premium, etc. (`/rewards` exists, basic points/badges implemented)
 
 ## 🌐 Anticipation marché et différenciation
 - App centrée sur **la compréhension émotionnelle** et **l'humain avant l'apparence**
@@ -85,7 +85,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 - [x] 2. Coach IA conversationnel temps réel (`/ai-conversation-coach`)
 - [x] 3. Dictionnaire d'expressions sensibles (`/risky-words-dictionary`)
 - [x] 4. Mode "Rencontre à l'aveugle" (`/blind-exchange-mode`)
-- [x] 5. Système de gamification (`/rewards` - basic)
+- [x] 5. Système de gamification (`/rewards` - basic points/badges)
 - [x] 6. Interface speed dating dynamique (`/speed-dating`)
 - [ ] 7. Tableau de bord utilisateur intelligent (conseils personnalisés) (Partially covered by AI Coach)
 
@@ -108,12 +108,12 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **[x] Speed Dating :** (`/speed-dating`)
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting`)
 *   **[x] Gestion Améliorée des Profils :** (`/profile`)
-*   **[x] Outils de Communication Intégrés à l'Application (Chat):** (`/chat`)
-*   **[x] Système de récompenses (basique) :** (`/rewards`)
+*   **[x] Outils de Communication Intégrés à l'Application (Chat):** (`/chat` - basic UI enhanced, mock data)
+*   **[x] Système de récompenses (basique) :** (`/rewards` - displays mock points/badges)
 
 ## Features to Implement / Enhance (Backend & Advanced):
 
-*   **Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels (Base de données utilisateurs, stockage d'images cloud, API de géolocalisation tierce, logique de matchmaking réelle, persistance du chat via base de données, etc.).
+*   **Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels (Base de données utilisateurs, stockage d'images cloud, API de géolocalisation tierce, logique de matchmaking réelle, persistance du chat via base de données, système de chat en temps réel via WebSockets ou similaire, etc.).
 *   **Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth).
 *   **Système de récompenses (avancé) :** Concevoir et implémenter le système de points, modes cachés, accès premium (logique backend + UI).
 *   **Style Bonus (AI Coach) :** Développer le flux Genkit et l'interface pour les suggestions de style personnalisées.
@@ -125,3 +125,5 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **Dévoilement progressif (Blind Exchange):** Implémenter la logique pour révéler les informations progressivement dans le chat.
 *   **Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage et le signalement utilisateur.
 *   **Tableau de bord intelligent:** Créer un tableau de bord personnalisé avec des conseils.
+*   **Tags d'intention (Chat):** Implémenter l'interface et la logique (potentiellement IA) pour ajouter des tags d'intention aux messages.
+```

@@ -6,20 +6,20 @@
     "geolocationMeeting": "Rencontres Géolocalisées",
     "facialAnalysisMatching": "Analyse Faciale et Correspondance",
     "aiConversationCoach": "Coach IA Conversationnel",
+    "riskyWordsDictionary": "Dictionnaire des Mots à Risque",
     "blindExchangeMode": "Mode d'échange à l'aveugle",
     "game": "Jeu",
+    "speedDating": "Speed Dating",
     "chat": "Discussion",
     "rewards": "Récompenses",
-    "myAccount": "Mon Compte",
     "profile": "Profil",
+    "myAccount": "Mon Compte",
     "settings": "Paramètres",
     "logout": "Déconnexion",
     "dashboardTitle": "Bienvenue sur HeartWise",
     "dashboardDescription": "Explorez nos fonctionnalités et trouvez votre partenaire idéal :",
-    "speedDating": "Speed Dating",
     "selectLanguage": "Sélectionner la langue",
-    "locale": "{locale, select, en {Anglais} fr {Français} other {Inconnu}}",
-    "riskyWordsDictionary": "Dictionnaire des Mots à Risque"
+    "locale": "{locale, select, en {Anglais} fr {Français} other {Inconnu}}"
   },
   "GeolocationMeeting": {
     "title": "Trouver des Connexions à Proximité",
@@ -124,7 +124,7 @@
     "no": "Non",
     "uploadPicture": "Télécharger une photo"
   },
-    "SpeedDating": {
+  "SpeedDating": {
     "title": "Speed Dating",
     "scheduleTitle": "Planifier une session de Speed Dating",
     "scheduleDescription": "Sélectionnez les centres d'intérêt sur lesquels vous souhaitez être mis en relation.",
@@ -149,9 +149,12 @@
     "sendMessagePlaceholder": "Tapez votre message...",
     "sendButton": "Envoyer",
     "errorLoadingChats": "Erreur lors du chargement des conversations.",
-    "errorSendingMessage": "Erreur lors de l'envoi du message."
+    "errorSendingMessage": "Erreur lors de l'envoi du message.",
+    "selectChatPrompt": "Sélectionnez une conversation pour commencer à discuter.",
+    "compatibilityScoreTitle": "Score de Compatibilité",
+    "onlineStatusPlaceholder": "En ligne"
   },
-   "RiskyWordsDictionary": {
+  "RiskyWordsDictionary": {
     "title": "Dictionnaire des Mots à Risque",
     "description": "Analysez vos messages pour détecter les phrases potentiellement ambiguës ou sensibles avant de les envoyer.",
     "inputTextTitle": "Entrez le Texte à Analyser",

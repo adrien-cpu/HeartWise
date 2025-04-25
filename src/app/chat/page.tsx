@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -7,12 +6,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"; // Added CardDescription
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Send, User } from 'lucide-react';
+import { Loader2, Send, User, HeartHandshake } from 'lucide-react'; // Added HeartHandshake
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { UserProfile, get_user } from '@/services/user_profile'; // Import user profile service
+
+/**
+ * @fileOverview Chat page component.
+ * @module ChatPage
+ * @description Displays the chat interface, allowing users to select conversations and send/receive messages. Includes mock compatibility display.
+ */
+
 
 // Mock data structures
 interface Message {
@@ -23,11 +30,14 @@ interface Message {
   timestamp: Date;
 }
 
+interface ConversationParticipant extends UserProfile {
+  // Inherits UserProfile fields like id, name, profilePicture, bio, interests etc.
+  compatibilityScore?: number; // Mock compatibility score (0-100)
+}
+
 interface Conversation {
   id: string;
-  participantId: string;
-  participantName: string;
-  participantAvatar: string;
+  participant: ConversationParticipant; // Use the extended participant type
   lastMessage: string;
   lastMessageTimestamp: Date;
   messages: Message[];
@@ -37,41 +47,64 @@ interface Conversation {
 const CURRENT_USER_ID = 'user1';
 const CURRENT_USER_NAME = 'Me'; // Or fetch from profile
 
-// Mock conversations data
+// Mock participants with compatibility
+const mockParticipants: { [key: string]: ConversationParticipant } = {
+  'user2': {
+    id: 'user2',
+    name: 'Bob',
+    profilePicture: 'https://picsum.photos/seed/bob/50/50',
+    bio: 'Loves cooking and travel.',
+    interests: ['Cooking', 'Travel'],
+    compatibilityScore: 75,
+  },
+  'user3': {
+    id: 'user3',
+    name: 'Charlie',
+    profilePicture: 'https://picsum.photos/seed/charlie/50/50',
+    bio: 'Tech enthusiast and bookworm.',
+    interests: ['Tech', 'Books'],
+    compatibilityScore: 60,
+  },
+  'user4': {
+    id: 'user4',
+    name: 'Diana',
+    profilePicture: 'https://picsum.photos/seed/diana/50/50',
+    bio: 'Outdoor adventurer and music lover.',
+    interests: ['Hiking', 'Music', 'Travel'],
+    compatibilityScore: 88,
+  },
+};
+
+
+// Mock conversations data using participants
 const initialConversations: Conversation[] = [
   {
     id: 'conv1',
-    participantId: 'user2',
-    participantName: 'Bob',
-    participantAvatar: 'https://picsum.photos/seed/bob/50/50',
+    participant: mockParticipants['user2'],
     lastMessage: 'Hey, how are you?',
     lastMessageTimestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
     messages: [
-      { id: 'm1', senderId: 'user2', senderName: 'Bob', text: 'Hey, how are you?', timestamp: new Date(Date.now() - 5 * 60 * 1000) },
+      { id: 'm1', senderId: 'user2', senderName: mockParticipants['user2'].name || 'Bob', text: 'Hey, how are you?', timestamp: new Date(Date.now() - 5 * 60 * 1000) },
       { id: 'm2', senderId: 'user1', senderName: CURRENT_USER_NAME, text: 'Hi Bob! I\'m good, thanks. You?', timestamp: new Date(Date.now() - 4 * 60 * 1000) },
     ],
   },
    {
     id: 'conv2',
-    participantId: 'user3',
-    participantName: 'Charlie',
-    participantAvatar: 'https://picsum.photos/seed/charlie/50/50',
+    participant: mockParticipants['user3'],
     lastMessage: 'Did you see that movie?',
     lastMessageTimestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
     messages: [
-      { id: 'm3', senderId: 'user3', senderName: 'Charlie', text: 'Did you see that movie?', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
+      { id: 'm3', senderId: 'user3', senderName: mockParticipants['user3'].name || 'Charlie', text: 'Did you see that movie?', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
     ],
   },
    {
     id: 'conv3',
-    participantId: 'user4',
-    participantName: 'Diana',
-    participantAvatar: 'https://picsum.photos/seed/diana/50/50',
+    participant: mockParticipants['user4'],
     lastMessage: 'Planning anything fun this weekend?',
     lastMessageTimestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
     messages: [
        { id: 'm4', senderId: 'user1', senderName: CURRENT_USER_NAME, text: 'Hey Diana!', timestamp: new Date(Date.now() - 1.1 * 24 * 60 * 60 * 1000) },
-       { id: 'm5', senderId: 'user4', senderName: 'Diana', text: 'Planning anything fun this weekend?', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
+       { id: 'm5', senderId: 'user4', senderName: mockParticipants['user4'].name || 'Diana', text: 'Planning anything fun this weekend?', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
     ],
   },
 ];
@@ -92,6 +125,15 @@ export default function ChatPage() {
   const [loadingChats, setLoadingChats] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
+
+  // Fetch current user profile
+  useEffect(() => {
+    get_user(CURRENT_USER_ID)
+      .then(profile => setCurrentUserProfile(profile))
+      .catch(err => console.error("Failed to fetch current user profile:", err));
+  }, []);
+
 
   // Fetch conversations (mocked)
   useEffect(() => {
@@ -99,9 +141,10 @@ export default function ChatPage() {
       setLoadingChats(true);
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      setConversations(initialConversations.sort((a,b) => b.lastMessageTimestamp.getTime() - a.lastMessageTimestamp.getTime())); // Sort by most recent
-      if (initialConversations.length > 0) {
-        setSelectedConversationId(initialConversations[0].id); // Select the first one initially
+      const sortedConversations = [...initialConversations].sort((a,b) => b.lastMessageTimestamp.getTime() - a.lastMessageTimestamp.getTime());
+      setConversations(sortedConversations);
+      if (sortedConversations.length > 0) {
+        setSelectedConversationId(sortedConversations[0].id); // Select the first one initially
       }
       setLoadingChats(false);
     };
@@ -110,7 +153,11 @@ export default function ChatPage() {
 
   // Scroll to bottom when messages change or conversation is selected
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Added a slight delay to ensure DOM updates before scrolling
+    const timer = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+    return () => clearTimeout(timer);
   }, [selectedConversationId, conversations]); // Rerun when conversation or messages change
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
@@ -150,6 +197,12 @@ export default function ChatPage() {
         ).sort((a,b) => b.lastMessageTimestamp.getTime() - a.lastMessageTimestamp.getTime()) // Re-sort after update
       );
       setNewMessage('');
+
+      // Ensure scroll happens after state update and potential re-render
+      requestAnimationFrame(() => {
+         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+       });
+
     } catch (error) {
       console.error("Failed to send message:", error);
       toast({
@@ -182,9 +235,9 @@ export default function ChatPage() {
 
   return (
     <div className="container mx-auto h-[calc(100vh-80px)] flex flex-col p-0 md:p-4"> {/* Adjust height based on header/footer */}
-      <Card className="flex flex-grow overflow-hidden h-full">
+      <Card className="flex flex-grow overflow-hidden h-full shadow-lg rounded-lg border">
         {/* Conversation List Sidebar */}
-        <div className="w-1/3 border-r flex flex-col">
+        <div className="w-full md:w-1/3 border-r flex flex-col bg-card">
           <CardHeader className="p-4">
             <CardTitle>{t('title')}</CardTitle>
           </CardHeader>
@@ -193,7 +246,7 @@ export default function ChatPage() {
             <div className="p-2 space-y-1">
               {loadingChats ? (
                  [...Array(5)].map((_, i) => (
-                    <div key={i} className="flex items-center space-x-3 p-2">
+                    <div key={i} className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
                        <Skeleton className="h-10 w-10 rounded-full" />
                        <div className="space-y-1 flex-grow">
                          <Skeleton className="h-4 w-3/4" />
@@ -207,17 +260,17 @@ export default function ChatPage() {
                     key={conv.id}
                     variant="ghost"
                     className={cn(
-                      "w-full justify-start h-auto py-2 px-3",
-                      selectedConversationId === conv.id && "bg-accent text-accent-foreground"
+                      "w-full justify-start h-auto py-3 px-3 text-left rounded-md transition-colors",
+                      selectedConversationId === conv.id ? "bg-primary/10 text-primary font-semibold" : "hover:bg-muted/50"
                     )}
                     onClick={() => setSelectedConversationId(conv.id)}
                   >
-                    <Avatar className="h-10 w-10 mr-3">
-                      <AvatarImage src={conv.participantAvatar} alt={conv.participantName} />
-                      <AvatarFallback>{getInitials(conv.participantName)}</AvatarFallback>
+                    <Avatar className="h-10 w-10 mr-3 border">
+                      <AvatarImage src={conv.participant.profilePicture} alt={conv.participant.name || 'User'} />
+                      <AvatarFallback>{getInitials(conv.participant.name)}</AvatarFallback>
                     </Avatar>
-                    <div className="flex-grow text-left overflow-hidden">
-                      <p className="font-medium truncate">{conv.participantName}</p>
+                    <div className="flex-grow overflow-hidden">
+                      <p className="font-medium truncate">{conv.participant.name || 'Unknown User'}</p>
                       <p className="text-xs text-muted-foreground truncate">{conv.lastMessage}</p>
                     </div>
                      <span className="text-xs text-muted-foreground ml-auto pl-2 shrink-0">
@@ -233,17 +286,28 @@ export default function ChatPage() {
         </div>
 
         {/* Chat Area */}
-        <div className="w-2/3 flex flex-col">
+        <div className="w-full md:w-2/3 flex flex-col bg-muted/10">
           {selectedConversation ? (
             <>
               {/* Chat Header */}
-              <CardHeader className="p-4 border-b flex flex-row items-center space-x-3">
-                 <Avatar className="h-10 w-10">
-                   <AvatarImage src={selectedConversation.participantAvatar} alt={selectedConversation.participantName} />
-                   <AvatarFallback>{getInitials(selectedConversation.participantName)}</AvatarFallback>
-                 </Avatar>
-                <CardTitle className="text-lg">{selectedConversation.participantName}</CardTitle>
-                 {/* Add online status indicator if available */}
+              <CardHeader className="p-4 border-b flex flex-row items-center justify-between space-x-3 bg-card">
+                 <div className="flex items-center space-x-3">
+                   <Avatar className="h-10 w-10 border">
+                     <AvatarImage src={selectedConversation.participant.profilePicture} alt={selectedConversation.participant.name || 'User'} />
+                     <AvatarFallback>{getInitials(selectedConversation.participant.name)}</AvatarFallback>
+                   </Avatar>
+                    <div>
+                      <CardTitle className="text-lg">{selectedConversation.participant.name || 'Unknown User'}</CardTitle>
+                      <CardDescription className="text-xs text-muted-foreground">{t('onlineStatusPlaceholder')}</CardDescription> {/* Placeholder */}
+                    </div>
+                 </div>
+                 {/* Mock Compatibility Score Display */}
+                 {selectedConversation.participant.compatibilityScore !== undefined && (
+                    <div className="flex items-center space-x-1 text-sm text-primary font-medium" title={t('compatibilityScoreTitle')}>
+                        <HeartHandshake className="h-4 w-4" />
+                        <span>{selectedConversation.participant.compatibilityScore}%</span>
+                    </div>
+                 )}
               </CardHeader>
 
               {/* Messages Area */}
@@ -252,22 +316,22 @@ export default function ChatPage() {
                   <div
                     key={msg.id}
                     className={cn(
-                      "flex items-end space-x-2",
-                      msg.senderId === CURRENT_USER_ID ? "justify-end" : "justify-start"
+                      "flex items-end space-x-2 max-w-[85%]",
+                      msg.senderId === CURRENT_USER_ID ? "ml-auto justify-end" : "mr-auto justify-start"
                     )}
                   >
                     {msg.senderId !== CURRENT_USER_ID && (
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={selectedConversation.participantAvatar} alt={selectedConversation.participantName} />
-                        <AvatarFallback>{getInitials(selectedConversation.participantName)}</AvatarFallback>
+                      <Avatar className="h-8 w-8 border self-start mt-1">
+                        <AvatarImage src={selectedConversation.participant.profilePicture} alt={selectedConversation.participant.name || 'User'} />
+                        <AvatarFallback>{getInitials(selectedConversation.participant.name)}</AvatarFallback>
                       </Avatar>
                     )}
                     <div
                       className={cn(
-                        "max-w-[70%] rounded-lg px-4 py-2",
+                        "rounded-lg px-4 py-2 shadow-sm",
                         msg.senderId === CURRENT_USER_ID
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary text-secondary-foreground"
+                          ? "bg-primary text-primary-foreground rounded-br-none"
+                          : "bg-card text-card-foreground border rounded-bl-none"
                       )}
                     >
                        <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
@@ -276,9 +340,9 @@ export default function ChatPage() {
                        </p>
                     </div>
                      {msg.senderId === CURRENT_USER_ID && (
-                       <Avatar className="h-8 w-8">
+                       <Avatar className="h-8 w-8 border self-start mt-1">
                          {/* Current user avatar - fetch from profile or use placeholder */}
-                         <AvatarImage src={undefined} alt={CURRENT_USER_NAME} />
+                         <AvatarImage src={currentUserProfile?.profilePicture || undefined} alt={CURRENT_USER_NAME} />
                          <AvatarFallback>{getInitials(CURRENT_USER_NAME)}</AvatarFallback>
                        </Avatar>
                      )}
@@ -288,7 +352,7 @@ export default function ChatPage() {
               </ScrollArea>
 
               {/* Message Input Area */}
-              <CardFooter className="p-4 border-t">
+              <CardFooter className="p-4 border-t bg-card">
                 <div className="flex w-full items-center space-x-2">
                   <Input
                     type="text"
@@ -298,17 +362,17 @@ export default function ChatPage() {
                     onKeyPress={handleKeyPress}
                     disabled={sendingMessage}
                     className="flex-grow"
+                    aria-label={t('sendMessagePlaceholder')}
                   />
-                  <Button type="button" size="icon" onClick={handleSendMessage} disabled={sendingMessage || !newMessage.trim()}>
+                  <Button aria-label={t('sendButton')} type="button" size="icon" onClick={handleSendMessage} disabled={sendingMessage || !newMessage.trim()}>
                     {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    <span className="sr-only">{t('sendButton')}</span>
                   </Button>
                 </div>
               </CardFooter>
             </>
           ) : (
             <div className="flex flex-grow items-center justify-center text-muted-foreground">
-              {loadingChats ? <Loader2 className="h-8 w-8 animate-spin" /> : <p>{t('noChats')}</p> }
+              {loadingChats ? <Loader2 className="h-8 w-8 animate-spin" /> : <p>{t('selectChatPrompt')}</p> }
             </div>
           )}
         </div>

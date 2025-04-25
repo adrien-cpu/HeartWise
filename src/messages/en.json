@@ -6,20 +6,20 @@
     "geolocationMeeting": "Geolocation Meeting",
     "facialAnalysisMatching": "Facial Analysis Matching",
     "aiConversationCoach": "AI Conversation Coach",
+    "riskyWordsDictionary": "Risky Words Dictionary",
     "blindExchangeMode": "Blind Exchange Mode",
     "game": "Game",
+    "speedDating": "Speed Dating",
     "chat": "Chat",
     "rewards": "Rewards",
-    "myAccount": "My Account",
     "profile": "Profile",
+    "myAccount": "My Account",
     "settings": "Settings",
     "logout": "Logout",
     "dashboardTitle": "Welcome to HeartWise",
     "dashboardDescription": "Explore our features and find your perfect match:",
-    "speedDating": "Speed Dating",
     "selectLanguage": "Select Language",
-    "locale": "{locale, select, en {English} fr {French} other {Unknown}}",
-    "riskyWordsDictionary": "Risky Words Dictionary"
+    "locale": "{locale, select, en {English} fr {French} other {Unknown}}"
   },
   "GeolocationMeeting": {
     "title": "Find Nearby Connections",
@@ -149,9 +149,12 @@
     "sendMessagePlaceholder": "Type your message...",
     "sendButton": "Send",
     "errorLoadingChats": "Error loading conversations.",
-    "errorSendingMessage": "Error sending message."
+    "errorSendingMessage": "Error sending message.",
+    "selectChatPrompt": "Select a conversation to start chatting.",
+    "compatibilityScoreTitle": "Compatibility Score",
+    "onlineStatusPlaceholder": "Online"
   },
-   "RiskyWordsDictionary": {
+  "RiskyWordsDictionary": {
     "title": "Risky Words Dictionary",
     "description": "Analyze your messages for potentially ambiguous or sensitive phrases before sending.",
     "inputTextTitle": "Enter Text to Analyze",
