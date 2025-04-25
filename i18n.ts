@@ -1,13 +1,12 @@
-
 /**
  * @fileOverview Configuration settings for internationalization (i18n) using next-intl.
  * This file defines supported locales, default locale, pathnames, and provides
  * the configuration function for next-intl.
  */
 
-import {notFound} from 'next/navigation';
-import {getRequestConfig} from 'next-intl/server';
-import {locales, defaultLocale, pathnames, isValidLocale} from '@/i18n/settings'; // Import from settings
+import { notFound } from 'next/navigation';
+import { getRequestConfig } from 'next-intl/server';
+import { locales, defaultLocale, pathnames, isValidLocale } from './src/i18n/settings'; // Adjust path if needed
 
 /**
  * Configuration function for next-intl.
@@ -17,47 +16,51 @@ import {locales, defaultLocale, pathnames, isValidLocale} from '@/i18n/settings'
  * @param {object} params - The parameters object.
  * @param {string} params.locale - The current locale provided by the middleware or URL.
  * @returns {Promise<object>} The configuration object with messages for the specified or default locale.
- * @throws {Error} If the messages file for the default locale cannot be loaded.
+ * @throws {Error} If the messages file for the default locale cannot be loaded or is invalid.
  */
-export default getRequestConfig(async ({locale}) => {
-  // Determine the locale to use: the provided one if valid, otherwise the default.
-  // The middleware should ensure a valid locale reaches here eventually via redirection.
+export default getRequestConfig(async ({ locale }) => {
+  // Use the provided locale if valid, otherwise default to `defaultLocale`.
+  // Middleware should ensure this is usually valid by the time it reaches here.
   const resolvedLocale = isValidLocale(locale) ? locale : defaultLocale;
 
-  // Log if the provided locale was invalid/undefined, but proceed with default.
+  // Log if the provided locale was invalid/undefined, but proceed with the default.
+  // Middleware is the primary place to handle redirection for invalid locales.
   if (!isValidLocale(locale)) {
-    console.warn(`i18n.ts: Invalid or undefined locale "${locale}" detected. Using default locale "${defaultLocale}". Middleware should handle redirection.`);
-    // It's generally better NOT to call notFound() here directly.
-    // Let the middleware handle the redirection to the correct locale path.
-    // If this function is called *after* middleware redirection with an invalid locale,
-    // then notFound() might be appropriate, but the primary check handles fallback.
+    console.warn(`i18n.ts: Invalid or undefined locale "${locale}" detected. Using default locale "${resolvedLocale}". Middleware should handle redirection.`);
+    // Do NOT call notFound() here. Let the middleware redirect.
   }
 
   let messages;
   try {
-    // Load messages for the *resolved* locale (either valid requested or default)
+    // Dynamically import the messages for the resolved locale.
+    // The path is relative to the location of this i18n.ts file.
     messages = (await import(`./src/messages/${resolvedLocale}.json`)).default;
-  } catch (error) {
-    // Log error if messages for the resolved locale fail
-    console.error(`Could not load messages for locale: ${resolvedLocale}`, error);
 
-    // If the resolved locale *was* the default and it failed, it's critical.
-    if (resolvedLocale === defaultLocale) {
-         throw new Error(`Failed to load default locale messages ("${defaultLocale}"). Please check if the file exists and is valid.`);
+    // Basic validation: Check if messages were loaded and are not empty.
+    if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
+      console.error(`Loaded empty or invalid messages for locale: ${resolvedLocale}. Check the JSON file.`);
+      // If the default locale itself failed, throw a critical error.
+      if (resolvedLocale === defaultLocale) {
+        throw new Error(`Default locale messages ("${defaultLocale}") are missing, empty, or invalid.`);
+      }
+      // Attempt to fall back to default locale messages if the requested one failed.
+      console.warn(`Falling back to default locale messages (${defaultLocale}).`);
+      messages = (await import(`./src/messages/${defaultLocale}.json`)).default;
+      if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
+        throw new Error(`Fallback default locale messages ("${defaultLocale}") are also missing, empty, or invalid.`);
+      }
     }
-
-    // If the resolved locale wasn't the default, attempt to load default messages as a final fallback.
-    try {
-         console.warn(`Falling back to default locale messages (${defaultLocale}) because messages for "${resolvedLocale}" failed to load.`);
-         messages = (await import(`./src/messages/${defaultLocale}.json`)).default;
-    } catch (fallbackError) {
-         // If even the default messages fail, throw a comprehensive error.
-         console.error(`Could not load default messages for locale: ${defaultLocale}`, fallbackError);
-         throw new Error(`Failed to load messages for originally requested locale "${locale}" and also failed to load default locale "${defaultLocale}".`);
-    }
+  } catch (error: any) {
+    console.error(`Failed to load messages for locale "${resolvedLocale}" (or fallback):`, error.message);
+    // If message loading fails critically (even fallback), we might need to signal an error.
+    // Throwing here ensures the problem is surfaced.
+     throw new Error(`Failed to load essential translation messages for locale "${resolvedLocale}" or default locale "${defaultLocale}". Error: ${error.message}`);
+     // Alternatively, could return minimal default messages or trigger notFound(),
+     // but throwing makes the configuration issue clear.
+     // notFound(); // Use cautiously, might hide underlying issues.
   }
 
-  // Return messages for the resolved locale (or default if resolved failed but default succeeded).
+  // Return the messages for the client provider.
   return {
     messages
   };
