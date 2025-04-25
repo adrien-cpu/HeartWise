@@ -6,6 +6,8 @@ import {notFound} from 'next/navigation';
 import {locales, config, handleI18n} from "@/i18n/settings";
 import {NextIntlClientProvider} from 'next-intl';
 import { useLocale } from 'next-intl';
+import {ReactNode} from 'react';
+import {ClientSideI18n} from "@/components/ClientSideI18n";
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -36,13 +38,8 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
   params,
-}: {
-  children: React.ReactNode;
-  params: { locale: string };
-}) {
-
-  const i18n = await handleI18n();
-
+}: { children: ReactNode; params: { locale: string } }) {
+  const i18nSetup = await handleI18n();
   const locale = params.locale;
 
   if (!locales.includes(locale as any)) {
@@ -50,22 +47,14 @@ export default async function RootLayout({
     notFound();
   }
 
-  let messages;
-  try {
-    messages = (await import(`../messages/${locale}.json`)).default;
-  } catch (error) {
-    console.error(`Failed to load translation file for locale: ${locale}`);
-    notFound();
-  }
-
   return (
     <html lang={locale}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <ClientSideI18n locale={locale}>
           <SidebarProvider>
             {children}
           </SidebarProvider>
-        </NextIntlClientProvider>
+        </ClientSideI18n>
       </body>
     </html>
   );

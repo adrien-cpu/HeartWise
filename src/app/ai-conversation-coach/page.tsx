@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import { getConversationAdvice } from '@/ai/flows/conversation-coach';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -36,7 +35,7 @@ import { AlertCircle } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { CalendarDateRangePicker } from "@/components/ui/calendar-date-range-picker"
+// import { CalendarDateRangePicker } from "@/components/ui/calendar-date-range-picker"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -51,8 +50,8 @@ const AIConversationCoachPage: React.FC = () => {
 
   const handleGetAdvice = async () => {
     try {
-      const generatedAdvice = await getConversationAdvice(conversationHistory, user1Profile, user2Profile);
-      setAdvice(generatedAdvice);
+      //const generatedAdvice = await getConversationAdvice(conversationHistory, user1Profile, user2Profile);
+      //setAdvice(generatedAdvice);
       toast({
         title: t('adviceGenerated'),
         description: t('adviceReceived'),

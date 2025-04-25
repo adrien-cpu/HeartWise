@@ -5,11 +5,17 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button"
-import {
-    get_speed_dating_compatibility,
-    get_user_for_speed_dating
-} from 'meetings/speed_dating';
-import { User } from '../../types';
+// import { // Commented out: Cannot import Python files
+//     get_speed_dating_compatibility,
+//     get_user_for_speed_dating
+// } from 'meetings/speed_dating';
+// import { User } from '../../types'; // Commented out: Incorrect path or file doesn't exist
+
+// Define a placeholder type for User for now
+interface User { 
+  id: number; 
+  // Add other properties of User if known
+}
 
 const SpeedDating = () => {
     const [userId1, setUserId1] = useState<number | null>(null);
@@ -22,10 +28,17 @@ const SpeedDating = () => {
     useEffect(() => {
       const fetchUsersForDating = async () => {
         try {
-          const users = await get_user_for_speed_dating();
-          setUsersForDating(users);
-        } catch (err: any) {
-          setError(err.message || "Failed to fetch users for speed dating.");
+          // const users = await get_user_for_speed_dating(); // Commented out: Cannot call Python function directly
+          // setUsersForDating(users);
+           setUsersForDating([{ id: 1 }, { id: 2 }, { id: 3 }]); // Placeholder data
+        } catch (err: unknown) { // Changed Error to unknown
+          let errorMessage = "Failed to fetch users for speed dating.";
+          if (err instanceof Error) {
+            errorMessage = err.message;
+          } else if (typeof err === "string") {
+            errorMessage = err;
+          }
+          setError(errorMessage);
         }
       };
       fetchUsersForDating();
@@ -41,11 +54,19 @@ const SpeedDating = () => {
       setError(null);
   
       try {
-        const compatibilityRate = await get_speed_dating_compatibility(userId1, userId2);
-        setCompatibility(compatibilityRate);
-      } catch (err: any) {
-        setError(err.message || "Failed to calculate compatibility.");
-        setCompatibility(null);
+        // const compatibilityRate = await get_speed_dating_compatibility(userId1, userId2); // Commented out: Cannot call Python function directly
+        // setCompatibility(compatibilityRate);
+        // Placeholder calculation
+        setCompatibility((userId1 + userId2) / 2); // Example placeholder calculation
+      } catch (err: unknown) { // Changed Error to unknown
+          let errorMessage = "Failed to calculate compatibility.";
+          if (err instanceof Error) {
+            errorMessage = err.message;
+          } else if (typeof err === "string") {
+            errorMessage = err;
+          }
+          setError(errorMessage);
+          setCompatibility(null);
       } finally {
         setLoading(false);
       }

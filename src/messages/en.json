@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -12,7 +13,8 @@
     "settings": "Settings",
     "logout": "Logout",
     "dashboardTitle": "Welcome to HeartWise",
-    "dashboardDescription": "Explore our features and find your perfect match:"
+    "dashboardDescription": "Explore our features and find your perfect match:",
+    "speedDating": "Speed Dating"
   },
   "GeolocationMeeting": {
     "title": "Geolocation Meeting",
@@ -52,5 +54,45 @@
     "submitAnswer": "Submit answer",
     "correctAnswer": "Correct answer",
     "incorrectAnswer": "Incorrect answer"
+  },
+  "ProfilePage": {
+    "title": "User Profile",
+    "description": "View and edit your profile information.",
+    "loading": "Loading profile...",
+    "noProfile": "Profile not found.",
+    "editProfile": "Edit Profile",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "nameLabel": "Name",
+    "bioLabel": "Bio",
+    "bioPlaceholder": "Tell us a bit about yourself...",
+    "interestsLabel": "Interests",
+    "privacySettingsLabel": "Privacy Settings",
+    "showLocationLabel": "Show my location to others",
+    "showOnlineStatusLabel": "Show my online status",
+    "fetchErrorTitle": "Error Fetching Profile",
+    "fetchErrorDescription": "Could not load your profile data. Please try again later.",
+    "updateSuccessTitle": "Profile Updated",
+    "updateSuccessDescription": "Your profile has been successfully updated.",
+    "updateErrorTitle": "Error Updating Profile",
+    "updateErrorDescription": "Failed to save your profile changes. Please try again.",
+    "notSet": "Not set",
+    "noInterests": "No interests selected.",
+    "anonymousUser": "Anonymous User",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "SpeedDating": {
+    "title": "Speed Dating",
+    "scheduleTitle": "Schedule Speed Dating",
+    "selectInterests": "Select Interests for Speed Dating",
+    "scheduleButton": "Schedule Session",
+    "upcomingSessions": "Upcoming Sessions",
+    "noSessions": "No upcoming speed dating sessions scheduled.",
+    "loading": "Loading...",
+    "fetchError": "Failed to load speed dating data.",
+    "scheduleSuccess": "Speed dating session scheduled successfully!",
+    "scheduleError": "Failed to schedule speed dating session."
   }
 }

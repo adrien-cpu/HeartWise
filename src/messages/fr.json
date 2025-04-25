@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -12,7 +13,8 @@
     "settings": "Paramètres",
     "logout": "Déconnexion",
     "dashboardTitle": "Bienvenue sur HeartWise",
-    "dashboardDescription": "Explorez nos fonctionnalités et trouvez votre partenaire idéal :"
+    "dashboardDescription": "Explorez nos fonctionnalités et trouvez votre partenaire idéal :",
+    "speedDating": "Speed Dating"
   },
   "GeolocationMeeting": {
     "title": "Rencontres Géolocalisées",
@@ -52,5 +54,45 @@
     "submitAnswer": "Soumettre la réponse",
     "correctAnswer": "Réponse correcte",
     "incorrectAnswer": "Réponse incorrecte"
+  },
+  "ProfilePage": {
+    "title": "Profil Utilisateur",
+    "description": "Visualisez et modifiez les informations de votre profil.",
+    "loading": "Chargement du profil...",
+    "noProfile": "Profil non trouvé.",
+    "editProfile": "Modifier le Profil",
+    "cancel": "Annuler",
+    "saveChanges": "Enregistrer les Modifications",
+    "saving": "Enregistrement...",
+    "nameLabel": "Nom",
+    "bioLabel": "Bio",
+    "bioPlaceholder": "Dites-nous en un peu plus sur vous...",
+    "interestsLabel": "Intérêts",
+    "privacySettingsLabel": "Paramètres de Confidentialité",
+    "showLocationLabel": "Afficher ma position aux autres",
+    "showOnlineStatusLabel": "Afficher mon statut en ligne",
+    "fetchErrorTitle": "Erreur de Récupération du Profil",
+    "fetchErrorDescription": "Impossible de charger les données de votre profil. Veuillez réessayer plus tard.",
+    "updateSuccessTitle": "Profil Mis à Jour",
+    "updateSuccessDescription": "Votre profil a été mis à jour avec succès.",
+    "updateErrorTitle": "Erreur de Mise à Jour du Profil",
+    "updateErrorDescription": "Échec de l'enregistrement des modifications de votre profil. Veuillez réessayer.",
+    "notSet": "Non défini",
+    "noInterests": "Aucun intérêt sélectionné.",
+    "anonymousUser": "Utilisateur Anonyme",
+    "yes": "Oui",
+    "no": "Non"
+  },
+    "SpeedDating": {
+    "title": "Speed Dating",
+    "scheduleTitle": "Planifier une session de Speed Dating",
+    "selectInterests": "Sélectionnez vos intérêts pour le Speed Dating",
+    "scheduleButton": "Planifier la session",
+    "upcomingSessions": "Sessions à venir",
+    "noSessions": "Aucune session de speed dating à venir.",
+    "loading": "Chargement...",
+    "fetchError": "Échec du chargement des données de speed dating.",
+    "scheduleSuccess": "Session de speed dating planifiée avec succès !",
+    "scheduleError": "Échec de la planification de la session de speed dating."
   }
 }

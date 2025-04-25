@@ -46,7 +46,7 @@ export interface MeetingPlace {
 export async function getMeetingPlaces(location: Location): Promise<MeetingPlace[]> {
   // TODO: Implement this by calling an API.
 
-  return [
+  const allMeetingPlaces = [
     {
       name: 'Starbucks',
       location: { lat: 37.7749, lng: -122.4194 },
@@ -56,6 +56,15 @@ export async function getMeetingPlaces(location: Location): Promise<MeetingPlace
       location: { lat: 37.7833, lng: -122.4167 },
     },
   ];
+
+  // Filter meeting places based on distance to the provided location (placeholder logic)
+  const filteredMeetingPlaces = allMeetingPlaces.filter(place => {
+    const distance = calculateDistance(location, place.location);
+    // Include places within a 1000 km radius for demonstration
+    return distance < 1000;
+  });
+
+  return filteredMeetingPlaces;
 }
 
 /**
@@ -84,7 +93,15 @@ export async function getUserLocation(userId: string): Promise<Location | null> 
  * @returns The distance between the two locations in kilometers.
  */
 export function calculateDistance(location1: Location, location2: Location): number {
-  // TODO: Implement the Haversine formula to calculate the distance between two locations.
-  // Placeholder implementation: Return a fixed distance for demonstration purposes.
-  return 559; // Approximate distance between San Francisco and Los Angeles
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = (location2.lat - location1.lat) * Math.PI / 180;
+  const dLng = (location2.lng - location1.lng) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(location1.lat * Math.PI / 180) *
+    Math.cos(location2.lat * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  return distance;
 }
