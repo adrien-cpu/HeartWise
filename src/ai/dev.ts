@@ -4,3 +4,4 @@
 
 import '@/ai/flows/conversation-coach.ts';
 import '@/ai/flows/blind-exchange-profile.ts';
+import '@/ai/flows/risky-words-dictionary.ts';

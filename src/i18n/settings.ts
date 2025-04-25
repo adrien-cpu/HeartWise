@@ -26,6 +26,7 @@ export const pathnames = {
   '/ai-conversation-coach': '/ai-conversation-coach',
   '/blind-exchange-mode': '/blind-exchange-mode',
   '/chat': '/chat',
+  '/risky-words-dictionary': '/risky-words-dictionary', // Added pathname
   // Add other paths as needed
 } satisfies Record<string, string>; // Use 'satisfies' for type checking without changing the type
 

@@ -9,7 +9,7 @@
  */
 
 import {
-    ArrowRight, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, File,
+    ArrowRight, Book, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, File,
     HelpCircle, Home, Loader2, Mail, MessageSquare, Moon, PanelLeft, Plus,
     PlusCircle, Search, Server, Settings, Share2, Shield, Sun, Trash, User, X,
     Workflow, MapPin, Gamepad, Zap, MessageCircle, LogOut
@@ -18,6 +18,7 @@ import {
 /**
  * @typedef {object} Icons
  * @property {LucideIcon} arrowRight - Arrow right icon.
+ * @property {LucideIcon} book - Book icon.
  * @property {LucideIcon} check - Check icon.
  * @property {LucideIcon} chevronDown - Chevron down icon.
  * @property {LucideIcon} circle - Circle icon.
@@ -53,6 +54,7 @@ import {
  */
 const Icons = {
   arrowRight: ArrowRight,
+  book: Book, // Added book icon
   check: Check,
   chevronDown: ChevronsUpDown,
   circle: Circle,

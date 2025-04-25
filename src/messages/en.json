@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -17,7 +16,8 @@
     "dashboardDescription": "Explore our features and find your perfect match:",
     "speedDating": "Speed Dating",
     "selectLanguage": "Select Language",
-    "locale": "{locale, select, en {English} fr {French} other {Unknown}}"
+    "locale": "{locale, select, en {English} fr {French} other {Unknown}}",
+    "riskyWordsDictionary": "Risky Words Dictionary"
   },
   "GeolocationMeeting": {
     "title": "Find Nearby Connections",
@@ -141,5 +141,25 @@
     "sendButton": "Send",
     "errorLoadingChats": "Error loading conversations.",
     "errorSendingMessage": "Error sending message."
+  },
+   "RiskyWordsDictionary": {
+    "title": "Risky Words Dictionary",
+    "description": "Analyze your messages for potentially ambiguous or sensitive phrases before sending.",
+    "inputTextTitle": "Enter Text to Analyze",
+    "inputTextDescription": "Type or paste the message you want to check.",
+    "messageLabel": "Your Message",
+    "placeholder": "Type your message here...",
+    "analyzeButton": "Analyze Text",
+    "analyzingButton": "Analyzing...",
+    "analysisResultsTitle": "Analysis Results",
+    "analysisResultsDescription": "Potential interpretations and suggestions for clarification.",
+    "possibleInterpretations": "Possible Interpretations",
+    "clarificationSuggestion": "Clarification Suggestion",
+    "analysisComplete": "Analysis Complete",
+    "noRiskyWordsFound": "No potentially risky words found in the text.",
+     "riskyWordsFound": "{count, plural, =1 {One potentially risky phrase found.} other {# potentially risky phrases found.}}",
+    "errorTitle": "Error",
+    "emptyInputError": "Please enter some text to analyze.",
+    "analysisError": "An error occurred while analyzing the text. Please try again."
   }
 }

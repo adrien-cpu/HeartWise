@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -17,7 +16,8 @@
     "dashboardDescription": "Explorez nos fonctionnalités et trouvez votre partenaire idéal :",
     "speedDating": "Speed Dating",
     "selectLanguage": "Sélectionner la langue",
-    "locale": "{locale, select, en {Anglais} fr {Français} other {Inconnu}}"
+    "locale": "{locale, select, en {Anglais} fr {Français} other {Inconnu}}",
+    "riskyWordsDictionary": "Dictionnaire des Mots à Risque"
   },
   "GeolocationMeeting": {
     "title": "Trouver des Connexions à Proximité",
@@ -141,6 +141,25 @@
     "sendButton": "Envoyer",
     "errorLoadingChats": "Erreur lors du chargement des conversations.",
     "errorSendingMessage": "Erreur lors de l'envoi du message."
+  },
+   "RiskyWordsDictionary": {
+    "title": "Dictionnaire des Mots à Risque",
+    "description": "Analysez vos messages pour détecter les phrases potentiellement ambiguës ou sensibles avant de les envoyer.",
+    "inputTextTitle": "Entrez le Texte à Analyser",
+    "inputTextDescription": "Tapez ou collez le message que vous souhaitez vérifier.",
+    "messageLabel": "Votre Message",
+    "placeholder": "Tapez votre message ici...",
+    "analyzeButton": "Analyser le Texte",
+    "analyzingButton": "Analyse en cours...",
+    "analysisResultsTitle": "Résultats de l'Analyse",
+    "analysisResultsDescription": "Interprétations possibles et suggestions de clarification.",
+    "possibleInterpretations": "Interprétations Possibles",
+    "clarificationSuggestion": "Suggestion de Clarification",
+    "analysisComplete": "Analyse Terminée",
+    "noRiskyWordsFound": "Aucun mot potentiellement à risque trouvé dans le texte.",
+    "riskyWordsFound": "{count, plural, =1 {Une expression potentiellement à risque trouvée.} other {# expressions potentiellement à risque trouvées.}}",
+    "errorTitle": "Erreur",
+    "emptyInputError": "Veuillez entrer du texte à analyser.",
+    "analysisError": "Une erreur est survenue lors de l'analyse du texte. Veuillez réessayer."
   }
 }
-

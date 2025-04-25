@@ -67,6 +67,9 @@ function HomeClient() {
                 <Link href="/ai-conversation-coach">
                     <Button className="w-full">{t('aiConversationCoach')}</Button>
                 </Link>
+                 <Link href="/risky-words-dictionary">
+                    <Button className="w-full">{t('riskyWordsDictionary')}</Button>
+                 </Link>
                 <Link href="/blind-exchange-mode">
                     <Button className="w-full">{t('blindExchangeMode')}</Button>
                 </Link>
@@ -178,6 +181,14 @@ export default function Home() {
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuItem>
+                   <SidebarMenuItem>
+                     <Link href="/risky-words-dictionary">
+                       <SidebarMenuButton>
+                         <Icons.book className="mr-2 h-4 w-4"/> {/* Using book icon */}
+                         <span>{t('riskyWordsDictionary')}</span>
+                       </SidebarMenuButton>
+                     </Link>
+                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <Link href="/blind-exchange-mode">
                       <SidebarMenuButton>
@@ -189,7 +200,7 @@ export default function Home() {
                    <SidebarMenuItem>
                     <Link href="/game">
                       <SidebarMenuButton>
-                        <Icons.gamepad className="mr-2 h-4 w-4"/> {/* Changed icon */}
+                        <Icons.gamepad className="mr-2 h-4 w-4"/>
                         <span>{t('game')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -197,7 +208,7 @@ export default function Home() {
                     <SidebarMenuItem>
                     <Link href="/speed-dating">
                       <SidebarMenuButton>
-                        <Icons.zap className="mr-2 h-4 w-4"/> {/* Changed icon */}
+                        <Icons.zap className="mr-2 h-4 w-4"/>
                         <span>{t('speedDating')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -205,12 +216,11 @@ export default function Home() {
                    <SidebarMenuItem>
                     <Link href="/chat">
                       <SidebarMenuButton>
-                        <Icons.messageCircle className="mr-2 h-4 w-4"/> {/* Changed icon */}
+                        <Icons.messageCircle className="mr-2 h-4 w-4"/>
                         <span>{t('chat')}</span>
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuItem>
-                  {/* Profile link moved to footer */}
                 </SidebarMenu>
               </SidebarGroup>
                <div className="mt-auto p-2">
@@ -246,3 +256,4 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
