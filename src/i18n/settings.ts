@@ -26,7 +26,8 @@ export const pathnames = {
   '/ai-conversation-coach': '/ai-conversation-coach',
   '/blind-exchange-mode': '/blind-exchange-mode',
   '/chat': '/chat',
-  '/risky-words-dictionary': '/risky-words-dictionary', // Added pathname
+  '/risky-words-dictionary': '/risky-words-dictionary',
+  '/rewards': '/rewards', // Added rewards pathname
   // Add other paths as needed
 } satisfies Record<string, string>; // Use 'satisfies' for type checking without changing the type
 
@@ -38,5 +39,3 @@ export const pathnames = {
 export function isValidLocale(locale: string): locale is Locale {
   return locales.includes(locale as any);
 }
-
-// No default export in this file

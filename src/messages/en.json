@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -8,6 +9,7 @@
     "blindExchangeMode": "Blind Exchange Mode",
     "game": "Game",
     "chat": "Chat",
+    "rewards": "Rewards",
     "myAccount": "My Account",
     "profile": "Profile",
     "settings": "Settings",
@@ -62,7 +64,14 @@
     "adviceGenerationFailed": "Failed to generate conversation advice.",
     "enterMessage": "Enter your message",
     "getTipsButton": "Get Tips",
-    "tips": "Tips"
+    "tips": "Tips",
+    "conversationHistoryLabel": "Conversation History",
+    "conversationHistoryPlaceholder": "Enter the conversation history...",
+    "user1ProfileLabel": "User 1 Profile",
+    "user1ProfilePlaceholder": "Enter User 1's profile info...",
+    "user2ProfileLabel": "User 2 Profile",
+    "user2ProfilePlaceholder": "Enter User 2's profile info...",
+    "conversationInputTitle": "Conversation Input"
   },
   "BlindExchangeMode": {
     "title": "Blind Exchange Mode",
@@ -161,5 +170,29 @@
     "errorTitle": "Error",
     "emptyInputError": "Please enter some text to analyze.",
     "analysisError": "An error occurred while analyzing the text. Please try again."
+  },
+  "RewardsPage": {
+    "title": "Your Rewards",
+    "description": "Check out the badges you've earned!",
+    "myBadges": "My Badges",
+    "earnedBadgesDesc": "Badges earned through your activity in the app.",
+    "noBadges": "You haven't earned any badges yet. Keep exploring!",
+    "fetchErrorTitle": "Error Loading Rewards",
+    "fetchErrorDescription": "Could not load your rewards. Please try again later.",
+    "earned": "Earned",
+    "badge_profile_complete_name": "Profile Pro",
+    "badge_profile_complete_desc": "Filled out your profile details.",
+    "badge_first_chat_name": "Ice Breaker",
+    "badge_first_chat_desc": "Initiated your first chat.",
+    "badge_first_match_name": "Match Maker",
+    "badge_first_match_desc": "Got your first match!",
+    "badge_speed_dater_name": "Speed Dater",
+    "badge_speed_dater_desc": "Participated in a Speed Dating session.",
+    "badge_game_winner_name": "Quiz Whiz",
+    "badge_game_winner_desc": "Won a round in the game.",
+    "badge_blind_exchange_participant_name": "Mystery Seeker",
+    "badge_blind_exchange_participant_desc": "Tried the Blind Exchange mode.",
+    "badge_explorer_name": "Local Explorer",
+    "badge_explorer_desc": "Checked out the Geolocation feature."
   }
 }

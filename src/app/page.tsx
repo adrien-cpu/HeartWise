@@ -82,6 +82,9 @@ function HomeClient() {
                  <Link href="/chat">
                   <Button className="w-full">{t('chat')}</Button>
                 </Link>
+                 <Link href="/rewards">
+                    <Button className="w-full">{t('rewards')}</Button>
+                 </Link>
                 <Link href="/profile">
                     <Button variant="secondary" className="w-full">{t('profile')}</Button>
                 </Link>
@@ -111,7 +114,7 @@ function LanguageSwitcher() {
     const onSelectChange = (nextLocale: string) => {
         startTransition(() => {
             const currentPathWithoutLocale = pathname.startsWith(`/${locale}`) ? pathname.substring(`/${locale}`.length) : pathname;
-            router.replace(`/${nextLocale}${currentPathWithoutLocale}`);
+            router.replace(`/${nextLocale}${currentPathWithoutLocale || '/'}`); // Ensure path starts with /
         });
     };
 
@@ -160,7 +163,7 @@ export default function Home() {
                   <SidebarMenuItem>
                     <Link href="/geolocation-meeting">
                       <SidebarMenuButton>
-                        <Icons.home className="mr-2 h-4 w-4"/>
+                        <Icons.mapPin className="mr-2 h-4 w-4"/> {/* Updated icon */}
                         <span>{t('geolocationMeeting')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -168,7 +171,7 @@ export default function Home() {
                   <SidebarMenuItem>
                     <Link href="/facial-analysis-matching">
                       <SidebarMenuButton>
-                        <Icons.user className="mr-2 h-4 w-4"/>
+                        <Icons.scanFace className="mr-2 h-4 w-4"/> {/* Updated icon */}
                         <span>{t('facialAnalysisMatching')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -192,7 +195,7 @@ export default function Home() {
                   <SidebarMenuItem>
                     <Link href="/blind-exchange-mode">
                       <SidebarMenuButton>
-                        <Icons.shield className="mr-2 h-4 w-4"/>
+                        <Icons.eyeOff className="mr-2 h-4 w-4"/> {/* Updated icon */}
                         <span>{t('blindExchangeMode')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -221,6 +224,14 @@ export default function Home() {
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuItem>
+                   <SidebarMenuItem>
+                      <Link href="/rewards">
+                        <SidebarMenuButton>
+                          <Icons.award className="mr-2 h-4 w-4"/> {/* Added icon */}
+                          <span>{t('rewards')}</span>
+                        </SidebarMenuButton>
+                      </Link>
+                    </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroup>
                <div className="mt-auto p-2">

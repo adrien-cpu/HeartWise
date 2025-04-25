@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -8,6 +9,7 @@
     "blindExchangeMode": "Mode d'échange à l'aveugle",
     "game": "Jeu",
     "chat": "Discussion",
+    "rewards": "Récompenses",
     "myAccount": "Mon Compte",
     "profile": "Profil",
     "settings": "Paramètres",
@@ -62,7 +64,14 @@
     "adviceGenerationFailed": "Échec de la génération du conseil de conversation.",
     "enterMessage": "Entrez votre message",
     "getTipsButton": "Obtenir des conseils",
-    "tips": "Conseils"
+    "tips": "Conseils",
+    "conversationHistoryLabel": "Historique de la conversation",
+    "conversationHistoryPlaceholder": "Entrez l'historique de la conversation...",
+    "user1ProfileLabel": "Profil Utilisateur 1",
+    "user1ProfilePlaceholder": "Entrez les infos du profil de l'Utilisateur 1...",
+    "user2ProfileLabel": "Profil Utilisateur 2",
+    "user2ProfilePlaceholder": "Entrez les infos du profil de l'Utilisateur 2...",
+    "conversationInputTitle": "Entrée de la Conversation"
   },
   "BlindExchangeMode": {
     "title": "Mode d'échange à l'aveugle",
@@ -161,5 +170,29 @@
     "errorTitle": "Erreur",
     "emptyInputError": "Veuillez entrer du texte à analyser.",
     "analysisError": "Une erreur est survenue lors de l'analyse du texte. Veuillez réessayer."
+  },
+  "RewardsPage": {
+    "title": "Vos Récompenses",
+    "description": "Découvrez les badges que vous avez gagnés !",
+    "myBadges": "Mes Badges",
+    "earnedBadgesDesc": "Badges gagnés grâce à votre activité dans l'application.",
+    "noBadges": "Vous n'avez pas encore gagné de badges. Continuez à explorer !",
+    "fetchErrorTitle": "Erreur de Chargement des Récompenses",
+    "fetchErrorDescription": "Impossible de charger vos récompenses. Veuillez réessayer plus tard.",
+    "earned": "Gagné",
+    "badge_profile_complete_name": "Profil Pro",
+    "badge_profile_complete_desc": "A complété les détails de son profil.",
+    "badge_first_chat_name": "Brise-Glace",
+    "badge_first_chat_desc": "A initié sa première discussion.",
+    "badge_first_match_name": "Entremetteur",
+    "badge_first_match_desc": "A obtenu sa première correspondance !",
+    "badge_speed_dater_name": "Speed Dater",
+    "badge_speed_dater_desc": "A participé à une session de Speed Dating.",
+    "badge_game_winner_name": "As du Quiz",
+    "badge_game_winner_desc": "A gagné une partie du jeu.",
+    "badge_blind_exchange_participant_name": "Chercheur de Mystère",
+    "badge_blind_exchange_participant_desc": "A essayé le mode Échange à l'Aveugle.",
+    "badge_explorer_name": "Explorateur Local",
+    "badge_explorer_desc": "A utilisé la fonctionnalité de Géolocalisation."
   }
 }
