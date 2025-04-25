@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { ReactNode } from 'react';
 import { NextIntlClientProvider, useMessages } from 'next-intl';
-import { locales } from "@/i18n"; // Import from the correct location
+import { locales } from "@/i18n/settings"; // Import from the correct location
 import { notFound } from 'next/navigation'; // Import notFound
 
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -44,19 +44,12 @@ export default function RootLayout({
   children: ReactNode;
   params: { locale: string };
 }) {
-  // Validate locale
+  // Validate locale - Basic check, middleware should handle redirects
   if (!locales.includes(locale as any)) {
-     // Using notFound() here is not allowed in root layout
-     // The middleware should handle redirecting invalid locales
-     // Log an error for debugging, but let the client layout handle potential issues
-     console.error(`RootLayout received invalid locale: ${locale}. Middleware should have handled this.`);
-     // Fallback or specific handling might be needed depending on desired UX for invalid locales
-     // For now, we proceed, assuming middleware handles redirects or ClientLayout can cope.
+     console.error(`RootLayout received invalid locale: ${locale}. Middleware should handle redirection.`);
+     // Avoid calling notFound() in RootLayout
+     // Let the request proceed; middleware/ClientLayout can handle errors if needed
   }
-
-  // Fetch messages in the Server Component context if needed,
-  // but typically, ClientLayout will use useMessages() hook.
-  // const messages = await getMessages(locale); // Example if fetching server-side
 
   return (
     <html lang={locale}>
@@ -75,7 +68,7 @@ export default function RootLayout({
  *
  * @component
  * @description Establishes the client boundary, sets up NextIntlClientProvider with messages,
- * and provides the Sidebar context.
+ * and provides the Sidebar context. This must be a Client Component.
  * @param {object} props - The props for the ClientLayout component.
  * @param {React.ReactNode} props.children - The children to render within the layout.
  * @param {string} props.locale - The current locale passed from RootLayout.
@@ -88,6 +81,8 @@ function ClientLayout({
   children: ReactNode;
   locale: string;
 }) {
+  "use client"; // Ensure this is marked as a client component
+
   // useMessages hook is safe to use here within the Client Component boundary
   const messages = useMessages();
 
@@ -96,13 +91,14 @@ function ClientLayout({
     // Handle case where messages might not be available (e.g., error during fetch/build)
     console.error("ClientLayout: Messages not available for locale:", locale);
     // Render fallback UI or throw error
-    return <div>Error loading translations.</div>;
+    return <div>Error loading translations. Please check the console or ensure the locale '{locale}' has a corresponding messages file.</div>;
   }
    if (!locales.includes(locale as any)) {
      // If an invalid locale somehow reaches here, redirect or show error
-     // This check might be redundant if middleware handles it robustly
      console.warn("ClientLayout received potentially invalid locale:", locale);
      // notFound(); // Can potentially use notFound here if needed for client-side routing
+     // Or render an error message
+      return <div>Unsupported language: {locale}</div>;
    }
 
   return (
@@ -113,3 +109,4 @@ function ClientLayout({
     </NextIntlClientProvider>
   );
 }
+
