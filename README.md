@@ -72,7 +72,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
   - [x] Une bulle de discussion neutre
 - [ ] Les infos se dévoilent **progressivement** selon l'engagement mutuel (Requires chat interaction logic)
 
-## 🚀 Bonus et gamification
+### 6. 🚀 Bonus et gamification
 - [x] 🌟 **Bonus de style** : suggestions personnalisées du coach IA selon ton niveau de confort, ton style (romantique, direct, poétique, etc.) (`/ai-conversation-coach`, `src/ai/flows/style-suggestions-flow.ts`)
 - [x] 🎖️ Système de récompenses : badges, accès à des modes cachés, speed-dating premium, etc. (`/rewards` exists, basic points/badges implemented)
 
@@ -126,3 +126,4 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage et le signalement utilisateur.
 *   **Tableau de bord intelligent:** Créer un tableau de bord personnalisé avec des conseils.
 *   **Tags d'intention (Chat):** Implémenter l'interface et la logique (potentiellement IA) pour ajouter des tags d'intention aux messages.
+

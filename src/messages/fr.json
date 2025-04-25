@@ -161,6 +161,7 @@
   },
   "Chat": {
     "title": "Discussion",
+    "conversationListDesc": "Sélectionnez une conversation pour voir les messages.",
     "loadingChats": "Chargement des conversations...",
     "noChats": "Aucune conversation active. Commencez à discuter !",
     "sendMessagePlaceholder": "Tapez votre message...",
@@ -169,7 +170,11 @@
     "errorSendingMessage": "Erreur lors de l'envoi du message.",
     "selectChatPrompt": "Sélectionnez une conversation pour commencer à discuter.",
     "compatibilityScoreTitle": "Score de Compatibilité",
-    "onlineStatusPlaceholder": "En ligne"
+    "onlineStatusPlaceholder": "En ligne",
+    "intentionTagLabel": "Intention (Optionnel)",
+    "selectIntentionPlaceholder": "Sélectionner l'intention...",
+    "noTagOption": "Aucune",
+    "intentionTagTitle": "Intention"
   },
   "RiskyWordsDictionary": {
     "title": "Dictionnaire des Mots à Risque",
@@ -218,5 +223,8 @@
     "pointsDesc": "Points gagnés pour les activités et les succès.",
     "noPoints": "Vous n'avez pas encore gagné de points.",
     "pointsSuffix": "points"
+  },
+  "Sidebar": {
+      "toggleSidebar": "Basculer la barre latérale"
   }
 }

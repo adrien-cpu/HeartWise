@@ -8,16 +8,19 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"; // Added CardDescription
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Send, User, HeartHandshake } from 'lucide-react'; // Added HeartHandshake
+import { Loader2, Send, User, HeartHandshake, Smile, Info, Flirt } from 'lucide-react'; // Added icons for intention tags
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UserProfile, get_user } from '@/services/user_profile'; // Import user profile service
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"; // Added Select for intention tags
+import { Label } from "@/components/ui/label"; // Added Label for intention tags
+
 
 /**
  * @fileOverview Chat page component.
  * @module ChatPage
- * @description Displays the chat interface, allowing users to select conversations and send/receive messages. Includes mock compatibility display.
+ * @description Displays the chat interface, allowing users to select conversations and send/receive messages. Includes mock compatibility display and optional intention tags.
  */
 
 
@@ -28,6 +31,7 @@ interface Message {
   senderName: string;
   text: string;
   timestamp: Date;
+  intentionTag?: string; // Optional intention tag (e.g., 'humor', 'serious', 'flirt')
 }
 
 interface ConversationParticipant extends UserProfile {
@@ -85,7 +89,7 @@ const initialConversations: Conversation[] = [
     lastMessageTimestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
     messages: [
       { id: 'm1', senderId: 'user2', senderName: mockParticipants['user2'].name || 'Bob', text: 'Hey, how are you?', timestamp: new Date(Date.now() - 5 * 60 * 1000) },
-      { id: 'm2', senderId: 'user1', senderName: CURRENT_USER_NAME, text: 'Hi Bob! I\'m good, thanks. You?', timestamp: new Date(Date.now() - 4 * 60 * 1000) },
+      { id: 'm2', senderId: 'user1', senderName: CURRENT_USER_NAME, text: 'Hi Bob! I\'m good, thanks. You?', timestamp: new Date(Date.now() - 4 * 60 * 1000), intentionTag: 'friendly' },
     ],
   },
    {
@@ -109,11 +113,20 @@ const initialConversations: Conversation[] = [
   },
 ];
 
+// Available intention tags
+const intentionTags = [
+  { value: 'friendly', label: 'Friendly', icon: <Smile className="h-4 w-4 mr-2"/> },
+  { value: 'humor', label: 'Humor', icon: <Smile className="h-4 w-4 mr-2"/> }, // Reusing Smile icon
+  { value: 'serious', label: 'Serious', icon: <Info className="h-4 w-4 mr-2"/> },
+  { value: 'flirt', label: 'Flirt', icon: <Flirt className="h-4 w-4 mr-2"/> },
+  { value: 'tender', label: 'Tender', icon: <HeartHandshake className="h-4 w-4 mr-2"/> }, // Reusing HeartHandshake
+];
+
 /**
  * ChatPage component.
  *
  * @component
- * @description Displays the chat interface, allowing users to select conversations and send/receive messages.
+ * @description Displays the chat interface, allowing users to select conversations and send/receive messages. Includes intention tag selection.
  * @returns {JSX.Element} The rendered Chat page.
  */
 export default function ChatPage() {
@@ -122,6 +135,7 @@ export default function ChatPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
+  const [selectedIntention, setSelectedIntention] = useState<string>(''); // State for selected intention tag
   const [loadingChats, setLoadingChats] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -176,6 +190,7 @@ export default function ChatPage() {
       senderName: CURRENT_USER_NAME,
       text: newMessage.trim(),
       timestamp: new Date(),
+      intentionTag: selectedIntention || undefined, // Include selected intention or undefined
     };
 
     try {
@@ -197,6 +212,7 @@ export default function ChatPage() {
         ).sort((a,b) => b.lastMessageTimestamp.getTime() - a.lastMessageTimestamp.getTime()) // Re-sort after update
       );
       setNewMessage('');
+      setSelectedIntention(''); // Reset intention tag after sending
 
       // Ensure scroll happens after state update and potential re-render
       requestAnimationFrame(() => {
@@ -232,6 +248,11 @@ export default function ChatPage() {
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
+  // Get display info for intention tag
+  const getIntentionTagInfo = (tagValue?: string) => {
+      return intentionTags.find(tag => tag.value === tagValue);
+  }
+
 
   return (
     <div className="container mx-auto h-[calc(100vh-80px)] flex flex-col p-0 md:p-4"> {/* Adjust height based on header/footer */}
@@ -240,6 +261,7 @@ export default function ChatPage() {
         <div className="w-full md:w-1/3 border-r flex flex-col bg-card">
           <CardHeader className="p-4">
             <CardTitle>{t('title')}</CardTitle>
+             <CardDescription>{t('conversationListDesc')}</CardDescription>
           </CardHeader>
           <Separator />
           <ScrollArea className="flex-grow">
@@ -312,62 +334,91 @@ export default function ChatPage() {
 
               {/* Messages Area */}
               <ScrollArea className="flex-grow p-4 space-y-4 bg-muted/20">
-                {selectedConversation.messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={cn(
-                      "flex items-end space-x-2 max-w-[85%]",
-                      msg.senderId === CURRENT_USER_ID ? "ml-auto justify-end" : "mr-auto justify-start"
-                    )}
-                  >
-                    {msg.senderId !== CURRENT_USER_ID && (
-                      <Avatar className="h-8 w-8 border self-start mt-1">
-                        <AvatarImage src={selectedConversation.participant.profilePicture} alt={selectedConversation.participant.name || 'User'} />
-                        <AvatarFallback>{getInitials(selectedConversation.participant.name)}</AvatarFallback>
-                      </Avatar>
-                    )}
-                    <div
-                      className={cn(
-                        "rounded-lg px-4 py-2 shadow-sm",
-                        msg.senderId === CURRENT_USER_ID
-                          ? "bg-primary text-primary-foreground rounded-br-none"
-                          : "bg-card text-card-foreground border rounded-bl-none"
-                      )}
-                    >
-                       <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                       <p className="text-xs text-right opacity-70 mt-1">
-                         {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                       </p>
-                    </div>
-                     {msg.senderId === CURRENT_USER_ID && (
-                       <Avatar className="h-8 w-8 border self-start mt-1">
-                         {/* Current user avatar - fetch from profile or use placeholder */}
-                         <AvatarImage src={currentUserProfile?.profilePicture || undefined} alt={CURRENT_USER_NAME} />
-                         <AvatarFallback>{getInitials(CURRENT_USER_NAME)}</AvatarFallback>
-                       </Avatar>
-                     )}
-                  </div>
-                ))}
+                {selectedConversation.messages.map((msg) => {
+                   const intentionInfo = getIntentionTagInfo(msg.intentionTag);
+                   return (
+                      <div
+                        key={msg.id}
+                        className={cn(
+                          "flex items-end space-x-2 max-w-[85%]",
+                          msg.senderId === CURRENT_USER_ID ? "ml-auto justify-end" : "mr-auto justify-start"
+                        )}
+                      >
+                        {msg.senderId !== CURRENT_USER_ID && (
+                          <Avatar className="h-8 w-8 border self-start mt-1">
+                            <AvatarImage src={selectedConversation.participant.profilePicture} alt={selectedConversation.participant.name || 'User'} />
+                            <AvatarFallback>{getInitials(selectedConversation.participant.name)}</AvatarFallback>
+                          </Avatar>
+                        )}
+                        <div
+                          className={cn(
+                            "rounded-lg px-4 py-2 shadow-sm",
+                             msg.senderId === CURRENT_USER_ID
+                              ? "bg-primary text-primary-foreground rounded-br-none"
+                              : "bg-card text-card-foreground border rounded-bl-none"
+                          )}
+                         >
+                           {/* Display Intention Tag if present */}
+                           {intentionInfo && (
+                               <div className="flex items-center text-xs opacity-80 mb-1" title={`${t('intentionTagTitle')}: ${intentionInfo.label}`}>
+                                   {React.cloneElement(intentionInfo.icon, { className: "h-3 w-3 mr-1" })}
+                                   <span>{intentionInfo.label}</span>
+                               </div>
+                           )}
+                           <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+                           <p className="text-xs text-right opacity-70 mt-1">
+                             {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                           </p>
+                        </div>
+                         {msg.senderId === CURRENT_USER_ID && (
+                           <Avatar className="h-8 w-8 border self-start mt-1">
+                             {/* Current user avatar - fetch from profile or use placeholder */}
+                             <AvatarImage src={currentUserProfile?.profilePicture || undefined} alt={CURRENT_USER_NAME} />
+                             <AvatarFallback>{getInitials(CURRENT_USER_NAME)}</AvatarFallback>
+                           </Avatar>
+                         )}
+                      </div>
+                    );
+                })}
                  <div ref={messagesEndRef} /> {/* Element to scroll to */}
               </ScrollArea>
 
               {/* Message Input Area */}
-              <CardFooter className="p-4 border-t bg-card">
-                <div className="flex w-full items-center space-x-2">
-                  <Input
-                    type="text"
-                    placeholder={t('sendMessagePlaceholder')}
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    disabled={sendingMessage}
-                    className="flex-grow"
-                    aria-label={t('sendMessagePlaceholder')}
-                  />
-                  <Button aria-label={t('sendButton')} type="button" size="icon" onClick={handleSendMessage} disabled={sendingMessage || !newMessage.trim()}>
-                    {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  </Button>
-                </div>
+              <CardFooter className="p-4 border-t bg-card space-y-2 flex-col items-start">
+                  <div className="flex w-full items-center space-x-2">
+                    <Input
+                      type="text"
+                      placeholder={t('sendMessagePlaceholder')}
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      disabled={sendingMessage}
+                      className="flex-grow"
+                      aria-label={t('sendMessagePlaceholder')}
+                    />
+                    <Button aria-label={t('sendButton')} type="button" size="icon" onClick={handleSendMessage} disabled={sendingMessage || !newMessage.trim()}>
+                      {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {/* Intention Tag Selector */}
+                   <div className="flex items-center space-x-2 w-full">
+                       <Label htmlFor="intention-select" className="text-xs text-muted-foreground whitespace-nowrap">{t('intentionTagLabel')}:</Label>
+                        <Select value={selectedIntention} onValueChange={setSelectedIntention} disabled={sendingMessage}>
+                          <SelectTrigger id="intention-select" className="h-8 text-xs flex-grow">
+                            <SelectValue placeholder={t('selectIntentionPlaceholder')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                             <SelectItem value="" className="text-xs">{t('noTagOption')}</SelectItem>
+                            {intentionTags.map(tag => (
+                              <SelectItem key={tag.value} value={tag.value} className="text-xs">
+                                <div className="flex items-center">
+                                    {tag.icon} {tag.label}
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                   </div>
               </CardFooter>
             </>
           ) : (

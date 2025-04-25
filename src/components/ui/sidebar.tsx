@@ -4,6 +4,7 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
+import { useTranslations } from 'next-intl'; // Import useTranslations
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -30,7 +31,7 @@ import {
  * SidebarMenuItem, SidebarMenuSkeleton, SidebarMenuSub, SidebarMenuSubButton,
  * SidebarMenuSubItem, SidebarProvider, SidebarRail, SidebarSeparator, SidebarTrigger,
  * and useSidebar components, which are styled components and hooks for creating accessible
- * and customizable sidebars.
+ * and customizable sidebars. Includes internationalization for accessibility labels.
  */
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
@@ -52,6 +53,12 @@ type SidebarContext = {
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
 
+/**
+ * @function useSidebar
+ * @description Hook to access the sidebar context. Must be used within a SidebarProvider.
+ * @returns {SidebarContext} The sidebar context.
+ * @throws {Error} If used outside of a SidebarProvider.
+ */
 function useSidebar() {
   const context = React.useContext(SidebarContext)
   if (!context) {
@@ -61,14 +68,27 @@ function useSidebar() {
   return context
 }
 
-const SidebarProvider = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<"div"> & {
-    defaultOpen?: boolean
-    open?: boolean
-    onOpenChange?: (open: boolean) => void
-  }
->(
+/**
+ * @interface SidebarProviderProps
+ * @extends React.ComponentProps<"div">
+ * @property {boolean} [defaultOpen=true] - The default open state of the sidebar.
+ * @property {boolean} [open] - Controlled open state of the sidebar.
+ * @property {(open: boolean) => void} [onOpenChange] - Callback function when the open state changes.
+ */
+interface SidebarProviderProps extends React.ComponentProps<"div"> {
+  defaultOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+/**
+ * SidebarProvider component.
+ *
+ * @component
+ * @param {SidebarProviderProps} props - Props for the SidebarProvider component.
+ * @returns {JSX.Element} The rendered SidebarProvider component.
+ */
+const SidebarProvider = React.forwardRef<HTMLDivElement, SidebarProviderProps>(
   (
     {
       defaultOpen = true,
@@ -170,14 +190,27 @@ const SidebarProvider = React.forwardRef<
 )
 SidebarProvider.displayName = "SidebarProvider"
 
-const Sidebar = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<"div"> & {
-    side?: "left" | "right"
-    variant?: "sidebar" | "floating" | "inset"
-    collapsible?: "offcanvas" | "icon" | "none"
-  }
->(
+/**
+ * @interface SidebarProps
+ * @extends React.ComponentProps<"div">
+ * @property {"left" | "right"} [side="left"] - The side where the sidebar appears.
+ * @property {"sidebar" | "floating" | "inset"} [variant="sidebar"] - The visual variant of the sidebar.
+ * @property {"offcanvas" | "icon" | "none"} [collapsible="offcanvas"] - The collapsible behavior.
+ */
+interface SidebarProps extends React.ComponentProps<"div"> {
+  side?: "left" | "right";
+  variant?: "sidebar" | "floating" | "inset";
+  collapsible?: "offcanvas" | "icon" | "none";
+}
+
+/**
+ * Sidebar component.
+ *
+ * @component
+ * @param {SidebarProps} props - Props for the Sidebar component.
+ * @returns {JSX.Element | null} The rendered Sidebar component or null if not applicable.
+ */
+const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
   (
     {
       side = "left",
@@ -273,11 +306,19 @@ const Sidebar = React.forwardRef<
 )
 Sidebar.displayName = "Sidebar"
 
+/**
+ * SidebarTrigger component.
+ *
+ * @component
+ * @param {React.ComponentProps<typeof Button>} props - Props for the SidebarTrigger button.
+ * @returns {JSX.Element} The rendered SidebarTrigger component.
+ */
 const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar } = useSidebar();
+  const t = useTranslations('Sidebar'); // Initialize translations hook
 
   return (
     <Button
@@ -290,29 +331,38 @@ const SidebarTrigger = React.forwardRef<
         onClick?.(event)
         toggleSidebar()
       }}
+      aria-label={t('toggleSidebar')} // Use translated label
       {...props}
     >
       <PanelLeft />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only">{t('toggleSidebar')}</span> {/* Ensure screen reader text is also translated */}
     </Button>
   )
 })
 SidebarTrigger.displayName = "SidebarTrigger"
 
+/**
+ * SidebarRail component.
+ *
+ * @component
+ * @param {React.ComponentProps<"button">} props - Props for the SidebarRail button.
+ * @returns {JSX.Element} The rendered SidebarRail component.
+ */
 const SidebarRail = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
 >(({ className, ...props }, ref) => {
-  const { toggleSidebar } = useSidebar()
+  const { toggleSidebar } = useSidebar();
+  const t = useTranslations('Sidebar'); // Initialize translations hook
 
   return (
     <button
       ref={ref}
       data-sidebar="rail"
-      aria-label="Toggle Sidebar"
+      aria-label={t('toggleSidebar')} // Use translated label
       tabIndex={-1}
       onClick={toggleSidebar}
-      title="Toggle Sidebar"
+      title={t('toggleSidebar')} // Use translated title
       className={cn(
         "absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[2px] hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex",
         "[[data-side=left]_&]:cursor-w-resize [[data-side=right]_&]:cursor-e-resize",

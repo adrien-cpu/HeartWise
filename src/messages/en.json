@@ -161,6 +161,7 @@
   },
   "Chat": {
     "title": "Chat",
+    "conversationListDesc": "Select a conversation to view messages.",
     "loadingChats": "Loading conversations...",
     "noChats": "No active conversations. Start chatting!",
     "sendMessagePlaceholder": "Type your message...",
@@ -169,7 +170,11 @@
     "errorSendingMessage": "Error sending message.",
     "selectChatPrompt": "Select a conversation to start chatting.",
     "compatibilityScoreTitle": "Compatibility Score",
-    "onlineStatusPlaceholder": "Online"
+    "onlineStatusPlaceholder": "Online",
+    "intentionTagLabel": "Intention (Optional)",
+    "selectIntentionPlaceholder": "Select intention...",
+    "noTagOption": "None",
+    "intentionTagTitle": "Intention"
   },
   "RiskyWordsDictionary": {
     "title": "Risky Words Dictionary",
@@ -218,5 +223,8 @@
     "pointsDesc": "Points earned for activities and achievements.",
     "noPoints": "You haven't earned any points yet.",
     "pointsSuffix": "points"
-  }
+  },
+   "Sidebar": {
+      "toggleSidebar": "Toggle Sidebar"
+   }
 }
