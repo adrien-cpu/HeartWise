@@ -1,9 +1,10 @@
+
 # **App Name**: HeartWise
 
 ## Core Features:
 - [x] Geolocation Based Meeting: Enable users to find geolocated meetings in public places. (`/geolocation-meeting`)
 - [x] Facial Analysis and Matching: Analyze facial morphology (with consent) and cross-reference with psychological traits to find natural affinities, considering both similarities and opposites. (`/facial-analysis-matching`, `src/services/face-analysis.ts`)
-- [x] AI Conversation Coach: Analyse the messages written by the user and suggest reformulations if needed to create a good conversation. The LLM acts as a tool and will decide when to intervene. (`/ai-conversation-coach`, `src/ai/flows/conversation-coach.ts`)
+- [x] AI Conversation Coach: Analyse the messages written by the user and suggest reformulations if needed to create a good conversation. The LLM acts as a tool and will decide when to intervene. (`/ai-conversation-coach`, `src/ai/flows/conversation-coach.ts`, `src/ai/flows/style-suggestions-flow.ts`)
 - [x] Blind Exchange Mode: Offer a mode of meeting without photo, profile or information. The AI proposes a profile based on facial and emotional matching, common points and opposite polarities. (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts`)
 
 ## Style Guidelines:
@@ -72,7 +73,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 - [ ] Les infos se dévoilent **progressivement** selon l'engagement mutuel (Requires chat interaction logic)
 
 ## 🚀 Bonus et gamification
-- [ ] 🌟 Bonus de style : suggestions personnalisées du coach IA selon ton niveau de confort, ton style (romantique, direct, poétique, etc.) (Enhancement to AI Coach)
+- [x] 🌟 **Bonus de style** : suggestions personnalisées du coach IA selon ton niveau de confort, ton style (romantique, direct, poétique, etc.) (`/ai-conversation-coach`, `src/ai/flows/style-suggestions-flow.ts`)
 - [x] 🎖️ Système de récompenses : badges, accès à des modes cachés, speed-dating premium, etc. (`/rewards` exists, basic points/badges implemented)
 
 ## 🌐 Anticipation marché et différenciation
@@ -87,7 +88,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 - [x] 4. Mode "Rencontre à l'aveugle" (`/blind-exchange-mode`)
 - [x] 5. Système de gamification (`/rewards` - basic points/badges)
 - [x] 6. Interface speed dating dynamique (`/speed-dating`)
-- [ ] 7. Tableau de bord utilisateur intelligent (conseils personnalisés) (Partially covered by AI Coach)
+- [x] 7. Tableau de bord utilisateur intelligent (conseils personnalisés) (Partially covered by AI Coach, Style Bonus)
 
 ## 💼 Pour le développement IA
 Le cahier des charges est prêt à être transmis à une IA spécialisée dans le code afin de générer :
@@ -102,7 +103,7 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 
 *   **[x] Correspondance par Analyse Faciale :** (`/facial-analysis-matching`)
 *   **[x] Mode d'Échange à l'Aveugle :** (`/blind-exchange-mode`)
-*   **[x] Coach Conversationnel IA :** (`/ai-conversation-coach`)
+*   **[x] Coach Conversationnel IA (avec Bonus de Style):** (`/ai-conversation-coach`)
 *   **[x] Dictionnaire IA des Mots à Risque :** (`/risky-words-dictionary`)
 *   **[x] Jeu :** (`/game`)
 *   **[x] Speed Dating :** (`/speed-dating`)
@@ -116,7 +117,6 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels (Base de données utilisateurs, stockage d'images cloud, API de géolocalisation tierce, logique de matchmaking réelle, persistance du chat via base de données, système de chat en temps réel via WebSockets ou similaire, etc.).
 *   **Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth).
 *   **Système de récompenses (avancé) :** Concevoir et implémenter le système de points, modes cachés, accès premium (logique backend + UI).
-*   **Style Bonus (AI Coach) :** Développer le flux Genkit et l'interface pour les suggestions de style personnalisées.
 *   **Modération de Contenu:** Intégrer un service de modération externe (API) pour le texte et les médias générés par les utilisateurs.
 *   **Notifications:** Mettre en place des notifications push (e.g., via Firebase Cloud Messaging) pour les nouveaux messages, matchs, etc.
 *   **Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer une solution WebRTC (e.g., Twilio, Agora) pour les appels vidéo/audio.
@@ -126,4 +126,3 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage et le signalement utilisateur.
 *   **Tableau de bord intelligent:** Créer un tableau de bord personnalisé avec des conseils.
 *   **Tags d'intention (Chat):** Implémenter l'interface et la logique (potentiellement IA) pour ajouter des tags d'intention aux messages.
-```
