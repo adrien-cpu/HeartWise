@@ -8,41 +8,72 @@
     "aiConversationCoach": "AI Conversation Coach",
     "blindExchangeMode": "Blind Exchange Mode",
     "game": "Game",
+    "chat": "Chat",
     "myAccount": "My Account",
     "profile": "Profile",
     "settings": "Settings",
     "logout": "Logout",
     "dashboardTitle": "Welcome to HeartWise",
     "dashboardDescription": "Explore our features and find your perfect match:",
-    "speedDating": "Speed Dating"
+    "speedDating": "Speed Dating",
+    "selectLanguage": "Select Language",
+    "locale": "{locale, select, en {English} fr {French} other {Unknown}}"
   },
   "GeolocationMeeting": {
-    "title": "Geolocation Meeting",
+    "title": "Find Nearby Connections",
     "geolocationNotSupported": "Geolocation is not supported by your browser.",
-    "yourLocation": "Your location",
+    "yourLocation": "Your Current Location",
     "latitude": "Latitude",
     "longitude": "Longitude",
-    "meetingPlacesTitle": "Meeting Places Nearby",
-    "loadingLocation": "Loading location..."
+    "meetingPlacesTitle": "Suggested Meeting Spots",
+    "meetingPlacesDescription": "Public places near you for potential meetups.",
+    "loadingLocation": "Getting your location...",
+    "locationUnavailable": "Could not retrieve location.",
+    "geolocationErrorTitle": "Geolocation Error",
+    "geolocationError": "Could not get location: {message}",
+    "fetchError": "Failed to load nearby data.",
+    "nearbyUsersTitle": "Users Nearby",
+    "nearbyUsersDescription": "Connect with users in your vicinity.",
+    "noMeetingPlaces": "No suggested meeting places found nearby.",
+    "noNearbyUsers": "No other users found nearby.",
+    "connectButton": "Connect",
+    "errorTitle": "Error"
   },
   "FacialAnalysisMatching": {
     "title": "Facial Analysis & Matching",
-    "imageUrlPlaceholder": "Enter image URL",
-    "analyzeSimilarityButton": "Analyze Similarity",
-    "similarFacesTitle": "Similar Faces"
+    "image1UrlPlaceholder": "Enter URL for Image 1",
+    "image2UrlPlaceholder": "Enter URL for Image 2",
+    "analyzeAndCompareButton": "Analyze & Compare",
+    "analysisResult1": "Analysis Result (Image 1)",
+    "analysisResult2": "Analysis Result (Image 2)",
+    "age": "Estimated Age",
+    "gender": "Estimated Gender",
+    "emotion": "Dominant Emotion",
+    "compatibilityScore": "Compatibility Score",
+    "errorMissingImageUrl": "Please enter URLs for both images.",
+    "errorAnalysisFailed": "Analysis failed: {message}",
+    "unknownError": "An unknown error occurred"
   },
   "AIConversationCoach": {
+    "pageTitle": "AI Conversation Coach",
+    "adviceGenerated": "Advice Generated",
+    "adviceReceived": "Received conversation advice successfully.",
+    "errorGeneratingAdvice": "Error Generating Advice",
+    "adviceGenerationFailed": "Failed to generate conversation advice.",
     "enterMessage": "Enter your message",
     "getTipsButton": "Get Tips",
     "tips": "Tips"
   },
   "BlindExchangeMode": {
     "title": "Blind Exchange Mode",
+    "matchedProfile": "Potential Connection",
+    "compatibility": "Compatibility",
+    "loading": "Finding a potential connection...",
     "match": "Match",
     "user1": "User 1",
     "user2": "User 2",
     "sharedInterests": "Shared Interests",
-    "noMatches": "No matches found."
+    "noMatches": "No suitable match found at the moment."
   },
   "Game": {
     "title": "General Knowledge Game",
@@ -52,8 +83,8 @@
     "answer": "Answer",
     "nextQuestion": "Next Question",
     "submitAnswer": "Submit answer",
-    "correctAnswer": "Correct answer",
-    "incorrectAnswer": "Incorrect answer"
+    "correctAnswer": "Correct answer!",
+    "incorrectAnswer": "Incorrect answer."
   },
   "ProfilePage": {
     "title": "User Profile",
@@ -69,7 +100,7 @@
     "bioPlaceholder": "Tell us a bit about yourself...",
     "interestsLabel": "Interests",
     "privacySettingsLabel": "Privacy Settings",
-    "showLocationLabel": "Show my location to others",
+    "showLocationLabel": "Show my approximate location to others",
     "showOnlineStatusLabel": "Show my online status",
     "fetchErrorTitle": "Error Fetching Profile",
     "fetchErrorDescription": "Could not load your profile data. Please try again later.",
@@ -81,18 +112,34 @@
     "noInterests": "No interests selected.",
     "anonymousUser": "Anonymous User",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "uploadPicture": "Upload Picture"
   },
   "SpeedDating": {
     "title": "Speed Dating",
-    "scheduleTitle": "Schedule Speed Dating",
-    "selectInterests": "Select Interests for Speed Dating",
-    "scheduleButton": "Schedule Session",
+    "scheduleTitle": "Schedule a Speed Dating Session",
+    "scheduleDescription": "Select interests you'd like to match on.",
+    "selectInterests": "Select Interests",
+    "scheduleButton": "Find a Session",
     "upcomingSessions": "Upcoming Sessions",
+    "upcomingSessionsDesc": "Your scheduled speed dating events.",
     "noSessions": "No upcoming speed dating sessions scheduled.",
     "loading": "Loading...",
     "fetchError": "Failed to load speed dating data.",
-    "scheduleSuccess": "Speed dating session scheduled successfully!",
-    "scheduleError": "Failed to schedule speed dating session."
+    "scheduleSuccessTitle": "Session Scheduled!",
+    "scheduleSuccess": "Speed dating session based on your interests has been scheduled!",
+    "scheduleError": "Failed to schedule speed dating session.",
+    "errorTitle": "Error",
+    "selectInterestsErrorTitle": "Select Interests",
+    "selectInterestsErrorDesc": "Please select at least one interest to schedule a session."
+  },
+  "Chat": {
+    "title": "Chat",
+    "loadingChats": "Loading conversations...",
+    "noChats": "No active conversations. Start chatting!",
+    "sendMessagePlaceholder": "Type your message...",
+    "sendButton": "Send",
+    "errorLoadingChats": "Error loading conversations.",
+    "errorSendingMessage": "Error sending message."
   }
 }

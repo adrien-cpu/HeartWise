@@ -1,7 +1,7 @@
 
 "use client";
 
-import {Button} from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import {
   Sidebar,
@@ -18,11 +18,11 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {Icons} from "@/components/icons";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {useTranslations} from 'next-intl';
-import {useLocale} from 'next-intl';
+import { Icons } from "@/components/icons";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useTranslations } from 'next-intl';
+import { useLocale } from 'next-intl';
 import { locales } from '@/i18n/settings';
 import {
   Select,
@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/select"
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useTransition } from 'react';
-
 
 /**
  * @fileOverview Home page component.
@@ -77,6 +76,9 @@ function HomeClient() {
                  <Link href="/speed-dating">
                   <Button className="w-full">{t('speedDating')}</Button>
                 </Link>
+                 <Link href="/chat">
+                  <Button className="w-full">{t('chat')}</Button>
+                </Link>
                 <Link href="/profile">
                     <Button variant="secondary" className="w-full">{t('profile')}</Button>
                 </Link>
@@ -105,7 +107,8 @@ function LanguageSwitcher() {
      */
     const onSelectChange = (nextLocale: string) => {
         startTransition(() => {
-            router.replace(pathname, {locale: nextLocale});
+            const currentPathWithoutLocale = pathname.startsWith(`/${locale}`) ? pathname.substring(`/${locale}`.length) : pathname;
+            router.replace(`/${nextLocale}${currentPathWithoutLocale}`);
         });
     };
 
@@ -186,7 +189,7 @@ export default function Home() {
                    <SidebarMenuItem>
                     <Link href="/game">
                       <SidebarMenuButton>
-                        <Icons.circle className="mr-2 h-4 w-4"/>
+                        <Icons.gamepad className="mr-2 h-4 w-4"/> {/* Changed icon */}
                         <span>{t('game')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -194,19 +197,20 @@ export default function Home() {
                     <SidebarMenuItem>
                     <Link href="/speed-dating">
                       <SidebarMenuButton>
-                        <Icons.circle className="mr-2 h-4 w-4"/>
+                        <Icons.zap className="mr-2 h-4 w-4"/> {/* Changed icon */}
                         <span>{t('speedDating')}</span>
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuItem>
-                    <SidebarMenuItem>
-                    <Link href="/profile">
+                   <SidebarMenuItem>
+                    <Link href="/chat">
                       <SidebarMenuButton>
-                        <Icons.user className="mr-2 h-4 w-4"/>
-                        <span>{t('profile')}</span>
+                        <Icons.messageCircle className="mr-2 h-4 w-4"/> {/* Changed icon */}
+                        <span>{t('chat')}</span>
                       </SidebarMenuButton>
                     </Link>
                   </SidebarMenuItem>
+                  {/* Profile link moved to footer */}
                 </SidebarMenu>
               </SidebarGroup>
                <div className="mt-auto p-2">
@@ -220,17 +224,17 @@ export default function Home() {
                   <Button variant="ghost" className="flex h-8 w-full items-center justify-between rounded-md">
                     <Avatar className="mr-2 h-6 w-6">
                       <AvatarImage src="https://picsum.photos/50/50" alt="Avatar"/>
-                      <AvatarFallback>CM</AvatarFallback>
+                      <AvatarFallback>ME</AvatarFallback> {/* Placeholder initials */}
                     </Avatar>
                     <span>{t('myAccount')}</span>
                     <Icons.chevronDown className="ml-2 h-4 w-4 opacity-50"/>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <Link href="/profile"><DropdownMenuItem>{t('profile')}</DropdownMenuItem></Link>
-                  <DropdownMenuItem>{t('settings')}</DropdownMenuItem>
+                  <Link href="/profile"><DropdownMenuItem><Icons.user className="mr-2 h-4 w-4"/>{t('profile')}</DropdownMenuItem></Link>
+                  <DropdownMenuItem><Icons.settings className="mr-2 h-4 w-4"/>{t('settings')}</DropdownMenuItem>
                   <DropdownMenuSeparator/>
-                  <DropdownMenuItem>{t('logout')}</DropdownMenuItem>
+                  <DropdownMenuItem><Icons.logOut className="mr-2 h-4 w-4"/>{t('logout')}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </SidebarFooter>

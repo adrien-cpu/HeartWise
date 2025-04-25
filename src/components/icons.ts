@@ -8,7 +8,12 @@
  * making it easier to use them throughout the application.
  */
 
-import {ArrowRight, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, File, HelpCircle, Home, Loader2, Mail, MessageSquare, Moon, PanelLeft, Plus, PlusCircle, Search, Server, Settings, Share2, Shield, Sun, Trash, User, X, Workflow} from 'lucide-react';
+import {
+    ArrowRight, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, File,
+    HelpCircle, Home, Loader2, Mail, MessageSquare, Moon, PanelLeft, Plus,
+    PlusCircle, Search, Server, Settings, Share2, Shield, Sun, Trash, User, X,
+    Workflow, MapPin, Gamepad, Zap, MessageCircle, LogOut
+} from 'lucide-react';
 
 /**
  * @typedef {object} Icons
@@ -40,6 +45,11 @@ import {ArrowRight, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, Fil
  * @property {LucideIcon} trash - Trash icon.
  * @property {LucideIcon} user - User icon.
  * @property {LucideIcon} panelLeft - Panel left icon.
+ * @property {LucideIcon} mapPin - Map pin icon.
+ * @property {LucideIcon} gamepad - Gamepad icon.
+ * @property {LucideIcon} zap - Zap icon (for Speed Dating).
+ * @property {LucideIcon} messageCircle - Message circle icon (for Chat).
+ * @property {LucideIcon} logOut - Log out icon.
  */
 const Icons = {
   arrowRight: ArrowRight,
@@ -70,7 +80,11 @@ const Icons = {
   trash: Trash,
   user: User,
   panelLeft: PanelLeft,
+  mapPin: MapPin,
+  gamepad: Gamepad,
+  zap: Zap,
+  messageCircle: MessageCircle,
+  logOut: LogOut,
 };
 
 export {Icons};
-

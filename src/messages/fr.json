@@ -8,41 +8,72 @@
     "aiConversationCoach": "Coach IA Conversationnel",
     "blindExchangeMode": "Mode d'échange à l'aveugle",
     "game": "Jeu",
+    "chat": "Discussion",
     "myAccount": "Mon Compte",
     "profile": "Profil",
     "settings": "Paramètres",
     "logout": "Déconnexion",
     "dashboardTitle": "Bienvenue sur HeartWise",
     "dashboardDescription": "Explorez nos fonctionnalités et trouvez votre partenaire idéal :",
-    "speedDating": "Speed Dating"
+    "speedDating": "Speed Dating",
+    "selectLanguage": "Sélectionner la langue",
+    "locale": "{locale, select, en {Anglais} fr {Français} other {Inconnu}}"
   },
   "GeolocationMeeting": {
-    "title": "Rencontres Géolocalisées",
+    "title": "Trouver des Connexions à Proximité",
     "geolocationNotSupported": "La géolocalisation n'est pas supportée par votre navigateur.",
-    "yourLocation": "Votre position",
+    "yourLocation": "Votre Position Actuelle",
     "latitude": "Latitude",
     "longitude": "Longitude",
-    "meetingPlacesTitle": "Lieux de rencontre à proximité",
-    "loadingLocation": "Chargement de la position..."
+    "meetingPlacesTitle": "Lieux de Rencontre Suggérés",
+    "meetingPlacesDescription": "Lieux publics près de chez vous pour des rencontres potentielles.",
+    "loadingLocation": "Récupération de votre position...",
+    "locationUnavailable": "Impossible de récupérer la position.",
+    "geolocationErrorTitle": "Erreur de Géolocalisation",
+    "geolocationError": "Impossible d'obtenir la position : {message}",
+    "fetchError": "Échec du chargement des données à proximité.",
+    "nearbyUsersTitle": "Utilisateurs à Proximité",
+    "nearbyUsersDescription": "Connectez-vous avec des utilisateurs dans votre voisinage.",
+    "noMeetingPlaces": "Aucun lieu de rencontre suggéré trouvé à proximité.",
+    "noNearbyUsers": "Aucun autre utilisateur trouvé à proximité.",
+    "connectButton": "Connecter",
+    "errorTitle": "Erreur"
   },
   "FacialAnalysisMatching": {
     "title": "Analyse Faciale et Correspondance",
-    "imageUrlPlaceholder": "Entrez l'URL de l'image",
-    "analyzeSimilarityButton": "Analyser la similarité",
-    "similarFacesTitle": "Visages similaires"
+    "image1UrlPlaceholder": "Entrez l'URL de l'Image 1",
+    "image2UrlPlaceholder": "Entrez l'URL de l'Image 2",
+    "analyzeAndCompareButton": "Analyser & Comparer",
+    "analysisResult1": "Résultat d'Analyse (Image 1)",
+    "analysisResult2": "Résultat d'Analyse (Image 2)",
+    "age": "Âge Estimé",
+    "gender": "Genre Estimé",
+    "emotion": "Émotion Dominante",
+    "compatibilityScore": "Score de Compatibilité",
+    "errorMissingImageUrl": "Veuillez entrer les URL pour les deux images.",
+    "errorAnalysisFailed": "L'analyse a échoué : {message}",
+    "unknownError": "Une erreur inconnue est survenue"
   },
   "AIConversationCoach": {
+    "pageTitle": "Coach IA Conversationnel",
+    "adviceGenerated": "Conseil Généré",
+    "adviceReceived": "Conseil de conversation reçu avec succès.",
+    "errorGeneratingAdvice": "Erreur lors de la Génération du Conseil",
+    "adviceGenerationFailed": "Échec de la génération du conseil de conversation.",
     "enterMessage": "Entrez votre message",
     "getTipsButton": "Obtenir des conseils",
     "tips": "Conseils"
   },
   "BlindExchangeMode": {
     "title": "Mode d'échange à l'aveugle",
+    "matchedProfile": "Connexion Potentielle",
+    "compatibility": "Compatibilité",
+    "loading": "Recherche d'une connexion potentielle...",
     "match": "Correspondance",
     "user1": "Utilisateur 1",
     "user2": "Utilisateur 2",
     "sharedInterests": "Intérêts communs",
-    "noMatches": "Aucune correspondance trouvée."
+    "noMatches": "Aucune correspondance appropriée trouvée pour le moment."
   },
   "Game": {
     "title": "Jeu de culture générale",
@@ -52,8 +83,8 @@
     "answer": "Réponse",
     "nextQuestion": "Question suivante",
     "submitAnswer": "Soumettre la réponse",
-    "correctAnswer": "Réponse correcte",
-    "incorrectAnswer": "Réponse incorrecte"
+    "correctAnswer": "Réponse correcte !",
+    "incorrectAnswer": "Réponse incorrecte."
   },
   "ProfilePage": {
     "title": "Profil Utilisateur",
@@ -69,7 +100,7 @@
     "bioPlaceholder": "Dites-nous en un peu plus sur vous...",
     "interestsLabel": "Intérêts",
     "privacySettingsLabel": "Paramètres de Confidentialité",
-    "showLocationLabel": "Afficher ma position aux autres",
+    "showLocationLabel": "Afficher ma position approximative aux autres",
     "showOnlineStatusLabel": "Afficher mon statut en ligne",
     "fetchErrorTitle": "Erreur de Récupération du Profil",
     "fetchErrorDescription": "Impossible de charger les données de votre profil. Veuillez réessayer plus tard.",
@@ -81,18 +112,35 @@
     "noInterests": "Aucun intérêt sélectionné.",
     "anonymousUser": "Utilisateur Anonyme",
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "uploadPicture": "Télécharger une photo"
   },
     "SpeedDating": {
     "title": "Speed Dating",
     "scheduleTitle": "Planifier une session de Speed Dating",
-    "selectInterests": "Sélectionnez vos intérêts pour le Speed Dating",
-    "scheduleButton": "Planifier la session",
+    "scheduleDescription": "Sélectionnez les centres d'intérêt sur lesquels vous souhaitez être mis en relation.",
+    "selectInterests": "Sélectionnez vos intérêts",
+    "scheduleButton": "Trouver une Session",
     "upcomingSessions": "Sessions à venir",
+    "upcomingSessionsDesc": "Vos événements de speed dating planifiés.",
     "noSessions": "Aucune session de speed dating à venir.",
     "loading": "Chargement...",
     "fetchError": "Échec du chargement des données de speed dating.",
-    "scheduleSuccess": "Session de speed dating planifiée avec succès !",
-    "scheduleError": "Échec de la planification de la session de speed dating."
+    "scheduleSuccessTitle": "Session Planifiée !",
+    "scheduleSuccess": "Une session de speed dating basée sur vos intérêts a été planifiée !",
+    "scheduleError": "Échec de la planification de la session de speed dating.",
+    "errorTitle": "Erreur",
+    "selectInterestsErrorTitle": "Sélectionnez des Intérêts",
+    "selectInterestsErrorDesc": "Veuillez sélectionner au moins un intérêt pour planifier une session."
+  },
+  "Chat": {
+    "title": "Discussion",
+    "loadingChats": "Chargement des conversations...",
+    "noChats": "Aucune conversation active. Commencez à discuter !",
+    "sendMessagePlaceholder": "Tapez votre message...",
+    "sendButton": "Envoyer",
+    "errorLoadingChats": "Erreur lors du chargement des conversations.",
+    "errorSendingMessage": "Erreur lors de l'envoi du message."
   }
 }
+

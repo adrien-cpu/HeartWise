@@ -1,36 +1,41 @@
+
 /**
  * @fileOverview Configuration settings for internationalization (i18n) using next-intl.
+ * This file primarily defines constants used by both the middleware and the main i18n config.
  */
 
-import { notFound } from 'next/navigation';
-import { getRequestConfig } from 'next-intl/server';
- 
-// If not using sentry, just delete this function.
-export async function handleI18n() {
-  // We're revalidating the request config on each request to ensure
-  // we're picking up the latest messages.
-  return getRequestConfig(async ({locale}) => ({
-    messages: (await import(`../messages/${locale}.json`)).default
-  }));
-}
-
+// Define the supported locales
 export const locales = ['en', 'fr'] as const;
-export const localePrefix = 'as-needed';
 export type Locale = typeof locales[number];
-export const pathnames = {
-  '/': '/'
-} as const;
-export const defaultLocale = 'en';
 
-export function isValidLocale(locale: string): boolean {
+// Define the default locale
+export const defaultLocale: Locale = 'en';
+
+// Define the prefixing strategy for locales in the URL
+export const localePrefix = 'as-needed'; // Options: 'always', 'never', 'as-needed'
+
+// Define pathnames for internationalized routing (optional)
+// Make sure these paths align with your actual application routes
+export const pathnames = {
+  '/': '/',
+  '/profile': '/profile',
+  '/game': '/game',
+  '/speed-dating': '/speed-dating',
+  '/geolocation-meeting': '/geolocation-meeting',
+  '/facial-analysis-matching': '/facial-analysis-matching',
+  '/ai-conversation-coach': '/ai-conversation-coach',
+  '/blind-exchange-mode': '/blind-exchange-mode',
+  '/chat': '/chat',
+  // Add other paths as needed
+} satisfies Record<string, string>; // Use 'satisfies' for type checking without changing the type
+
+/**
+ * Checks if the provided locale string is a valid and supported locale.
+ * @param {string} locale - The locale string to validate.
+ * @returns {boolean} True if the locale is valid, false otherwise.
+ */
+export function isValidLocale(locale: string): locale is Locale {
   return locales.includes(locale as any);
 }
 
-export const config = {
-  // Provide the locales that should be supported
-  locales,
-  // Provide the default locale to be used
-  defaultLocale,
-  localePrefix,
-  pathnames
-};
+// No default export in this file
