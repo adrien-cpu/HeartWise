@@ -31,29 +31,27 @@ Une application de rencontre à la croisee de l'humain et de l'intelligence arti
 ## 🌐 Fonctionnalités principales
 
 ### 1. 📲 Rencontres hybrides (virtuelles & réelles)
-- [x] **Rencontres géolocalisées** dans des lieux publics (cafés partenaires, événements) (`/geolocation-meeting`)
-- [ ] **Rencontres virtuelles classiques** via l'application (`/chat` exists, basic UI enhanced, but needs **real-time backend** and advanced features like video/audio calls)
-- [x] **Speed Dating digital** : sessions rapides avec matching + feedback immédiat (`/speed-dating` - UI implemented, needs **backend** for matching/scheduling/feedback)
+- [x] **Rencontres géolocalisées** dans des lieux publics (cafés partenaires, événements) (`/geolocation-meeting` - *Frontend*)
+- [ ] **Rencontres virtuelles classiques** via l'application (`/chat` exists, enhanced UI, needs **real-time backend** & video/audio calls)
+- [ ] **Speed Dating digital** : sessions rapides avec matching + feedback immédiat (`/speed-dating` - *Frontend UI*, needs **backend** for matching/scheduling/feedback)
 
 ### 2. 👁‍🗨️ Reconnaissance faciale + IA de Matching
-- [x] Analyse morphologique faciale (avec consentement) (`/facial-analysis-matching`, `src/services/face-analysis.ts` - *Simulation*)
-- [x] Croisement avec les traits psychologiques pour affinités "naturelles" (`/facial-analysis-matching`, `src/services/face-analysis.ts`, `/blind-exchange-mode` - *Simulation/AI*)
-- [x] Capacité à jouer sur les similarités ET les opposés (Implemented in Blind Exchange AI flow) (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts` - *AI*)
+- [x] Analyse morphologique faciale (avec consentement) (`/facial-analysis-matching`, `src/services/face-analysis.ts` - *Frontend Simulation*)
+- [x] Croisement avec les traits psychologiques pour affinités "naturelles" (`/facial-analysis-matching`, `/blind-exchange-mode` - *Frontend Simulation/AI*)
+- [x] Capacité à jouer sur les similarités ET les opposés (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts` - *Frontend AI*)
 
 ### 3. 💬 Coach IA conversationnel
-Un assistant intelligent intégré au tchat pour aider à créer une vraie alchimie. (`/ai-conversation-coach`, `src/ai/flows/conversation-coach.ts`)
+Un assistant intelligent intégré au tchat pour aider à créer une vraie alchimie. (`/ai-conversation-coach`, `src/ai/flows/conversation-coach.ts` - *Frontend AI*)
 
 #### Fonctions principales :
-- [x] ✨ **Proposition de phrases d'accroche** selon les caractéristiques du partenaire. (*Covered by AI Coach*)
+- [x] ✨ **Proposition de phrases d'accroche** (*Covered by AI Coach*)
 - [x] 🔍 **Analyse en temps réel** du message écrit : (*Covered by AI Coach & Risky Words*)
-  - Ambiguïté ? Ton trop agressif ? Maladresse ?
-  - Suggestion de reformulations douces ou plus claires.
-- [ ] 🌟 **Tag d'intention** en option : tendre, humour, séduction, amical... (`/chat` page UI allows selection, but needs **backend/AI logic** for analysis/suggestion)
+- [ ] 🌟 **Tag d'intention** en option : tendre, humour, séduction, amical... (`/chat` UI allows selection, needs **backend/AI logic**)
 - [x] ⚠️ **Alerte aux malentendus** : mots à double sens ou émotions contradictoires. (*Covered by Risky Words*) (`/risky-words-dictionary`)
 - [x] 🤝 **Facilitateur d'échange** : reformule, relance ou clarifie au besoin. (*Covered by AI Coach*)
 
 ### 4. 🔖 Dictionnaire IA des mots à risque
-Une base dynamique qui identifie les expressions ambiguës ou sensibles. (`/risky-words-dictionary`, `src/ai/flows/risky-words-dictionary.ts` - *AI*)
+Une base dynamique qui identifie les expressions ambiguës ou sensibles. (`/risky-words-dictionary`, `src/ai/flows/risky-words-dictionary.ts` - *Frontend AI*)
 
 #### Contenu :
 - [x] “Câlin”, “Je veux te voir”, “T’es sexy”, “Envie de te connaître”, etc. (*Covered by AI Flow*)
@@ -61,20 +59,20 @@ Une base dynamique qui identifie les expressions ambiguës ou sensibles. (`/risk
 - [ ] Mise à jour par : IA auto-apprenante + signalements utilisateurs (**Backend/Database/Feedback Loop**)
 
 ### 5. 🥶 Echanges à l’aveugle
-Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts` - *AI/Simulation*)
+Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts` - *Frontend AI/Simulation*)
 
 #### Déroulé :
 - L'IA propose un profil compatible basé sur :
-  - [x] Matching facial et émotionnel (*AI/Simulation*)
-  - [x] Points communs et polarités contraires (*AI*)
+  - [x] Matching facial et émotionnel (*Frontend AI/Simulation*)
+  - [x] Points communs et polarités contraires (*Frontend AI*)
 - L'utilisateur ne voit que :
-  - [x] Un pourcentage de compatibilité (*AI*)
-  - [x] Une bulle de discussion neutre (*UI*)
+  - [x] Un pourcentage de compatibilité (*Frontend AI*)
+  - [x] Une bulle de discussion neutre (*Frontend UI*)
 - [ ] Les infos se dévoilent **progressivement** selon l'engagement mutuel (**Requires complex chat interaction logic + backend/state management**)
 
 ### 6. 🚀 Bonus et gamification
-- [x] 🌟 **Bonus de style** : suggestions personnalisées du coach IA selon ton niveau de confort, ton style (romantique, direct, poétique, etc.) (`/ai-conversation-coach`, `src/ai/flows/style-suggestions-flow.ts` - *AI*)
-- [x] 🎖️ Système de récompenses : badges, accès à des modes cachés, speed-dating premium, etc. (`/rewards` - *Basic UI/Simulation*, needs **backend logic**)
+- [x] 🌟 **Bonus de style** : suggestions personnalisées du coach IA selon ton niveau de confort, ton style (romantique, direct, poétique, etc.) (`/ai-conversation-coach`, `src/ai/flows/style-suggestions-flow.ts` - *Frontend AI*)
+- [ ] 🎖️ Système de récompenses : badges, accès à des modes cachés, speed-dating premium, etc. (`/rewards` - *Basic UI/Simulation*, needs **backend logic**)
 
 ## 🌐 Anticipation marché et différenciation
 - App centrée sur **la compréhension émotionnelle** et **l'humain avant l'apparence**
@@ -82,13 +80,13 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 - IA au service des **valeurs de respect, d'authenticité et de lien vrai**
 
 ## 🚧 Modules à développer (Frontend Simulation Status)
-- [x] 1. Moteur de matching (IA émotionnelle + reconnaissance faciale + logique "semblable/contraire") (`/facial-analysis-matching`, `/blind-exchange-mode` - *AI/Simulation*)
-- [x] 2. Coach IA conversationnel temps réel (`/ai-conversation-coach` - *AI*)
-- [x] 3. Dictionnaire d'expressions sensibles (`/risky-words-dictionary` - *AI*)
-- [x] 4. Mode "Rencontre à l'aveugle" (`/blind-exchange-mode` - *AI/Simulation*)
-- [x] 5. Système de gamification (`/rewards` - *Basic UI/Simulation*)
-- [x] 6. Interface speed dating dynamique (`/speed-dating` - *UI*)
-- [x] 7. Tableau de bord utilisateur intelligent (conseils personnalisés) (*Partially covered by AI Coach/Style Bonus*)
+- [x] 1. Moteur de matching (IA émotionnelle + reconnaissance faciale + logique "semblable/contraire") (`/facial-analysis-matching`, `/blind-exchange-mode` - *Frontend AI/Simulation*)
+- [x] 2. Coach IA conversationnel temps réel (`/ai-conversation-coach` - *Frontend AI*)
+- [x] 3. Dictionnaire d'expressions sensibles (`/risky-words-dictionary` - *Frontend AI*)
+- [x] 4. Mode "Rencontre à l'aveugle" (`/blind-exchange-mode` - *Frontend AI/Simulation*)
+- [x] 5. Système de gamification (`/rewards` - *Basic Frontend UI/Simulation*, needs backend logic)
+- [x] 6. Interface speed dating dynamique (`/speed-dating` - *Frontend UI*)
+- [ ] 7. Tableau de bord utilisateur intelligent (conseils personnalisés) (*Partially covered by AI Coach/Style Bonus*, needs dedicated dashboard page)
 
 ## 💼 Pour le développement IA
 Le cahier des charges est prêt à être transmis à une IA spécialisée dans le code afin de générer :
@@ -120,7 +118,7 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **[ ] Modération de Contenu:** Intégrer un service de modération externe (API) pour le texte et les médias générés par les utilisateurs.
 *   **[ ] Notifications:** Mettre en place des notifications push (e.g., via Firebase Cloud Messaging) pour les nouveaux messages, matchs, etc.
 *   **[ ] Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer une solution WebRTC (e.g., Twilio, Agora) pour les appels vidéo/audio dans `/chat`.
-*   **[ ] Améliorations des Jeux:** Ajouter plus de jeux, de la variété, un système de scores persistant et des classements (backend requis).
+*   **[ ] Améliorations des Jeux:** Ajouter plus de jeux (comme Times Up), de la variété, un système de scores persistant et des classements (backend requis).
 *   **[ ] Feedback Post-Speed Dating:** Créer l'interface et la logique (backend) pour collecter et afficher le feedback après les sessions de speed dating (`/speed-dating`).
 *   **[ ] Dévoilement progressif (Blind Exchange):** Implémenter la logique pour révéler les informations progressivement dans le chat (`/blind-exchange-mode`).
 *   **[ ] Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage et le signalement utilisateur (`/risky-words-dictionary`).
