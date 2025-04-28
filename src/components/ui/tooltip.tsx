@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
  * components, which are styled wrappers around Radix UI primitives for creating accessible and customizable tooltips.
  */
 
-const TooltipProvider = TooltipPrimitive.Provider
+const TooltipProvider = TooltipPrimitive.Provider // Export TooltipProvider
 
 const Tooltip = TooltipPrimitive.Root
 
@@ -37,3 +37,5 @@ const TooltipContent = React.forwardRef<
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+
+    

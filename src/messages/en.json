@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -175,11 +174,21 @@
     "errorSendingMessage": "Error sending message.",
     "selectChatPrompt": "Select a conversation to start chatting.",
     "compatibilityScoreTitle": "Compatibility Score",
-    "onlineStatusPlaceholder": "Online",
+    "statusOnline": "Online",
+    "statusOffline": "Offline",
     "intentionTagLabel": "Intention (Optional)",
     "selectIntentionPlaceholder": "Select intention...",
     "noTagOption": "None",
-    "intentionTagTitle": "Intention"
+    "intentionTagTitle": "Intention",
+    "startAudioCall": "Start Audio Call",
+    "startVideoCall": "Start Video Call",
+    "videoCallTitle": "Starting Video Call...",
+    "videoCallDesc": "Connecting video call with {name}. (Requires backend)",
+    "audioCallTitle": "Starting Audio Call...",
+    "audioCallDesc": "Connecting audio call with {name}. (Requires backend)",
+    "messageFailedToSend": "Failed to send message.",
+    "errorLoadingProfile": "Error loading your profile.",
+    "unknownUser": "Unknown User"
   },
   "RiskyWordsDictionary": {
     "title": "Risky Words Dictionary",

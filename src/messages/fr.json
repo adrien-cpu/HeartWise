@@ -175,11 +175,21 @@
     "errorSendingMessage": "Erreur lors de l'envoi du message.",
     "selectChatPrompt": "Sélectionnez une conversation pour commencer à discuter.",
     "compatibilityScoreTitle": "Score de Compatibilité",
-    "onlineStatusPlaceholder": "En ligne",
+    "statusOnline": "En ligne",
+    "statusOffline": "Hors ligne",
     "intentionTagLabel": "Intention (Optionnel)",
     "selectIntentionPlaceholder": "Sélectionner l'intention...",
     "noTagOption": "Aucune",
-    "intentionTagTitle": "Intention"
+    "intentionTagTitle": "Intention",
+    "startAudioCall": "Démarrer un appel audio",
+    "startVideoCall": "Démarrer un appel vidéo",
+    "videoCallTitle": "Démarrage de l'appel vidéo...",
+    "videoCallDesc": "Connexion de l'appel vidéo avec {name}. (Nécessite un backend)",
+    "audioCallTitle": "Démarrage de l'appel audio...",
+    "audioCallDesc": "Connexion de l'appel audio avec {name}. (Nécessite un backend)",
+    "messageFailedToSend": "Échec de l'envoi du message.",
+    "errorLoadingProfile": "Erreur lors du chargement de votre profil.",
+    "unknownUser": "Utilisateur Inconnu"
   },
   "RiskyWordsDictionary": {
     "title": "Dictionnaire des Mots à Risque",
@@ -251,3 +261,5 @@
       "toggleSidebar": "Basculer la barre latérale"
    }
 }
+
+    

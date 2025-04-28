@@ -33,7 +33,7 @@ Une application de rencontre à la croisee de l'humain et de l'intelligence arti
 
 ### 1. 📲 Rencontres hybrides (virtuelles & réelles)
 - [x] **Rencontres géolocalisées** dans des lieux publics (cafés partenaires, événements) (`/geolocation-meeting` - *Frontend*)
-- [ ] **Rencontres virtuelles classiques** via l'application (`/chat` exists, enhanced UI, needs **real-time backend** & video/audio calls)
+- [x] **Rencontres virtuelles classiques** via l'application (`/chat` - *Enhanced UI*, needs **real-time backend** & **video/audio call integration**)
 - [x] **Speed Dating digital** : sessions rapides avec matching + feedback immédiat (`/speed-dating` - *Frontend UI*, needs **backend** for matching/scheduling/feedback)
 
 ### 2. 👁‍🗨️ Reconnaissance faciale + IA de Matching
@@ -47,7 +47,7 @@ Un assistant intelligent intégré au tchat pour aider à créer une vraie alchi
 #### Fonctions principales :
 - [x] ✨ **Proposition de phrases d'accroche** (*Covered by AI Coach*)
 - [x] 🔍 **Analyse en temps réel** du message écrit : (*Covered by AI Coach & Risky Words*)
-- [x] 🌟 **Tag d'intention** en option : tendre, humour, séduction, amical... (`/chat` UI allows selection, needs **backend/AI logic**)
+- [x] 🌟 **Tag d'intention** en option : tendre, humour, séduction, amical... (`/chat` - *UI allows selection*, needs **backend/AI logic**)
 - [x] ⚠️ **Alerte aux malentendus** : mots à double sens ou émotions contradictoires. (*Covered by Risky Words*) (`/risky-words-dictionary`)
 - [x] 🤝 **Facilitateur d'échange** : reformule, relance ou clarifie au besoin. (*Covered by AI Coach*)
 
@@ -73,7 +73,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 
 ### 6. 🚀 Bonus et gamification
 - [x] 🌟 **Bonus de style** : suggestions personnalisées du coach IA selon ton niveau de confort, ton style (romantique, direct, poétique, etc.) (`/ai-conversation-coach`, `src/ai/flows/style-suggestions-flow.ts` - *Frontend AI*)
-- [x] 🎖️ Système de récompenses : badges, accès à des modes cachés, speed-dating premium, etc. (`/rewards` - *Basic UI/Simulation*, needs **backend logic**)
+- [x] 🎖️ Système de récompenses : badges, accès à des modes cachés, speed-dating premium, etc. (`/rewards` - *Frontend UI*, needs **backend logic**)
 
 ## 🌐 Anticipation marché et différenciation
 - App centrée sur **la compréhension émotionnelle** et **l'humain avant l'apparence**
@@ -85,7 +85,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 - [x] 2. Coach IA conversationnel temps réel (`/ai-conversation-coach` - *Frontend AI*)
 - [x] 3. Dictionnaire d'expressions sensibles (`/risky-words-dictionary` - *Frontend AI*)
 - [x] 4. Mode "Rencontre à l'aveugle" (`/blind-exchange-mode` - *Frontend AI/Simulation*)
-- [x] 5. Système de gamification (`/rewards` - *Basic Frontend UI/Simulation*, needs backend logic)
+- [x] 5. Système de gamification (`/rewards` - *Frontend UI*, needs backend logic)
 - [x] 6. Interface speed dating dynamique (`/speed-dating` - *Frontend UI*)
 - [x] 7. Tableau de bord utilisateur intelligent (conseils personnalisés) (`/dashboard` - *Frontend UI/Mock Data*)
 
@@ -104,13 +104,13 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **[x] Mode d'Échange à l'Aveugle :** (`/blind-exchange-mode` - *AI/Simulation*)
 *   **[x] Coach Conversationnel IA (avec Bonus de Style):** (`/ai-conversation-coach` - *AI*)
 *   **[x] Dictionnaire IA des Mots à Risque :** (`/risky-words-dictionary` - *AI*)
-*   **[x] Jeu :** (`/game` - *UI/Basic Logic*)
-*   **[x] Speed Dating :** (`/speed-dating` - *UI*)
+*   **[x] Jeu :** (`/game` - *UI/Basic Logic*, needs backend for preferences/points persistence)
+*   **[x] Speed Dating :** (`/speed-dating` - *UI*, needs backend for scheduling/matching)
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API*)
 *   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Mock Data*)
-*   **[x] Outils de Communication Intégrés à l'Application (Chat):** (`/chat` - *Enhanced UI/Mock Data*)
-*   **[x] Système de récompenses (basique) :** (`/rewards` - *Displays Mock Points/Badges*)
-*   **[x] Tableau de bord utilisateur intelligent :** (`/dashboard` - *Displays Mock Advice/Stats*)
+*   **[x] Outils de Communication Intégrés à l'Application (Chat):** (`/chat` - *Enhanced UI/Mock Data*, needs backend for real-time/persistence/calls)
+*   **[x] Système de récompenses (basique) :** (`/rewards` - *Displays Mock Points/Badges*, needs backend)
+*   **[x] Tableau de bord utilisateur intelligent :** (`/dashboard` - *Displays Mock Advice/Stats*, needs backend)
 
 ## Features to Implement / Enhance (Requires Backend & Advanced Logic):
 
@@ -129,4 +129,4 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 
 *Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality.*
 
-```
+    

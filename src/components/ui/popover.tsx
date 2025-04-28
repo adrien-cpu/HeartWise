@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
  * which are styled wrappers around Radix UI primitives for creating accessible and customizable popovers.
  */
 
-const PopoverProvider = TooltipPrimitive.Provider
+const PopoverProvider = PopoverPrimitive.Provider // Corrected import source
 
 const Popover = PopoverPrimitive.Root
 
@@ -40,3 +40,5 @@ const PopoverContent = React.forwardRef<
 PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
 export { Popover, PopoverTrigger, PopoverContent, PopoverProvider }
+
+    
