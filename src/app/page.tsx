@@ -39,7 +39,7 @@ import { useState, useTransition } from 'react';
  *
  * @module Home
  *
- * @description This component is the main dashboard of the HeartWise application.
+ * @description This component is the main entry point or landing page of the HeartWise application.
  * It displays links to the core features and services, along with a sidebar for navigation.
  */
 
@@ -47,7 +47,7 @@ import { useState, useTransition } from 'react';
  * HomeClient component.
  *
  * @component
- * @description The main dashboard content of the HeartWise application.
+ * @description The main landing page content of the HeartWise application.
  * @returns {JSX.Element} The rendered Home page client content.
  */
 function HomeClient() {
@@ -58,6 +58,9 @@ function HomeClient() {
             <h1 className="text-4xl font-bold mb-4">{t('dashboardTitle')}</h1>
             <p className="text-lg mb-8">{t('dashboardDescription')}:</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                 <Link href="/dashboard">
+                    <Button className="w-full">{t('dashboard')}</Button> {/* Added Dashboard Link */}
+                 </Link>
                 <Link href="/geolocation-meeting">
                     <Button className="w-full">{t('geolocationMeeting')}</Button>
                 </Link>
@@ -157,6 +160,20 @@ export default function Home() {
               </div>
             </SidebarHeader>
             <SidebarContent>
+              <SidebarGroup>
+                 <SidebarGroupLabel>{t('navigation')}</SidebarGroupLabel> {/* Changed label */}
+                 <SidebarMenu>
+                    <SidebarMenuItem>
+                       <Link href="/dashboard">
+                         <SidebarMenuButton>
+                           <Icons.home className="mr-2 h-4 w-4"/> {/* Updated icon */}
+                           <span>{t('dashboard')}</span> {/* Added Dashboard Link */}
+                         </SidebarMenuButton>
+                       </Link>
+                     </SidebarMenuItem>
+                 </SidebarMenu>
+               </SidebarGroup>
+               <SidebarSeparator/>
               <SidebarGroup>
                 <SidebarGroupLabel>{t('features')}</SidebarGroupLabel>
                 <SidebarMenu>
@@ -262,7 +279,12 @@ export default function Home() {
           </Sidebar>
 
         <main className="flex flex-col items-center justify-center min-h-screen p-8 lg:ml-64">
-            <HomeClient />
+            {/* Removed HomeClient as this is the main entry page */}
+             <h1 className="text-4xl font-bold mb-4">{t('mainPageTitle')}</h1>
+             <p className="text-lg text-center max-w-prose mb-8">{t('mainPageDescription')}</p>
+             <Link href="/dashboard">
+               <Button size="lg">{t('goToDashboard')}</Button>
+             </Link>
         </main>
     </SidebarProvider>
   );

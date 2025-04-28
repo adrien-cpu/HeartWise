@@ -19,7 +19,12 @@
     "dashboardTitle": "Welcome to HeartWise",
     "dashboardDescription": "Explore our features and find your perfect match:",
     "selectLanguage": "Select Language",
-    "locale": "{locale, select, en {English} fr {French} other {Unknown}}"
+    "locale": "{locale, select, en {English} fr {French} other {Unknown}}",
+    "navigation": "Navigation",
+    "dashboard": "Dashboard",
+    "mainPageTitle": "Welcome to HeartWise",
+    "mainPageDescription": "The innovative dating app focused on emotional intelligence and genuine connection. Explore our features to find meaningful relationships.",
+    "goToDashboard": "Go to Dashboard"
   },
   "GeolocationMeeting": {
     "title": "Find Nearby Connections",
@@ -223,6 +228,24 @@
     "pointsDesc": "Points earned for activities and achievements.",
     "noPoints": "You haven't earned any points yet.",
     "pointsSuffix": "points"
+  },
+  "DashboardPage": {
+    "welcome": "Welcome, {name}!",
+    "dashboardOverview": "Here's your personalized HeartWise dashboard.",
+    "personalizedAdviceTitle": "Today's Tip",
+    "personalizedAdviceDesc": "A suggestion to enhance your experience.",
+    "profileCompletenessTitle": "Profile Completeness",
+    "profileCompletenessDesc": "Complete your profile to improve matches.",
+    "quickStatsTitle": "Quick Stats",
+    "quickStatsDesc": "Your recent activity overview.",
+    "totalPoints": "Total Points",
+    "badgesEarned": "Badges Earned",
+    "recentBadgesTitle": "Recent Badges",
+    "recentBadgesDesc": "Your latest achievements.",
+    "moreBadges": "more",
+    "mockAdvice1": "Consider updating your bio to reflect your current mood or interests.",
+    "mockAdvice2": "Try initiating a conversation with someone who shares a unique interest.",
+    "mockAdvice3": "Explore the Blind Exchange mode for a different kind of connection."
   },
    "Sidebar": {
       "toggleSidebar": "Toggle Sidebar"

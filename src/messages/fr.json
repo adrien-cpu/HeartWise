@@ -19,7 +19,12 @@
     "dashboardTitle": "Bienvenue sur HeartWise",
     "dashboardDescription": "Explorez nos fonctionnalités et trouvez votre partenaire idéal :",
     "selectLanguage": "Sélectionner la langue",
-    "locale": "{locale, select, en {Anglais} fr {Français} other {Inconnu}}"
+    "locale": "{locale, select, en {Anglais} fr {Français} other {Inconnu}}",
+    "navigation": "Navigation",
+    "dashboard": "Tableau de Bord",
+    "mainPageTitle": "Bienvenue sur HeartWise",
+    "mainPageDescription": "L'application de rencontre innovante axée sur l'intelligence émotionnelle et la connexion authentique. Explorez nos fonctionnalités pour trouver des relations significatives.",
+    "goToDashboard": "Aller au Tableau de Bord"
   },
   "GeolocationMeeting": {
     "title": "Trouver des Connexions à Proximité",
@@ -224,7 +229,25 @@
     "noPoints": "Vous n'avez pas encore gagné de points.",
     "pointsSuffix": "points"
   },
-  "Sidebar": {
+  "DashboardPage": {
+    "welcome": "Bienvenue, {name} !",
+    "dashboardOverview": "Voici votre tableau de bord HeartWise personnalisé.",
+    "personalizedAdviceTitle": "Conseil du Jour",
+    "personalizedAdviceDesc": "Une suggestion pour améliorer votre expérience.",
+    "profileCompletenessTitle": "Complétude du Profil",
+    "profileCompletenessDesc": "Complétez votre profil pour de meilleures correspondances.",
+    "quickStatsTitle": "Statistiques Rapides",
+    "quickStatsDesc": "Aperçu de votre activité récente.",
+    "totalPoints": "Total des Points",
+    "badgesEarned": "Badges Gagnés",
+    "recentBadgesTitle": "Badges Récents",
+    "recentBadgesDesc": "Vos dernières réalisations.",
+    "moreBadges": "autres",
+    "mockAdvice1": "Pensez à mettre à jour votre bio pour refléter votre humeur ou vos intérêts actuels.",
+    "mockAdvice2": "Essayez d'engager la conversation avec quelqu'un qui partage un intérêt unique.",
+    "mockAdvice3": "Explorez le mode Échange à l'Aveugle pour un autre type de connexion."
+  },
+   "Sidebar": {
       "toggleSidebar": "Basculer la barre latérale"
-  }
+   }
 }

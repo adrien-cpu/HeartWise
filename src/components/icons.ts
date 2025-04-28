@@ -9,10 +9,10 @@
  */
 
 import {
-    ArrowRight, Award, Book, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, EyeOff, File,
-    Gamepad, HelpCircle, Home, Loader2, LogOut, Mail, MapPin, MessageCircle, MessageSquare, Moon, PanelLeft, Plus,
-    PlusCircle, ScanFace, Search, Server, Settings, Share2, Shield, Sun, Trash, User, Workflow, X, Zap
-} from 'lucide-react';
+    ArrowRight, Award, Book, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, EyeOff, File, Gamepad2,
+    Gamepad, HelpCircle, Home, Lightbulb, Loader2, LogOut, Mail, MapPin, MessageCircle, MessageSquare, MessageSquareText, Moon, PanelLeft, Plus,
+    PlusCircle, ScanFace, Search, Server, Settings, Share2, Shield, Smile, Star, Sun, Trash, Trophy, User, UserCheck, Users, Workflow, X, Zap
+} from 'lucide-react'; // Added Lightbulb, UserCheck, MessageSquareText, Trophy
 
 /**
  * @typedef {object} Icons
@@ -30,8 +30,11 @@ import {
  * @property {LucideIcon} externalLink - External link icon.
  * @property {LucideIcon} eyeOff - Eye off icon (for Blind Exchange).
  * @property {LucideIcon} file - File icon.
+ * @property {LucideIcon} gamepad - Gamepad icon.
+ * @property {LucideIcon} gamepad2 - Gamepad2 icon.
  * @property {LucideIcon} help - Help icon.
  * @property {LucideIcon} home - Home icon.
+ * @property {LucideIcon} lightbulb - Lightbulb icon.
  * @property {LucideIcon} light - Light mode icon.
  * @property {LucideIcon} loader - Loader icon.
  * @property {LucideIcon} logOut - Log out icon.
@@ -39,6 +42,7 @@ import {
  * @property {LucideIcon} mapPin - Map pin icon.
  * @property {LucideIcon} messageCircle - Message circle icon (for Chat).
  * @property {LucideIcon} messageSquare - Message square icon.
+ * @property {LucideIcon} messageSquareText - Message square text icon.
  * @property {LucideIcon} plus - Plus icon.
  * @property {LucideIcon} plusCircle - Plus circle icon.
  * @property {LucideIcon} scanFace - Scan face icon (for Facial Analysis).
@@ -47,11 +51,15 @@ import {
  * @property {LucideIcon} settings - Settings icon.
  * @property {LucideIcon} share - Share icon.
  * @property {LucideIcon} shield - Shield icon.
+ * @property {LucideIcon} smile - Smile icon.
  * @property {LucideIcon} spinner - Spinner icon.
+ * @property {LucideIcon} star - Star icon.
  * @property {LucideIcon} trash - Trash icon.
+ * @property {LucideIcon} trophy - Trophy icon.
  * @property {LucideIcon} user - User icon.
+ * @property {LucideIcon} userCheck - User check icon.
+ * @property {LucideIcon} users - Users icon.
  * @property {LucideIcon} panelLeft - Panel left icon.
- * @property {LucideIcon} gamepad - Gamepad icon.
  * @property {LucideIcon} zap - Zap icon (for Speed Dating).
  */
 const Icons = {
@@ -69,8 +77,11 @@ const Icons = {
   externalLink: ExternalLink,
   eyeOff: EyeOff, // Added eyeOff icon
   file: File,
+  gamepad: Gamepad,
+  gamepad2: Gamepad2,
   help: HelpCircle,
   home: Home,
+  lightbulb: Lightbulb, // Added lightbulb
   light: Sun,
   loader: Loader2,
   logOut: LogOut,
@@ -78,6 +89,7 @@ const Icons = {
   mapPin: MapPin,
   messageCircle: MessageCircle,
   messageSquare: MessageSquare,
+  messageSquareText: MessageSquareText, // Added messageSquareText
   plus: Plus,
   plusCircle: PlusCircle,
   scanFace: ScanFace, // Added scanFace icon
@@ -86,11 +98,15 @@ const Icons = {
   settings: Settings,
   share: Share2,
   shield: Shield,
+  smile: Smile,
   spinner: Loader2,
+  star: Star,
   trash: Trash,
+  trophy: Trophy, // Added trophy
   user: User,
+  userCheck: UserCheck, // Added userCheck
+  users: Users,
   panelLeft: PanelLeft,
-  gamepad: Gamepad,
   zap: Zap,
 };
 
