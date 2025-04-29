@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -41,6 +42,8 @@ const RadioGroupItem = React.forwardRef<
         className
       )}
       {...props}
+      // Consider adding aria-label or aria-labelledby for better accessibility if the item doesn't have an associated Label component visible.
+      // Example: aria-label={props.value || "Radio option"}
     >
       <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
         <Circle className="h-2.5 w-2.5 fill-current text-current" />
@@ -51,3 +54,5 @@ const RadioGroupItem = React.forwardRef<
 RadioGroupItem.displayName = RadioGroupPrimitive.Item.displayName
 
 export { RadioGroup, RadioGroupItem }
+
+    

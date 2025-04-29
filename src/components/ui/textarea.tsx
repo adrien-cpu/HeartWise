@@ -1,3 +1,4 @@
+
 import * as React from 'react';
 
 import {cn} from '@/lib/utils';
@@ -19,6 +20,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<'tex
           className
         )}
         ref={ref}
+        // Add aria-label if a visible <Label> is not always associated
+        // aria-label={props['aria-label'] || props.placeholder || "Text area"}
         {...props}
       />
     );
@@ -27,3 +30,5 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, React.ComponentProps<'tex
 Textarea.displayName = 'Textarea';
 
 export {Textarea};
+
+    

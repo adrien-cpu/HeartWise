@@ -161,7 +161,21 @@
     "scheduleError": "Failed to schedule speed dating session.",
     "errorTitle": "Error",
     "selectInterestsErrorTitle": "Select Interests",
-    "selectInterestsErrorDesc": "Please select at least one interest to schedule a session."
+    "selectInterestsErrorDesc": "Please select at least one interest to schedule a session.",
+    "provideFeedbackButton": "Provide Feedback",
+    "sessionInProgress": "In Progress",
+    "sessionScheduled": "Scheduled",
+    "feedbackTitle": "Feedback for Session ({date})",
+    "feedbackDescription": "Share your thoughts on the partners you met.",
+    "feedbackFor": "Feedback for {name}",
+    "ratingLabel": "Overall Impression",
+    "commentLabel": "Comments (Optional)",
+    "commentPlaceholder": "Any specific thoughts?",
+    "submitFeedbackButton": "Submit Feedback",
+    "feedbackSubmittedTitle": "Feedback Submitted",
+    "feedbackSubmittedDesc": "Thank you for your feedback!",
+    "feedbackErrorDesc": "Failed to submit feedback. Please try again.",
+    "cancelButton": "Cancel"
   },
   "Chat": {
     "title": "Chat",

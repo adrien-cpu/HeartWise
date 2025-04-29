@@ -34,7 +34,7 @@ Une application de rencontre à la croisee de l'humain et de l'intelligence arti
 ### 1. 📲 Rencontres hybrides (virtuelles & réelles)
 - [x] **Rencontres géolocalisées** dans des lieux publics (cafés partenaires, événements) (`/geolocation-meeting` - *Frontend*)
 - [x] **Rencontres virtuelles classiques** via l'application (`/chat` - *Enhanced UI*, needs **real-time backend** & **video/audio call integration**)
-- [x] **Speed Dating digital** : sessions rapides avec matching + feedback immédiat (`/speed-dating` - *Frontend UI*, needs **backend** for matching/scheduling/feedback)
+- [x] **Speed Dating digital** : sessions rapides avec matching + feedback immédiat (`/speed-dating` - *Frontend UI + Feedback Simulation*, needs **backend** for matching/scheduling/feedback persistence)
 
 ### 2. 👁‍🗨️ Reconnaissance faciale + IA de Matching
 - [x] Analyse morphologique faciale (avec consentement) (`/facial-analysis-matching`, `src/services/face-analysis.ts` - *Frontend Simulation*)
@@ -86,7 +86,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 - [x] 3. Dictionnaire d'expressions sensibles (`/risky-words-dictionary` - *Frontend AI*)
 - [x] 4. Mode "Rencontre à l'aveugle" (`/blind-exchange-mode` - *Frontend AI/Simulation*)
 - [x] 5. Système de gamification (`/rewards` - *Frontend UI*, needs backend logic)
-- [x] 6. Interface speed dating dynamique (`/speed-dating` - *Frontend UI*)
+- [x] 6. Interface speed dating dynamique (`/speed-dating` - *Frontend UI + Feedback Simulation*)
 - [x] 7. Tableau de bord utilisateur intelligent (conseils personnalisés) (`/dashboard` - *Frontend UI/Mock Data*)
 
 ## 💼 Pour le développement IA
@@ -105,7 +105,7 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **[x] Coach Conversationnel IA (avec Bonus de Style):** (`/ai-conversation-coach` - *AI*)
 *   **[x] Dictionnaire IA des Mots à Risque :** (`/risky-words-dictionary` - *AI*)
 *   **[x] Jeu :** (`/game` - *UI/Basic Logic*, needs backend for preferences/points persistence)
-*   **[x] Speed Dating :** (`/speed-dating` - *UI*, needs backend for scheduling/matching)
+*   **[x] Speed Dating :** (`/speed-dating` - *UI + Feedback Simulation*, needs backend for scheduling/matching/feedback persistence)
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API*)
 *   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Mock Data*)
 *   **[x] Outils de Communication Intégrés à l'Application (Chat):** (`/chat` - *Enhanced UI/Mock Data*, needs backend for real-time/persistence/calls)
@@ -121,7 +121,7 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **[ ] Notifications:** Mettre en place des notifications push (e.g., via Firebase Cloud Messaging) pour les nouveaux messages, matchs, etc.
 *   **[ ] Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer une solution WebRTC (e.g., Twilio, Agora) pour les appels vidéo/audio dans `/chat`.
 *   **[ ] Améliorations des Jeux:** Ajouter plus de jeux (comme Times Up), de la variété, un système de scores persistant et des classements (backend requis).
-*   **[ ] Feedback Post-Speed Dating:** Créer l'interface et la logique (backend) pour collecter et afficher le feedback après les sessions de speed dating (`/speed-dating`).
+*   **[ ] Feedback Post-Speed Dating (Persistance):** Connecter l'interface de feedback (`/speed-dating`) à un backend pour stocker les avis.
 *   **[ ] Dévoilement progressif (Blind Exchange):** Implémenter la logique pour révéler les informations progressivement dans le chat (`/blind-exchange-mode`).
 *   **[ ] Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage et le signalement utilisateur (`/risky-words-dictionary`).
 *   **[ ] Tags d'intention (Chat - Avancé):** Implémenter la logique IA backend pour analyser/suggérer des tags d'intention (`/chat`).

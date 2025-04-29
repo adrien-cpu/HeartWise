@@ -162,7 +162,21 @@
     "scheduleError": "Échec de la planification de la session de speed dating.",
     "errorTitle": "Erreur",
     "selectInterestsErrorTitle": "Sélectionnez des Intérêts",
-    "selectInterestsErrorDesc": "Veuillez sélectionner au moins un intérêt pour planifier une session."
+    "selectInterestsErrorDesc": "Veuillez sélectionner au moins un intérêt pour planifier une session.",
+    "provideFeedbackButton": "Donner un Avis",
+    "sessionInProgress": "En cours",
+    "sessionScheduled": "Planifiée",
+    "feedbackTitle": "Avis sur la Session ({date})",
+    "feedbackDescription": "Partagez vos impressions sur les partenaires rencontrés.",
+    "feedbackFor": "Avis pour {name}",
+    "ratingLabel": "Impression Générale",
+    "commentLabel": "Commentaires (Optionnel)",
+    "commentPlaceholder": "Des remarques particulières ?",
+    "submitFeedbackButton": "Envoyer l'Avis",
+    "feedbackSubmittedTitle": "Avis Envoyé",
+    "feedbackSubmittedDesc": "Merci pour votre retour !",
+    "feedbackErrorDesc": "Échec de l'envoi de l'avis. Veuillez réessayer.",
+    "cancelButton": "Annuler"
   },
   "Chat": {
     "title": "Discussion",
