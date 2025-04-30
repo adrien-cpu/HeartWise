@@ -7,6 +7,12 @@
 - [x] AI Conversation Coach: Analyse the messages written by the user and suggest reformulations if needed to create a good conversation. The LLM acts as a tool and will decide when to intervene. (`/ai-conversation-coach`, `src/ai/flows/conversation-coach.ts`, `src/ai/flows/style-suggestions-flow.ts`)
 - [x] Blind Exchange Mode: Offer a mode of meeting without photo, profile or information. The AI proposes a profile based on facial and emotional matching, common points and opposite polarities. (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts`)
 - [x] Intelligent User Dashboard: Display personalized advice and user stats. (`/dashboard`)
+- [x] Risky Words Dictionary: Identify ambiguous or sensitive expressions in messages. (`/risky-words-dictionary`, `src/ai/flows/risky-words-dictionary.ts`)
+- [x] User Profile Management: View and edit user profile details. (`/profile`, `src/services/user_profile.ts`)
+- [x] Basic Chat Interface: Simulate conversations with mock data. (`/chat`)
+- [x] Speed Dating Interface: UI for scheduling and providing feedback (simulated). (`/speed-dating`)
+- [x] General Knowledge Game: Basic question/answer game. (`/game`)
+- [x] Rewards System (Basic): Display earned badges and points. (`/rewards`)
 
 ## Style Guidelines:
 
@@ -47,7 +53,7 @@ Un assistant intelligent intégré au tchat pour aider à créer une vraie alchi
 #### Fonctions principales :
 - [x] ✨ **Proposition de phrases d'accroche** (*Covered by AI Coach*)
 - [x] 🔍 **Analyse en temps réel** du message écrit : (*Covered by AI Coach & Risky Words*)
-- [x] 🌟 **Tag d'intention** en option : tendre, humour, séduction, amical... (`/chat` - *UI allows selection*, needs **backend/AI logic**)
+- [ ] 🌟 **Tag d'intention** en option : tendre, humour, séduction, amical... (`/chat` - *UI allows selection*, needs **backend/AI logic**)
 - [x] ⚠️ **Alerte aux malentendus** : mots à double sens ou émotions contradictoires. (*Covered by Risky Words*) (`/risky-words-dictionary`)
 - [x] 🤝 **Facilitateur d'échange** : reformule, relance ou clarifie au besoin. (*Covered by AI Coach*)
 
@@ -129,4 +135,3 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 
 *Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality.*
 
-    

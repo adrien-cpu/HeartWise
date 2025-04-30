@@ -250,7 +250,20 @@
     "yourPoints": "Your Points",
     "pointsDesc": "Points earned for activities and achievements.",
     "noPoints": "You haven't earned any points yet.",
-    "pointsSuffix": "points"
+    "pointsSuffix": "points",
+    "howToEarnTitle": "How to Earn Points",
+    "howToEarnDesc": "Complete activities to boost your score!",
+    "earnPointsProfile": "Complete your profile",
+    "earnPointsFirstChat": "Start your first chat",
+    "earnPointsGameWin": "Win a game round",
+    "earnPointsSpeedDate": "Participate in Speed Dating",
+    "pointsValue": "{value} pts",
+    "premiumFeaturesTitle": "Unlock Premium Features",
+    "premiumFeaturesDesc": "Use your points or earn badges for exclusive access (coming soon!).",
+    "premiumFeatureAdvancedFilters": "Advanced search filters",
+    "premiumFeatureSeeLikes": "See who liked your profile",
+    "premiumFeatureProfileBoost": "Boost your profile visibility",
+    "comingSoon": "Coming Soon"
   },
   "DashboardPage": {
     "welcome": "Welcome, {name}!",

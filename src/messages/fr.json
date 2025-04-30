@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -251,7 +250,20 @@
     "yourPoints": "Vos Points",
     "pointsDesc": "Points gagnés pour les activités et les succès.",
     "noPoints": "Vous n'avez pas encore gagné de points.",
-    "pointsSuffix": "points"
+    "pointsSuffix": "points",
+    "howToEarnTitle": "Comment Gagner des Points",
+    "howToEarnDesc": "Complétez des activités pour augmenter votre score !",
+    "earnPointsProfile": "Compléter votre profil",
+    "earnPointsFirstChat": "Commencer votre premier chat",
+    "earnPointsGameWin": "Gagner une partie de jeu",
+    "earnPointsSpeedDate": "Participer au Speed Dating",
+    "pointsValue": "{value} pts",
+    "premiumFeaturesTitle": "Débloquer les Fonctionnalités Premium",
+    "premiumFeaturesDesc": "Utilisez vos points ou gagnez des badges pour un accès exclusif (bientôt disponible !).",
+    "premiumFeatureAdvancedFilters": "Filtres de recherche avancés",
+    "premiumFeatureSeeLikes": "Voir qui a aimé votre profil",
+    "premiumFeatureProfileBoost": "Booster la visibilité de votre profil",
+    "comingSoon": "Bientôt Disponible"
   },
   "DashboardPage": {
     "welcome": "Bienvenue, {name} !",
@@ -276,4 +288,3 @@
    }
 }
 
-    
