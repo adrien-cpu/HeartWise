@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -106,15 +107,65 @@
     "noMatches": "No suitable match found at the moment."
   },
   "Game": {
-    "title": "General Knowledge Game",
+    "title": "Games Hub",
     "randomPartner": "Play with Random Partner",
     "matchPartner": "Play with Match",
     "question": "Question",
     "answer": "Answer",
     "nextQuestion": "Next Question",
-    "submitAnswer": "Submit answer",
-    "correctAnswer": "Correct answer!",
-    "incorrectAnswer": "Incorrect answer."
+    "submitAnswer": "Submit Answer",
+    "correctAnswer": "Correct!",
+    "incorrectAnswer": "Incorrect!",
+    "tabGeneralKnowledge": "Trivia",
+    "tabTimesUp": "Time's Up",
+    "tabRankings": "Rankings",
+    "preferencesTitle": "Trivia Preferences",
+    "preferencesDesc": "Choose categories you like.",
+    "categoryHistory": "History",
+    "categoryScience": "Science",
+    "categoryGeography": "Geography",
+    "prefsUpdatedTitle": "Preferences Updated",
+    "prefsUpdatedDesc": "Your trivia preferences have been saved.",
+    "errorLoadingPrefs": "Could not load game preferences.",
+    "errorSavingPrefs": "Could not save game preferences.",
+    "error": "Error",
+    "gkDescription": "Test your knowledge!",
+    "startGameButton": "Start Trivia Game",
+    "answerPlaceholder": "Your Answer",
+    "answerLabel": "Your Answer",
+    "scoreLabel": "Score",
+    "timesUpTitle": "Time's Up!",
+    "timesUpDesc": "You ran out of time for this question.",
+    "gameOverTitle": "Game Over!",
+    "gameOverScore": "Your final score: {score}",
+    "pointsEarned": "You earned {count} points.",
+    "badgeGameWinnerName": "Quiz Whiz",
+    "badgeGameWinnerDesc": "Won a round in the game.",
+    "errorUpdatingScore": "Could not update your points or rewards.",
+    "correctAnswerWas": "The correct answer was {answer}.",
+    "viewResults": "View Results",
+    "noQuestionsForPrefs": "No questions available for your selected preferences.",
+    "noMoreQuestions": "No more questions available.",
+    "rankingsTitle": "Leaderboard",
+    "rankingsDesc": "See how you stack up!",
+    "rankHeader": "Rank",
+    "nameHeader": "Name",
+    "scoreHeader": "Score",
+    "timesUpDescription": "Guess the word based on descriptions!",
+    "timesUpNotImplemented": "Time's Up game mode coming soon!",
+    "tuGetReady": "Get Ready!",
+    "tuRound": "Round {round}",
+    "tuDescribe": "Describe",
+    "tuGuess": "Guess",
+    "tuWord": "Word: {word}",
+    "tuStartRound": "Start Round",
+    "tuNextWord": "Next Word",
+    "tuGotIt": "Got It!",
+    "tuSkip": "Skip",
+    "tuRoundOver": "Round Over!",
+    "tuWordsGuessed": "Words Guessed: {count}",
+    "tuFinalScore": "Final Score: {score}",
+    "tuPlayAgain": "Play Again"
   },
   "ProfilePage": {
     "title": "User Profile",
@@ -287,3 +338,5 @@
       "toggleSidebar": "Toggle Sidebar"
    }
 }
+
+    

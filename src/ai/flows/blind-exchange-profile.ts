@@ -15,58 +15,47 @@
 
 import {ai} from '@/ai/ai-instance';
 import {z} from 'genkit';
-import {getPsychologicalTraits, PsychologicalTraits} from '@/services/face-analysis'; // Removed unused FaceData
+import {getPsychologicalTraits, PsychologicalTraits} from '@/services/face-analysis';
+export const PsychologicalTraitsSchema = z.object({
+  openness: z.number(),
+  conscientiousness: z.number(),
+  extraversion: z.number(),
+  agreeableness: z.number(),
+  neuroticism: z.number(),
+});
 
-/**
- * @typedef {object} BlindExchangeProfileInput
- * @property {object} faceData1 - Face data of the first user.
- * @property {string} faceData1.imageUrl - URL of the first user's face image.
- * @property {object} faceData2 - Face data of the second user.
- * @property {string} faceData2.imageUrl - URL of the second user's face image.
- * @property {string[]} interests1 - List of interests of the first user.
- * @property {string[]} interests2 - List of interests of the second user.
- */
-const BlindExchangeProfileInputSchema = z.object({
-  faceData1: z.object({
-    imageUrl: z.string().describe('URL of the first user\'s face image.'),
-  }).describe('Face data of the first user.'),
-  faceData2: z.object({
-    imageUrl: z.string().describe('URL of the second user\'s face image.'),
-  }).describe('Face data of the second user.'),
-  interests1: z.array(z.string()).describe('List of interests of the first user.'),
-  interests2: z.array(z.string()).describe('List of interests of the second user.'),
+export type PsychologicalTraits = z.infer<typeof PsychologicalTraitsSchema>;
+
+export const BlindExchangeProfileInputSchema = z.object({
+  psychologicalTraits: PsychologicalTraitsSchema,
+
+
+  userProfile: z.string(),
 });
 
 export type BlindExchangeProfileInput = z.infer<typeof BlindExchangeProfileInputSchema>;
 
-/**
- * @typedef {object} BlindExchangeProfileOutput
- * @property {number} compatibilityScore - A percentage indicating the compatibility between the two users.
- * @property {string} profileDescription - A short, neutral description of the potential connection between the two users, highlighting commonalities and differences.
- */
-const BlindExchangeProfileOutputSchema = z.object({
-  compatibilityScore: z.number().describe('A percentage indicating the compatibility between the two users.'),
-  profileDescription: z.string().describe('A short, neutral description of the potential connection between the two users, highlighting commonalities and differences.'),
+
+export const BlindExchangeProfileOutputSchema = z.object({
+  compatibleProfile: z.string(),
+
 });
 
 export type BlindExchangeProfileOutput = z.infer<typeof BlindExchangeProfileOutputSchema>;
 
-/**
- * Generates a blind exchange profile based on input data.
- *
- * @async
- * @function generateBlindExchangeProfile
- * @param {BlindExchangeProfileInput} input - The input data for generating the profile.
- * @returns {Promise<BlindExchangeProfileOutput>} The generated blind exchange profile.
- */
-export async function generateBlindExchangeProfile(input: BlindExchangeProfileInput): Promise<BlindExchangeProfileOutput> {
-  return blindExchangeProfileFlow(input);
+export async function generateBlindExchangeProfile(input: BlindExchangeProfileInput) :Promise<BlindExchangeProfileOutput> {
+  const compatibleProfile:BlindExchangeProfileOutput ={
+      compatibleProfile: 'This is a blind exchange profile'
+  }
+
+  
+
+
+  return compatibleProfile;
 }
 
-const blindExchangeProfilePrompt = ai.definePrompt({
-  name: 'blindExchangeProfilePrompt',
-  input: {
-    schema: z.object({
+
+export const blindExchangeProfilePrompt = ai.definePrompt({
       compatibilityScore: z.number().describe('A percentage indicating the compatibility between the two users.'),
       profileDescription: z.string().describe('A short, neutral description of the potential connection between the two users, highlighting commonalities and differences.'),
     })
@@ -94,24 +83,27 @@ const blindExchangeProfileFlow = ai.defineFlow<
     outputSchema: BlindExchangeProfileOutputSchema,
   },
   async input => {
-    // Assuming getPsychologicalTraits returns an object with known structure,
-    // replace 'unknown' with a specific type if available.
-    const traits1: PsychologicalTraits = await getPsychologicalTraits(input.faceData1);
-    const traits2: PsychologicalTraits = await getPsychologicalTraits(input.faceData2);
+   const {psychologicalTraits, userProfile}= input;
+   
+  //const traits1: PsychologicalTraits = await getPsychologicalTraits(input.faceData1);
+    //const traits2: PsychologicalTraits = await getPsychologicalTraits(input.faceData2);
 
     // Calculate a compatibility score based on traits and interests
-    const compatibilityScore = calculateCompatibilityScore(traits1, traits2, input.interests1, input.interests2);
+    //const compatibilityScore = calculateCompatibilityScore(traits1, traits2, input.interests1, input.interests2);
 
     // Generate a profile description highlighting common interests and complementary traits
-    const profileDescription = generateProfileDescription(input.interests1, input.interests2, traits1, traits2);
+    //const profileDescription = generateProfileDescription(input.interests1, input.interests2, traits1, traits2);
 
-    const {output} = await blindExchangeProfilePrompt({
-      compatibilityScore,
-      profileDescription,
-    });
+    const {output} = await blindExchangeProfilePrompt({} as any);
     return output!;
   }
 );
+
+
+
+
+
+
 
 /**
  * Calculates a compatibility score based on interests and psychological traits.
@@ -122,8 +114,8 @@ const blindExchangeProfileFlow = ai.defineFlow<
  * @returns A number representing the compatibility score.
  */
 function calculateCompatibilityScore(
-  traits1: PsychologicalTraits, // Changed from any
-  traits2: PsychologicalTraits, // Changed from any
+  traits1: PsychologicalTraits, 
+  traits2: PsychologicalTraits, 
   interests1: string[],
   interests2: string[]
 ): number {
@@ -181,8 +173,8 @@ function calculateCompatibilityRate(interests1: string[], interests2: string[], 
 function generateProfileDescription(
   interests1: string[],
   interests2: string[],
-  traits1: PsychologicalTraits, // Changed from any
-  traits2: PsychologicalTraits  // Changed from any
+  traits1: PsychologicalTraits, 
+  traits2: PsychologicalTraits  
 ): string {
   let description = '';
 
