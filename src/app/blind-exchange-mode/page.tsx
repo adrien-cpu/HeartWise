@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from "next-intl";
 import { generateBlindExchangeProfile } from "@/ai/flows/blind-exchange-profile";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 interface User {
   id: string;
@@ -95,10 +94,11 @@ export default function BlindExchangeModePage() {
           <CardHeader>
             <CardTitle>{t("matchedProfile")}</CardTitle>
             <CardDescription>
-              {matchedProfile.profileDescription} (
-              {matchedProfile.compatibilityScore.toFixed(2)}% {t("compatibility")})
+              {/* Corrected property access based on generateBlindExchangeProfile output */}
+              {matchedProfile.compatibleProfile}
             </CardDescription>
           </CardHeader>
+           {/* Removed CardContent as it was unused */}
         </Card>
       ) : (
         <p className="text-center">{t("loading")}</p>

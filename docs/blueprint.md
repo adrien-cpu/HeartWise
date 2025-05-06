@@ -71,6 +71,18 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**.
   - Une bulle de discussion neutre
 - Les infos se dévoilent **progressivement** selon l'engagement mutuel
 
+#### Mini-jeux pour briser la glace:
+*   **Jeux Qui est-ce**: L'utilisateur peut jouer avec l'autre utilisateur afin de deviner qui il est.
+*   **Blind test musicale**: L'application propose un blind test de musique au 2 utilisateur. Le premier qui trouve le titre et l'artiste, gagne un point. 
+* **Jeu de culture général**: 
+    *   L'application pose des questions de culture générale aux utilisateurs.
+    *   A chaque bonne réponse, une partie de l'image/photo du potentiel partenaire se dévoile.
+    *   Il faut 20 bonnes réponses pour découvrir intégralement l'image.
+    *   L'utilisateur peut choisir le niveau de difficulté des questions (facile, moyen, difficile).
+    * L'utilisateur peut aussi choisir un thème pour les questions.
+    * Les questions sont générées par l'IA.
+    
+
 ## 🚀 Bonus et gamification
 - 🌟 Bonus de style : suggestions personnalisées du coach IA selon ton niveau de confort, ton style (romantique, direct, poétique, etc.)
 - 🎖️ Système de récompenses : badges, accès à des modes cachés, speed-dating premium, etc.

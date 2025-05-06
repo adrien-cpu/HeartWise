@@ -1,19 +1,19 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect, useCallback } from "react"; // Added useCallback
 import { useTranslations } from "next-intl";
-import { useState, useEffect, useCallback } from "react"; // Added useCallback
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { get_user_game_preferences, set_user_game_preferences, add_user_points, add_user_reward } from "@/services/user_profile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Added Tabs components
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"; // Added Card components
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"; // Added Card components, Imported CardFooter
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"; // Added Table components
 import { Trophy } from "lucide-react"; // Added Trophy icon
 import TimesUpGame from "@/components/game/times-up"; // Import the new TimesUpGame component
+import { Button } from "@/components/ui/button"; // Import Button
 
 // Mock data for General Knowledge questions
 const generalKnowledgeQuestions = [

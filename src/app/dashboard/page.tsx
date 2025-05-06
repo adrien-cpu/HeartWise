@@ -139,7 +139,7 @@ export default function DashboardPage() {
             {loading ? (
               <Skeleton className="h-10 w-full" />
             ) : (
-              <p className="text-sm italic">"{currentAdvice}"</p>
+              <p className="text-sm italic">{`"${currentAdvice}"`}</p>
             )}
           </CardContent>
         </Card>

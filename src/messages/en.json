@@ -253,7 +253,8 @@
     "audioCallDesc": "Connecting audio call with {name}. (Requires backend)",
     "messageFailedToSend": "Failed to send message.",
     "errorLoadingProfile": "Error loading your profile.",
-    "unknownUser": "Unknown User"
+    "unknownUser": "Unknown User",
+    "aiSuggestedTagTooltip": "AI Suggestion (click to use)"
   },
   "RiskyWordsDictionary": {
     "title": "Risky Words Dictionary",
@@ -338,5 +339,3 @@
       "toggleSidebar": "Toggle Sidebar"
    }
 }
-
-    

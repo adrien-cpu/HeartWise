@@ -253,7 +253,8 @@
     "audioCallDesc": "Connexion de l'appel audio avec {name}. (Nécessite un backend)",
     "messageFailedToSend": "Échec de l'envoi du message.",
     "errorLoadingProfile": "Erreur lors du chargement de votre profil.",
-    "unknownUser": "Utilisateur Inconnu"
+    "unknownUser": "Utilisateur Inconnu",
+    "aiSuggestedTagTooltip": "Suggestion IA (cliquer pour utiliser)"
   },
   "RiskyWordsDictionary": {
     "title": "Dictionnaire des Mots à Risque",

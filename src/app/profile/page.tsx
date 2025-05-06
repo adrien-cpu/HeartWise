@@ -171,10 +171,12 @@ export default function ProfilePage() {
          setPreviewUrl(uploadedImageUrl); // Update preview to the "uploaded" URL
        }
 
-      const updatedProfileData = {
+      const updatedProfileData: UserProfile = {
         ...profile,
         profilePicture: uploadedImageUrl, // Use the potentially updated URL
+        dataAiHint: profile.name ? `${profile.name.split(' ')[0].toLowerCase()} person` : 'person', // Add a basic AI hint
       };
+
 
       // Remove profilePicture from data sent if it wasn't changed and wasn't uploaded
       // This depends on how your backend handles updates. If it merges, sending undefined might clear it.
@@ -224,7 +226,8 @@ export default function ProfilePage() {
           name: "Alice",
           bio: "Loves hiking and photography.",
           interests: ["Hiking", "Photography", "Reading"],
-          // profilePicture: "https://picsum.photos/seed/alice/200", // Use picsum for initial placeholder
+          profilePicture: "https://picsum.photos/seed/alice/200", 
+          dataAiHint: "woman nature",
           privacySettings: { showLocation: true, showOnlineStatus: true }
       },
   };
@@ -248,6 +251,7 @@ export default function ProfilePage() {
               <Avatar
                   className={`h-32 w-32 border-4 border-muted group-hover:border-primary transition-colors ${isEditing ? 'cursor-pointer' : ''}`}
                   onClick={handleAvatarClick}
+                  data-ai-hint={profile.dataAiHint || "person placeholder"}
                 >
                 <AvatarImage src={previewUrl || undefined} alt={profile.name || 'User'} />
                 <AvatarFallback className="text-4xl">{getInitials(profile.name)}</AvatarFallback>

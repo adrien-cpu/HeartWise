@@ -14,6 +14,7 @@ export interface UserProfile {
   bio?: string;
   interests?: string[];
   profilePicture?: string; // URL to the profile picture
+  dataAiHint?: string; // Hint for AI image generation if profile picture is a placeholder
   privacySettings?: {
     showLocation?: boolean;
     showOnlineStatus?: boolean;
@@ -46,6 +47,7 @@ const mockUserData: { [key: string]: UserProfile } = {
     bio: "Loves hiking and photography.",
     interests: ["Hiking", "Photography", "Reading"],
     profilePicture: "https://picsum.photos/seed/alice/200", // Using Picsum for placeholder
+    dataAiHint: "woman nature",
     privacySettings: {
       showLocation: true,
       showOnlineStatus: true,
@@ -65,6 +67,7 @@ const mockUserData: { [key: string]: UserProfile } = {
     bio: "Passionate about cooking and travel.",
     interests: ["Cooking", "Travel"],
     profilePicture: "https://picsum.photos/seed/bob/200", // Using Picsum for placeholder
+    dataAiHint: "man kitchen",
     privacySettings: {
       showLocation: false,
       showOnlineStatus: true,
@@ -137,6 +140,7 @@ export async function update_user_profile(userId: string, profileData: Partial<U
      speedDatingSchedule: profileData.speedDatingSchedule !== undefined ? profileData.speedDatingSchedule : mockUserData[userId].speedDatingSchedule,
      gamePreferences: profileData.gamePreferences !== undefined ? profileData.gamePreferences : mockUserData[userId].gamePreferences,
      points: profileData.points !== undefined ? profileData.points : mockUserData[userId].points, // Merge points
+     dataAiHint: profileData.dataAiHint !== undefined ? profileData.dataAiHint : mockUserData[userId].dataAiHint, // Merge dataAiHint
   };
 
   console.log("Updated profile:", mockUserData[userId]);

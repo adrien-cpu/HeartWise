@@ -9,7 +9,7 @@
 - [x] Intelligent User Dashboard: Display personalized advice and user stats. (`/dashboard`)
 - [x] Risky Words Dictionary: Identify ambiguous or sensitive expressions in messages. (`/risky-words-dictionary`, `src/ai/flows/risky-words-dictionary.ts`)
 - [x] User Profile Management: View and edit user profile details. (`/profile`, `src/services/user_profile.ts`)
-- [x] Basic Chat Interface: Simulate conversations with mock data. (`/chat`)
+- [x] Basic Chat Interface: Simulate conversations with mock data. Includes AI-suggested intention tagging. (`/chat`, `src/ai/flows/intention-tagging.ts`)
 - [x] Speed Dating Interface: UI for scheduling and providing feedback (simulated). (`/speed-dating`)
 - [x] General Knowledge Game: Basic question/answer game. (`/game`)
 - [x] Rewards System (Basic): Display earned badges and points. (`/rewards`)
@@ -53,7 +53,7 @@ Un assistant intelligent intégré au tchat pour aider à créer une vraie alchi
 #### Fonctions principales :
 - [x] ✨ **Proposition de phrases d'accroche** (*Covered by AI Coach*)
 - [x] 🔍 **Analyse en temps réel** du message écrit : (*Covered by AI Coach & Risky Words*)
-- [ ] 🌟 **Tag d'intention** en option : tendre, humour, séduction, amical... (`/chat` - *UI allows selection*, needs **backend/AI logic**)
+- [x] 🌟 **Tag d'intention** en option : tendre, humour, séduction, amical... (`/chat`, `src/ai/flows/intention-tagging.ts` - *UI allows selection, AI suggests tags*)
 - [x] ⚠️ **Alerte aux malentendus** : mots à double sens ou émotions contradictoires. (*Covered by Risky Words*) (`/risky-words-dictionary`)
 - [x] 🤝 **Facilitateur d'échange** : reformule, relance ou clarifie au besoin. (*Covered by AI Coach*)
 
@@ -114,7 +114,7 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **[x] Speed Dating :** (`/speed-dating` - *UI + Feedback Simulation*, needs backend for scheduling/matching/feedback persistence)
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API*)
 *   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Mock Data*)
-*   **[x] Outils de Communication Intégrés à l'Application (Chat):** (`/chat` - *Enhanced UI/Mock Data*, needs backend for real-time/persistence/calls)
+*   **[x] Outils de Communication Intégrés à l'Application (Chat avec Tag d'Intention IA):** (`/chat`, `src/ai/flows/intention-tagging.ts` - *Enhanced UI/Mock Data/AI Suggestion*, needs backend for real-time/persistence/calls)
 *   **[x] Système de récompenses (basique) :** (`/rewards` - *Displays Mock Points/Badges*, needs backend)
 *   **[x] Tableau de bord utilisateur intelligent :** (`/dashboard` - *Displays Mock Advice/Stats*, needs backend)
 
@@ -130,7 +130,7 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **[ ] Feedback Post-Speed Dating (Persistance):** Connecter l'interface de feedback (`/speed-dating`) à un backend pour stocker les avis.
 *   **[ ] Dévoilement progressif (Blind Exchange):** Implémenter la logique pour révéler les informations progressivement dans le chat (`/blind-exchange-mode`).
 *   **[ ] Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage et le signalement utilisateur (`/risky-words-dictionary`).
-*   **[ ] Tags d'intention (Chat - Avancé):** Implémenter la logique IA backend pour analyser/suggérer des tags d'intention (`/chat`).
+*   **[ ] Tags d'intention (Chat - Avancé):** Affiner la logique IA backend pour analyser/suggérer des tags d'intention (`/chat`).
 
 
 *Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality.*

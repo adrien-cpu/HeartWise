@@ -125,7 +125,7 @@ export default function RiskyWordsDictionaryPage() {
                   <AccordionTrigger>
                     <span className="flex items-center gap-2">
                       <AlertTriangle className="h-4 w-4 text-destructive" />
-                      "{item.word}"
+                      &quot;{item.word}&quot;
                     </span>
                    </AccordionTrigger>
                   <AccordionContent className="space-y-3 pl-6">
@@ -139,7 +139,7 @@ export default function RiskyWordsDictionaryPage() {
                     </div>
                      <div>
                         <h4 className="font-semibold mb-1">{t('clarificationSuggestion')}</h4>
-                        <p className="text-sm text-muted-foreground italic">"{item.clarificationSuggestion}"</p>
+                        <p className="text-sm text-muted-foreground italic">&quot;{item.clarificationSuggestion}&quot;</p>
                     </div>
                   </AccordionContent>
                 </AccordionItem>
