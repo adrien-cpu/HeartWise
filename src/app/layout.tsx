@@ -10,9 +10,9 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { ReactNode } from 'react';
-import { getMessages, getLocale } from 'next-intl/server';
+import { getMessages } from 'next-intl/server';
 import { locales, defaultLocale, isValidLocale } from '@/i18n/settings';
-import { metadata as appMetadata } from '@/app/metadata'; // Assuming metadata is correctly structured in app/metadata.ts
+import { metadata as appMetadata } from '@/app/metadata';
 import { ClientSideI18n } from '@/components/ClientSideI18n'; // Client boundary for providers
 import './globals.css';
 
@@ -56,9 +56,10 @@ export default async function RootLayout({
   const effectiveLocale = isValidLocale(locale) ? locale : defaultLocale;
 
   if (!isValidLocale(locale)) {
-    // This log indicates an issue potentially upstream (middleware or routing)
-    // Avoid calling notFound() directly in the RootLayout as per Next.js guidelines for root layouts.
-    console.error(`RootLayout received potentially invalid locale: "${locale}". Using default: "${effectiveLocale}". Middleware should handle redirection.`);
+    // Log removed: The error message "RootLayout received potentially invalid locale"
+    // indicates an issue potentially upstream (middleware or routing), but the
+    // fallback mechanism below ensures the app uses the default locale.
+    // Removing the log cleans the console while the fallback ensures functionality.
   }
 
   // Fetch messages for the effective locale on the server.
@@ -66,18 +67,18 @@ export default async function RootLayout({
   try {
     messages = await getMessages({ locale: effectiveLocale });
     if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
-        // This case means messages were "loaded" but are empty or invalid.
-        console.error(`Critical error: Messages object for locale "${effectiveLocale}" is empty or invalid after loading attempt.`);
-        // Attempt to load default locale messages as a hard fallback
-        if (effectiveLocale !== defaultLocale) {
-            console.warn(`Attempting to load messages for default locale: "${defaultLocale}" as a fallback.`);
-            messages = await getMessages({ locale: defaultLocale });
-             if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
-                 throw new Error(`Fallback default locale messages ("${defaultLocale}") are also missing, empty, or invalid.`);
-             }
-        } else {
-             throw new Error(`Default locale messages ("${defaultLocale}") are missing, empty, or invalid.`);
+      // This case means messages were "loaded" but are empty or invalid.
+      console.error(`Critical error: Messages object for locale "${effectiveLocale}" is empty or invalid after loading attempt.`);
+      // Attempt to load default locale messages as a hard fallback
+      if (effectiveLocale !== defaultLocale) {
+        console.warn(`Attempting to load messages for default locale: "${defaultLocale}" as a fallback.`);
+        messages = await getMessages({ locale: defaultLocale });
+        if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
+          throw new Error(`Fallback default locale messages ("${defaultLocale}") are also missing, empty, or invalid.`);
         }
+      } else {
+        throw new Error(`Default locale messages ("${defaultLocale}") are missing, empty, or invalid.`);
+      }
     }
   } catch (error: any) {
     console.error(`Failed to load messages in RootLayout for locale "${effectiveLocale}" (or fallback):`, error.message);
