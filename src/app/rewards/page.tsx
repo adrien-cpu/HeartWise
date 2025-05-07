@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -79,8 +80,7 @@ export default function RewardsPage() {
 
     fetchRewards();
     fetchPoints();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast]); // Removed t from dependency array as it's stable
+  }, [t, toast]);
 
   // Helper to get an icon based on badge type (customize as needed)
   const getBadgeIcon = (type: string): React.ReactNode => {
@@ -223,3 +223,4 @@ export default function RewardsPage() {
     </div>
   );
 }
+

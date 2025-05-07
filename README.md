@@ -12,7 +12,7 @@
 - [x] Basic Chat Interface: Simulate conversations with mock data. Includes AI-suggested intention tagging. (`/chat`, `src/ai/flows/intention-tagging.ts`)
 - [x] Speed Dating Interface: UI for scheduling and providing feedback (simulated). (`/speed-dating`)
 - [x] General Knowledge Game: Basic question/answer game. (`/game`)
-- [x] Rewards System (Basic): Display earned badges and points. (`/rewards`)
+- [x] Rewards System: Display earned badges and points. (`/rewards`)
 
 ## Style Guidelines:
 
@@ -115,7 +115,7 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API*)
 *   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Mock Data*)
 *   **[x] Outils de Communication Intégrés à l'Application (Chat avec Tag d'Intention IA):** (`/chat`, `src/ai/flows/intention-tagging.ts` - *Enhanced UI/Mock Data/AI Suggestion*, needs backend for real-time/persistence/calls)
-*   **[x] Système de récompenses (basique) :** (`/rewards` - *Displays Mock Points/Badges*, needs backend)
+*   **[x] Système de récompenses :** (`/rewards` - *Displays Mock Points/Badges*, needs backend)
 *   **[x] Tableau de bord utilisateur intelligent :** (`/dashboard` - *Displays Mock Advice/Stats*, needs backend)
 
 ## Features to Implement / Enhance (Requires Backend & Advanced Logic):
@@ -134,4 +134,5 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 
 
 *Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality.*
+
 
