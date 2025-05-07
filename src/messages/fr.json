@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -358,6 +357,12 @@
     "badge_blind_exchange_participant_desc": "A essayé le mode Échange à l'Aveugle.",
     "badge_explorer_name": "Explorateur Local",
     "badge_explorer_desc": "A utilisé la fonctionnalité de Géolocalisation.",
+    "badge_chat_enthusiast_name": "Pilier de la Discussion",
+    "badge_chat_enthusiast_desc": "A envoyé plus de 50 messages.",
+    "badge_top_contributor_name": "Contributeur Émérite",
+    "badge_top_contributor_desc": "A fourni des retours ou contenus précieux.",
+    "badge_game_master_name": "Maître du Jeu",
+    "badge_game_master_desc": "A atteint un score élevé sur plusieurs jeux.",
     "yourPoints": "Vos Points",
     "pointsDesc": "Points gagnés pour les activités et les succès.",
     "noPoints": "Vous n'avez pas encore gagné de points.",
@@ -368,8 +373,11 @@
     "earnPointsFirstChat": "Commencer votre premier chat",
     "earnPointsGameWin": "Gagner une partie de jeu",
     "earnPointsSpeedDate": "Participer au Speed Dating",
+    "earnPointsBlindExchange": "Essayer le mode Échange à l'Aveugle",
+    "earnPointsManyMessages": "Envoyer 50+ messages",
     "pointsValue": "{value} pts",
-    "premiumFeaturesTitle": "Débloquer les Fonctionnalités Premium",
+    "exploreFeaturesLink": "Explorez les fonctionnalités pour en gagner plus !",
+    "premiumFeaturesTitle": "Fonctionnalités Premium",
     "premiumFeaturesDesc": "Utilisez vos points ou gagnez des badges spécifiques pour accéder à des avantages exclusifs.",
     "premiumMoreComingSoon": "Plus de fonctionnalités premium bientôt disponibles !",
     "premiumAdvancedFiltersTitle": "Filtres Avancés",
@@ -381,11 +389,15 @@
     "premiumExclusiveModesTitle": "Modes Exclusifs",
     "premiumExclusiveModesDesc": "Accédez à des modes de jeu spéciaux ou des styles d'interaction uniques.",
     "pointsNeeded": "Débloquer avec {value} points",
-    "badgeNeeded": "Débloquer avec le badge {value}",
+    "badgeNeeded": "Débloquer avec le badge '{value}'",
     "locked": "Verrouillé",
     "accessFeature": "Accéder à la Fonctionnalité",
-    "badgeProfileProName": "Profil Pro",
-    "badgeSpeedDaterName": "Speed Dater"
+    "featureUnlocked": "Débloquée !",
+    "unlockFeature": "Débloquer la Fonctionnalité",
+    "noPremiumFeatures": "Aucune fonctionnalité premium disponible actuellement.",
+    "unlockAdvancedFiltersDetails": "Atteignez {points} points pour débloquer les filtres de recherche avancés.",
+    "unlockProfileBoostDetails": "Gagnez le badge '{badgeName}' en étant un membre actif et utile de la communauté pour obtenir des boosts de profil.",
+    "unlockExclusiveModesDetails": "Maîtrisez les jeux et gagnez le badge '{badgeName}' pour accéder à des modes de jeu exclusifs."
   },
   "DashboardPage": {
     "welcome": "Bienvenue, {name} !",

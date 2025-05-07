@@ -1,9 +1,18 @@
 /**
  * @fileOverview Provides services for managing user profile data, including rewards and points.
  * @module user_profile
- * @description This module defines the UserProfile and UserReward interfaces and functions for retrieving/updating profiles, rewards, and points.
- *              Uses a mock in-memory store for demonstration.
+ * @description This module defines the UserProfile, UserReward, and PremiumFeatures interfaces and functions for retrieving/updating profiles, rewards, and points.
+ *              Uses a mock in-memory store for demonstration. It also simulates unlocking premium features.
  */
+
+/**
+ * Defines the structure for premium features available to users.
+ */
+export interface PremiumFeatures {
+  advancedFilters?: boolean; // e.g., Unlocked by points
+  profileBoost?: boolean;    // e.g., Unlocked by a specific badge
+  exclusiveModes?: boolean;  // e.g., Unlocked by another badge
+}
 
 /**
  * Represents the structure of a user profile.
@@ -11,20 +20,20 @@
 export interface UserProfile {
   id: string;
   name?: string;
-  email?: string; // Added email field
+  email?: string;
   bio?: string;
   interests?: string[];
-  profilePicture?: string; // URL to the profile picture
-  dataAiHint?: string; // Hint for AI image generation if profile picture is a placeholder
+  profilePicture?: string;
+  dataAiHint?: string;
   privacySettings?: {
     showLocation?: boolean;
     showOnlineStatus?: boolean;
   };
-  rewards?: UserReward[]; // User's earned badges/rewards
-  points?: number; // Gamification points
-  speedDatingSchedule?: string[]; // Added for Speed Dating feature
-  gamePreferences?: string[]; // Added for Game feature
-  // Add other fields like age, preferences, etc. as needed
+  rewards?: UserReward[];
+  points?: number;
+  speedDatingSchedule?: string[];
+  gamePreferences?: string[];
+  premiumFeatures?: PremiumFeatures; // Added premium features
 }
 
 /**
@@ -32,11 +41,11 @@ export interface UserProfile {
  */
 export interface UserReward {
     id: string;
-    name: string; // e.g., "First Chat Initiated"
-    description: string; // e.g., "Started your first conversation!"
-    type: string; // e.g., 'first_chat', 'profile_complete', 'game_winner'
+    name: string;
+    description: string;
+    type: string; // e.g., 'first_chat', 'profile_complete', 'game_winner', 'chat_enthusiast', 'top_contributor'
     dateEarned: Date;
-    icon?: string; // Optional: URL or identifier for a visual icon
+    icon?: string;
 }
 
 
@@ -48,7 +57,7 @@ const mockUserData: { [key: string]: UserProfile } = {
     email: "alice@example.com",
     bio: "Loves hiking and photography.",
     interests: ["Hiking", "Photography", "Reading"],
-    profilePicture: "https://picsum.photos/seed/alice/200", // Using Picsum for placeholder
+    profilePicture: "https://picsum.photos/seed/alice/200",
     dataAiHint: "woman nature",
     privacySettings: {
       showLocation: true,
@@ -59,9 +68,10 @@ const mockUserData: { [key: string]: UserProfile } = {
         { id: 'r2', name: 'Ice Breaker', description: 'Initiated your first chat.', type: 'first_chat', dateEarned: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
         { id: 'r3', name: 'Local Explorer', description: 'Checked out the geolocation feature.', type: 'explorer', dateEarned: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
     ],
-    points: 175, // Adjusted points for Alice
+    points: 175,
     speedDatingSchedule: [],
     gamePreferences: ["history", "geography"],
+    premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
   },
   "user2": {
     id: "user2",
@@ -69,18 +79,19 @@ const mockUserData: { [key: string]: UserProfile } = {
     email: "bob@example.com",
     bio: "Passionate about cooking and travel.",
     interests: ["Cooking", "Travel"],
-    profilePicture: "https://picsum.photos/seed/bob/200", // Using Picsum for placeholder
+    profilePicture: "https://picsum.photos/seed/bob/200",
     dataAiHint: "man kitchen",
     privacySettings: {
       showLocation: false,
       showOnlineStatus: true,
     },
     rewards: [
-        { id: 'r4', name: 'Profile Complete', description: 'Filled out your profile details.', type: 'profile_complete', dateEarned: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) }
+        { id: 'r4', name: 'Profile Pro', description: 'Filled out your profile details.', type: 'profile_complete', dateEarned: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) }
     ],
-    points: 50, // Initial points for Bob
+    points: 50,
     speedDatingSchedule: [],
     gamePreferences: ["science"],
+    premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
   },
   "user3": {
     id: "user3",
@@ -94,10 +105,12 @@ const mockUserData: { [key: string]: UserProfile } = {
     rewards: [
         { id: 'r5', name: 'Profile Pro', description: 'Filled out your profile details.', type: 'profile_complete', dateEarned: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
         { id: 'r6', name: 'Quiz Whiz', description: 'Won a round in the game.', type: 'game_winner', dateEarned: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000) },
+        { id: 'r9', name: 'Top Contributor', description: 'Provided valuable feedback or content.', type: 'top_contributor', dateEarned: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
     ],
-    points: 210, // Charlie has more points
+    points: 210,
     speedDatingSchedule: [],
     gamePreferences: ["science", "history"],
+    premiumFeatures: { advancedFilters: false, profileBoost: true, exclusiveModes: false }, // Charlie has Profile Boost
   },
    "user4": {
     id: "user4",
@@ -112,14 +125,16 @@ const mockUserData: { [key: string]: UserProfile } = {
          { id: 'r7', name: 'Profile Pro', description: 'Filled out your profile details.', type: 'profile_complete', dateEarned: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
          { id: 'r8', name: 'Speed Dater', description: 'Participated in a Speed Dating session.', type: 'speed_dater', dateEarned: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
     ],
-    points: 95,
+    points: 550, // Diana has enough for advanced filters
     speedDatingSchedule: [],
     gamePreferences: ["music", "geography"],
+    premiumFeatures: { advancedFilters: true, profileBoost: false, exclusiveModes: false }, // Diana has Advanced Filters
    },
 };
 
 /**
  * Retrieves the profile for a given user ID.
+ * Initializes rewards, points, and premium features if missing.
  * @async
  * @function get_user
  * @param {string} userId - The ID of the user.
@@ -128,25 +143,32 @@ const mockUserData: { [key: string]: UserProfile } = {
  */
 export async function get_user(userId: string): Promise<UserProfile> {
   console.log(`Fetching profile for user: ${userId}`);
-  await new Promise(resolve => setTimeout(resolve, 300)); // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 300));
 
   const user = mockUserData[userId];
   if (!user) {
     throw new Error(`User with ID ${userId} not found.`);
   }
+
+  // Ensure defaults are set
+  if (!user.rewards) user.rewards = [];
+  if (user.points === undefined) user.points = 0;
+  if (!user.premiumFeatures) user.premiumFeatures = { advancedFilters: false, profileBoost: false, exclusiveModes: false };
+  if (user.premiumFeatures.advancedFilters === undefined) user.premiumFeatures.advancedFilters = false;
+  if (user.premiumFeatures.profileBoost === undefined) user.premiumFeatures.profileBoost = false;
+  if (user.premiumFeatures.exclusiveModes === undefined) user.premiumFeatures.exclusiveModes = false;
+  if (!user.speedDatingSchedule) user.speedDatingSchedule = [];
+  if (!user.gamePreferences) user.gamePreferences = [];
+  if (!user.privacySettings) user.privacySettings = { showLocation: true, showOnlineStatus: true };
+
+
   console.log("Fetched profile:", user);
-  // Ensure rewards and points are initialized if missing
-  if (!user.rewards) {
-      user.rewards = [];
-  }
-  if (user.points === undefined) {
-      user.points = 0;
-  }
   return user;
 }
 
 /**
  * Updates the profile for a given user ID.
+ * Merges provided data with existing profile data.
  * @async
  * @function update_user_profile
  * @param {string} userId - The ID of the user to update.
@@ -156,44 +178,60 @@ export async function get_user(userId: string): Promise<UserProfile> {
  */
 export async function update_user_profile(userId: string, profileData: Partial<UserProfile>): Promise<UserProfile> {
   console.log(`Updating profile for user: ${userId}`, profileData);
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 500));
 
-  if (!mockUserData[userId]) {
+  const existingUser = mockUserData[userId];
+
+  if (!existingUser) {
     // If user doesn't exist, create them (useful for signup)
-    if (!profileData.id) profileData.id = userId; // Ensure ID is set
-     mockUserData[userId] = profileData as UserProfile; // Assume complete profile on creation
-     console.log("Created new profile:", mockUserData[userId]);
-  } else {
-     // Merge the new data with the existing profile
     mockUserData[userId] = {
-      ...mockUserData[userId],
-      ...profileData,
-      // Ensure privacy settings are merged correctly
-      privacySettings: {
-        ...(mockUserData[userId].privacySettings || {}), // Existing settings or empty object
-        ...(profileData.privacySettings || {}),       // New settings or empty object
-      },
-      // Note: Rewards are typically added via specific actions, not general profile updates.
-      // Merging interests, schedule, preferences correctly if they are part of the update
-       interests: profileData.interests !== undefined ? profileData.interests : mockUserData[userId].interests,
-       speedDatingSchedule: profileData.speedDatingSchedule !== undefined ? profileData.speedDatingSchedule : mockUserData[userId].speedDatingSchedule,
-       gamePreferences: profileData.gamePreferences !== undefined ? profileData.gamePreferences : mockUserData[userId].gamePreferences,
-       points: profileData.points !== undefined ? profileData.points : mockUserData[userId].points, // Merge points
-       dataAiHint: profileData.dataAiHint !== undefined ? profileData.dataAiHint : mockUserData[userId].dataAiHint, // Merge dataAiHint
+      id: userId,
+      name: profileData.name,
+      email: profileData.email,
+      bio: profileData.bio,
+      interests: profileData.interests || [],
+      profilePicture: profileData.profilePicture,
+      dataAiHint: profileData.dataAiHint,
+      privacySettings: profileData.privacySettings || { showLocation: true, showOnlineStatus: true },
+      rewards: profileData.rewards || [],
+      points: profileData.points || 0,
+      speedDatingSchedule: profileData.speedDatingSchedule || [],
+      gamePreferences: profileData.gamePreferences || [],
+      premiumFeatures: profileData.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false },
     };
-     console.log("Updated profile:", mockUserData[userId]);
+    console.log("Created new profile:", mockUserData[userId]);
+  } else {
+    // Merge the new data with the existing profile
+    mockUserData[userId] = {
+      ...existingUser,
+      ...profileData,
+      privacySettings: {
+        ...(existingUser.privacySettings || {}),
+        ...(profileData.privacySettings || {}),
+      },
+      premiumFeatures: {
+        ...(existingUser.premiumFeatures || {}),
+        ...(profileData.premiumFeatures || {}),
+      },
+      interests: profileData.interests !== undefined ? profileData.interests : existingUser.interests,
+      speedDatingSchedule: profileData.speedDatingSchedule !== undefined ? profileData.speedDatingSchedule : existingUser.speedDatingSchedule,
+      gamePreferences: profileData.gamePreferences !== undefined ? profileData.gamePreferences : existingUser.gamePreferences,
+      points: profileData.points !== undefined ? profileData.points : existingUser.points,
+      dataAiHint: profileData.dataAiHint !== undefined ? profileData.dataAiHint : existingUser.dataAiHint,
+    };
+    console.log("Updated profile:", mockUserData[userId]);
   }
 
+  // Re-ensure defaults after merging, especially for nested objects
+  const user = mockUserData[userId];
+  if (!user.rewards) user.rewards = [];
+  if (user.points === undefined) user.points = 0;
+  if (!user.premiumFeatures) user.premiumFeatures = { advancedFilters: false, profileBoost: false, exclusiveModes: false };
+  if (user.premiumFeatures.advancedFilters === undefined) user.premiumFeatures.advancedFilters = false;
+  if (user.premiumFeatures.profileBoost === undefined) user.premiumFeatures.profileBoost = false;
+  if (user.premiumFeatures.exclusiveModes === undefined) user.premiumFeatures.exclusiveModes = false;
 
-  // Ensure default values for new or potentially incomplete profiles
-  if (!mockUserData[userId].rewards) mockUserData[userId].rewards = [];
-  if (mockUserData[userId].points === undefined) mockUserData[userId].points = 0;
-  if (!mockUserData[userId].speedDatingSchedule) mockUserData[userId].speedDatingSchedule = [];
-  if (!mockUserData[userId].gamePreferences) mockUserData[userId].gamePreferences = [];
-  if (!mockUserData[userId].privacySettings) mockUserData[userId].privacySettings = { showLocation: true, showOnlineStatus: true };
-
-
-  return mockUserData[userId];
+  return user;
 }
 
 
@@ -207,19 +245,48 @@ export async function update_user_profile(userId: string, profileData: Partial<U
  */
 export async function get_user_rewards(userId: string): Promise<UserReward[]> {
   console.log(`Fetching rewards for user: ${userId}`);
-  await new Promise(resolve => setTimeout(resolve, 250)); // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 250));
 
-  const user = mockUserData[userId];
-  if (!user) {
-    throw new Error(`User with ID ${userId} not found.`);
-  }
-
-  return user.rewards || []; // Return rewards array or empty array if undefined
+  const user = await get_user(userId); // Ensures user and defaults are loaded
+  return user.rewards || [];
 }
 
 /**
+ * Checks and potentially unlocks premium features based on user's points and rewards.
+ * This function is called internally after points or rewards are updated.
+ * @param {string} userId - The ID of the user.
+ */
+async function checkAndUnlockPremiumFeatures(userId: string): Promise<void> {
+    const user = mockUserData[userId];
+    if (!user || !user.premiumFeatures) return;
+
+    // Unlock Advanced Filters by points
+    if (!user.premiumFeatures.advancedFilters && (user.points || 0) >= 500) {
+        user.premiumFeatures.advancedFilters = true;
+        console.log(`User ${userId} unlocked Advanced Filters.`);
+        // Potentially toast this in the UI layer after the update
+    }
+
+    // Unlock Profile Boost by 'top_contributor' badge
+    if (!user.premiumFeatures.profileBoost && user.rewards?.some(r => r.type === 'top_contributor')) {
+        user.premiumFeatures.profileBoost = true;
+        console.log(`User ${userId} unlocked Profile Boost.`);
+    }
+
+    // Unlock Exclusive Modes by 'game_master' badge
+    if (!user.premiumFeatures.exclusiveModes && user.rewards?.some(r => r.type === 'game_master')) {
+        user.premiumFeatures.exclusiveModes = true;
+        console.log(`User ${userId} unlocked Exclusive Game Modes.`);
+    }
+    // Persist changes if this were a real backend
+    // await update_user_profile(userId, { premiumFeatures: user.premiumFeatures }); // This would cause a loop here, so update mockUserData directly
+    mockUserData[userId] = user;
+}
+
+
+/**
  * Adds a reward to a user's profile (if they haven't earned it already).
- * Also adds points associated with the reward type.
+ * Also adds points associated with the reward type and checks for premium feature unlocks.
  * @async
  * @function add_user_reward
  * @param {string} userId - The ID of the user.
@@ -228,47 +295,35 @@ export async function get_user_rewards(userId: string): Promise<UserReward[]> {
  */
 export async function add_user_reward(userId: string, rewardData: Omit<UserReward, 'id' | 'dateEarned'>): Promise<boolean> {
     console.log(`Attempting to add reward type ${rewardData.type} for user: ${userId}`);
-    await new Promise(resolve => setTimeout(resolve, 100)); // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-    const user = mockUserData[userId];
-    if (!user) {
-        console.error(`User not found: ${userId}`);
-        return false;
-    }
+    const user = await get_user(userId); // Ensures user and defaults are loaded
 
-    if (!user.rewards) {
-        user.rewards = [];
-    }
-     if (user.points === undefined) {
-        user.points = 0;
-    }
-
-    // Check if the user already has this type of reward
-    const hasReward = user.rewards.some(r => r.type === rewardData.type);
+    const hasReward = user.rewards!.some(r => r.type === rewardData.type);
 
     if (!hasReward) {
         const newReward: UserReward = {
             ...rewardData,
-            id: `r${Date.now()}-${Math.random().toString(16).substring(2, 8)}`, // Generate unique ID
+            id: `r${Date.now()}-${Math.random().toString(16).substring(2, 8)}`,
             dateEarned: new Date(),
         };
-        user.rewards.push(newReward);
+        user.rewards!.push(newReward);
 
-        // Add points based on reward type (example values)
         const pointsToAdd = getPointsForReward(rewardData.type);
-        user.points += pointsToAdd;
+        user.points! += pointsToAdd;
 
         console.log(`Reward ${rewardData.type} added for user ${userId}. Points added: ${pointsToAdd}. Total points: ${user.points}`);
+        mockUserData[userId] = user; // Update mock data
+        await checkAndUnlockPremiumFeatures(userId); // Check for unlocks
         return true;
     } else {
          console.log(`User ${userId} already has reward ${rewardData.type}`);
-        return false; // Reward already exists
+        return false;
     }
 }
 
 /**
  * Retrieves the speed dating schedule for a user.
- * Mock implementation.
  * @param {string} userId - The ID of the user.
  * @returns {Promise<string[]>} A promise resolving to the user's schedule.
  */
@@ -279,7 +334,6 @@ export async function get_user_speed_dating_schedule(userId: string): Promise<st
 
 /**
  * Sets the speed dating schedule for a user.
- * Mock implementation.
  * @param {string} userId - The ID of the user.
  * @param {string[]} schedule - The new schedule.
  * @returns {Promise<void>}
@@ -290,7 +344,6 @@ export async function set_user_speed_dating_schedule(userId: string, schedule: s
 
 /**
  * Retrieves the game preferences for a user.
- * Mock implementation.
  * @param {string} userId - The ID of the user.
  * @returns {Promise<string[]>} A promise resolving to the user's game preferences.
  */
@@ -301,7 +354,6 @@ export async function get_user_game_preferences(userId: string): Promise<string[
 
 /**
  * Sets the game preferences for a user.
- * Mock implementation.
  * @param {string} userId - The ID of the user.
  * @param {string[]} preferences - The new game preferences.
  * @returns {Promise<void>}
@@ -323,7 +375,7 @@ export async function get_user_points(userId: string): Promise<number> {
 }
 
 /**
- * Adds points to a user's profile.
+ * Adds points to a user's profile and checks for premium feature unlocks.
  * @async
  * @function add_user_points
  * @param {string} userId - The ID of the user.
@@ -333,19 +385,15 @@ export async function get_user_points(userId: string): Promise<number> {
  */
 export async function add_user_points(userId: string, pointsToAdd: number): Promise<number> {
   console.log(`Adding ${pointsToAdd} points to user: ${userId}`);
-  await new Promise(resolve => setTimeout(resolve, 50)); // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 50));
 
-  if (!mockUserData[userId]) {
-    throw new Error(`User with ID ${userId} not found.`);
-  }
+  const user = await get_user(userId); // Ensures user and defaults are loaded
 
-  if (mockUserData[userId].points === undefined) {
-    mockUserData[userId].points = 0;
-  }
-
-  mockUserData[userId].points! += pointsToAdd;
-  console.log(`User ${userId} new total points: ${mockUserData[userId].points}`);
-  return mockUserData[userId].points!;
+  user.points! += pointsToAdd;
+  console.log(`User ${userId} new total points: ${user.points}`);
+  mockUserData[userId] = user; // Update mock data
+  await checkAndUnlockPremiumFeatures(userId); // Check for unlocks
+  return user.points!;
 }
 
 
@@ -359,22 +407,39 @@ function getPointsForReward(rewardType: string): number {
         case 'game_winner': return 15;
         case 'blind_exchange_participant': return 20;
         case 'explorer': return 10;
-        default: return 5; // Default points for unknown badges
+        case 'chat_enthusiast': return 35; // New badge
+        case 'top_contributor': return 100; // New badge
+        case 'game_master': return 75; // New badge
+        default: return 5;
     }
 }
 
 /**
  * Retrieves all user profiles (for leaderboard simulation).
+ * Ensures points and premium features are initialized for all users.
  * @async
  * @function get_all_users
  * @returns {Promise<UserProfile[]>} A promise that resolves to an array of all user profiles.
  */
 export async function get_all_users(): Promise<UserProfile[]> {
   console.log("Fetching all user profiles for leaderboard");
-  await new Promise(resolve => setTimeout(resolve, 400)); // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 400));
   return Object.values(mockUserData).map(user => ({
-    // Ensure points field exists for sorting
     ...user,
     points: user.points ?? 0,
+    rewards: user.rewards ?? [],
+    premiumFeatures: user.premiumFeatures ?? { advancedFilters: false, profileBoost: false, exclusiveModes: false },
   }));
+}
+
+/**
+ * Retrieves the premium features status for a given user.
+ * @async
+ * @function get_user_premium_features
+ * @param {string} userId - The ID of the user.
+ * @returns {Promise<PremiumFeatures>} A promise resolving to the user's premium features status.
+ */
+export async function get_user_premium_features(userId: string): Promise<PremiumFeatures> {
+    const user = await get_user(userId);
+    return user.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
 }
