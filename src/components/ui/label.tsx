@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -23,9 +24,11 @@ const Label = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root> &
     VariantProps<typeof labelVariants>
->(({ className, ...props }, ref) => (
+>(({ className, htmlFor, id, ...props }, ref) => ( // Accept htmlFor and id props
   <LabelPrimitive.Root
     ref={ref}
+    htmlFor={htmlFor} // Pass htmlFor to the underlying primitive
+    id={id} // Pass id if provided (for aria-labelledby)
     className={cn(labelVariants(), className)}
     {...props}
   />

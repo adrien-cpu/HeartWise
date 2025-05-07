@@ -11,6 +11,7 @@
 export interface UserProfile {
   id: string;
   name?: string;
+  email?: string; // Added email field
   bio?: string;
   interests?: string[];
   profilePicture?: string; // URL to the profile picture
@@ -44,6 +45,7 @@ const mockUserData: { [key: string]: UserProfile } = {
   "user1": {
     id: "user1",
     name: "Alice",
+    email: "alice@example.com",
     bio: "Loves hiking and photography.",
     interests: ["Hiking", "Photography", "Reading"],
     profilePicture: "https://picsum.photos/seed/alice/200", // Using Picsum for placeholder
@@ -53,17 +55,18 @@ const mockUserData: { [key: string]: UserProfile } = {
       showOnlineStatus: true,
     },
     rewards: [
-        { id: 'r1', name: 'Profile Complete', description: 'Filled out your profile details.', type: 'profile_complete', dateEarned: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
-        { id: 'r2', name: 'First Chat', description: 'Initiated your first chat.', type: 'first_chat', dateEarned: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
-        { id: 'r3', name: 'Explorer', description: 'Checked out the geolocation feature.', type: 'explorer', dateEarned: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
+        { id: 'r1', name: 'Profile Pro', description: 'Filled out your profile details.', type: 'profile_complete', dateEarned: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) },
+        { id: 'r2', name: 'Ice Breaker', description: 'Initiated your first chat.', type: 'first_chat', dateEarned: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) },
+        { id: 'r3', name: 'Local Explorer', description: 'Checked out the geolocation feature.', type: 'explorer', dateEarned: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
     ],
-    points: 150, // Initial points for Alice
+    points: 175, // Adjusted points for Alice
     speedDatingSchedule: [],
     gamePreferences: ["history", "geography"],
   },
   "user2": {
     id: "user2",
     name: "Bob",
+    email: "bob@example.com",
     bio: "Passionate about cooking and travel.",
     interests: ["Cooking", "Travel"],
     profilePicture: "https://picsum.photos/seed/bob/200", // Using Picsum for placeholder
@@ -79,6 +82,40 @@ const mockUserData: { [key: string]: UserProfile } = {
     speedDatingSchedule: [],
     gamePreferences: ["science"],
   },
+  "user3": {
+    id: "user3",
+    name: "Charlie",
+    email: "charlie@example.com",
+    bio: "Tech enthusiast and bookworm.",
+    interests: ["Tech", "Books", "Gaming"],
+    profilePicture: "https://picsum.photos/seed/charlie/200",
+    dataAiHint: "person reading",
+    privacySettings: { showLocation: true, showOnlineStatus: false },
+    rewards: [
+        { id: 'r5', name: 'Profile Pro', description: 'Filled out your profile details.', type: 'profile_complete', dateEarned: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000) },
+        { id: 'r6', name: 'Quiz Whiz', description: 'Won a round in the game.', type: 'game_winner', dateEarned: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000) },
+    ],
+    points: 210, // Charlie has more points
+    speedDatingSchedule: [],
+    gamePreferences: ["science", "history"],
+  },
+   "user4": {
+    id: "user4",
+    name: "Diana",
+    email: "diana@example.com",
+    bio: "Outdoor adventurer and music lover.",
+    interests: ["Hiking", "Music", "Travel", "Sports"],
+    profilePicture: "https://picsum.photos/seed/diana/200",
+    dataAiHint: "woman mountains",
+    privacySettings: { showLocation: true, showOnlineStatus: true },
+    rewards: [
+         { id: 'r7', name: 'Profile Pro', description: 'Filled out your profile details.', type: 'profile_complete', dateEarned: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
+         { id: 'r8', name: 'Speed Dater', description: 'Participated in a Speed Dating session.', type: 'speed_dater', dateEarned: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) },
+    ],
+    points: 95,
+    speedDatingSchedule: [],
+    gamePreferences: ["music", "geography"],
+   },
 };
 
 /**
@@ -122,28 +159,40 @@ export async function update_user_profile(userId: string, profileData: Partial<U
   await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
 
   if (!mockUserData[userId]) {
-    throw new Error(`User with ID ${userId} not found.`);
+    // If user doesn't exist, create them (useful for signup)
+    if (!profileData.id) profileData.id = userId; // Ensure ID is set
+     mockUserData[userId] = profileData as UserProfile; // Assume complete profile on creation
+     console.log("Created new profile:", mockUserData[userId]);
+  } else {
+     // Merge the new data with the existing profile
+    mockUserData[userId] = {
+      ...mockUserData[userId],
+      ...profileData,
+      // Ensure privacy settings are merged correctly
+      privacySettings: {
+        ...(mockUserData[userId].privacySettings || {}), // Existing settings or empty object
+        ...(profileData.privacySettings || {}),       // New settings or empty object
+      },
+      // Note: Rewards are typically added via specific actions, not general profile updates.
+      // Merging interests, schedule, preferences correctly if they are part of the update
+       interests: profileData.interests !== undefined ? profileData.interests : mockUserData[userId].interests,
+       speedDatingSchedule: profileData.speedDatingSchedule !== undefined ? profileData.speedDatingSchedule : mockUserData[userId].speedDatingSchedule,
+       gamePreferences: profileData.gamePreferences !== undefined ? profileData.gamePreferences : mockUserData[userId].gamePreferences,
+       points: profileData.points !== undefined ? profileData.points : mockUserData[userId].points, // Merge points
+       dataAiHint: profileData.dataAiHint !== undefined ? profileData.dataAiHint : mockUserData[userId].dataAiHint, // Merge dataAiHint
+    };
+     console.log("Updated profile:", mockUserData[userId]);
   }
 
-  // Merge the new data with the existing profile
-  mockUserData[userId] = {
-    ...mockUserData[userId],
-    ...profileData,
-    // Ensure privacy settings are merged correctly
-    privacySettings: {
-      ...(mockUserData[userId].privacySettings || {}), // Existing settings or empty object
-      ...(profileData.privacySettings || {}),       // New settings or empty object
-    },
-    // Note: Rewards are typically added via specific actions, not general profile updates.
-    // Merging interests, schedule, preferences correctly if they are part of the update
-     interests: profileData.interests !== undefined ? profileData.interests : mockUserData[userId].interests,
-     speedDatingSchedule: profileData.speedDatingSchedule !== undefined ? profileData.speedDatingSchedule : mockUserData[userId].speedDatingSchedule,
-     gamePreferences: profileData.gamePreferences !== undefined ? profileData.gamePreferences : mockUserData[userId].gamePreferences,
-     points: profileData.points !== undefined ? profileData.points : mockUserData[userId].points, // Merge points
-     dataAiHint: profileData.dataAiHint !== undefined ? profileData.dataAiHint : mockUserData[userId].dataAiHint, // Merge dataAiHint
-  };
 
-  console.log("Updated profile:", mockUserData[userId]);
+  // Ensure default values for new or potentially incomplete profiles
+  if (!mockUserData[userId].rewards) mockUserData[userId].rewards = [];
+  if (mockUserData[userId].points === undefined) mockUserData[userId].points = 0;
+  if (!mockUserData[userId].speedDatingSchedule) mockUserData[userId].speedDatingSchedule = [];
+  if (!mockUserData[userId].gamePreferences) mockUserData[userId].gamePreferences = [];
+  if (!mockUserData[userId].privacySettings) mockUserData[userId].privacySettings = { showLocation: true, showOnlineStatus: true };
+
+
   return mockUserData[userId];
 }
 
@@ -312,4 +361,20 @@ function getPointsForReward(rewardType: string): number {
         case 'explorer': return 10;
         default: return 5; // Default points for unknown badges
     }
+}
+
+/**
+ * Retrieves all user profiles (for leaderboard simulation).
+ * @async
+ * @function get_all_users
+ * @returns {Promise<UserProfile[]>} A promise that resolves to an array of all user profiles.
+ */
+export async function get_all_users(): Promise<UserProfile[]> {
+  console.log("Fetching all user profiles for leaderboard");
+  await new Promise(resolve => setTimeout(resolve, 400)); // Simulate network delay
+  return Object.values(mockUserData).map(user => ({
+    // Ensure points field exists for sorting
+    ...user,
+    points: user.points ?? 0,
+  }));
 }
