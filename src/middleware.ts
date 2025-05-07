@@ -3,8 +3,8 @@ import createMiddleware from 'next-intl/middleware';
 import { locales, localePrefix, defaultLocale, pathnames } from '@/i18n/settings';
 
 /**
- * Middleware for handling internationalization (i18n) routing.
- *
+ * @fileOverview Middleware for handling internationalization (i18n) routing.
+ * @module Middleware
  * @description This middleware uses `next-intl` to manage locale detection and prefixing in routes.
  * It ensures that requests are correctly routed based on the detected or specified locale.
  * It uses the configuration defined in `i18n/settings.ts`.
@@ -22,6 +22,8 @@ export default createMiddleware({
   localePrefix,
 
   // Pathnames for internationalized routing (optional but recommended for complex apps)
+  // If you have specific path translations, define them in settings.ts
+  // e.g., pathnames: { '/about': { en: '/about-us', fr: '/a-propos' } }
   pathnames,
 });
 
@@ -39,7 +41,7 @@ export const config = {
     // - … if they start with `/api`, `/_next` or `/_vercel`
     // - … the ones containing a dot (e.g. `favicon.ico`)
     '/((?!api|_next|_vercel|.*\\..*).*)',
-    // Match all pathnames within `/users`, optionally including a locale prefix
-     //'/([\\w-]+)?/users/(.+)' // Uncomment if you have user-specific routes that need locale handling
+    // Optional: Match all pathnames within specific directories if needed, e.g.,
+    // '/(en|fr)/users/:path*'
   ]
 };

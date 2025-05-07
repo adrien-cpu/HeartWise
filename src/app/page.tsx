@@ -1,6 +1,7 @@
-
 "use client";
 
+import type { ReactNode } from 'react';
+import React, { useState, useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import {
@@ -19,42 +20,36 @@ import {
 import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useTranslations } from 'next-intl';
-import { useLocale } from 'next-intl';
-import { locales } from '@/i18n/settings';
+import { useTranslations, useLocale } from 'next-intl';
+import { locales, defaultLocale, isValidLocale } from '@/i18n/settings';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import { useRouter, usePathname } from 'next/navigation';
-import { useState, useTransition } from 'react';
 import { useAuth } from '@/contexts/AuthContext'; // Import useAuth hook
 import { Loader2 } from 'lucide-react'; // Import Loader2 for loading state
 
 /**
- * @fileOverview Home page component.
- *
- * @module Home
- *
- * @description This component is the main entry point or landing page of the HeartWise application.
- * It displays links to the core features and services, along with a sidebar for navigation.
- * It now also handles authentication state to display relevant UI elements.
+ * @fileOverview Home page component for the HeartWise application.
+ * @module HomePage
+ * @description This component serves as the main landing page and includes the primary navigation sidebar.
+ *              It displays links to core features and adapts the sidebar footer based on user authentication state.
  */
 
 
 /**
  * LanguageSwitcher component.
- *
+ * Allows users to switch the application's language.
  * @component
- * @description A component to switch the application language.
  * @returns {JSX.Element} The rendered LanguageSwitcher component.
  */
-function LanguageSwitcher() {
+function LanguageSwitcher(): JSX.Element {
     const t = useTranslations('Home');
-    const locale = useLocale();
+    const currentLocale = useLocale();
     const router = useRouter();
     const pathname = usePathname();
     const [isPending, startTransition] = useTransition();
@@ -65,20 +60,24 @@ function LanguageSwitcher() {
      */
     const onSelectChange = (nextLocale: string) => {
         startTransition(() => {
-            const currentPathWithoutLocale = pathname.startsWith(`/${locale}`) ? pathname.substring(`/${locale}`.length) : pathname;
-            router.replace(`/${nextLocale}${currentPathWithoutLocale || '/'}`); // Ensure path starts with /
+            // Remove current locale prefix if it exists
+            let newPathname = pathname;
+            if (isValidLocale(pathname.split('/')[1])) {
+                newPathname = pathname.substring(pathname.indexOf('/', 1));
+            }
+            router.replace(`/${nextLocale}${newPathname}`);
         });
     };
 
      return (
-        <Select value={locale} onValueChange={onSelectChange} disabled={isPending}>
-          <SelectTrigger className="w-full md:w-[180px]">
+        <Select value={currentLocale} onValueChange={onSelectChange} disabled={isPending}>
+          <SelectTrigger className="w-full md:w-[180px]" aria-label={t('selectLanguage')}>
             <SelectValue placeholder={t('selectLanguage')} />
           </SelectTrigger>
           <SelectContent>
-            {locales.map((cur) => (
-              <SelectItem key={cur} value={cur}>
-                {t('locale', {locale: cur})}
+            {locales.map((loc) => (
+              <SelectItem key={loc} value={loc}>
+                {t('locale', {locale: loc})}
               </SelectItem>
             ))}
           </SelectContent>
@@ -94,18 +93,27 @@ function LanguageSwitcher() {
  *              Adapts UI based on user authentication state.
  * @returns {JSX.Element} The rendered Home page layout.
  */
-export default function Home() {
+export default function Home(): JSX.Element {
   const t = useTranslations('Home');
   const { currentUser, loading: authLoading, logout } = useAuth(); // Get auth state and logout function
 
+  /**
+   * Generates initials from a user's name for avatar fallbacks.
+   * @param {string | null | undefined} name - The user's name.
+   * @returns {string} The initials (e.g., "JD" for "John Doe").
+   */
   const getInitials = (name?: string | null): string => {
-    if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    if (!name) return 'U'; // Default for User
+    const nameParts = name.split(' ');
+    if (nameParts.length > 1) {
+      return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
   };
 
   return (
-    // SidebarProvider is now in ClientSideI18n, so not needed here directly
-    // <SidebarProvider>
+    // SidebarProvider is now in ClientSideI18n, via RootLayout and ClientLayout
+    <div className="flex h-screen">
         <Sidebar className="bg-card text-card-foreground border-r">
             <SidebarHeader>
               <div className="flex items-center justify-between">
@@ -223,8 +231,8 @@ export default function Home() {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex h-12 w-full items-center justify-between rounded-md text-sm">
                       <div className="flex items-center gap-2 overflow-hidden">
-                        <Avatar className="h-7 w-7 border">
-                          <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} data-ai-hint="user avatar" />
+                        <Avatar className="h-7 w-7 border" data-ai-hint="user profile">
+                          <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || t('myAccount')} />
                           <AvatarFallback>{getInitials(currentUser.displayName)}</AvatarFallback>
                         </Avatar>
                         <span className="truncate">{currentUser.displayName || currentUser.email || t('myAccount')}</span>
@@ -263,6 +271,6 @@ export default function Home() {
                <Button size="lg" variant="default">{t('goToDashboard')}</Button>
              </Link>
         </main>
-    // </SidebarProvider>
+    </div>
   );
 }

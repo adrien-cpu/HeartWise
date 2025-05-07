@@ -1,7 +1,7 @@
 /**
  * @fileOverview Configuration settings for internationalization (i18n) using next-intl.
  * This file defines supported locales, default locale, pathnames, and provides
- * the configuration function for next-intl.
+ * the configuration function for next-intl. It runs on the server.
  */
 
 import { notFound } from 'next/navigation';
@@ -27,7 +27,7 @@ export default getRequestConfig(async ({ locale }) => {
   // Middleware is the primary place to handle redirection for invalid locales.
   if (!isValidLocale(locale)) {
     console.warn(`i18n.ts: Invalid or undefined locale "${locale}" detected. Using default locale "${resolvedLocale}". Middleware should handle redirection.`);
-    // Do NOT call notFound() here. Let the middleware redirect.
+    // Do NOT call notFound() here. Let the middleware redirect or RootLayout handle it.
   }
 
   let messages;
@@ -57,12 +57,12 @@ export default getRequestConfig(async ({ locale }) => {
      throw new Error(`Failed to load essential translation messages for locale "${resolvedLocale}" or default locale "${defaultLocale}". Error: ${error.message}`);
      // Alternatively, could return minimal default messages or trigger notFound(),
      // but throwing makes the configuration issue clear.
-     // notFound(); // Use cautiously, might hide underlying issues.
+     // Note: Calling notFound() here might not be ideal if RootLayout also tries to handle it.
   }
 
   // Return the locale and messages for the client provider.
   return {
-    locale: resolvedLocale, // <<< Add the resolved locale here
+    locale: resolvedLocale, // Crucial: Ensure locale is part of the returned object
     messages
   };
 });
