@@ -13,10 +13,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarProvider,
   SidebarSeparator,
   SidebarTrigger,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -33,6 +31,8 @@ import {
 } from "@/components/ui/select"
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useTransition } from 'react';
+import { useAuth } from '@/contexts/AuthContext'; // Import useAuth hook
+import { Loader2 } from 'lucide-react'; // Import Loader2 for loading state
 
 /**
  * @fileOverview Home page component.
@@ -41,60 +41,9 @@ import { useState, useTransition } from 'react';
  *
  * @description This component is the main entry point or landing page of the HeartWise application.
  * It displays links to the core features and services, along with a sidebar for navigation.
+ * It now also handles authentication state to display relevant UI elements.
  */
 
-/**
- * HomeClient component.
- *
- * @component
- * @description The main landing page content of the HeartWise application.
- * @returns {JSX.Element} The rendered Home page client content.
- */
-function HomeClient() {
-    const t = useTranslations('Home');
-
-    return (
-        <>
-            <h1 className="text-4xl font-bold mb-4">{t('dashboardTitle')}</h1>
-            <p className="text-lg mb-8">{t('dashboardDescription')}:</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                 <Link href="/dashboard">
-                    <Button className="w-full">{t('dashboard')}</Button> {/* Added Dashboard Link */}
-                 </Link>
-                <Link href="/geolocation-meeting">
-                    <Button className="w-full">{t('geolocationMeeting')}</Button>
-                </Link>
-                <Link href="/facial-analysis-matching">
-                    <Button className="w-full">{t('facialAnalysisMatching')}</Button>
-                </Link>
-                <Link href="/ai-conversation-coach">
-                    <Button className="w-full">{t('aiConversationCoach')}</Button>
-                </Link>
-                 <Link href="/risky-words-dictionary">
-                    <Button className="w-full">{t('riskyWordsDictionary')}</Button>
-                 </Link>
-                <Link href="/blind-exchange-mode">
-                    <Button className="w-full">{t('blindExchangeMode')}</Button>
-                </Link>
-                <Link href="/game">
-                    <Button className="w-full">{t('game')}</Button>
-                </Link>
-                 <Link href="/speed-dating">
-                  <Button className="w-full">{t('speedDating')}</Button>
-                </Link>
-                 <Link href="/chat">
-                  <Button className="w-full">{t('chat')}</Button>
-                </Link>
-                 <Link href="/rewards">
-                    <Button className="w-full">{t('rewards')}</Button>
-                 </Link>
-                <Link href="/profile">
-                    <Button variant="secondary" className="w-full">{t('profile')}</Button>
-                </Link>
-            </div>
-        </>
-    );
-}
 
 /**
  * LanguageSwitcher component.
@@ -123,7 +72,7 @@ function LanguageSwitcher() {
 
      return (
         <Select value={locale} onValueChange={onSelectChange} disabled={isPending}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full md:w-[180px]">
             <SelectValue placeholder={t('selectLanguage')} />
           </SelectTrigger>
           <SelectContent>
@@ -142,32 +91,40 @@ function LanguageSwitcher() {
  *
  * @component
  * @description The main layout structure for the home page, including the sidebar and main content area.
+ *              Adapts UI based on user authentication state.
  * @returns {JSX.Element} The rendered Home page layout.
  */
 export default function Home() {
   const t = useTranslations('Home');
+  const { currentUser, loading: authLoading, logout } = useAuth(); // Get auth state and logout function
+
+  const getInitials = (name?: string | null): string => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
 
   return (
-    <SidebarProvider>
-        <Sidebar className="bg-gray-100 dark:bg-gray-900">
+    // SidebarProvider is now in ClientSideI18n, so not needed here directly
+    // <SidebarProvider>
+        <Sidebar className="bg-card text-card-foreground border-r">
             <SidebarHeader>
               <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                    <h1 className="text-lg font-semibold">HeartWise</h1>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{t('tagline')}</p>
+                    <Link href="/" className="text-lg font-semibold hover:text-primary transition-colors">HeartWise</Link>
+                    <p className="text-sm text-muted-foreground">{t('tagline')}</p>
                   </div>
                   <SidebarTrigger className="md:hidden"/>
               </div>
             </SidebarHeader>
             <SidebarContent>
               <SidebarGroup>
-                 <SidebarGroupLabel>{t('navigation')}</SidebarGroupLabel> {/* Changed label */}
+                 <SidebarGroupLabel>{t('navigation')}</SidebarGroupLabel>
                  <SidebarMenu>
                     <SidebarMenuItem>
                        <Link href="/dashboard">
                          <SidebarMenuButton>
-                           <Icons.home className="mr-2 h-4 w-4"/> {/* Updated icon */}
-                           <span>{t('dashboard')}</span> {/* Added Dashboard Link */}
+                           <Icons.home className="mr-2"/>
+                           <span>{t('dashboard')}</span>
                          </SidebarMenuButton>
                        </Link>
                      </SidebarMenuItem>
@@ -180,7 +137,7 @@ export default function Home() {
                   <SidebarMenuItem>
                     <Link href="/geolocation-meeting">
                       <SidebarMenuButton>
-                        <Icons.mapPin className="mr-2 h-4 w-4"/> {/* Updated icon */}
+                        <Icons.mapPin className="mr-2"/>
                         <span>{t('geolocationMeeting')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -188,7 +145,7 @@ export default function Home() {
                   <SidebarMenuItem>
                     <Link href="/facial-analysis-matching">
                       <SidebarMenuButton>
-                        <Icons.scanFace className="mr-2 h-4 w-4"/> {/* Updated icon */}
+                        <Icons.scanFace className="mr-2"/>
                         <span>{t('facialAnalysisMatching')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -196,7 +153,7 @@ export default function Home() {
                   <SidebarMenuItem>
                     <Link href="/ai-conversation-coach">
                       <SidebarMenuButton>
-                        <Icons.messageSquare className="mr-2 h-4 w-4"/>
+                        <Icons.messageSquare className="mr-2"/>
                         <span>{t('aiConversationCoach')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -204,7 +161,7 @@ export default function Home() {
                    <SidebarMenuItem>
                      <Link href="/risky-words-dictionary">
                        <SidebarMenuButton>
-                         <Icons.book className="mr-2 h-4 w-4"/> {/* Using book icon */}
+                         <Icons.book className="mr-2"/>
                          <span>{t('riskyWordsDictionary')}</span>
                        </SidebarMenuButton>
                      </Link>
@@ -212,7 +169,7 @@ export default function Home() {
                   <SidebarMenuItem>
                     <Link href="/blind-exchange-mode">
                       <SidebarMenuButton>
-                        <Icons.eyeOff className="mr-2 h-4 w-4"/> {/* Updated icon */}
+                        <Icons.eyeOff className="mr-2"/>
                         <span>{t('blindExchangeMode')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -220,7 +177,7 @@ export default function Home() {
                    <SidebarMenuItem>
                     <Link href="/game">
                       <SidebarMenuButton>
-                        <Icons.gamepad className="mr-2 h-4 w-4"/>
+                        <Icons.gamepad className="mr-2"/>
                         <span>{t('game')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -228,7 +185,7 @@ export default function Home() {
                     <SidebarMenuItem>
                     <Link href="/speed-dating">
                       <SidebarMenuButton>
-                        <Icons.zap className="mr-2 h-4 w-4"/>
+                        <Icons.zap className="mr-2"/>
                         <span>{t('speedDating')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -236,7 +193,7 @@ export default function Home() {
                    <SidebarMenuItem>
                     <Link href="/chat">
                       <SidebarMenuButton>
-                        <Icons.messageCircle className="mr-2 h-4 w-4"/>
+                        <Icons.messageCircle className="mr-2"/>
                         <span>{t('chat')}</span>
                       </SidebarMenuButton>
                     </Link>
@@ -244,7 +201,7 @@ export default function Home() {
                    <SidebarMenuItem>
                       <Link href="/rewards">
                         <SidebarMenuButton>
-                          <Icons.award className="mr-2 h-4 w-4"/> {/* Added icon */}
+                          <Icons.award className="mr-2"/>
                           <span>{t('rewards')}</span>
                         </SidebarMenuButton>
                       </Link>
@@ -257,36 +214,55 @@ export default function Home() {
             </SidebarContent>
             <SidebarFooter>
               <SidebarSeparator/>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex h-8 w-full items-center justify-between rounded-md">
-                    <Avatar className="mr-2 h-6 w-6">
-                      <AvatarImage src="https://picsum.photos/50/50" alt="Avatar"/>
-                      <AvatarFallback>ME</AvatarFallback> {/* Placeholder initials */}
-                    </Avatar>
-                    <span>{t('myAccount')}</span>
-                    <Icons.chevronDown className="ml-2 h-4 w-4 opacity-50"/>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <Link href="/profile"><DropdownMenuItem><Icons.user className="mr-2 h-4 w-4"/>{t('profile')}</DropdownMenuItem></Link>
-                  <DropdownMenuItem><Icons.settings className="mr-2 h-4 w-4"/>{t('settings')}</DropdownMenuItem>
-                  <DropdownMenuSeparator/>
-                  <DropdownMenuItem><Icons.logOut className="mr-2 h-4 w-4"/>{t('logout')}</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {authLoading ? (
+                <div className="flex items-center justify-center h-12">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : currentUser ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex h-12 w-full items-center justify-between rounded-md text-sm">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <Avatar className="h-7 w-7 border">
+                          <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser.displayName || 'User'} data-ai-hint="user avatar" />
+                          <AvatarFallback>{getInitials(currentUser.displayName)}</AvatarFallback>
+                        </Avatar>
+                        <span className="truncate">{currentUser.displayName || currentUser.email || t('myAccount')}</span>
+                      </div>
+                      <Icons.chevronDown className="ml-2 h-4 w-4 opacity-50"/>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem asChild>
+                        <Link href="/profile"><Icons.user className="mr-2"/>{t('profile')}</Link>
+                    </DropdownMenuItem>
+                    {/* <DropdownMenuItem><Icons.settings className="mr-2"/>{t('settings')}</DropdownMenuItem> */}
+                    <DropdownMenuSeparator/>
+                    <DropdownMenuItem onClick={logout}>
+                        <Icons.logOut className="mr-2"/>{t('logout')}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                 <div className="grid grid-cols-2 gap-2 p-2">
+                    <Button variant="outline" asChild size="sm">
+                        <Link href="/login">{t('loginButton')}</Link>
+                    </Button>
+                    <Button variant="default" asChild size="sm">
+                        <Link href="/signup">{t('signupButton')}</Link>
+                    </Button>
+                 </div>
+              )}
             </SidebarFooter>
           </Sidebar>
 
-        <main className="flex flex-col items-center justify-center min-h-screen p-8 lg:ml-64">
-            {/* Removed HomeClient as this is the main entry page */}
-             <h1 className="text-4xl font-bold mb-4">{t('mainPageTitle')}</h1>
-             <p className="text-lg text-center max-w-prose mb-8">{t('mainPageDescription')}</p>
+        <main className="flex flex-col items-center justify-center min-h-screen p-8 lg:ml-[var(--sidebar-width)] transition-[margin-left] duration-300 ease-in-out group-data-[sidebar-state=collapsed]/sidebar-wrapper:lg:ml-[var(--sidebar-width-icon)]">
+             <h1 className="text-4xl font-bold mb-4 text-center">{t('mainPageTitle')}</h1>
+             <p className="text-lg text-center max-w-prose mb-8 text-muted-foreground">{t('mainPageDescription')}</p>
              <Link href="/dashboard">
-               <Button size="lg">{t('goToDashboard')}</Button>
+               <Button size="lg" variant="default">{t('goToDashboard')}</Button>
              </Link>
         </main>
-    </SidebarProvider>
+    // </SidebarProvider>
   );
 }
-

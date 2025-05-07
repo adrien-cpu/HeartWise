@@ -28,7 +28,9 @@ export const pathnames = {
   '/chat': '/chat',
   '/risky-words-dictionary': '/risky-words-dictionary',
   '/rewards': '/rewards',
-  '/dashboard': '/dashboard', // Added dashboard pathname
+  '/dashboard': '/dashboard',
+  '/login': '/login', // Added login pathname
+  '/signup': '/signup', // Added signup pathname
   // Add other paths as needed
 } satisfies Record<string, string>; // Use 'satisfies' for type checking without changing the type
 
@@ -40,3 +42,6 @@ export const pathnames = {
 export function isValidLocale(locale: string): locale is Locale {
   return locales.includes(locale as any);
 }
+
+// The `getRequestConfig` function should be in `i18n.ts` at the root, not here.
+// This file is for settings shared between middleware and the main config.

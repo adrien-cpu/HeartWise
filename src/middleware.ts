@@ -1,13 +1,13 @@
 
 import createMiddleware from 'next-intl/middleware';
-import { locales, localePrefix, defaultLocale, pathnames } from '@/i18n/settings'; // Keep importing settings from src
+import { locales, localePrefix, defaultLocale, pathnames } from '@/i18n/settings';
 
 /**
  * Middleware for handling internationalization (i18n) routing.
  *
  * @description This middleware uses `next-intl` to manage locale detection and prefixing in routes.
  * It ensures that requests are correctly routed based on the detected or specified locale.
- * It uses the configuration defined in `i18n.ts` (at the root).
+ * It uses the configuration defined in `i18n/settings.ts`.
  *
  * @see https://next-intl.dev/docs/routing/middleware
  */
@@ -21,13 +21,8 @@ export default createMiddleware({
   // The prefixing strategy
   localePrefix,
 
-  // Pathnames for internationalized routing (optional)
+  // Pathnames for internationalized routing (optional but recommended for complex apps)
   pathnames,
-
-  // The file where the configuration is defined
-  // This explicitly tells next-intl where to find the config
-  // Adjust if your config file is named differently or located elsewhere relative to root
-  pathnames // Already defined in settings, re-using here for clarity
 });
 
 /**

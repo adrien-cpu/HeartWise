@@ -1,19 +1,20 @@
+
 "use client"; // This component MUST be a client component
 
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { NextIntlClientProvider, AbstractIntlMessages } from 'next-intl';
-import { defaultLocale } from '@/i18n/settings'; // Import only what's needed
+import { AuthProvider } from '@/contexts/AuthContext'; // Import AuthProvider
 
 /**
  * ClientSideI18n component (Client Component Boundary).
- * Handles client-side initialization for NextIntlClientProvider.
+ * Handles client-side initialization for NextIntlClientProvider and AuthProvider.
  * It receives the locale and pre-loaded messages from the Server Component (RootLayout).
  *
  * @param {object} props - The props for the ClientSideI18n component.
  * @param {React.ReactNode} props.children - The children to render within the provider.
  * @param {string} props.locale - The effective locale passed from RootLayout.
  * @param {AbstractIntlMessages} props.messages - The pre-loaded messages passed from RootLayout.
- * @returns {JSX.Element} The rendered ClientSideI18n component with the provider.
+ * @returns {JSX.Element} The rendered ClientSideI18n component with the providers.
  */
 export function ClientSideI18n({
   children,
@@ -32,7 +33,11 @@ export function ClientSideI18n({
     // Render children directly without the provider as context is broken.
     // This prevents a hard crash but i18n functionality will be missing.
     // Consider a more robust error UI if needed.
-    return <>{children}</>; // Render children without provider
+    return (
+      <AuthProvider> {/* Still provide AuthContext even if i18n fails */}
+        {children}
+      </AuthProvider>
+    );
   }
 
   return (
@@ -40,7 +45,9 @@ export function ClientSideI18n({
       locale={locale} // Use the locale passed down from the server component
       messages={messages} // Use the messages passed down from the server component
     >
-      {children}
+      <AuthProvider>
+        {children}
+      </AuthProvider>
     </NextIntlClientProvider>
   );
 }
