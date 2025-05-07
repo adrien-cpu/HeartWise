@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -154,7 +153,13 @@
     "partnerReply1": "That's interesting! Tell me more.",
     "partnerReply2": "I see. What do you think about...?",
     "partnerReply3": "Oh, you like {interest}? That's cool!",
-    "partnerReply4": "Hmm, let me think..."
+    "partnerReply4": "Hmm, let me think...",
+    "revealedInterest": "✨ Revealed Interest: {value}",
+    "revealedBioSnippet": "✨ Revealed Bio Snippet: \"{value}\"",
+    "revealedPhoto": "✨ Partner's photo revealed!",
+    "nextRevealProgress": "Progress to next reveal",
+    "photo": "Photo",
+    "partnerPhotoAlt": "Partner's profile picture"
   },
   "Game": {
     "title": "Games Hub",
@@ -398,7 +403,9 @@
     "noPremiumFeatures": "No premium features currently available.",
     "unlockAdvancedFiltersDetails": "Reach {points} points to unlock advanced search filters.",
     "unlockProfileBoostDetails": "Earn the '{badgeName}' badge by being an active and helpful community member to get profile boosts.",
-    "unlockExclusiveModesDetails": "Master the games and earn the '{badgeName}' badge to access exclusive game modes."
+    "unlockExclusiveModesDetails": "Master the games and earn the '{badgeName}' badge to access exclusive game modes.",
+    "unlockProgress": "Unlock Progress",
+    "useFeature": "Use Feature"
   },
   "DashboardPage": {
     "welcome": "Welcome, {name}!",

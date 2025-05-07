@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -154,7 +153,13 @@
     "partnerReply1": "C'est intéressant ! Dites-m'en plus.",
     "partnerReply2": "Je vois. Que pensez-vous de... ?",
     "partnerReply3": "Oh, vous aimez {interest} ? C'est cool !",
-    "partnerReply4": "Hmm, laissez-moi réfléchir..."
+    "partnerReply4": "Hmm, laissez-moi réfléchir...",
+    "revealedInterest": "✨ Intérêt Révélé : {value}",
+    "revealedBioSnippet": "✨ Fragment de Bio Révélé : \"{value}\"",
+    "revealedPhoto": "✨ Photo du partenaire révélée !",
+    "nextRevealProgress": "Progression vers la prochaine révélation",
+    "photo": "Photo",
+    "partnerPhotoAlt": "Photo de profil du partenaire"
   },
   "Game": {
     "title": "Centre de Jeux",
@@ -398,7 +403,9 @@
     "noPremiumFeatures": "Aucune fonctionnalité premium disponible actuellement.",
     "unlockAdvancedFiltersDetails": "Atteignez {points} points pour débloquer les filtres de recherche avancés.",
     "unlockProfileBoostDetails": "Gagnez le badge '{badgeName}' en étant un membre actif et utile pour obtenir des boosts de profil.",
-    "unlockExclusiveModesDetails": "Maîtrisez les jeux et gagnez le badge '{badgeName}' pour accéder aux modes de jeu exclusifs."
+    "unlockExclusiveModesDetails": "Maîtrisez les jeux et gagnez le badge '{badgeName}' pour accéder aux modes de jeu exclusifs.",
+    "unlockProgress": "Progression du déblocage",
+    "useFeature": "Utiliser"
   },
   "DashboardPage": {
     "welcome": "Bienvenue, {name} !",

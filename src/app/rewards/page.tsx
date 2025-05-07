@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Award, MessageSquare, Users, Zap, Star, Gamepad2, Eye, MapPin, Trophy, HelpCircle, Lock, Sparkles, Brain, MessageCircleHeart, UserCheck } from 'lucide-react'; // Added new icons
+import { Award, MessageSquare, Users, Zap, Star, Gamepad2, Eye, MapPin, Trophy, HelpCircle, Lock, Sparkles, Brain, MessageCircleHeart, UserCheck, Filter, TrendingUp } from 'lucide-react'; // Added new icons including Filter, TrendingUp
 import { Skeleton } from '@/components/ui/skeleton';
 import { get_user, UserProfile, UserReward, PremiumFeatures } from '@/services/user_profile'; // Import necessary types
 import { useToast } from '@/hooks/use-toast';
@@ -12,19 +12,27 @@ import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import Link from 'next/link';
+import { Progress } from '@/components/ui/progress'; // Import Progress
 
 // Mock user ID - replace with actual user identification
 const userId = 'user1';
+
+// Define unlock thresholds
+const ADVANCED_FILTERS_POINTS_THRESHOLD = 500;
+const PROFILE_BOOST_BADGE_TYPE = 'top_contributor';
+const EXCLUSIVE_MODES_BADGE_TYPE = 'game_master';
+
 
 interface PremiumFeatureDisplayData {
   id: keyof PremiumFeatures; // Use keys from PremiumFeatures interface
   icon: React.ReactNode;
   titleKey: string;
   descriptionKey: string;
-  unlockConditionKey: string; // Key for the type of condition (e.g., 'pointsNeeded', 'badgeNeeded')
-  unlockValue: string | number; // The value needed (points amount or badge name/type)
+  unlockConditionKey: 'pointsNeeded' | 'badgeNeeded'; // Key for the type of condition
+  unlockValue: string | number; // The value needed (points amount or badge type)
   isLocked: boolean;
-  unlockDetails?: string; // More detailed explanation for unlocking
+  unlockDetails: string; // More detailed explanation for unlocking
+  progress?: number; // Optional progress percentage (0-100) towards unlocking
 }
 
 
@@ -37,7 +45,7 @@ interface PremiumFeatureDisplayData {
  * RewardsPage component.
  *
  * @component
- * @description Displays the user's earned badges, rewards, total points, and guides on how to earn more. Shows status of premium features.
+ * @description Displays the user's earned badges, rewards, total points, and guides on how to earn more. Shows status and progress of premium features.
  * @returns {JSX.Element} The rendered Rewards page.
  */
 export default function RewardsPage() {
@@ -47,8 +55,6 @@ export default function RewardsPage() {
 
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
-  
-  // Combined state for premium features display
   const [premiumFeaturesDisplay, setPremiumFeaturesDisplay] = useState<PremiumFeatureDisplayData[]>([]);
 
 
@@ -61,38 +67,43 @@ export default function RewardsPage() {
 
         // Ensure premium features object exists and has defaults
         const features = profile.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
+        const userPoints = profile.points || 0;
+        const userRewards = profile.rewards || [];
 
-        // Define premium features and their unlock status based on fetched profile
+        // Define premium features and their unlock status/progress based on fetched profile
         const featuresData: PremiumFeatureDisplayData[] = [
           {
             id: 'advancedFilters',
-            icon: <Icons.filter className="h-6 w-6 text-primary" />,
+            icon: <Filter className="h-6 w-6 text-primary" />, // Use Filter icon
             titleKey: 'premiumAdvancedFiltersTitle',
             descriptionKey: 'premiumAdvancedFiltersDesc',
             unlockConditionKey: 'pointsNeeded',
-            unlockValue: 500,
+            unlockValue: ADVANCED_FILTERS_POINTS_THRESHOLD,
             isLocked: !(features.advancedFilters),
-            unlockDetails: t('unlockAdvancedFiltersDetails', { points: 500 }),
+            unlockDetails: t('unlockAdvancedFiltersDetails', { points: ADVANCED_FILTERS_POINTS_THRESHOLD }),
+            progress: features.advancedFilters ? 100 : Math.min(100, Math.floor((userPoints / ADVANCED_FILTERS_POINTS_THRESHOLD) * 100)),
           },
           {
             id: 'profileBoost',
-            icon: <Icons.trendingUp className="h-6 w-6 text-primary" />,
+            icon: <TrendingUp className="h-6 w-6 text-primary" />, // Use TrendingUp icon
             titleKey: 'premiumProfileBoostTitle',
             descriptionKey: 'premiumProfileBoostDesc',
             unlockConditionKey: 'badgeNeeded',
-            unlockValue: t('badge_top_contributor_name'), // Use the actual badge name key
+            unlockValue: PROFILE_BOOST_BADGE_TYPE,
             isLocked: !(features.profileBoost),
-            unlockDetails: t('unlockProfileBoostDetails', { badgeName: t('badge_top_contributor_name') }),
+            unlockDetails: t('unlockProfileBoostDetails', { badgeName: t(`badge_${PROFILE_BOOST_BADGE_TYPE}_name`) }),
+            progress: features.profileBoost || userRewards.some(r => r.type === PROFILE_BOOST_BADGE_TYPE) ? 100 : 0, // 100% if unlocked or badge earned, 0% otherwise
           },
           {
             id: 'exclusiveModes',
-            icon: <Icons.gamepad2 className="h-6 w-6 text-primary" />,
+            icon: <Gamepad2 className="h-6 w-6 text-primary" />, // Use Gamepad2 icon
             titleKey: 'premiumExclusiveModesTitle',
             descriptionKey: 'premiumExclusiveModesDesc',
             unlockConditionKey: 'badgeNeeded',
-            unlockValue: t('badge_game_master_name'), // Use the actual badge name key
+            unlockValue: EXCLUSIVE_MODES_BADGE_TYPE,
             isLocked: !(features.exclusiveModes),
-            unlockDetails: t('unlockExclusiveModesDetails', { badgeName: t('badge_game_master_name') }),
+            unlockDetails: t('unlockExclusiveModesDetails', { badgeName: t(`badge_${EXCLUSIVE_MODES_BADGE_TYPE}_name`) }),
+            progress: features.exclusiveModes || userRewards.some(r => r.type === EXCLUSIVE_MODES_BADGE_TYPE) ? 100 : 0, // 100% if unlocked or badge earned, 0% otherwise
           },
         ];
         setPremiumFeaturesDisplay(featuresData);
@@ -242,7 +253,7 @@ export default function RewardsPage() {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {loadingProfile ? (
-                    [...Array(3)].map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-lg"/>)
+                    [...Array(3)].map((_, i) => <Skeleton key={i} className="h-52 w-full rounded-lg"/>) // Increased height
                 ) : premiumFeaturesDisplay.length > 0 ? (
                     premiumFeaturesDisplay.map((feature) => (
                     <Card key={feature.id} className={`relative overflow-hidden flex flex-col ${feature.isLocked ? 'bg-muted/50' : 'bg-card border-green-500'}`}>
@@ -253,38 +264,43 @@ export default function RewardsPage() {
                             </div>
                             {feature.icon}
                         </CardHeader>
-                        <CardContent className="flex-grow pt-2">
-                            {feature.isLocked && (
-                                <div className="mt-1">
-                                    <Badge variant="secondary" className="text-xs mb-2">
-                                        <Lock className="mr-1 h-3 w-3" />
-                                        {t('locked')}
-                                    </Badge>
+                        <CardContent className="flex-grow pt-2 space-y-2">
+                            {feature.isLocked ? (
+                                <>
+                                    <div className="flex items-center gap-2">
+                                        <Lock className="mr-1 h-4 w-4 text-muted-foreground" />
+                                        <span className="text-xs font-medium text-muted-foreground">{t('locked')}</span>
+                                    </div>
                                     <p className="text-xs text-muted-foreground">
                                         {feature.unlockDetails}
                                     </p>
-                                </div>
-                            )}
-                             {!feature.isLocked && (
-                                <div className="mt-1">
-                                    <Badge variant="default" className="text-xs bg-green-600 hover:bg-green-700 text-white">
-                                        <Sparkles className="mr-1 h-3 w-3"/>
-                                        {t('featureUnlocked')}
-                                    </Badge>
+                                     {/* Progress bar for unlock condition */}
+                                     {feature.progress !== undefined && feature.progress < 100 && (
+                                        <div className="pt-2">
+                                             <Progress value={feature.progress} className="h-1.5" aria-label={`${t('unlockProgress')} ${feature.progress}%`}/>
+                                             <p className="text-xs text-muted-foreground mt-1 text-right">{feature.progress}%</p>
+                                        </div>
+                                     )}
+                                </>
+                            ) : (
+                                 <div className="flex items-center gap-2">
+                                    <Sparkles className="mr-1 h-4 w-4 text-green-500"/>
+                                    <span className="text-xs font-medium text-green-600">{t('featureUnlocked')}</span>
                                 </div>
                             )}
                         </CardContent>
-                         {feature.isLocked && (
-                             <CardFooter>
-                                 <Button size="sm" variant="outline" className="w-full" disabled>{t('unlockFeature')}</Button>
-                             </CardFooter>
-                         )}
-                         {/* Optionally add a button to "Use Feature" if unlocked */}
-                         {/* {!feature.isLocked && (
-                             <CardFooter>
-                                 <Button size="sm" variant="default" className="w-full">{t('useFeature')}</Button>
-                             </CardFooter>
-                         )} */}
+                         {/* Footer always visible for consistent height, button disabled/enabled based on lock status */}
+                         <CardFooter>
+                             <Button
+                                 size="sm"
+                                 variant={feature.isLocked ? "outline" : "default"}
+                                 className="w-full"
+                                 disabled={feature.isLocked}
+                                 onClick={() => toast({ title: t(feature.titleKey), description: "Feature usage simulation." })} // Simulate usage
+                             >
+                                 {feature.isLocked ? t('unlockFeature') : t('useFeature')}
+                             </Button>
+                         </CardFooter>
                     </Card>
                 ))
                 ) : (
