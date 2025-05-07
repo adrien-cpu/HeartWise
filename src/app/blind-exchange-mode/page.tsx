@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslations } from "next-intl";
-import { generateBlindExchangeProfile, BlindExchangeProfileInput, BlindExchangeProfileOutput, PsychologicalTraits } from "@/ai/flows/blind-exchange-profile";
+import blindExchangeProfileFlow, { BlindExchangeProfileInput, BlindExchangeProfileOutput, PsychologicalTraits } from "@/ai/flows/blind-exchange-profile"; // Corrected import
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -25,12 +25,12 @@ import Image from 'next/image'; // Import next/image
 
 // --- Mock Data ---
 const mockCurrentUserPsychTraits: PsychologicalTraits = {
-  openness: 0.7, conscientiousness: 0.6, extraversion: 0.8, agreeableness: 0.7, neuroticism: 0.3
+  openness: 0.7, conscientiousness: 0.6, extroversion: 0.8, agreeableness: 0.7, neuroticism: 0.3 // Corrected extroversion
 };
 const mockCurrentUserInterests: string[] = ["Reading", "Hiking"];
 
 const mockMatchUserPsychTraits: PsychologicalTraits = {
-  openness: 0.5, conscientiousness: 0.8, extraversion: 0.5, agreeableness: 0.9, neuroticism: 0.2
+  openness: 0.5, conscientiousness: 0.8, extroversion: 0.5, agreeableness: 0.9, neuroticism: 0.2 // Corrected extroversion
 };
 const mockMatchUserInterests: string[] = ["Hiking", "Photography", "Travel", "Classical Music"]; // Match data used for generating AI profile
 
@@ -104,7 +104,7 @@ export default function BlindExchangeModePage() {
           matchUserPsychologicalTraits: mockMatchUserPsychTraits,
           matchUserInterests: mockMatchUserInterests,
         };
-        const profile = await generateBlindExchangeProfile(input);
+        const profile = await blindExchangeProfileFlow(input); // Corrected function call
         setAiProfile(profile);
         // Add an initial system message
         setMessages([{
@@ -140,11 +140,11 @@ export default function BlindExchangeModePage() {
 
             setRevealedInfo(prev => {
                 const newRevealed: RevealedInfo = { ...prev, interests: [...prev.interests], bioSnippets: [...prev.bioSnippets] };
-                if (milestone.type === 'interest' && milestone.index < MOCK_PARTNER_REVEAL_DATA.interests.length && !newRevealed.interests.includes(MOCK_PARTNER_REVEAL_DATA.interests[milestone.index])) {
+                if (milestone.type === 'interest' && milestone.index !== undefined && milestone.index < MOCK_PARTNER_REVEAL_DATA.interests.length && !newRevealed.interests.includes(MOCK_PARTNER_REVEAL_DATA.interests[milestone.index])) {
                     revealedValue = MOCK_PARTNER_REVEAL_DATA.interests[milestone.index];
                     newRevealed.interests.push(revealedValue);
                     newItemRevealed = true;
-                } else if (milestone.type === 'bio' && milestone.index < MOCK_PARTNER_REVEAL_DATA.bioSnippets.length && !newRevealed.bioSnippets.includes(MOCK_PARTNER_REVEAL_DATA.bioSnippets[milestone.index])) {
+                } else if (milestone.type === 'bio' && milestone.index !== undefined && milestone.index < MOCK_PARTNER_REVEAL_DATA.bioSnippets.length && !newRevealed.bioSnippets.includes(MOCK_PARTNER_REVEAL_DATA.bioSnippets[milestone.index])) {
                     revealedValue = MOCK_PARTNER_REVEAL_DATA.bioSnippets[milestone.index];
                     newRevealed.bioSnippets.push(revealedValue);
                      newItemRevealed = true;
@@ -248,7 +248,7 @@ export default function BlindExchangeModePage() {
                 </span>
             </div>
             <CardDescription className="italic text-sm">
-              &quot;{aiProfile.compatibleProfileDescription}&quot;
+              &quot;{aiProfile.compatibleProfileDescription}&quot; {/* Corrected access to property */}
             </CardDescription>
           </CardHeader>
         </Card>

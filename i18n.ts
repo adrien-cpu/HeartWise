@@ -18,32 +18,24 @@ import { locales, defaultLocale, pathnames, isValidLocale } from './src/i18n/set
  * @returns {Promise<object>} The configuration object with messages and locale for the specified or default locale.
  * @throws {Error} If the messages file for the default locale cannot be loaded or is invalid.
  */
-export default getRequestConfig(async ({ locale }) => {
-  // Use the provided locale if valid, otherwise default to `defaultLocale`.
-  // Middleware should ensure this is usually valid by the time it reaches here.
-  const resolvedLocale = isValidLocale(locale) ? locale : defaultLocale;
+export default getRequestConfig(async ({ locale: rawLocale }) => {
+  // Ensure locale is a valid string, defaulting to defaultLocale if not.
+  const locale = (typeof rawLocale === 'string' && isValidLocale(rawLocale)) ? rawLocale : defaultLocale;
 
-  // Log if the provided locale was invalid/undefined, but proceed with the default.
-  // Middleware is the primary place to handle redirection for invalid locales.
-  if (!isValidLocale(locale)) {
-    console.warn(`i18n.ts: Invalid or undefined locale "${locale}" detected. Using default locale "${resolvedLocale}". Middleware should handle redirection.`);
-    // Do NOT call notFound() here. Let the middleware redirect or RootLayout handle it.
+  // Log if the provided rawLocale was invalid/undefined, but proceed with the determined locale.
+  if (typeof rawLocale !== 'string' || !isValidLocale(rawLocale)) {
+    console.warn(`i18n.ts: Invalid or undefined locale "${rawLocale ?? 'undefined'}" detected. Using default locale "${locale}". Middleware should handle redirection.`);
   }
 
   let messages;
   try {
-    // Dynamically import the messages for the resolved locale.
-    // The path is relative to the location of this i18n.ts file.
-    messages = (await import(`./src/messages/${resolvedLocale}.json`)).default;
+    messages = (await import(`./src/messages/${locale}.json`)).default;
 
-    // Basic validation: Check if messages were loaded and are not empty.
     if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
-      console.error(`Loaded empty or invalid messages for locale: ${resolvedLocale}. Check the JSON file.`);
-      // If the default locale itself failed, throw a critical error.
-      if (resolvedLocale === defaultLocale) {
+      console.error(`Loaded empty or invalid messages for locale: ${locale}. Check the JSON file.`);
+      if (locale === defaultLocale) {
         throw new Error(`Default locale messages ("${defaultLocale}") are missing, empty, or invalid.`);
       }
-      // Attempt to fall back to default locale messages if the requested one failed.
       console.warn(`Falling back to default locale messages (${defaultLocale}).`);
       messages = (await import(`./src/messages/${defaultLocale}.json`)).default;
       if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
@@ -51,18 +43,12 @@ export default getRequestConfig(async ({ locale }) => {
       }
     }
   } catch (error: any) {
-    console.error(`Failed to load messages for locale "${resolvedLocale}" (or fallback):`, error.message);
-    // If message loading fails critically (even fallback), we might need to signal an error.
-    // Throwing here ensures the problem is surfaced.
-     throw new Error(`Failed to load essential translation messages for locale "${resolvedLocale}" or default locale "${defaultLocale}". Error: ${error.message}`);
-     // Alternatively, could return minimal default messages or trigger notFound(),
-     // but throwing makes the configuration issue clear.
-     // Note: Calling notFound() here might not be ideal if RootLayout also tries to handle it.
+    console.error(`Failed to load messages for locale "${locale}" (or fallback):`, error.message);
+     throw new Error(`Failed to load essential translation messages for locale "${locale}" or default locale "${defaultLocale}". Error: ${error.message}`);
   }
 
-  // Return the locale and messages for the client provider.
   return {
-    locale: resolvedLocale, // Crucial: Ensure locale is part of the returned object
+    locale: locale,
     messages
   };
 });

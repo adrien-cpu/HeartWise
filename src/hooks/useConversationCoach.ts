@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { getConversationAdvice } from '@/ai/flows/conversation-coach';
-import { getStyleSuggestions, StyleSuggestion } from '@/ai/flows/style-suggestions-flow';
+import { getStyleSuggestions, StyleSuggestion, StyleSuggestionsInput } from '@/ai/flows/style-suggestions-flow'; // StyleSuggestion is now correctly imported as a type
 
 interface ConversationCoachHook {
     conversationHistory: string;
@@ -16,7 +16,8 @@ interface ConversationCoachHook {
     isLoadingAdvice: boolean;
     isLoadingStyles: boolean;
     getAdvice: () => Promise<void>;
-    getStyleSuggestions: () => Promise<void>;
+    // Corrected to accept input if the underlying getStyleSuggestions requires it
+    getStyleSuggestions: (input?: Partial<StyleSuggestionsInput>) => Promise<void>; 
 }
 
 export const useConversationCoach = (): ConversationCoachHook => {
@@ -31,9 +32,8 @@ export const useConversationCoach = (): ConversationCoachHook => {
 
     const getAdvice = async () => {
         if (!conversationHistory || !user1Profile || !user2Profile) {
-            // Handle error, e.g., show a toast. This should ideally be handled in the UI component
-            // that uses the hook, but for now, we'll keep the logic here for migration.
             console.error("Missing required input for getting advice.");
+            setAdvice("Error: Missing required fields to get advice."); // Provide feedback
             return;
         }
         setIsLoadingAdvice(true);
@@ -47,31 +47,33 @@ export const useConversationCoach = (): ConversationCoachHook => {
             setAdvice(result.advice);
         } catch (error) {
             console.error("Error generating advice:", error);
-            // Handle error, e.g., show a toast.
+            setAdvice("Error: Could not generate advice at this time."); // Provide feedback
         } finally {
             setIsLoadingAdvice(false);
         }
     };
 
-    const getStyleSuggestions = async () => {
-         if (!user1Profile || !user2Profile) {
-            // Handle error, e.g., show a toast.
-             console.error("Missing required input for getting style suggestions.");
+    const handleGetStyleSuggestions = async (input?: Partial<StyleSuggestionsInput>) => {
+         const finalInput: StyleSuggestionsInput = {
+             userProfile: input?.userProfile || user1Profile,
+             partnerProfile: input?.partnerProfile || user2Profile,
+             conversationContext: input?.conversationContext || conversationHistory,
+             userComfortLevel: input?.userComfortLevel || userComfortLevel,
+         };
+
+         if (!finalInput.userProfile || !finalInput.partnerProfile) {
+             console.error("Missing required input for getting style suggestions (userProfile or partnerProfile).");
+             setStyleSuggestions([{ styleName: "Error", description: "Missing profile information.", examples: [] }]); // Provide feedback
              return;
          }
         setIsLoadingStyles(true);
         setStyleSuggestions([]);
         try {
-            const result = await getStyleSuggestions({
-                userProfile: user1Profile,
-                partnerProfile: user2Profile,
-                conversationContext: conversationHistory,
-                userComfortLevel: userComfortLevel,
-            });
+            const result = await getStyleSuggestions(finalInput);
             setStyleSuggestions(result.suggestions);
         } catch (error) {
             console.error("Error generating style suggestions:", error);
-            // Handle error, e.g., show a toast.
+            setStyleSuggestions([{ styleName: "Error", description: "Could not generate style suggestions.", examples: [] }]); // Provide feedback
         } finally {
             setIsLoadingStyles(false);
         }
@@ -91,6 +93,6 @@ export const useConversationCoach = (): ConversationCoachHook => {
         isLoadingAdvice,
         isLoadingStyles,
         getAdvice,
-        getStyleSuggestions,
+        getStyleSuggestions: handleGetStyleSuggestions, // Assign the new handler
     };
 };

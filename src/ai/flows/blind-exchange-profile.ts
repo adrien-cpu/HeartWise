@@ -20,7 +20,7 @@ import { calculateCompatibilityScore, generateProfileDescription } from '@/servi
 export const PsychologicalTraitsSchema = z.object({
   openness: z.number().min(0).max(1).describe("Openness to experience score (0-1)"),
   conscientiousness: z.number().min(0).max(1).describe("Conscientiousness score (0-1)"),
-  extraversion: z.number().min(0).max(1).describe("Extraversion score (0-1)"),
+  extroversion: z.number().min(0).max(1).describe("Extroversion score (0-1)"), // Corrected from extraversion
   agreeableness: z.number().min(0).max(1).describe("Agreeableness score (0-1)"),
   neuroticism: z.number().min(0).max(1).describe("Neuroticism score (0-1)"),
 });

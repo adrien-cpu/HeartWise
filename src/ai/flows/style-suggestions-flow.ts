@@ -11,6 +11,8 @@
  * @exports {function} getStyleSuggestions - A function that generates style suggestions.
  * @exports {StyleSuggestionsInput} StyleSuggestionsInput - The input type for the getStyleSuggestions function.
  * @exports {StyleSuggestionsOutput} StyleSuggestionsOutput - The return type for the getStyleSuggestions function.
+ * @exports {StyleSuggestion} StyleSuggestion - The type for a single style suggestion.
+ * @exports {StyleSuggestionSchema} StyleSuggestionSchema - The Zod schema for a single style suggestion.
  */
 
 import { ai } from '@/ai/ai-instance';
@@ -38,11 +40,12 @@ export type StyleSuggestionsInput = z.infer<typeof StyleSuggestionsInputSchema>;
  * @property {string} description - A brief explanation of the style and why it might be suitable.
  * @property {string[]} examples - Example phrases demonstrating the style.
  */
-const StyleSuggestionSchema = z.object({
+export const StyleSuggestionSchema = z.object({
     styleName: z.string().describe('The name of the suggested style (e.g., "Romantic", "Playful Humor", "Direct & Clear").'),
     description: z.string().describe('A brief explanation of the style and why it might be suitable.'),
     examples: z.array(z.string()).describe('Example phrases demonstrating the style.'),
 });
+export type StyleSuggestion = z.infer<typeof StyleSuggestionSchema>; // Exporting the StyleSuggestion type
 
 /**
  * @typedef {object} StyleSuggestionsOutput

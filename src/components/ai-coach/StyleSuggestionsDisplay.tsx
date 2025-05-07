@@ -4,7 +4,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useTranslations } from 'next-intl';
 import { Lightbulb, Loader2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import { StyleSuggestion } from '@/ai/flows/style-suggestions-flow';
+import { StyleSuggestion } from '@/ai/flows/style-suggestions-flow'; // Assuming StyleSuggestion is now correctly exported as a type
 
 interface StyleSuggestionsDisplayProps {
     styleSuggestions: StyleSuggestion[];
@@ -35,7 +35,7 @@ const StyleSuggestionsDisplay: React.FC<StyleSuggestionsDisplayProps> = ({
                     </CardHeader>
                     <CardContent>
                         <Accordion type="single" collapsible className="w-full">
-                            {styleSuggestions.map((suggestion, index) => (
+                            {styleSuggestions.map((suggestion: StyleSuggestion, index: number) => (
                                 <AccordionItem value={`style-${index}`} key={index}>
                                     <AccordionTrigger className="text-lg font-semibold">{suggestion.styleName}</AccordionTrigger>
                                     <AccordionContent className="space-y-3 pl-2">
@@ -43,7 +43,7 @@ const StyleSuggestionsDisplay: React.FC<StyleSuggestionsDisplayProps> = ({
                                         <div>
                                             <h4 className="font-medium mb-1 text-sm">{t('examples')}</h4>
                                             <ul className="list-disc list-inside text-sm space-y-1">
-                                                {suggestion.examples.map((example, i) => (
+                                                {suggestion.examples.map((example: string, i: number) => (
                                                     <li key={i}>{example}</li>
                                                 ))}
                                             </ul>
