@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Badge } from '@/components/ui/badge';
 import { Award, MessageSquare, Users, Zap, Star, Gamepad2, Eye, MapPin, Trophy, HelpCircle, Lock, Sparkles, Brain, MessageCircleHeart, UserCheck } from 'lucide-react'; // Added new icons
 import { Skeleton } from '@/components/ui/skeleton';
-import { get_user_rewards, UserReward, get_user_points, UserProfile, get_user_premium_features, PremiumFeatures, get_user } from '@/services/user_profile';
+import { get_user, UserProfile, UserReward, PremiumFeatures } from '@/services/user_profile'; // Import necessary types
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -21,8 +21,8 @@ interface PremiumFeatureDisplayData {
   icon: React.ReactNode;
   titleKey: string;
   descriptionKey: string;
-  unlockConditionKey: string;
-  unlockValue: string | number;
+  unlockConditionKey: string; // Key for the type of condition (e.g., 'pointsNeeded', 'badgeNeeded')
+  unlockValue: string | number; // The value needed (points amount or badge name/type)
   isLocked: boolean;
   unlockDetails?: string; // More detailed explanation for unlocking
 }
@@ -59,6 +59,9 @@ export default function RewardsPage() {
         const profile = await get_user(userId);
         setUserProfile(profile);
 
+        // Ensure premium features object exists and has defaults
+        const features = profile.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
+
         // Define premium features and their unlock status based on fetched profile
         const featuresData: PremiumFeatureDisplayData[] = [
           {
@@ -68,7 +71,7 @@ export default function RewardsPage() {
             descriptionKey: 'premiumAdvancedFiltersDesc',
             unlockConditionKey: 'pointsNeeded',
             unlockValue: 500,
-            isLocked: !(profile.premiumFeatures?.advancedFilters),
+            isLocked: !(features.advancedFilters),
             unlockDetails: t('unlockAdvancedFiltersDetails', { points: 500 }),
           },
           {
@@ -77,9 +80,9 @@ export default function RewardsPage() {
             titleKey: 'premiumProfileBoostTitle',
             descriptionKey: 'premiumProfileBoostDesc',
             unlockConditionKey: 'badgeNeeded',
-            unlockValue: t('badgeTopContributorName'),
-            isLocked: !(profile.premiumFeatures?.profileBoost),
-            unlockDetails: t('unlockProfileBoostDetails', { badgeName: t('badgeTopContributorName')}),
+            unlockValue: t('badge_top_contributor_name'), // Use the actual badge name key
+            isLocked: !(features.profileBoost),
+            unlockDetails: t('unlockProfileBoostDetails', { badgeName: t('badge_top_contributor_name') }),
           },
           {
             id: 'exclusiveModes',
@@ -87,9 +90,9 @@ export default function RewardsPage() {
             titleKey: 'premiumExclusiveModesTitle',
             descriptionKey: 'premiumExclusiveModesDesc',
             unlockConditionKey: 'badgeNeeded',
-            unlockValue: t('badgeGameMasterName'),
-            isLocked: !(profile.premiumFeatures?.exclusiveModes),
-            unlockDetails: t('unlockExclusiveModesDetails', { badgeName: t('badgeGameMasterName')}),
+            unlockValue: t('badge_game_master_name'), // Use the actual badge name key
+            isLocked: !(features.exclusiveModes),
+            unlockDetails: t('unlockExclusiveModesDetails', { badgeName: t('badge_game_master_name') }),
           },
         ];
         setPremiumFeaturesDisplay(featuresData);
@@ -131,7 +134,7 @@ export default function RewardsPage() {
      { icon: <MessageSquare className="h-4 w-4 text-blue-500" />, text: t('earnPointsFirstChat'), points: t('pointsValue', { value: 20 }) },
      { icon: <Gamepad2 className="h-4 w-4 text-red-500" />, text: t('earnPointsGameWin'), points: t('pointsValue', { value: 15 }) },
      { icon: <Zap className="h-4 w-4 text-purple-500" />, text: t('earnPointsSpeedDate'), points: t('pointsValue', { value: 25 }) },
-     { icon: <Brain className="h-4 w-4 text-indigo-500" />, text: t('earnPointsBlindExchange'), points: t('pointsValue', { value: 30 }) },
+     { icon: <Eye className="h-4 w-4 text-indigo-500" />, text: t('earnPointsBlindExchange'), points: t('pointsValue', { value: 30 }) }, // Corrected icon
      { icon: <MessageCircleHeart className="h-4 w-4 text-teal-500" />, text: t('earnPointsManyMessages'), points: t('pointsValue', { value: 40 }) }, // Example for Chat Enthusiast
    ];
 
@@ -242,35 +245,46 @@ export default function RewardsPage() {
                     [...Array(3)].map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-lg"/>)
                 ) : premiumFeaturesDisplay.length > 0 ? (
                     premiumFeaturesDisplay.map((feature) => (
-                    <Card key={feature.id} className={`relative overflow-hidden flex flex-col ${feature.isLocked ? 'bg-muted/50' : 'bg-card'}`}>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-base font-medium">{t(feature.titleKey)}</CardTitle>
+                    <Card key={feature.id} className={`relative overflow-hidden flex flex-col ${feature.isLocked ? 'bg-muted/50' : 'bg-card border-green-500'}`}>
+                        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                           <div className="space-y-1">
+                             <CardTitle className="text-base font-medium">{t(feature.titleKey)}</CardTitle>
+                             <CardDescription className="text-xs">{t(feature.descriptionKey)}</CardDescription>
+                            </div>
                             {feature.icon}
                         </CardHeader>
-                        <CardContent className="flex-grow">
-                            <p className="text-xs text-muted-foreground">{t(feature.descriptionKey)}</p>
+                        <CardContent className="flex-grow pt-2">
                             {feature.isLocked && (
-                                <div className="mt-3">
-                                    <Badge variant="secondary" className="text-xs">
+                                <div className="mt-1">
+                                    <Badge variant="secondary" className="text-xs mb-2">
                                         <Lock className="mr-1 h-3 w-3" />
                                         {t('locked')}
                                     </Badge>
-                                    <p className="text-xs text-muted-foreground mt-1">
+                                    <p className="text-xs text-muted-foreground">
                                         {feature.unlockDetails}
                                     </p>
                                 </div>
                             )}
+                             {!feature.isLocked && (
+                                <div className="mt-1">
+                                    <Badge variant="default" className="text-xs bg-green-600 hover:bg-green-700 text-white">
+                                        <Sparkles className="mr-1 h-3 w-3"/>
+                                        {t('featureUnlocked')}
+                                    </Badge>
+                                </div>
+                            )}
                         </CardContent>
-                         {!feature.isLocked && (
-                            <CardFooter>
-                                <Button size="sm" className="w-full bg-green-600 hover:bg-green-700 text-white">{t('featureUnlocked')}</Button>
-                            </CardFooter>
-                        )}
                          {feature.isLocked && (
                              <CardFooter>
                                  <Button size="sm" variant="outline" className="w-full" disabled>{t('unlockFeature')}</Button>
                              </CardFooter>
                          )}
+                         {/* Optionally add a button to "Use Feature" if unlocked */}
+                         {/* {!feature.isLocked && (
+                             <CardFooter>
+                                 <Button size="sm" variant="default" className="w-full">{t('useFeature')}</Button>
+                             </CardFooter>
+                         )} */}
                     </Card>
                 ))
                 ) : (

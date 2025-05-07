@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -393,11 +394,11 @@
     "locked": "Verrouillé",
     "accessFeature": "Accéder à la Fonctionnalité",
     "featureUnlocked": "Débloquée !",
-    "unlockFeature": "Débloquer la Fonctionnalité",
+    "unlockFeature": "Débloquer",
     "noPremiumFeatures": "Aucune fonctionnalité premium disponible actuellement.",
     "unlockAdvancedFiltersDetails": "Atteignez {points} points pour débloquer les filtres de recherche avancés.",
-    "unlockProfileBoostDetails": "Gagnez le badge '{badgeName}' en étant un membre actif et utile de la communauté pour obtenir des boosts de profil.",
-    "unlockExclusiveModesDetails": "Maîtrisez les jeux et gagnez le badge '{badgeName}' pour accéder à des modes de jeu exclusifs."
+    "unlockProfileBoostDetails": "Gagnez le badge '{badgeName}' en étant un membre actif et utile pour obtenir des boosts de profil.",
+    "unlockExclusiveModesDetails": "Maîtrisez les jeux et gagnez le badge '{badgeName}' pour accéder aux modes de jeu exclusifs."
   },
   "DashboardPage": {
     "welcome": "Bienvenue, {name} !",

@@ -260,27 +260,38 @@ async function checkAndUnlockPremiumFeatures(userId: string): Promise<void> {
     const user = mockUserData[userId];
     if (!user || !user.premiumFeatures) return;
 
+    let changed = false;
+
     // Unlock Advanced Filters by points
     if (!user.premiumFeatures.advancedFilters && (user.points || 0) >= 500) {
         user.premiumFeatures.advancedFilters = true;
         console.log(`User ${userId} unlocked Advanced Filters.`);
-        // Potentially toast this in the UI layer after the update
+        changed = true;
+        // Potentially trigger a notification or UI update here
     }
 
     // Unlock Profile Boost by 'top_contributor' badge
     if (!user.premiumFeatures.profileBoost && user.rewards?.some(r => r.type === 'top_contributor')) {
         user.premiumFeatures.profileBoost = true;
         console.log(`User ${userId} unlocked Profile Boost.`);
+         changed = true;
     }
 
     // Unlock Exclusive Modes by 'game_master' badge
     if (!user.premiumFeatures.exclusiveModes && user.rewards?.some(r => r.type === 'game_master')) {
         user.premiumFeatures.exclusiveModes = true;
         console.log(`User ${userId} unlocked Exclusive Game Modes.`);
+         changed = true;
     }
-    // Persist changes if this were a real backend
-    // await update_user_profile(userId, { premiumFeatures: user.premiumFeatures }); // This would cause a loop here, so update mockUserData directly
-    mockUserData[userId] = user;
+
+    // If any feature status changed, update the mock store
+    if (changed) {
+       mockUserData[userId] = user;
+       // In a real backend, this is where you'd persist the updated premiumFeatures
+       // e.g., await update_user_profile(userId, { premiumFeatures: user.premiumFeatures });
+       // Avoid calling update_user_profile here to prevent potential infinite loops
+       console.log(`Updated premium features for user ${userId}:`, user.premiumFeatures);
+    }
 }
 
 
@@ -314,7 +325,7 @@ export async function add_user_reward(userId: string, rewardData: Omit<UserRewar
 
         console.log(`Reward ${rewardData.type} added for user ${userId}. Points added: ${pointsToAdd}. Total points: ${user.points}`);
         mockUserData[userId] = user; // Update mock data
-        await checkAndUnlockPremiumFeatures(userId); // Check for unlocks
+        await checkAndUnlockPremiumFeatures(userId); // Check for unlocks after adding reward and points
         return true;
     } else {
          console.log(`User ${userId} already has reward ${rewardData.type}`);
@@ -392,7 +403,7 @@ export async function add_user_points(userId: string, pointsToAdd: number): Prom
   user.points! += pointsToAdd;
   console.log(`User ${userId} new total points: ${user.points}`);
   mockUserData[userId] = user; // Update mock data
-  await checkAndUnlockPremiumFeatures(userId); // Check for unlocks
+  await checkAndUnlockPremiumFeatures(userId); // Check for unlocks after adding points
   return user.points!;
 }
 
@@ -424,12 +435,20 @@ function getPointsForReward(rewardType: string): number {
 export async function get_all_users(): Promise<UserProfile[]> {
   console.log("Fetching all user profiles for leaderboard");
   await new Promise(resolve => setTimeout(resolve, 400));
-  return Object.values(mockUserData).map(user => ({
-    ...user,
-    points: user.points ?? 0,
-    rewards: user.rewards ?? [],
-    premiumFeatures: user.premiumFeatures ?? { advancedFilters: false, profileBoost: false, exclusiveModes: false },
-  }));
+  // Ensure defaults are applied to all users before returning
+  Object.keys(mockUserData).forEach(id => {
+      const user = mockUserData[id];
+       if (!user.rewards) user.rewards = [];
+       if (user.points === undefined) user.points = 0;
+       if (!user.premiumFeatures) user.premiumFeatures = { advancedFilters: false, profileBoost: false, exclusiveModes: false };
+       if (user.premiumFeatures.advancedFilters === undefined) user.premiumFeatures.advancedFilters = false;
+       if (user.premiumFeatures.profileBoost === undefined) user.premiumFeatures.profileBoost = false;
+       if (user.premiumFeatures.exclusiveModes === undefined) user.premiumFeatures.exclusiveModes = false;
+       if (!user.speedDatingSchedule) user.speedDatingSchedule = [];
+       if (!user.gamePreferences) user.gamePreferences = [];
+       if (!user.privacySettings) user.privacySettings = { showLocation: true, showOnlineStatus: true };
+  })
+  return Object.values(mockUserData);
 }
 
 /**
