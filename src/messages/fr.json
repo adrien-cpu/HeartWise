@@ -332,11 +332,13 @@
   },
   "DashboardPage": {
     "welcome": "Bienvenue, {name} !",
+    "userAlt": "Utilisateur",
     "dashboardOverview": "Voici votre tableau de bord HeartWise personnalisé.",
     "personalizedAdviceTitle": "Conseil du Jour",
     "personalizedAdviceDesc": "Une suggestion pour améliorer votre expérience.",
     "profileCompletenessTitle": "Complétude du Profil",
     "profileCompletenessDesc": "Complétez votre profil pour de meilleures correspondances.",
+    "completeProfileLink": "Compléter votre profil",
     "quickStatsTitle": "Statistiques Rapides",
     "quickStatsDesc": "Aperçu de votre activité récente.",
     "totalPoints": "Total des Points",
@@ -346,9 +348,17 @@
     "moreBadges": "autres",
     "mockAdvice1": "Pensez à mettre à jour votre bio pour refléter votre humeur ou vos intérêts actuels.",
     "mockAdvice2": "Essayez d'engager la conversation avec quelqu'un qui partage un intérêt unique.",
-    "mockAdvice3": "Explorez le mode Échange à l'Aveugle pour un autre type de connexion."
+    "mockAdvice3": "Explorez le mode Échange à l'Aveugle pour un autre type de connexion.",
+    "quickActionsTitle": "Actions Rapides",
+    "quickActionsDesc": "Accédez directement aux fonctionnalités clés.",
+    "matchSuggestionTitle": "Suggestion de Match",
+    "matchSuggestionDesc": "Quelqu'un qui pourrait vous plaire !",
+    "compatibility": "{score}% compatible",
+    "viewProfileButton": "Voir le Profil",
+    "viewAllRewards": "Voir toutes les récompenses"
   },
    "Sidebar": {
       "toggleSidebar": "Basculer la barre latérale"
    }
 }
+
