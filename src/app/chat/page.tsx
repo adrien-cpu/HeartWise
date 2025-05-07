@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -8,23 +9,22 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Send, User, HeartHandshake, Smile, Info, Heart, Video, Phone, AlertCircle, Bot } from 'lucide-react'; // Added Bot icon
+import { Loader2, Send, User, HeartHandshake, Smile, Info, Heart, Video, Phone, AlertCircle, Bot, MessagesSquare } from 'lucide-react'; // Added MessagesSquare
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { UserProfile, get_user } from '@/services/user_profile'; // Import user profile service
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; 
-import { Badge } from "@/components/ui/badge"; 
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { tagMessageIntent, IntentionTaggingOutput } from '@/ai/flows/intention-tagging'; // Import Genkit flow
 
 /**
  * @fileOverview Chat page component.
  * @module ChatPage
- * @description Displays the chat interface, allowing users to select conversations and send/receive messages. Includes mock compatibility display, manual intention tag selection, and AI-suggested intention tagging. Simulates video/audio call initiation.
+ * @description Displays the chat interface, allowing users to select conversations and send/receive messages. Includes mock compatibility display, manual intention tag selection, and AI-suggested intention tagging. Simulates video/audio call initiation and typing indicator.
  */
-
 
 // Mock data structures
 interface Message {
@@ -50,6 +50,7 @@ interface Conversation {
   lastMessageTimestamp: Date;
   unreadCount?: number; // Mock unread message count
   messages: Message[];
+  isTyping?: boolean; // Partner typing status
 }
 
 // Mock current user ID
@@ -134,7 +135,7 @@ const manualIntentionTags = [
   { value: 'friendly', label: 'Friendly', icon: <Smile className="h-4 w-4 mr-2"/> },
   { value: 'humor', label: 'Humor', icon: <Smile className="h-4 w-4 mr-2"/> },
   { value: 'serious', label: 'Serious', icon: <Info className="h-4 w-4 mr-2"/> },
-  { value: 'flirt', label: 'Flirt', icon: <Heart className="h-4 w-4 mr-2"/> }, 
+  { value: 'flirt', label: 'Flirt', icon: <Heart className="h-4 w-4 mr-2"/> },
   { value: 'tender', label: 'Tender', icon: <HeartHandshake className="h-4 w-4 mr-2"/> },
 ];
 
@@ -142,8 +143,8 @@ const manualIntentionTags = [
  * ChatPage component.
  *
  * @component
- * @description Displays the chat interface, allowing users to select conversations, send/receive messages, manually select intention tags, and view AI-suggested intentions.
- *              **Requires Backend:** Real-time messaging (WebSockets), persistent message storage (Database), actual call functionality (WebRTC - e.g., Twilio, Agora).
+ * @description Displays the chat interface, allowing users to select conversations, send/receive messages, manually select intention tags, and view AI-suggested intentions. Simulates video/audio calls and partner typing indicator.
+ *              **Requires Backend:** Real-time messaging (WebSockets), persistent message storage (Database), actual call functionality (WebRTC - e.g., Twilio, Agora), typing indicator propagation.
  * @returns {JSX.Element} The rendered Chat page.
  */
 export default function ChatPage() {
@@ -152,7 +153,7 @@ export default function ChatPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
-  const [selectedIntention, setSelectedIntention] = useState<string>(''); 
+  const [selectedIntention, setSelectedIntention] = useState<string>('');
   const [loadingChats, setLoadingChats] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -162,19 +163,20 @@ export default function ChatPage() {
   const [aiSuggestedTag, setAiSuggestedTag] = useState<IntentionTaggingOutput | null>(null);
   const [isAnalyzingIntent, setIsAnalyzingIntent] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 
   useEffect(() => {
-    setLoadingChats(true); 
+    setLoadingChats(true);
     get_user(CURRENT_USER_ID)
       .then(profile => setCurrentUserProfile(profile))
       .catch(err => {
          console.error("Failed to fetch current user profile:", err);
          toast({ variant: 'destructive', title: t('errorLoadingProfile') })
         })
-      .finally(() => setLoadingChats(false)); 
+      .finally(() => setLoadingChats(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast]); 
+  }, [toast]);
 
 
   useEffect(() => {
@@ -185,7 +187,7 @@ export default function ChatPage() {
           const sortedConversations = [...initialConversations].sort((a,b) => b.lastMessageTimestamp.getTime() - a.lastMessageTimestamp.getTime());
           setConversations(sortedConversations);
           if (sortedConversations.length > 0 && !selectedConversationId) {
-            setSelectedConversationId(sortedConversations[0].id); 
+            setSelectedConversationId(sortedConversations[0].id);
           }
       } catch (error) {
           console.error("Failed to load chats:", error);
@@ -196,14 +198,15 @@ export default function ChatPage() {
     };
     loadChats();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast]); 
+  }, [toast]);
 
+  // Smooth scroll to bottom of messages
   useEffect(() => {
     const timer = setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, 100);
     return () => clearTimeout(timer);
-  }, [selectedConversationId, conversations]); 
+  }, [selectedConversationId, conversations]);
 
   // Debounced AI intention analysis
   const analyzeIntent = useCallback(async (message: string, context: string) => {
@@ -229,7 +232,7 @@ export default function ChatPage() {
       clearTimeout(debounceTimeoutRef.current);
     }
     if (newMessage.trim()) {
-      const currentConversationHistory = selectedConversation?.messages.slice(-5).map(m => `${m.senderName}: ${m.text}`).join('\n') || '';
+      const currentConversationHistory = conversations.find(c => c.id === selectedConversationId)?.messages.slice(-5).map(m => `${m.senderName}: ${m.text}`).join('\n') || '';
       debounceTimeoutRef.current = setTimeout(() => {
         analyzeIntent(newMessage, currentConversationHistory);
       }, 750); // 750ms debounce
@@ -242,15 +245,64 @@ export default function ChatPage() {
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [newMessage, analyzeIntent, selectedConversation]);
+  }, [newMessage, analyzeIntent, selectedConversationId, conversations]);
 
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
+  // Function to simulate partner's response
+  const simulatePartnerResponse = useCallback(async (convId: string, userMessageText: string) => {
+    // Simulate typing indicator
+    setConversations(prev => prev.map(c => c.id === convId ? { ...c, isTyping: true } : c));
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+    const typingDuration = 1000 + Math.random() * 1500; // Variable typing time
+    await new Promise(resolve => setTimeout(resolve, typingDuration));
+
+    // Generate a mock reply (more sophisticated logic possible)
+    const partnerReplies = [
+      `That's interesting! Tell me more about "${userMessageText.substring(0, 15)}"...`,
+      `I see. What do you think about that?`,
+      `Okay, got it.`,
+      `Hmm, let me think about that. 🤔`,
+      `Totally agree!`,
+      `Really? I didn't know that.`,
+      `😂 That's funny!`,
+    ];
+    const partnerMessage: Message = {
+      id: `msg-partner-${Date.now()}`,
+      senderId: selectedConversation?.participant.id || 'unknown',
+      senderName: selectedConversation?.participant.name || 'Partner',
+      text: partnerReplies[Math.floor(Math.random() * partnerReplies.length)],
+      timestamp: new Date(),
+      status: 'delivered', // Assume delivered
+    };
+
+    // Add partner message and stop typing indicator
+    setConversations(prev => prev.map(conv => {
+      if (conv.id === convId) {
+        return {
+          ...conv,
+          messages: [...conv.messages, partnerMessage],
+          lastMessage: partnerMessage.text,
+          lastMessageTimestamp: partnerMessage.timestamp,
+          isTyping: false, // Stop typing
+        };
+      }
+      return conv;
+    }));
+
+     requestAnimationFrame(() => {
+       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+     });
+
+  }, [selectedConversation]);
+
+
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversationId || !selectedConversation) return;
 
-    const tempId = `msg-${Date.now()}`; 
+    const tempId = `msg-${Date.now()}`;
     setSendingMessage(true);
     const messageToSend: Message = {
       id: tempId,
@@ -259,8 +311,10 @@ export default function ChatPage() {
       text: newMessage.trim(),
       timestamp: new Date(),
       intentionTag: selectedIntention || aiSuggestedTag?.detectedIntention || undefined, // Prioritize manual, then AI, then none
-      status: 'sent', 
+      status: 'sent',
     };
+
+     const originalMessageText = newMessage.trim(); // Store text before clearing
 
      setConversations(prev =>
         prev.map(conv =>
@@ -272,10 +326,10 @@ export default function ChatPage() {
                 lastMessageTimestamp: messageToSend.timestamp,
               }
             : conv
-        ).sort((a,b) => b.lastMessageTimestamp.getTime() - a.lastMessageTimestamp.getTime()) 
+        ).sort((a,b) => b.lastMessageTimestamp.getTime() - a.lastMessageTimestamp.getTime())
       );
       setNewMessage('');
-      setSelectedIntention(''); 
+      setSelectedIntention('');
       setAiSuggestedTag(null); // Clear AI suggestion after sending
        requestAnimationFrame(() => {
          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -283,7 +337,11 @@ export default function ChatPage() {
 
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 700)); 
+      await new Promise(resolve => setTimeout(resolve, 700)); // Simulate sending delay
+
+      // Simulate partner response after a short delay
+      simulatePartnerResponse(selectedConversationId, originalMessageText);
+
     } catch (error) {
       console.error("Failed to send message:", error);
       toast({
@@ -304,7 +362,7 @@ export default function ChatPage() {
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); 
+      e.preventDefault();
       handleSendMessage();
     }
   };
@@ -317,7 +375,7 @@ export default function ChatPage() {
   const getManualIntentionTagInfo = (tagValue?: string) => {
       return manualIntentionTags.find(tag => tag.value === tagValue);
   };
-  
+
   const getAiIntentionTagIcon = (tagValue?: string) => {
     const manualTag = manualIntentionTags.find(tag => tag.value === tagValue);
     return manualTag ? manualTag.icon : <Bot className="h-3 w-3 mr-1"/>;
@@ -337,13 +395,13 @@ export default function ChatPage() {
 
 
   return (
-    <TooltipProvider> 
-        <div className="container mx-auto h-[calc(100vh-80px)] flex flex-col p-0 md:p-4"> 
+    <TooltipProvider>
+        <div className="container mx-auto h-[calc(100vh-80px)] flex flex-col p-0 md:p-4">
         <Card className="flex flex-grow overflow-hidden h-full shadow-lg rounded-lg border">
             {/* Conversation List Sidebar */}
             <div className="w-full md:w-1/3 border-r flex flex-col bg-card">
             <CardHeader className="p-4">
-                <CardTitle>{t('title')}</CardTitle>
+                <CardTitle className="flex items-center gap-2"><MessagesSquare className="h-6 w-6 text-primary"/>{t('title')}</CardTitle>
                 <CardDescription>{t('conversationListDesc')}</CardDescription>
             </CardHeader>
             <Separator />
@@ -365,7 +423,7 @@ export default function ChatPage() {
                         key={conv.id}
                         variant="ghost"
                         className={cn(
-                        "w-full justify-start h-auto py-3 px-3 text-left rounded-md transition-colors relative", 
+                        "w-full justify-start h-auto py-3 px-3 text-left rounded-md transition-colors relative",
                         selectedConversationId === conv.id ? "bg-primary/10 text-primary font-semibold" : "hover:bg-muted/50"
                         )}
                         onClick={() => setSelectedConversationId(conv.id)}
@@ -472,7 +530,7 @@ export default function ChatPage() {
                             )}
                             <div
                             className={cn(
-                                "rounded-lg px-3 py-2 shadow-sm relative group", 
+                                "rounded-lg px-3 py-2 shadow-sm relative group",
                                 isCurrentUser
                                 ? "bg-primary text-primary-foreground rounded-br-none"
                                 : "bg-card text-card-foreground border rounded-bl-none"
@@ -515,7 +573,22 @@ export default function ChatPage() {
                         </div>
                         );
                     })}
-                    <div ref={messagesEndRef} /> 
+                     {/* Typing Indicator */}
+                     {selectedConversation.isTyping && (
+                         <div className="flex items-center space-x-2 mr-auto justify-start max-w-[85%]">
+                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0 opacity-0"> {/* Placeholder for alignment */}
+                                <AvatarFallback>?</AvatarFallback>
+                            </Avatar>
+                             <div className="rounded-lg px-3 py-2 bg-card text-card-foreground border rounded-bl-none shadow-sm">
+                                <div className="flex space-x-1 animate-pulse">
+                                    <span className="h-2 w-2 bg-muted-foreground rounded-full"></span>
+                                    <span className="h-2 w-2 bg-muted-foreground rounded-full animation-delay-150"></span>
+                                    <span className="h-2 w-2 bg-muted-foreground rounded-full animation-delay-300"></span>
+                                </div>
+                             </div>
+                         </div>
+                     )}
+                    <div ref={messagesEndRef} />
                 </ScrollArea>
 
                 {/* Message Input Area */}

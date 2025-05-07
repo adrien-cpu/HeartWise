@@ -48,18 +48,27 @@
   },
   "FacialAnalysisMatching": {
     "title": "Facial Analysis & Matching",
-    "image1UrlPlaceholder": "Enter URL for Image 1",
-    "image2UrlPlaceholder": "Enter URL for Image 2",
+    "description": "Upload or provide URLs for two images to analyze simulated psychological traits and compatibility.",
+    "image1UrlPlaceholder": "URL for Image 1",
+    "image2UrlPlaceholder": "URL for Image 2",
+    "imageAlt": "Image {number}",
     "analyzeAndCompareButton": "Analyze & Compare",
-    "analysisResult1": "Analysis Result (Image 1)",
-    "analysisResult2": "Analysis Result (Image 2)",
-    "age": "Estimated Age",
-    "gender": "Estimated Gender",
-    "emotion": "Dominant Emotion",
+    "analysisResult1": "Image 1 Analysis",
+    "analysisResult2": "Image 2 Analysis",
+    "extroversion": "Extroversion",
+    "agreeableness": "Agreeableness",
     "compatibilityScore": "Compatibility Score",
-    "errorMissingImageUrl": "Please enter URLs for both images.",
+    "errorMissingImageUrl": "Please provide URLs for both images.",
     "errorAnalysisFailed": "Analysis failed: {message}",
-    "unknownError": "An unknown error occurred"
+    "unknownError": "An unknown error occurred.",
+    "analyzingButton": "Analyzing...",
+    "enterUrlPrompt": "Enter URL above.",
+    "imageLoadError": "Could not load image {number}.",
+    "noResults": "No results yet.",
+    "analysisSuccessTitle": "Analysis Complete",
+    "analysisSuccessDesc": "Simulated analysis and comparison finished.",
+    "errorTitle": "Error",
+    "partialFailureError": "Could not complete analysis for both images."
   },
   "AIConversationCoachPage": {
     "pageTitle": "AI Conversation Coach",
@@ -267,7 +276,8 @@
     "messageFailedToSend": "Failed to send message.",
     "errorLoadingProfile": "Error loading your profile.",
     "unknownUser": "Unknown User",
-    "aiSuggestedTagTooltip": "AI Suggestion (click to use)"
+    "aiSuggestedTagTooltip": "AI Suggestion (click to use)",
+    "typingIndicator": "Typing..."
   },
   "RiskyWordsDictionary": {
     "title": "Risky Words Dictionary",

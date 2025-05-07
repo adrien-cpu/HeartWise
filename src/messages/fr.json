@@ -48,18 +48,27 @@
   },
   "FacialAnalysisMatching": {
     "title": "Analyse Faciale et Correspondance",
-    "image1UrlPlaceholder": "Entrez l'URL de l'Image 1",
-    "image2UrlPlaceholder": "Entrez l'URL de l'Image 2",
+    "description": "Téléchargez ou fournissez les URLs de deux images pour analyser des traits psychologiques simulés et la compatibilité.",
+    "image1UrlPlaceholder": "URL de l'Image 1",
+    "image2UrlPlaceholder": "URL de l'Image 2",
+    "imageAlt": "Image {number}",
     "analyzeAndCompareButton": "Analyser & Comparer",
-    "analysisResult1": "Résultat d'Analyse (Image 1)",
-    "analysisResult2": "Résultat d'Analyse (Image 2)",
-    "age": "Âge Estimé",
-    "gender": "Genre Estimé",
-    "emotion": "Émotion Dominante",
+    "analysisResult1": "Analyse Image 1",
+    "analysisResult2": "Analyse Image 2",
+    "extroversion": "Extraversion",
+    "agreeableness": "Agréabilité",
     "compatibilityScore": "Score de Compatibilité",
-    "errorMissingImageUrl": "Veuillez entrer les URL pour les deux images.",
+    "errorMissingImageUrl": "Veuillez fournir les URLs pour les deux images.",
     "errorAnalysisFailed": "L'analyse a échoué : {message}",
-    "unknownError": "Une erreur inconnue est survenue"
+    "unknownError": "Une erreur inconnue est survenue.",
+    "analyzingButton": "Analyse en cours...",
+    "enterUrlPrompt": "Entrez l'URL ci-dessus.",
+    "imageLoadError": "Impossible de charger l'image {number}.",
+    "noResults": "Pas encore de résultats.",
+    "analysisSuccessTitle": "Analyse Terminée",
+    "analysisSuccessDesc": "L'analyse simulée et la comparaison sont terminées.",
+    "errorTitle": "Erreur",
+    "partialFailureError": "Impossible de terminer l'analyse pour les deux images."
   },
   "AIConversationCoachPage": {
     "pageTitle": "Coach IA Conversationnel",
@@ -267,7 +276,8 @@
     "messageFailedToSend": "Échec de l'envoi du message.",
     "errorLoadingProfile": "Erreur lors du chargement de votre profil.",
     "unknownUser": "Utilisateur Inconnu",
-    "aiSuggestedTagTooltip": "Suggestion IA (cliquer pour utiliser)"
+    "aiSuggestedTagTooltip": "Suggestion IA (cliquer pour utiliser)",
+    "typingIndicator": "Écrit..."
   },
   "RiskyWordsDictionary": {
     "title": "Dictionnaire des Mots à Risque",
