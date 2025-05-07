@@ -324,11 +324,22 @@
     "earnPointsSpeedDate": "Participer au Speed Dating",
     "pointsValue": "{value} pts",
     "premiumFeaturesTitle": "Débloquer les Fonctionnalités Premium",
-    "premiumFeaturesDesc": "Utilisez vos points ou gagnez des badges pour un accès exclusif (bientôt disponible !).",
-    "premiumFeatureAdvancedFilters": "Filtres de recherche avancés",
-    "premiumFeatureSeeLikes": "Voir qui a aimé votre profil",
-    "premiumFeatureProfileBoost": "Booster la visibilité de votre profil",
-    "comingSoon": "Bientôt Disponible"
+    "premiumFeaturesDesc": "Utilisez vos points ou gagnez des badges spécifiques pour accéder à des avantages exclusifs.",
+    "premiumMoreComingSoon": "Plus de fonctionnalités premium bientôt disponibles !",
+    "premiumAdvancedFiltersTitle": "Filtres Avancés",
+    "premiumAdvancedFiltersDesc": "Affinez votre recherche avec des critères plus spécifiques.",
+    "premiumSeeLikesTitle": "Voir Qui Vous Aime",
+    "premiumSeeLikesDesc": "Découvrez qui a déjà exprimé de l'intérêt pour votre profil.",
+    "premiumProfileBoostTitle": "Boost de Profil",
+    "premiumProfileBoostDesc": "Augmentez votre visibilité pour obtenir plus de matchs.",
+    "premiumExclusiveModesTitle": "Modes Exclusifs",
+    "premiumExclusiveModesDesc": "Accédez à des modes de jeu spéciaux ou des styles d'interaction uniques.",
+    "pointsNeeded": "Débloquer avec {value} points",
+    "badgeNeeded": "Débloquer avec le badge {value}",
+    "locked": "Verrouillé",
+    "accessFeature": "Accéder à la Fonctionnalité",
+    "badgeProfileProName": "Profil Pro",
+    "badgeSpeedDaterName": "Speed Dater"
   },
   "DashboardPage": {
     "welcome": "Bienvenue, {name} !",
@@ -361,4 +372,3 @@
       "toggleSidebar": "Basculer la barre latérale"
    }
 }
-

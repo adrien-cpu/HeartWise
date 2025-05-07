@@ -11,8 +11,9 @@
 import {
     ArrowRight, Award, Book, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, EyeOff, File, Gamepad2,
     Gamepad, HelpCircle, Home, Lightbulb, Loader2, LogOut, Mail, MapPin, MessageCircle, MessageSquare, MessageSquareText, Moon, PanelLeft, Plus,
-    PlusCircle, ScanFace, Search, Server, Settings, Share2, Shield, Smile, Star, Sun, Trash, Trophy, User, UserCheck, Users, Workflow, X, Zap
-} from 'lucide-react'; // Added Lightbulb, UserCheck, MessageSquareText, Trophy
+    PlusCircle, ScanFace, Search, Server, Settings, Share2, Shield, Smile, Star, Sun, Trash, Trophy, User, UserCheck, Users, Workflow, X, Zap,
+    Filter, TrendingUp // Added Filter and TrendingUp
+} from 'lucide-react'; // Added Lightbulb, UserCheck, MessageSquareText, Trophy, Filter, TrendingUp
 
 /**
  * @typedef {object} Icons
@@ -30,6 +31,7 @@ import {
  * @property {LucideIcon} externalLink - External link icon.
  * @property {LucideIcon} eyeOff - Eye off icon (for Blind Exchange).
  * @property {LucideIcon} file - File icon.
+ * @property {LucideIcon} filter - Filter icon.
  * @property {LucideIcon} gamepad - Gamepad icon.
  * @property {LucideIcon} gamepad2 - Gamepad2 icon.
  * @property {LucideIcon} help - Help icon.
@@ -55,6 +57,7 @@ import {
  * @property {LucideIcon} spinner - Spinner icon.
  * @property {LucideIcon} star - Star icon.
  * @property {LucideIcon} trash - Trash icon.
+ * @property {LucideIcon} trendingUp - Trending up icon.
  * @property {LucideIcon} trophy - Trophy icon.
  * @property {LucideIcon} user - User icon.
  * @property {LucideIcon} userCheck - User check icon.
@@ -77,6 +80,7 @@ const Icons = {
   externalLink: ExternalLink,
   eyeOff: EyeOff, // Added eyeOff icon
   file: File,
+  filter: Filter, // Added Filter icon
   gamepad: Gamepad,
   gamepad2: Gamepad2,
   help: HelpCircle,
@@ -102,6 +106,7 @@ const Icons = {
   spinner: Loader2,
   star: Star,
   trash: Trash,
+  trendingUp: TrendingUp, // Added TrendingUp icon
   trophy: Trophy, // Added trophy
   user: User,
   userCheck: UserCheck, // Added userCheck

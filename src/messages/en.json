@@ -324,11 +324,22 @@
     "earnPointsSpeedDate": "Participate in Speed Dating",
     "pointsValue": "{value} pts",
     "premiumFeaturesTitle": "Unlock Premium Features",
-    "premiumFeaturesDesc": "Use your points or earn badges for exclusive access (coming soon!).",
-    "premiumFeatureAdvancedFilters": "Advanced search filters",
-    "premiumFeatureSeeLikes": "See who liked your profile",
-    "premiumFeatureProfileBoost": "Boost your profile visibility",
-    "comingSoon": "Coming Soon"
+    "premiumFeaturesDesc": "Use your points or earn specific badges to access exclusive benefits.",
+    "premiumMoreComingSoon": "More premium features coming soon!",
+    "premiumAdvancedFiltersTitle": "Advanced Filters",
+    "premiumAdvancedFiltersDesc": "Fine-tune your search with more specific criteria.",
+    "premiumSeeLikesTitle": "See Who Likes You",
+    "premiumSeeLikesDesc": "Discover who has already expressed interest in your profile.",
+    "premiumProfileBoostTitle": "Profile Boost",
+    "premiumProfileBoostDesc": "Increase your visibility to get more matches.",
+    "premiumExclusiveModesTitle": "Exclusive Modes",
+    "premiumExclusiveModesDesc": "Access special game modes or unique interaction styles.",
+    "pointsNeeded": "Unlock with {value} points",
+    "badgeNeeded": "Unlock with {value} badge",
+    "locked": "Locked",
+    "accessFeature": "Access Feature",
+    "badgeProfileProName": "Profile Pro",
+    "badgeSpeedDaterName": "Speed Dater"
   },
   "DashboardPage": {
     "welcome": "Welcome, {name}!",
@@ -361,4 +372,3 @@
       "toggleSidebar": "Toggle Sidebar"
    }
 }
-

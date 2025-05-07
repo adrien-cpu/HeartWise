@@ -3,16 +3,29 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Award, MessageSquare, Users, Zap, Star, Gamepad2, Eye, MapPin, Trophy, HelpCircle, Lock } from 'lucide-react'; // Added HelpCircle, Lock icons
+import { Award, MessageSquare, Users, Zap, Star, Gamepad2, Eye, MapPin, Trophy, HelpCircle, Lock, Filter, TrendingUp, SlidersHorizontal } from 'lucide-react'; // Added HelpCircle, Lock icons, Filter, TrendingUp, SlidersHorizontal
 import { Skeleton } from '@/components/ui/skeleton';
 import { get_user_rewards, UserReward, get_user_points } from '@/services/user_profile'; // Import points related functions
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Icons } from '@/components/icons'; // Import Icons object
 
 // Mock user ID - replace with actual user identification
 const userId = 'user1';
+
+interface PremiumFeatureDisplayData {
+  id: string;
+  icon: React.ReactNode;
+  titleKey: string;
+  descriptionKey: string;
+  unlockConditionKey: string; // e.g., "pointsToUnlock" or "badgeRequired"
+  unlockValue: string | number;
+  isLocked: boolean; // Simulate locked state
+}
+
 
 /**
  * @fileOverview Implements the Rewards page component.
@@ -104,12 +117,13 @@ export default function RewardsPage() {
      { icon: <Zap className="h-4 w-4 text-purple-500" />, text: t('earnPointsSpeedDate'), points: t('pointsValue', { value: 25 }) },
    ];
 
-   // Mock data for "Premium Features"
-   const premiumFeatures = [
-       { icon: <Lock className="h-4 w-4 text-primary"/>, text: t('premiumFeatureAdvancedFilters') },
-       { icon: <Lock className="h-4 w-4 text-primary"/>, text: t('premiumFeatureSeeLikes') },
-       { icon: <Lock className="h-4 w-4 text-primary"/>, text: t('premiumFeatureProfileBoost') },
-   ];
+   // Data for "Premium Features"
+    const premiumFeaturesDisplay: PremiumFeatureDisplayData[] = [
+    { id: 'adv_filters', icon: <Icons.filter className="h-6 w-6 text-primary" />, titleKey: 'premiumAdvancedFiltersTitle', descriptionKey: 'premiumAdvancedFiltersDesc', unlockConditionKey: 'pointsNeeded', unlockValue: 500, isLocked: true },
+    { id: 'see_likes', icon: <Icons.users className="h-6 w-6 text-primary" />, titleKey: 'premiumSeeLikesTitle', descriptionKey: 'premiumSeeLikesDesc', unlockConditionKey: 'badgeNeeded', unlockValue: t('badgeProfileProName'), isLocked: true },
+    { id: 'profile_boost', icon: <Icons.trendingUp className="h-6 w-6 text-primary" />, titleKey: 'premiumProfileBoostTitle', descriptionKey: 'premiumProfileBoostDesc', unlockConditionKey: 'pointsNeeded', unlockValue: 1000, isLocked: true },
+    { id: 'exclusive_modes', icon: <Icons.gamepad2 className="h-6 w-6 text-primary" />, titleKey: 'premiumExclusiveModesTitle', descriptionKey: 'premiumExclusiveModesDesc', unlockConditionKey: 'badgeNeeded', unlockValue: t('badgeSpeedDaterName'), isLocked: true },
+    ];
 
 
   return (
@@ -208,19 +222,40 @@ export default function RewardsPage() {
                 <CardTitle>{t('premiumFeaturesTitle')}</CardTitle>
                 <CardDescription>{t('premiumFeaturesDesc')}</CardDescription>
             </CardHeader>
-            <CardContent>
-                 <ul className="space-y-3">
-                    {premiumFeatures.map((feature, index) => (
-                         <li key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {premiumFeaturesDisplay.map((feature) => (
+                    <Card key={feature.id} className={`relative overflow-hidden ${feature.isLocked ? 'opacity-70' : ''}`}>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-base font-medium">{t(feature.titleKey)}</CardTitle>
                             {feature.icon}
-                            <span>{feature.text} ({t('comingSoon')})</span>
-                        </li>
-                    ))}
-                </ul>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-xs text-muted-foreground">{t(feature.descriptionKey)}</p>
+                            {feature.isLocked && (
+                                <div className="mt-3">
+                                    <Badge variant="secondary" className="text-xs">
+                                        <Lock className="mr-1 h-3 w-3" />
+                                        {t('locked')}
+                                    </Badge>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        {t(feature.unlockConditionKey, { value: feature.unlockValue })}
+                                    </p>
+                                </div>
+                            )}
+                        </CardContent>
+                         {!feature.isLocked && (
+                            <CardFooter>
+                                <Button size="sm" className="w-full">{t('accessFeature')}</Button>
+                            </CardFooter>
+                        )}
+                    </Card>
+                ))}
             </CardContent>
+             <CardFooter>
+                <p className="text-xs text-muted-foreground">{t('premiumMoreComingSoon')}</p>
+             </CardFooter>
         </Card>
 
     </div>
   );
 }
-
