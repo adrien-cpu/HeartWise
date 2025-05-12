@@ -47,55 +47,55 @@ export const metadata: Metadata = appMetadata;
  */
 export default async function RootLayout({
   children,
-  params: { locale }, // Receive locale from params
+  params: { locale: urlLocale }, // Renamed for clarity
 }: {
   children: ReactNode;
   params: { locale: string };
-}): Promise<JSX.Element> {
-  // Validate locale or use default. Middleware should ideally handle this.
-  const effectiveLocale = isValidLocale(locale) ? locale : defaultLocale;
+}) {
+  // Determine initial locale based on URL, fallback to default
+  let initialLocaleCandidate = isValidLocale(urlLocale) ? urlLocale : defaultLocale;
 
-  if (!isValidLocale(locale)) {
-    // Log removed: The error message "RootLayout received potentially invalid locale"
-    // indicates an issue potentially upstream (middleware or routing), but the
-    // fallback mechanism below ensures the app uses the default locale.
-    // Removing the log cleans the console while the fallback ensures functionality.
+  if (!isValidLocale(urlLocale)) {
+    // This log indicates an issue potentially upstream (middleware)
+    // Avoid calling notFound() here in the root layout, as it's not allowed.
+    console.warn(`RootLayout: URL locale "${urlLocale}" is invalid or undefined. Using default locale "${initialLocaleCandidate}". Middleware should handle redirection.`);
   }
 
-  // Fetch messages for the effective locale on the server.
   let messages;
+  let finalLocaleForRender; // This will be the locale for <html lang> and NextIntlClientProvider
+
   try {
-    messages = await getMessages({ locale: effectiveLocale });
+    // getMessages internally calls getRequestConfig from i18n.ts
+    // The result.locale will be the locale for which messages were actually loaded (could be default if fallback occurred)
+    const result = await getMessages({ locale: initialLocaleCandidate });
+    messages = result.messages;
+    finalLocaleForRender = result.locale; // Use the locale returned by getRequestConfig
+
+    // This check is important: even if getRequestConfig returns a locale, messages might be empty if all loading failed.
     if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
-      // This case means messages were "loaded" but are empty or invalid.
-      console.error(`Critical error: Messages object for locale "${effectiveLocale}" is empty or invalid after loading attempt.`);
-      // Attempt to load default locale messages as a hard fallback
-      if (effectiveLocale !== defaultLocale) {
-        console.warn(`Attempting to load messages for default locale: "${defaultLocale}" as a fallback.`);
-        messages = await getMessages({ locale: defaultLocale });
-        if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
-          throw new Error(`Fallback default locale messages ("${defaultLocale}") are also missing, empty, or invalid.`);
-        }
-      } else {
-        throw new Error(`Default locale messages ("${defaultLocale}") are missing, empty, or invalid.`);
-      }
+      console.error(`RootLayout: Messages object for locale "${finalLocaleForRender}" (from getRequestConfig) is empty or invalid. This suggests a critical failure in message loading, even fallbacks.`);
+      // If messages are truly empty, we have a big problem.
+      // We'll stick with defaultLocale for lang and pass empty messages to provider.
+      // The provider or components might show missing translation warnings.
+      finalLocaleForRender = defaultLocale; // Ensure lang attribute is at least a valid default
+      messages = {}; // Pass empty messages to prevent provider crash
+      console.error(`RootLayout: Using default locale "${defaultLocale}" for rendering due to critical message loading failure.`);
     }
   } catch (error: any) {
-    console.error(`Failed to load messages in RootLayout for locale "${effectiveLocale}" (or fallback):`, error.message);
-    // Critical error, i18n won't work properly.
-    // Render children within a basic HTML structure, and ClientSideI18n will handle the error display.
-    // Passing null or an empty messages object to ClientSideI18n will trigger its internal error handling.
-    messages = {}; // Pass empty messages to indicate failure to ClientSideI18n
+    // This catch handles errors during the getMessages call itself (e.g., if i18n.ts throws)
+    console.error(`RootLayout: Critical failure in getMessages for locale "${initialLocaleCandidate}". Error: ${error.message}`);
+    messages = {}; // Provide empty messages
+    finalLocaleForRender = defaultLocale; // Fallback to default locale for rendering
   }
 
   return (
-    <html lang={effectiveLocale}>
+    <html lang={finalLocaleForRender}> {/* Use the locale for which messages were actually obtained/intended */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/*
           Pass locale and server-loaded messages to the Client Boundary Component.
           ClientSideI18n will use these to set up NextIntlClientProvider and AuthProvider.
         */}
-        <ClientSideI18n locale={effectiveLocale} messages={messages}>
+        <ClientSideI18n locale={finalLocaleForRender} messages={messages}>
           {children}
         </ClientSideI18n>
       </body>
