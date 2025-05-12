@@ -9,11 +9,11 @@
 
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { ReactNode } from 'react';
-import { getMessages } from 'next-intl/server';
-import { locales, defaultLocale, isValidLocale, Locale } from '@/i18n/settings'; // Import Locale type
+import type { ReactNode } from 'react';
+import { getMessages, unstable_setRequestLocale } from 'next-intl/server'; // Use unstable_setRequestLocale for static rendering
+import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/settings';
 import { metadata as appMetadata } from '@/app/metadata';
-import { ClientSideI18n } from '@/components/ClientSideI18n'; // Client boundary for providers
+import { ClientSideI18n } from '@/components/ClientSideI18n';
 import './globals.css';
 
 const geistSans = Geist({
@@ -28,16 +28,19 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = appMetadata;
 
-// Optional: Define viewport settings if needed
 // export const viewport: Viewport = {
 //   themeColor: '...',
 // }
 
+// Enable static rendering for all locales
+export function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
+}
+
 /**
  * RootLayout component (Server Component).
  * Sets up the basic HTML structure, fonts, fetches i18n messages,
- * and passes locale and messages to the ClientSideI18n boundary
- * for client-side context setup (NextIntlClientProvider and AuthProvider).
+ * and passes locale and messages to the ClientSideI18n boundary.
  *
  * @param {object} props - The props for the RootLayout component.
  * @param {React.ReactNode} props.children - The children to render within the layout.
@@ -47,70 +50,65 @@ export const metadata: Metadata = appMetadata;
  */
 export default async function RootLayout({
   children,
-  params: { locale: urlLocale }, // Renamed for clarity
+  params: { locale: rawUrlLocale },
 }: {
   children: ReactNode;
   params: { locale: string };
 }) {
-  // Determine initial locale based on URL, fallback to default
-  let initialLocaleCandidate: Locale;
-  if (isValidLocale(urlLocale)) {
-    initialLocaleCandidate = urlLocale;
-  } else {
-    console.warn(`RootLayout: URL locale "${urlLocale}" is invalid or undefined. Using default locale "${defaultLocale}". Middleware should handle redirection.`);
-    initialLocaleCandidate = defaultLocale;
+  // Validate the locale from the URL. If invalid, use the default.
+  // Middleware should ideally handle redirection for invalid locales.
+  const effectiveLocale: Locale = isValidLocale(rawUrlLocale) ? rawUrlLocale : defaultLocale;
+
+  if (!isValidLocale(rawUrlLocale)) {
+    console.warn(`[RootLayout] URL locale "${rawUrlLocale}" is invalid. Using default locale "${effectiveLocale}". Middleware should handle redirection.`);
   }
+
+  // Set the locale for the current request. This is necessary for
+  // server-side rendering and for `getMessages` to work correctly.
+  unstable_setRequestLocale(effectiveLocale);
 
   let messages;
-  let finalLocaleForRender: Locale; // This will be the locale for <html lang> and NextIntlClientProvider
+  let actualLocaleForMessages: Locale = effectiveLocale; // Initialize with the current effective locale
 
   try {
-    // getMessages internally calls getRequestConfig from i18n.ts
-    // The result.locale will be the locale for which messages were actually loaded (could be default if fallback occurred)
-    const result = await getMessages({ locale: initialLocaleCandidate });
+    // getMessages will call the getRequestConfig from your i18n setup.
+    // The .locale property in the result from getMessages indicates the locale
+    // for which messages were actually loaded (could be default if fallback occurred).
+    const result = await getMessages({ locale: effectiveLocale });
     messages = result.messages;
-    
-    // Validate result.locale from getMessages
+
+    // Trust the locale returned by getMessages if it's valid, as it reflects fallbacks.
     if (result.locale && isValidLocale(result.locale)) {
-      finalLocaleForRender = result.locale;
+      actualLocaleForMessages = result.locale;
     } else {
-      console.error(`RootLayout: Received invalid or undefined locale ("${result.locale}") from getMessages, even though initial candidate was "${initialLocaleCandidate}". Falling back to default: "${defaultLocale}".`);
-      finalLocaleForRender = defaultLocale;
+      console.error(`[RootLayout] Received invalid or undefined locale ("${result.locale}") from getMessages, even though initial candidate was "${effectiveLocale}". Using effectiveLocale: "${effectiveLocale}" for ClientSideI18n.`);
+      actualLocaleForMessages = effectiveLocale; // Fallback to the validated URL locale or default
     }
 
-    // Check if messages object is valid
     if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
-      console.error(`RootLayout: Messages object for locale "${finalLocaleForRender}" (derived from getMessages result.locale: "${result.locale}") is empty or invalid. This suggests a critical failure in message loading, even fallbacks.`);
-      // If messages are empty, we should still try to render with a valid locale string
-      // finalLocaleForRender should already be a valid Locale type from the check above.
-      // If it somehow wasn't, the hardcoded 'en' below will catch it.
-      messages = {}; // Pass empty messages to prevent provider crash, but translations will be missing.
+      console.error(`[RootLayout] Messages object for locale "${actualLocaleForMessages}" (derived from getMessages result.locale: "${result.locale}") is empty or invalid. This suggests a critical failure in message loading, even fallbacks.`);
+      messages = {}; // Pass empty messages to prevent provider crash; translations will be missing.
     }
   } catch (error: any) {
-    console.error(`RootLayout: Critical failure in getMessages for locale "${initialLocaleCandidate}". Error: ${error.message}. Stack: ${error.stack}`);
-    messages = {};
-    finalLocaleForRender = defaultLocale; // Fallback to default locale for rendering
+    console.error(`[RootLayout] Critical failure in getMessages for locale "${effectiveLocale}". Error: ${error.message}.`);
+    messages = {}; // Fallback to empty messages
+    actualLocaleForMessages = defaultLocale; // Fallback to default locale for rendering
+    console.warn(`[RootLayout] Falling back to default locale "${actualLocaleForMessages}" for ClientSideI18n due to message loading error.`);
   }
-
-  // Final safeguard for finalLocaleForRender before using it in <html> and passing to ClientSideI18n
-  if (!isValidLocale(finalLocaleForRender)) {
-    console.error(`RootLayout: finalLocaleForRender is STILL invalid ("${finalLocaleForRender}") before rendering. This is a critical state. Using hardcoded '${defaultLocale}'.`);
-    finalLocaleForRender = defaultLocale; 
+  
+  // Ensure actualLocaleForMessages is a valid Locale type before rendering
+  if (!isValidLocale(actualLocaleForMessages)) {
+    console.error(`[RootLayout] actualLocaleForMessages is STILL invalid ("${actualLocaleForMessages}") before rendering. This is a critical state. Using hardcoded '${defaultLocale}'.`);
+    actualLocaleForMessages = defaultLocale;
   }
-
 
   return (
-    <html lang={finalLocaleForRender}>
+    <html lang={actualLocaleForMessages}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/*
-          Pass locale and server-loaded messages to the Client Boundary Component.
-          ClientSideI18n will use these to set up NextIntlClientProvider and AuthProvider.
-        */}
-        <ClientSideI18n locale={finalLocaleForRender} messages={messages}>
+        <ClientSideI18n locale={actualLocaleForMessages} messages={messages}>
           {children}
         </ClientSideI18n>
       </body>
     </html>
   );
 }
-
