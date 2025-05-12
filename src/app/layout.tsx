@@ -10,7 +10,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { getMessages, unstable_setRequestLocale } from 'next-intl/server'; // Use unstable_setRequestLocale for static rendering
+import { getMessages, setRequestLocale } from 'next-intl/server'; // Use setRequestLocale for static rendering
 import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/settings';
 import { metadata as appMetadata } from '@/app/metadata';
 import { ClientSideI18n } from '@/components/ClientSideI18n';
@@ -65,7 +65,7 @@ export default async function RootLayout({
 
   // Set the locale for the current request. This is necessary for
   // server-side rendering and for `getMessages` to work correctly.
-  unstable_setRequestLocale(effectiveLocale);
+  setRequestLocale(effectiveLocale);
 
   let messages;
   let actualLocaleForMessages: Locale = effectiveLocale; // Initialize with the current effective locale
