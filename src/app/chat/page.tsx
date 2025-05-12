@@ -53,47 +53,48 @@ interface Conversation {
   isTyping?: boolean; // Partner typing status
 }
 
-// Mock current user ID
-const CURRENT_USER_ID = 'user1';
-const CURRENT_USER_NAME = 'Me'; // Or fetch from profile
-
-// Mock participants with compatibility and online status
-const mockParticipants: { [key: string]: ConversationParticipant } = {
-  'user2': {
-    id: 'user2',
-    name: 'Bob',
-    profilePicture: 'https://picsum.photos/seed/bob/50/50',
-    dataAiHint: 'man portrait',
-    bio: 'Loves cooking and travel.',
-    interests: ['Cooking', 'Travel'],
-    compatibilityScore: 75,
-    isOnline: true,
-  },
-  'user3': {
-    id: 'user3',
-    name: 'Charlie',
-    profilePicture: 'https://picsum.photos/seed/charlie/50/50',
-    dataAiHint: 'woman portrait',
-    bio: 'Tech enthusiast and bookworm.',
-    interests: ['Tech', 'Books'],
-    compatibilityScore: 60,
-    isOnline: false,
-  },
-  'user4': {
-    id: 'user4',
-    name: 'Diana',
-    profilePicture: 'https://picsum.photos/seed/diana/50/50',
-    dataAiHint: 'person smiling',
-    bio: 'Outdoor adventurer and music lover.',
-    interests: ['Hiking', 'Music', 'Travel'],
-    compatibilityScore: 88,
-    isOnline: true,
-  },
+// Helper function to update messages in a specific conversation
+const updateConversationMessages = (
+  conversations: Conversation[],
+  convId: string,
+  messageUpdateFn: (messages: Message[]) => Message[]
+): Conversation[] => {
+  return conversations.map(conv => {
+    if (conv.id === convId) {
+      const updatedMessages = messageUpdateFn(conv.messages);
+      const lastMessage = updatedMessages[updatedMessages.length - 1];
+      return {
+        ...conv,
+        messages: updatedMessages,
+        // Update last message info based on the last message in the updated array
+        lastMessage: lastMessage?.text || conv.lastMessage,
+        lastMessageTimestamp: lastMessage?.timestamp || conv.lastMessageTimestamp,
+        // Keep isTyping state unchanged here, it's handled separately
+      };
+    }
+    return conv;
+  });
 };
 
+// Helper function to add a new message to a conversation
+const addMessageToConversation = (
+  conversations: Conversation[],
+  convId: string,
+  newMessage: Message
+): Conversation[] => {
+  return updateConversationMessages(conversations, convId, messages => [
+    ...messages,
+    newMessage,
+  ]);
+};
 
-// Mock conversations data using participants
-const initialConversations: Conversation[] = [
+// Helper function to update the status of a specific message
+const updateMessageStatus = (
+  conversations: Conversation[],
+  convId: string,
+  messageId: string,
+  newStatus: 'sent' | 'delivered' | 'read' | 'error'
+): Conversation[] => {
   {
     id: 'conv1',
     participant: mockParticipants['user2'],
@@ -253,8 +254,7 @@ export default function ChatPage() {
   // Function to simulate partner's response
   const simulatePartnerResponse = useCallback(async (convId: string, userMessageText: string) => {
     // Simulate typing indicator
-    setConversations(prev => prev.map(c => c.id === convId ? { ...c, isTyping: true } : c));
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    setConversations(prev => setTypingIndicator(prev, convId, true));
 
     const typingDuration = 1000 + Math.random() * 1500; // Variable typing time
     await new Promise(resolve => setTimeout(resolve, typingDuration));
