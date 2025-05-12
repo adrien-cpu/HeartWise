@@ -103,16 +103,16 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[x] Jeu :** (`/game` - *UI/Basic Logic*, needs backend for preferences/points persistence)
 *   **[x] Speed Dating :** (`/speed-dating` - *UI + Feedback Simulation*, needs backend for scheduling/matching/feedback persistence)
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API*)
-*   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Mock Data*)
+*   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Data now uses Firebase Firestore*)
 *   **[x] Outils de Communication Intégrés à l'Application (Chat avec Tag d'Intention IA):** (`/chat`, `src/ai/flows/intention-tagging.ts` - *Enhanced UI/Mock Data/AI Suggestion*, needs backend for real-time/persistence/calls)
-*   **[x] Système de récompenses :** (`/rewards` - *Displays Mock Points/Badges*, needs backend)
-*   **[x] Tableau de bord utilisateur intelligent :** (`/dashboard` - *Displays Mock Advice/Stats*, needs backend for real data)
+*   **[x] Système de récompenses :** (`/rewards` - *Displays Points/Badges from Firebase Firestore*)
+*   **[x] Tableau de bord utilisateur intelligent :** (`/dashboard` - *Displays Advice/Stats from Firebase Firestore*)
 
 ## Features to Implement / Enhance (Requires Backend & Advanced Logic):
 
-*   **[ ] Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels (Base de données utilisateurs, stockage d'images cloud, API de géolocalisation tierce, logique de matchmaking réelle, persistance du chat via base de données, etc.).
-*   **[~] Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth). (*UI for Login/Signup done, basic Firebase Auth integration, client-side route protection for /dashboard and /profile implemented. Needs further backend integration and more robust protection.*)
-*   **[ ] Système de récompenses (avancé):** Concevoir et implémenter le système de points, modes cachés, accès premium (logique backend + UI).
+*   **[~] Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels. (*User profiles, rewards, points now use Firebase Firestore. Other areas like chat, geolocation matching still need backend.*)
+*   **[~] Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth). (*Firebase Auth implemented for email/password. Profile creation linked. Further enhancements needed for social logins, password reset, email verification.*)
+*   **[~] Système de récompenses (avancé):** Concevoir et implémenter le système de points, modes cachés, accès premium (logique backend + UI). (*Points and badges stored in Firestore. Premium feature unlocking logic partially simulated.*)
 *   **[ ] Modération de Contenu:** Intégrer un service de modération externe (API) pour le texte et les médias générés par les utilisateurs.
 *   **[ ] Notifications:** Mettre en place des notifications push (e.g., via Firebase Cloud Messaging) pour les nouveaux messages, matchs, etc.
 *   **[ ] Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer une solution WebRTC (e.g., Twilio, Agora) pour les appels vidéo/audio dans `/chat`.
@@ -123,4 +123,4 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[ ] Tags d'intention (Chat - Avancé):** Affiner la logique IA backend pour analyser/suggérer des tags d'intention (`/chat`).
 
 
-*Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality.*
+*Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality. Features marked with *~* are partially implemented.*

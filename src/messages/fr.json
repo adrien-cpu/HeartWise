@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -257,10 +258,16 @@
     "anonymousUser": "Utilisateur Anonyme",
     "yes": "Oui",
     "no": "Non",
-    "uploadPicture": "Télécharger une photo",
+    "uploadPicture": "Changer la Photo",
+    "uploadPictureInputLabel": "Télécharger une photo de profil",
     "redirectingToLogin": "Redirection vers la connexion...",
     "noProfileError": "Le profil n'a pas pu être chargé. Vous devez peut-être vous connecter.",
-    "returnToLogin": "Retour à la Connexion"
+    "returnToLogin": "Retour à la Connexion",
+    "fileTooLargeTitle": "Fichier Trop Volumineux",
+    "fileTooLargeDesc": "La taille de l'image ne doit pas dépasser 5Mo.",
+    "invalidFileTypeTitle": "Type de Fichier Invalide",
+    "invalidFileTypeDesc": "Veuillez télécharger un fichier image (ex: JPG, PNG).",
+    "emailLabel": "E-mail"
   },
   "SpeedDating": {
     "title": "Speed Dating",
@@ -440,7 +447,8 @@
     "redirectingToLogin": "Redirection vers la connexion...",
     "profileLoadError": "Impossible de charger les données de profil de votre tableau de bord.",
     "noAdviceAvailable": "Aucun conseil disponible pour le moment.",
-    "profileDataUnavailable": "Les données de profil sont actuellement indisponibles."
+    "profileDataUnavailable": "Les données de profil sont actuellement indisponibles.",
+    "authenticating": "Authentification en cours..."
   },
    "Sidebar": {
       "toggleSidebar": "Basculer la barre latérale"

@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -257,10 +258,16 @@
     "anonymousUser": "Anonymous User",
     "yes": "Yes",
     "no": "No",
-    "uploadPicture": "Upload Picture",
+    "uploadPicture": "Change Photo",
+    "uploadPictureInputLabel": "Upload profile picture",
     "redirectingToLogin": "Redirecting to login...",
     "noProfileError": "Profile could not be loaded. You may need to log in.",
-    "returnToLogin": "Return to Login"
+    "returnToLogin": "Return to Login",
+    "fileTooLargeTitle": "File Too Large",
+    "fileTooLargeDesc": "Image size should not exceed 5MB.",
+    "invalidFileTypeTitle": "Invalid File Type",
+    "invalidFileTypeDesc": "Please upload an image file (e.g., JPG, PNG).",
+    "emailLabel": "Email"
   },
   "SpeedDating": {
     "title": "Speed Dating",
@@ -440,7 +447,8 @@
     "redirectingToLogin": "Redirecting to login...",
     "profileLoadError": "Could not load your dashboard profile data.",
     "noAdviceAvailable": "No advice available at the moment.",
-    "profileDataUnavailable": "Profile data is currently unavailable."
+    "profileDataUnavailable": "Profile data is currently unavailable.",
+    "authenticating": "Authenticating..."
   },
    "Sidebar": {
       "toggleSidebar": "Toggle Sidebar"

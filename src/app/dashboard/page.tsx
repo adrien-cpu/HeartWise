@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -10,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Lightbulb, UserCheck, MessageSquareText, Star, Trophy, Users, Play, Sparkles, Zap, Search, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { get_user, UserProfile } from '@/services/user_profile';
+import { get_user, UserProfile } from '@/services/user_profile'; // Updated to use Firestore-backed service
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -35,10 +36,10 @@ const mockMatchSuggestion: MockMatch = {
 };
 
 /**
- * @fileOverview Implements the Intelligent User Dashboard page.
+ * @fileOverview Implements the Intelligent User Dashboard page, now fetching data from Firestore.
  * @module DashboardPage
  * @description Displays personalized insights, stats, quick links, and a mock match suggestion for the user.
- *              Requires user to be authenticated.
+ *              Requires user to be authenticated. Data is fetched from Firestore via `user_profile` service.
  */
 
 /**
@@ -64,18 +65,18 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (authLoading) {
-      return; // Wait for authentication state to resolve
+      return; 
     }
 
     if (!currentUser) {
-      router.push('/login'); // Redirect to login if not authenticated
+      router.push('/login'); 
       return;
     }
 
     const fetchProfileData = async () => {
       setLoadingProfileData(true);
       try {
-        const userProfile = await get_user(currentUser.uid);
+        const userProfile = await get_user(currentUser.uid); // Fetch from Firestore
         setProfile(userProfile);
 
         let completeness = 0;
@@ -83,7 +84,7 @@ export default function DashboardPage() {
         if (userProfile.bio && userProfile.bio.length > 10) completeness += 20;
         if (userProfile.profilePicture) completeness += 20;
         if (userProfile.interests && userProfile.interests.length > 0) completeness += 20;
-        if (userProfile.interests && userProfile.interests.length >= 3) completeness += 20;
+        if (userProfile.interests && userProfile.interests.length >= 3) completeness += 20; // Bonus for more interests
         setProfileCompleteness(Math.min(100, completeness));
         
         const mockAdvices = [
@@ -109,7 +110,7 @@ export default function DashboardPage() {
     fetchProfileData();
   }, [currentUser, authLoading, router, t, tProfile, toast, tHome]);
 
-  const getInitials = (name?: string): string => {
+  const getInitials = (name?: string | null): string => {
     if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
@@ -118,22 +119,28 @@ export default function DashboardPage() {
      switch (type) {
        case 'profile_complete': return <UserCheck className="h-4 w-4 text-green-500" />;
        case 'first_chat': return <MessageSquareText className="h-4 w-4 text-blue-500" />;
-       default: return <Star className="h-4 w-4 text-yellow-500" />;
+       case 'first_match': return <Users className="h-4 w-4 text-pink-500" />;
+       case 'speed_dater': return <Zap className="h-4 w-4 text-purple-500" />;
+       case 'game_winner': return <Gamepad2 className="h-4 w-4 text-red-500" />;
+       case 'blind_exchange_participant': return <Eye className="h-4 w-4 text-indigo-500" />;
+       case 'explorer': return <MapPin className="h-4 w-4 text-orange-500" />;
+       case 'chat_enthusiast': return <MessageSquareText className="h-4 w-4 text-teal-500" />; // Re-used icon for simplicity
+       case 'top_contributor': return <Award className="h-4 w-4 text-yellow-500" />;
+       case 'game_master': return <Trophy className="h-4 w-4 text-amber-600" />;
+       default: return <Star className="h-4 w-4 text-gray-400" />;
      }
    };
 
-  if (authLoading) {
+  if (authLoading || (loadingProfileData && !profile && currentUser)) { // Show loader if auth is loading OR profile data is loading for an authenticated user
     return (
       <div className="container mx-auto py-8 px-4 flex flex-col items-center justify-center min-h-screen">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">{t('loadingDashboard')}</p>
+        <p className="mt-4 text-muted-foreground">{authLoading ? t('authenticating') : t('loadingDashboard')}</p>
       </div>
     );
   }
-
+  
   if (!currentUser) {
-    // This state indicates redirection is likely happening or auth check just finished negatively.
-    // A loader is shown while router.push takes effect.
     return (
         <div className="container mx-auto py-8 px-4 flex flex-col items-center justify-center min-h-screen">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -141,6 +148,7 @@ export default function DashboardPage() {
         </div>
     );
   }
+  
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -156,15 +164,15 @@ export default function DashboardPage() {
         ) : profile ? (
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16 border" data-ai-hint={profile.dataAiHint || "user"}>
-              <AvatarImage src={profile.profilePicture || undefined} alt={profile.name || t('userAlt')} />
-              <AvatarFallback className="text-2xl">{getInitials(profile.name)}</AvatarFallback>
+              <AvatarImage src={profile.profilePicture || undefined} alt={profile.name || currentUser.displayName || t('userAlt')} />
+              <AvatarFallback className="text-2xl">{getInitials(profile.name || currentUser.displayName)}</AvatarFallback>
             </Avatar>
             <div>
               <h1 className="text-3xl font-bold">{t('welcome', { name: profile.name || currentUser.displayName || t('userAlt') })}</h1>
               <p className="text-muted-foreground">{t('dashboardOverview')}</p>
             </div>
           </div>
-        ) : (
+        ) : ( // Case where loading is done, but profile is still null (error fetching)
            <div className="flex items-center space-x-4">
              <Avatar className="h-16 w-16 border">
                 <AvatarFallback className="text-2xl">{getInitials(currentUser.displayName)}</AvatarFallback>
@@ -211,7 +219,7 @@ export default function DashboardPage() {
           <CardContent>
             {loadingProfileData ? (
                <Skeleton className="h-8 w-full" />
-            ) : profile ? (
+            ) : profile ? ( // Check if profile exists before accessing completeness
                 <>
                     <Progress value={profileCompleteness} className="w-full mb-2 h-3" aria-label={`${t('profileCompletenessTitle')} ${profileCompleteness}%`} />
                     <p className="text-right text-sm font-medium text-primary">{profileCompleteness}%</p>
@@ -233,8 +241,8 @@ export default function DashboardPage() {
               <Sparkles className="h-6 w-6 text-primary" />
               {t('quickActionsTitle')}
             </CardTitle>
-            <CardDescription>{t('quickActionsDesc')}</CardDescription>
-          </CardHeader>
+            <CardDescription>{t('quickActionsDesc')}</CardHeader>
+          </CardContent>
           <CardContent className="grid grid-cols-2 gap-3">
             <Link href="/speed-dating" passHref>
               <Button variant="outline" className="w-full flex items-center justify-start gap-2">
@@ -243,7 +251,7 @@ export default function DashboardPage() {
             </Link>
             <Link href="/blind-exchange-mode" passHref>
               <Button variant="outline" className="w-full flex items-center justify-start gap-2">
-                <Users className="h-4 w-4" /> {tHome('blindExchangeMode')}
+                <Eye className="h-4 w-4" /> {tHome('blindExchangeMode')}
               </Button>
             </Link>
             <Link href="/game" passHref>
@@ -265,10 +273,10 @@ export default function DashboardPage() {
               <Search className="h-6 w-6 text-primary" />
               {t('matchSuggestionTitle')}
             </CardTitle>
-            <CardDescription>{t('matchSuggestionDesc')}</CardDescription>
+            <CardDescription>{t('matchSuggestionDesc')}</CardHeader>
            </CardHeader>
            <CardContent>
-            {loadingProfileData && !profile ? ( // Show skeleton if profile data is loading and not yet available
+            {loadingProfileData && !profile ? ( 
                 <div className="flex items-center space-x-4">
                     <Skeleton className="h-16 w-16 rounded-full" />
                     <div className="space-y-2 flex-grow">
@@ -277,7 +285,7 @@ export default function DashboardPage() {
                         <Skeleton className="h-4 w-2/3" />
                     </div>
                 </div>
-            ) : ( // Otherwise, show match suggestion (even if main profile data is still loading, this is mock)
+            ) : ( 
                 <div className="flex items-center space-x-4 p-3 border rounded-lg bg-muted/50">
                     <Avatar className="h-16 w-16 border" data-ai-hint={mockMatchSuggestion.dataAiHint || "person"}>
                         <AvatarImage src={mockMatchSuggestion.profilePicture} alt={mockMatchSuggestion.name}/>
@@ -301,8 +309,8 @@ export default function DashboardPage() {
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>{t('quickStatsTitle')}</CardTitle>
-            <CardDescription>{t('quickStatsDesc')}</CardDescription>
-          </CardHeader>
+            <CardDescription>{t('quickStatsDesc')}</CardHeader>
+          </CardContent>
           <CardContent className="space-y-3">
             {loadingProfileData ? (
               <>
@@ -315,12 +323,12 @@ export default function DashboardPage() {
                    <span className="text-muted-foreground">{t('totalPoints')}</span>
                    <span className="font-semibold flex items-center gap-1">
                      <Trophy className="h-4 w-4 text-yellow-500" />
-                     {profile?.points ?? 0}
+                     {profile.points ?? 0}
                    </span>
                  </div>
                  <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t('badgesEarned')}</span>
-                   <span className="font-semibold">{profile?.rewards?.length ?? 0}</span>
+                   <span className="font-semibold">{profile.rewards?.length ?? 0}</span>
                  </div>
               </>
             ) : (
@@ -332,7 +340,7 @@ export default function DashboardPage() {
         <Card className="lg:col-span-2 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>{t('recentBadgesTitle')}</CardTitle>
-             <CardDescription>{t('recentBadgesDesc')}</CardDescription>
+             <CardDescription>{t('recentBadgesDesc')}</CardHeader>
           </CardHeader>
           <CardContent>
             {loadingProfileData ? (

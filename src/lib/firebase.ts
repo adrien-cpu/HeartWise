@@ -7,7 +7,7 @@
  */
 import { initializeApp, getApp, getApps, FirebaseApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
-// import { getFirestore, Firestore } from 'firebase/firestore'; // Uncomment if you use Firestore
+import { getFirestore, Firestore } from 'firebase/firestore'; // Uncomment if you use Firestore
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -30,6 +30,6 @@ if (!getApps().length) {
 }
 
 const auth: Auth = getAuth(app);
-// const firestore: Firestore = getFirestore(app); // Uncomment if you use Firestore
+const firestore: Firestore = getFirestore(app); // Enable Firestore
 
-export { app, auth /*, firestore*/ }; // Export auth and firestore
+export { app, auth, firestore }; // Export auth and firestore
