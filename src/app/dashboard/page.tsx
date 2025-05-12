@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -9,15 +8,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, UserCheck, MessageSquareText, Star, Trophy, Users, Play, Sparkles, Zap, Search } from 'lucide-react'; // Added more icons
+import { Lightbulb, UserCheck, MessageSquareText, Star, Trophy, Users, Play, Sparkles, Zap, Search, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { get_user, UserProfile } from '@/services/user_profile';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
-// Mock user ID for demonstration
-const userId = 'user1';
-
-// Mock Match Suggestion Data
+// Mock Match Suggestion Data (can be replaced with dynamic data later)
 interface MockMatch {
   id: string;
   name: string;
@@ -40,6 +38,7 @@ const mockMatchSuggestion: MockMatch = {
  * @fileOverview Implements the Intelligent User Dashboard page.
  * @module DashboardPage
  * @description Displays personalized insights, stats, quick links, and a mock match suggestion for the user.
+ *              Requires user to be authenticated.
  */
 
 /**
@@ -52,19 +51,31 @@ export default function DashboardPage() {
   const t = useTranslations('DashboardPage');
   const tProfile = useTranslations('ProfilePage');
   const tRewards = useTranslations('RewardsPage');
-  const tHome = useTranslations('Home'); // For reusing feature names
+  const tHome = useTranslations('Home');
 
   const { toast } = useToast();
+  const { currentUser, loading: authLoading } = useAuth();
+  const router = useRouter();
+
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingProfileData, setLoadingProfileData] = useState(true);
   const [currentAdvice, setCurrentAdvice] = useState('');
   const [profileCompleteness, setProfileCompleteness] = useState(0);
 
   useEffect(() => {
+    if (authLoading) {
+      return; // Wait for authentication state to resolve
+    }
+
+    if (!currentUser) {
+      router.push('/login'); // Redirect to login if not authenticated
+      return;
+    }
+
     const fetchProfileData = async () => {
-      setLoading(true);
+      setLoadingProfileData(true);
       try {
-        const userProfile = await get_user(userId);
+        const userProfile = await get_user(currentUser.uid);
         setProfile(userProfile);
 
         let completeness = 0;
@@ -72,7 +83,7 @@ export default function DashboardPage() {
         if (userProfile.bio && userProfile.bio.length > 10) completeness += 20;
         if (userProfile.profilePicture) completeness += 20;
         if (userProfile.interests && userProfile.interests.length > 0) completeness += 20;
-        if (userProfile.interests && userProfile.interests.length >= 3) completeness += 20; // Bonus for more interests
+        if (userProfile.interests && userProfile.interests.length >= 3) completeness += 20;
         setProfileCompleteness(Math.min(100, completeness));
         
         const mockAdvices = [
@@ -89,12 +100,14 @@ export default function DashboardPage() {
           title: tProfile('fetchErrorTitle'),
           description: tProfile('fetchErrorDescription'),
         });
+        setProfile(null);
       } finally {
-        setLoading(false);
+        setLoadingProfileData(false);
       }
     };
+
     fetchProfileData();
-  }, [userId, tProfile, toast, t]);
+  }, [currentUser, authLoading, router, t, tProfile, toast, tHome]);
 
   const getInitials = (name?: string): string => {
     if (!name) return 'U';
@@ -109,10 +122,30 @@ export default function DashboardPage() {
      }
    };
 
+  if (authLoading) {
+    return (
+      <div className="container mx-auto py-8 px-4 flex flex-col items-center justify-center min-h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">{t('loadingDashboard')}</p>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    // This state indicates redirection is likely happening or auth check just finished negatively.
+    // A loader is shown while router.push takes effect.
+    return (
+        <div className="container mx-auto py-8 px-4 flex flex-col items-center justify-center min-h-screen">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="mt-4 text-muted-foreground">{t('redirectingToLogin')}</p>
+        </div>
+    );
+  }
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-4">
-        {loading ? (
+        {loadingProfileData && !profile ? (
           <div className="flex items-center space-x-4">
             <Skeleton className="h-16 w-16 rounded-full" />
             <div className="space-y-2">
@@ -127,12 +160,20 @@ export default function DashboardPage() {
               <AvatarFallback className="text-2xl">{getInitials(profile.name)}</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-bold">{t('welcome', { name: profile.name || t('userAlt') })}</h1>
+              <h1 className="text-3xl font-bold">{t('welcome', { name: profile.name || currentUser.displayName || t('userAlt') })}</h1>
               <p className="text-muted-foreground">{t('dashboardOverview')}</p>
             </div>
           </div>
         ) : (
-           <h1 className="text-3xl font-bold">{t('welcome', { name: t('userAlt') })}</h1>
+           <div className="flex items-center space-x-4">
+             <Avatar className="h-16 w-16 border">
+                <AvatarFallback className="text-2xl">{getInitials(currentUser.displayName)}</AvatarFallback>
+             </Avatar>
+             <div>
+                <h1 className="text-3xl font-bold">{t('welcome', { name: currentUser.displayName || t('userAlt') })}</h1>
+                <p className="text-destructive">{t('profileLoadError')}</p>
+             </div>
+           </div>
         )}
          <Link href="/profile" passHref>
             <Button variant="outline">{tProfile('editProfile')}</Button>
@@ -140,7 +181,6 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Personalized Advice Card */}
         <Card className="lg:col-span-2 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -150,15 +190,16 @@ export default function DashboardPage() {
             <CardDescription>{t('personalizedAdviceDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {loadingProfileData ? (
               <Skeleton className="h-10 w-full" />
-            ) : (
+            ) : currentAdvice ? (
               <p className="text-sm italic leading-relaxed">{`"${currentAdvice}"`}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t('noAdviceAvailable')}</p>
             )}
           </CardContent>
         </Card>
 
-        {/* Profile Completeness Card */}
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -168,9 +209,9 @@ export default function DashboardPage() {
              <CardDescription>{t('profileCompletenessDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {loadingProfileData ? (
                <Skeleton className="h-8 w-full" />
-            ) : (
+            ) : profile ? (
                 <>
                     <Progress value={profileCompleteness} className="w-full mb-2 h-3" aria-label={`${t('profileCompletenessTitle')} ${profileCompleteness}%`} />
                     <p className="text-right text-sm font-medium text-primary">{profileCompleteness}%</p>
@@ -180,11 +221,12 @@ export default function DashboardPage() {
                        </Link>
                      )}
                 </>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t('profileDataUnavailable')}</p>
             )}
           </CardContent>
         </Card>
 
-        {/* Quick Actions Card */}
         <Card className="lg:col-span-1 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -217,7 +259,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
         
-        {/* Mock Match Suggestion Card */}
         <Card className="lg:col-span-2 shadow-sm hover:shadow-md transition-shadow">
            <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -227,7 +268,7 @@ export default function DashboardPage() {
             <CardDescription>{t('matchSuggestionDesc')}</CardDescription>
            </CardHeader>
            <CardContent>
-            {loading ? (
+            {loadingProfileData && !profile ? ( // Show skeleton if profile data is loading and not yet available
                 <div className="flex items-center space-x-4">
                     <Skeleton className="h-16 w-16 rounded-full" />
                     <div className="space-y-2 flex-grow">
@@ -236,7 +277,7 @@ export default function DashboardPage() {
                         <Skeleton className="h-4 w-2/3" />
                     </div>
                 </div>
-            ) : (
+            ) : ( // Otherwise, show match suggestion (even if main profile data is still loading, this is mock)
                 <div className="flex items-center space-x-4 p-3 border rounded-lg bg-muted/50">
                     <Avatar className="h-16 w-16 border" data-ai-hint={mockMatchSuggestion.dataAiHint || "person"}>
                         <AvatarImage src={mockMatchSuggestion.profilePicture} alt={mockMatchSuggestion.name}/>
@@ -257,20 +298,18 @@ export default function DashboardPage() {
            </CardContent>
         </Card>
 
-
-        {/* User Stats Card */}
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>{t('quickStatsTitle')}</CardTitle>
             <CardDescription>{t('quickStatsDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {loading ? (
+            {loadingProfileData ? (
               <>
                 <Skeleton className="h-6 w-3/4" />
                 <Skeleton className="h-6 w-1/2" />
               </>
-            ) : (
+            ) : profile ? (
               <>
                 <div className="flex items-center justify-between text-sm">
                    <span className="text-muted-foreground">{t('totalPoints')}</span>
@@ -283,20 +322,20 @@ export default function DashboardPage() {
                   <span className="text-muted-foreground">{t('badgesEarned')}</span>
                    <span className="font-semibold">{profile?.rewards?.length ?? 0}</span>
                  </div>
-                 {/* Add more mock stats if relevant, e.g., "Matches Made", "Dates Scheduled" - requires backend */}
               </>
+            ) : (
+              <p className="text-sm text-muted-foreground">{t('profileDataUnavailable')}</p>
             )}
           </CardContent>
         </Card>
 
-         {/* Recent Badges Card */}
         <Card className="lg:col-span-2 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>{t('recentBadgesTitle')}</CardTitle>
              <CardDescription>{t('recentBadgesDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
+            {loadingProfileData ? (
               <div className="flex space-x-4">
                 <Skeleton className="h-10 w-24 rounded-md" />
                 <Skeleton className="h-10 w-20 rounded-md" />
@@ -326,9 +365,7 @@ export default function DashboardPage() {
                 </Link>
             </CardFooter>
         </Card>
-
       </div>
     </div>
   );
 }
-

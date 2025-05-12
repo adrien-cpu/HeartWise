@@ -257,7 +257,10 @@
     "anonymousUser": "Anonymous User",
     "yes": "Yes",
     "no": "No",
-    "uploadPicture": "Upload Picture"
+    "uploadPicture": "Upload Picture",
+    "redirectingToLogin": "Redirecting to login...",
+    "noProfileError": "Profile could not be loaded. You may need to log in.",
+    "returnToLogin": "Return to Login"
   },
   "SpeedDating": {
     "title": "Speed Dating",
@@ -432,7 +435,12 @@
     "matchSuggestionDesc": "Someone you might like!",
     "compatibility": "{score}% compatible",
     "viewProfileButton": "View Profile",
-    "viewAllRewards": "View All Rewards"
+    "viewAllRewards": "View All Rewards",
+    "loadingDashboard": "Loading your dashboard...",
+    "redirectingToLogin": "Redirecting to login...",
+    "profileLoadError": "Could not load your dashboard profile data.",
+    "noAdviceAvailable": "No advice available at the moment.",
+    "profileDataUnavailable": "Profile data is currently unavailable."
   },
    "Sidebar": {
       "toggleSidebar": "Toggle Sidebar"

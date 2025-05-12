@@ -257,7 +257,10 @@
     "anonymousUser": "Utilisateur Anonyme",
     "yes": "Oui",
     "no": "Non",
-    "uploadPicture": "Télécharger une photo"
+    "uploadPicture": "Télécharger une photo",
+    "redirectingToLogin": "Redirection vers la connexion...",
+    "noProfileError": "Le profil n'a pas pu être chargé. Vous devez peut-être vous connecter.",
+    "returnToLogin": "Retour à la Connexion"
   },
   "SpeedDating": {
     "title": "Speed Dating",
@@ -432,7 +435,12 @@
     "matchSuggestionDesc": "Quelqu'un qui pourrait vous plaire !",
     "compatibility": "{score}% compatible",
     "viewProfileButton": "Voir le Profil",
-    "viewAllRewards": "Voir toutes les récompenses"
+    "viewAllRewards": "Voir toutes les récompenses",
+    "loadingDashboard": "Chargement de votre tableau de bord...",
+    "redirectingToLogin": "Redirection vers la connexion...",
+    "profileLoadError": "Impossible de charger les données de profil de votre tableau de bord.",
+    "noAdviceAvailable": "Aucun conseil disponible pour le moment.",
+    "profileDataUnavailable": "Les données de profil sont actuellement indisponibles."
   },
    "Sidebar": {
       "toggleSidebar": "Basculer la barre latérale"

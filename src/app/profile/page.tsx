@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -10,43 +9,58 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
-import { get_user, update_user_profile, UserProfile } from '@/services/user_profile'; // Assuming service exists
+import { get_user, update_user_profile, UserProfile } from '@/services/user_profile';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Upload } from 'lucide-react'; // Import Loader2 and Upload icon
+import { Loader2, Upload } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+
+/**
+ * @fileOverview Profile page component.
+ * @module ProfilePage
+ * @description This page allows users to view and edit their profile details. Requires authentication.
+ */
+
+// Example interests - this list could come from a config or backend in a real app
+const allInterests = ["Reading", "Hiking", "Photography", "Cooking", "Travel", "Music", "Sports", "Movies", "Gaming"];
 
 /**
  * ProfilePage component.
  *
  * @component
- * @description This page allows users to view and edit their profile details.
  * @returns {JSX.Element} The rendered Profile page.
  */
 export default function ProfilePage() {
   const t = useTranslations('ProfilePage');
   const { toast } = useToast();
+  const { currentUser, loading: authLoading } = useAuth();
+  const router = useRouter();
+
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadingProfileData, setLoadingProfileData] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Mock user ID for now
-  const userId = "user1"; // Replace with actual user ID fetching logic
-
   useEffect(() => {
-    /**
-     * Fetches the user profile data.
-     * @async
-     */
+    if (authLoading) {
+      return; // Wait for authentication state to resolve
+    }
+
+    if (!currentUser) {
+      router.push('/login'); // Redirect if not authenticated
+      return;
+    }
+
     const fetchProfile = async () => {
-      setLoading(true);
+      setLoadingProfileData(true);
       try {
-        const userProfile = await get_user(userId);
+        const userProfile = await get_user(currentUser.uid);
         setProfile(userProfile);
-        setPreviewUrl(userProfile.profilePicture || null); // Set initial preview
+        setPreviewUrl(userProfile.profilePicture || null);
       } catch (error) {
         console.error("Failed to fetch profile:", error);
         toast({
@@ -54,27 +68,19 @@ export default function ProfilePage() {
           title: t('fetchErrorTitle'),
           description: t('fetchErrorDescription'),
         });
+        setProfile(null); // Set profile to null on error
       } finally {
-        setLoading(false);
+        setLoadingProfileData(false);
       }
     };
     fetchProfile();
-  }, [userId, t, toast]);
+  }, [currentUser, authLoading, router, t, toast]);
 
-  /**
-   * Handles input changes in the profile form.
-   * @param {React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>} e - The change event.
-   */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setProfile(prev => prev ? { ...prev, [name]: value } : null);
   };
 
-   /**
-   * Handles checkbox changes for interests.
-   * @param {string} interest - The interest to toggle.
-   * @param {boolean} checked - The new checked state.
-   */
   const handleInterestChange = (interest: string, checked: boolean) => {
     setProfile(prev => {
       if (!prev) return null;
@@ -86,15 +92,9 @@ export default function ProfilePage() {
     });
   };
 
-  /**
-   * Handles switch changes for privacy settings.
-   * @param {string} setting - The privacy setting key.
-   * @param {boolean} value - The new value for the setting.
-   */
   const handlePrivacyChange = (setting: keyof NonNullable<UserProfile['privacySettings']>, value: boolean) => {
      setProfile(prev => {
       if (!prev) return null;
-      // Ensure privacySettings exists
       const currentSettings = prev.privacySettings || { showLocation: true, showOnlineStatus: true };
       return {
         ...prev,
@@ -104,17 +104,12 @@ export default function ProfilePage() {
         },
       };
     });
-  }
+  };
 
-  /**
-   * Handles the profile picture file selection.
-   * @param {React.ChangeEvent<HTMLInputElement>} e - The change event.
-   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setProfilePictureFile(file);
-      // Create a preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
@@ -123,75 +118,42 @@ export default function ProfilePage() {
     }
   };
 
-  /**
-   * Triggers the hidden file input click event.
-   */
   const handleAvatarClick = () => {
     if (isEditing && fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
 
-  /**
-   * Simulates uploading the profile picture.
-   * @param {File} file - The file to upload.
-   * @returns {Promise<string>} A promise resolving to the mock uploaded image URL.
-   */
   const mockUploadProfilePicture = async (file: File): Promise<string> => {
     setIsUploading(true);
-    console.log("Uploading file:", file.name);
-    // Simulate upload delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    // In a real app, upload the file to storage (e.g., Firebase Storage)
-    // and get the download URL.
-    const mockUrl = URL.createObjectURL(file); // Use blob URL for local preview simulation
-    console.log("Mock upload complete. URL:", mockUrl);
+    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate upload
+    const mockUrl = URL.createObjectURL(file);
     setIsUploading(false);
-    return mockUrl; // Return the object URL for preview
+    return mockUrl;
   };
 
-
-  /**
-   * Handles the profile update submission.
-   * @async
-   */
   const handleUpdateProfile = async () => {
-    if (!profile) return;
-    setLoading(true);
-    let uploadedImageUrl = profile.profilePicture; // Keep existing if no new file
+    if (!profile || !currentUser) return;
+    setLoadingProfileData(true);
+    let uploadedImageUrl = profile.profilePicture;
 
     try {
-       // Upload new profile picture if selected
        if (profilePictureFile) {
          uploadedImageUrl = await mockUploadProfilePicture(profilePictureFile);
-         // Revoke previous object URL if it exists and is a blob URL
          if (previewUrl && previewUrl.startsWith('blob:')) {
             URL.revokeObjectURL(previewUrl);
          }
-         setPreviewUrl(uploadedImageUrl); // Update preview to the "uploaded" URL
+         setPreviewUrl(uploadedImageUrl);
        }
 
       const updatedProfileData: UserProfile = {
         ...profile,
-        profilePicture: uploadedImageUrl, // Use the potentially updated URL
-        dataAiHint: profile.name ? `${profile.name.split(' ')[0].toLowerCase()} person` : 'person', // Add a basic AI hint
+        id: currentUser.uid, // Ensure correct ID
+        profilePicture: uploadedImageUrl,
+        dataAiHint: profile.name ? `${profile.name.split(' ')[0].toLowerCase()} person` : 'person',
       };
 
-
-      // Remove profilePicture from data sent if it wasn't changed and wasn't uploaded
-      // This depends on how your backend handles updates. If it merges, sending undefined might clear it.
-      // If it requires explicit fields, you might need to adjust.
-      const dataToSend: Partial<UserProfile> = { ...updatedProfileData };
-      if (!profilePictureFile && dataToSend.profilePicture === mockUserData[userId]?.profilePicture) {
-         // If no new file and the URL hasn't changed from the initial load,
-         // you might not need to send the profilePicture field at all,
-         // unless your backend expects it. Let's keep it for now assuming merge.
-      }
-
-
-      await update_user_profile(userId, dataToSend); // Send updated data
-
-      // Update local state with the final profile, including the potentially new image URL
+      await update_user_profile(currentUser.uid, updatedProfileData);
       setProfile(updatedProfileData);
 
       toast({
@@ -199,7 +161,7 @@ export default function ProfilePage() {
         description: t('updateSuccessDescription'),
       });
       setIsEditing(false);
-      setProfilePictureFile(null); // Clear the selected file after successful upload/save
+      setProfilePictureFile(null);
     } catch (error) {
       console.error("Failed to update profile:", error);
       toast({
@@ -208,40 +170,51 @@ export default function ProfilePage() {
         description: t('updateErrorDescription'),
       });
     } finally {
-      setLoading(false);
+      setLoadingProfileData(false);
       setIsUploading(false);
     }
   };
 
-  // Helper function to get initials
   const getInitials = (name?: string): string => {
     if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
-  // Mock user data store for demonstration purposes (replace with actual data fetching)
-  const mockUserData: { [key: string]: UserProfile } = {
-      "user1": {
-          id: "user1",
-          name: "Alice",
-          bio: "Loves hiking and photography.",
-          interests: ["Hiking", "Photography", "Reading"],
-          profilePicture: "https://picsum.photos/seed/alice/200", 
-          dataAiHint: "woman nature",
-          privacySettings: { showLocation: true, showOnlineStatus: true }
-      },
-  };
+  if (authLoading) {
+    return (
+      <div className="container mx-auto p-4 flex items-center justify-center min-h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  if (loading && !profile) {
-    return <div className="container mx-auto p-4">{t('loading')}</div>;
+  if (!currentUser) {
+    // Should be redirected by useEffect, but this is a fallback display
+    return (
+      <div className="container mx-auto p-4 flex items-center justify-center min-h-screen">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <p className="mt-2">{t('redirectingToLogin')}</p>
+      </div>
+    );
+  }
+
+  if (loadingProfileData && !profile) {
+    return (
+      <div className="container mx-auto p-4 flex items-center justify-center min-h-screen">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="ml-2">{t('loading')}</p>
+      </div>
+    );
   }
 
   if (!profile) {
-    return <div className="container mx-auto p-4">{t('noProfile')}</div>;
+    return (
+      <div className="container mx-auto p-4 text-center">
+        <p className="text-destructive">{t('noProfileError')}</p>
+        <Button onClick={() => router.push('/login')} className="mt-4">{t('returnToLogin')}</Button>
+      </div>
+    );
   }
-
-  const allInterests = ["Reading", "Hiking", "Photography", "Cooking", "Travel", "Music", "Sports", "Movies", "Gaming"]; // Example interests
-
 
   return (
     <div className="container mx-auto p-4">
@@ -253,8 +226,8 @@ export default function ProfilePage() {
                   onClick={handleAvatarClick}
                   data-ai-hint={profile.dataAiHint || "person placeholder"}
                 >
-                <AvatarImage src={previewUrl || undefined} alt={profile.name || 'User'} />
-                <AvatarFallback className="text-4xl">{getInitials(profile.name)}</AvatarFallback>
+                <AvatarImage src={previewUrl || undefined} alt={profile.name || currentUser.displayName || 'User'} />
+                <AvatarFallback className="text-4xl">{getInitials(profile.name || currentUser.displayName)}</AvatarFallback>
               </Avatar>
               {isEditing && (
                   <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick}>
@@ -278,17 +251,16 @@ export default function ProfilePage() {
           />
 
           <div className="text-center">
-            <CardTitle className="text-2xl">{profile.name || t('anonymousUser')}</CardTitle>
+            <CardTitle className="text-2xl">{profile.name || currentUser.displayName || t('anonymousUser')}</CardTitle>
             <CardDescription>{t('description')}</CardDescription>
           </div>
-          <Button variant="outline" size="sm" className="ml-auto" onClick={() => setIsEditing(!isEditing)} disabled={isUploading}>
+          <Button variant="outline" size="sm" className="ml-auto" onClick={() => setIsEditing(!isEditing)} disabled={isUploading || loadingProfileData}>
             {isEditing ? t('cancel') : t('editProfile')}
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
           {isEditing ? (
             <>
-             {/* Profile Fields */}
               <div className="space-y-2">
                 <Label htmlFor="name">{t('nameLabel')}</Label>
                 <Input
@@ -296,7 +268,7 @@ export default function ProfilePage() {
                   name="name"
                   value={profile.name || ''}
                   onChange={handleInputChange}
-                  disabled={loading || isUploading}
+                  disabled={loadingProfileData || isUploading}
                 />
               </div>
               <div className="space-y-2">
@@ -307,10 +279,9 @@ export default function ProfilePage() {
                   value={profile.bio || ''}
                   onChange={handleInputChange}
                   placeholder={t('bioPlaceholder')}
-                  disabled={loading || isUploading}
+                  disabled={loadingProfileData || isUploading}
                 />
               </div>
-               {/* Interests Section */}
               <div className="space-y-2">
                 <Label>{t('interestsLabel')}</Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -320,7 +291,7 @@ export default function ProfilePage() {
                         id={`interest-${interest}`}
                         checked={profile.interests?.includes(interest)}
                         onCheckedChange={(checked) => handleInterestChange(interest, !!checked)}
-                        disabled={loading || isUploading}
+                        disabled={loadingProfileData || isUploading}
                       />
                       <label
                         htmlFor={`interest-${interest}`}
@@ -332,7 +303,6 @@ export default function ProfilePage() {
                   ))}
                 </div>
               </div>
-              {/* Privacy Settings Section */}
                <div className="space-y-4">
                 <Label>{t('privacySettingsLabel')}</Label>
                  <div className="flex items-center space-x-2">
@@ -340,7 +310,7 @@ export default function ProfilePage() {
                     id="showLocation"
                     checked={profile.privacySettings?.showLocation ?? true}
                     onCheckedChange={(checked) => handlePrivacyChange('showLocation', checked)}
-                    disabled={loading || isUploading}
+                    disabled={loadingProfileData || isUploading}
                    />
                   <Label htmlFor="showLocation">{t('showLocationLabel')}</Label>
                  </div>
@@ -349,7 +319,7 @@ export default function ProfilePage() {
                     id="showOnlineStatus"
                     checked={profile.privacySettings?.showOnlineStatus ?? true}
                     onCheckedChange={(checked) => handlePrivacyChange('showOnlineStatus', checked)}
-                    disabled={loading || isUploading}
+                    disabled={loadingProfileData || isUploading}
                   />
                    <Label htmlFor="showOnlineStatus">{t('showOnlineStatusLabel')}</Label>
                  </div>
@@ -357,16 +327,14 @@ export default function ProfilePage() {
             </>
           ) : (
              <>
-               {/* Display Profile Fields */}
               <div className="space-y-1">
                 <Label className="font-semibold">{t('nameLabel')}</Label>
-                <p>{profile.name || t('notSet')}</p>
+                <p>{profile.name || currentUser.displayName || t('notSet')}</p>
               </div>
               <div className="space-y-1">
                 <Label className="font-semibold">{t('bioLabel')}</Label>
                 <p className="text-muted-foreground whitespace-pre-wrap">{profile.bio || t('notSet')}</p>
               </div>
-               {/* Display Interests */}
               <div className="space-y-1">
                 <Label className="font-semibold">{t('interestsLabel')}</Label>
                 <div className="flex flex-wrap gap-2">
@@ -379,7 +347,6 @@ export default function ProfilePage() {
                   )}
                 </div>
               </div>
-              {/* Display Privacy Settings */}
               <div className="space-y-2">
                   <Label className="font-semibold">{t('privacySettingsLabel')}</Label>
                   <p>{t('showLocationLabel')}: <span className="text-muted-foreground">{profile.privacySettings?.showLocation ? t('yes') : t('no')}</span></p>
@@ -390,9 +357,9 @@ export default function ProfilePage() {
         </CardContent>
         {isEditing && (
           <CardFooter>
-            <Button onClick={handleUpdateProfile} disabled={loading || isUploading}>
-              { (loading || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" /> }
-              {loading || isUploading ? t('saving') : t('saveChanges')}
+            <Button onClick={handleUpdateProfile} disabled={loadingProfileData || isUploading}>
+              { (loadingProfileData || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" /> }
+              {loadingProfileData || isUploading ? t('saving') : t('saveChanges')}
             </Button>
           </CardFooter>
         )}

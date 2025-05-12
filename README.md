@@ -1,4 +1,3 @@
-
 # **App Name**: HeartWise
 
 ## Core Features:
@@ -95,15 +94,6 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 - [x] 6. Interface speed dating dynamique (`/speed-dating` - *Frontend UI + Feedback Simulation*)
 - [x] 7. Tableau de bord utilisateur intelligent (conseils personnalisés) (`/dashboard` - *Frontend UI/Mock Data*)
 
-## 💼 Pour le développement IA
-Le cahier des charges est prêt à être transmis à une IA spécialisée dans le code afin de générer :
-- L'architecture de l'application
-- Les modules IA conversationnels
-- Le moteur de matching avancé
-- Le système de chat augmenté avec filtre émotionnel
-
----
-
 ## Implemented Features (Frontend Simulation):
 
 *   **[x] Correspondance par Analyse Faciale :** (`/facial-analysis-matching` - *Simulation*)
@@ -116,12 +106,12 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 *   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Mock Data*)
 *   **[x] Outils de Communication Intégrés à l'Application (Chat avec Tag d'Intention IA):** (`/chat`, `src/ai/flows/intention-tagging.ts` - *Enhanced UI/Mock Data/AI Suggestion*, needs backend for real-time/persistence/calls)
 *   **[x] Système de récompenses :** (`/rewards` - *Displays Mock Points/Badges*, needs backend)
-*   **[x] Tableau de bord utilisateur intelligent :** (`/dashboard` - *Displays Mock Advice/Stats*, needs backend)
+*   **[x] Tableau de bord utilisateur intelligent :** (`/dashboard` - *Displays Mock Advice/Stats*, needs backend for real data)
 
 ## Features to Implement / Enhance (Requires Backend & Advanced Logic):
 
 *   **[ ] Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels (Base de données utilisateurs, stockage d'images cloud, API de géolocalisation tierce, logique de matchmaking réelle, persistance du chat via base de données, etc.).
-*   **[ ] Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth).
+*   **[~] Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth). (*UI for Login/Signup done, basic Firebase Auth integration, client-side route protection for /dashboard and /profile implemented. Needs further backend integration and more robust protection.*)
 *   **[ ] Système de récompenses (avancé):** Concevoir et implémenter le système de points, modes cachés, accès premium (logique backend + UI).
 *   **[ ] Modération de Contenu:** Intégrer un service de modération externe (API) pour le texte et les médias générés par les utilisateurs.
 *   **[ ] Notifications:** Mettre en place des notifications push (e.g., via Firebase Cloud Messaging) pour les nouveaux messages, matchs, etc.
@@ -134,5 +124,3 @@ Le cahier des charges est prêt à être transmis à une IA spécialisée dans l
 
 
 *Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality.*
-
-
