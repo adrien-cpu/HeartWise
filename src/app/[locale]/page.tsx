@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { ReactNode } from 'react';
@@ -62,7 +63,8 @@ function LanguageSwitcher(): JSX.Element {
         startTransition(() => {
             // Remove current locale prefix if it exists
             let newPathname = pathname;
-            if (isValidLocale(pathname.split('/')[1])) {
+            const pathSegments = pathname.split('/');
+            if (pathSegments.length > 1 && isValidLocale(pathSegments[1])) {
                 newPathname = pathname.substring(pathname.indexOf('/', 1));
             }
             router.replace(`/${nextLocale}${newPathname}`);
@@ -105,14 +107,14 @@ export default function Home(): JSX.Element {
   const getInitials = (name?: string | null): string => {
     if (!name) return 'U'; // Default for User
     const nameParts = name.split(' ');
-    if (nameParts.length > 1) {
+    if (nameParts.length > 1 && nameParts[0] && nameParts[nameParts.length - 1]) {
       return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
   };
 
   return (
-    // SidebarProvider is now in ClientSideI18n, via RootLayout and ClientLayout
+    // SidebarProvider is now in ClientSideI18n, via RootLayout
     <div className="flex h-screen">
         <Sidebar className="bg-card text-card-foreground border-r">
             <SidebarHeader>
@@ -274,3 +276,4 @@ export default function Home(): JSX.Element {
     </div>
   );
 }
+
