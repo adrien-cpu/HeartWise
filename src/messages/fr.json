@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -47,6 +46,7 @@
     "namePlaceholder": "Votre Nom",
     "signupButton": "S'inscrire",
     "alreadyAccountPrompt": "Vous avez déjà un compte ?",
+    "loginLink": "Se connecter",
     "signupSuccessTitle": "Inscription Réussie",
     "signupSuccessDesc": "Bienvenue sur HeartWise ! Votre compte a été créé.",
     "signupErrorTitle": "Échec de l'Inscription",
