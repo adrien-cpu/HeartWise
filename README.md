@@ -6,7 +6,7 @@
 - [x] AI Conversation Coach: Analyse the messages written by the user and suggest reformulations if needed to create a good conversation. The LLM acts as a tool and will decide when to intervene. (`/ai-conversation-coach`, `src/ai/flows/conversation-coach.ts`, `src/ai/flows/style-suggestions-flow.ts`)
 - [x] Blind Exchange Mode: Offer a mode of meeting without photo, profile or information. The AI proposes a profile based on facial and emotional matching, common points and opposite polarities. (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts`)
 - [x] Intelligent User Dashboard: Display personalized advice and user stats. (`/dashboard`)
-- [x] Risky Words Dictionary: Identify ambiguous or sensitive expressions in messages. (`/risky-words-dictionary`, `src/ai/flows/risky-words-dictionary.ts`)
+- [~] Risky Words Dictionary: Identify ambiguous or sensitive expressions in messages. Users can provide feedback on flagged words and report missed words. (`/risky-words-dictionary`, `src/ai/flows/risky-words-dictionary.ts`, `src/services/feedback_service.ts`)
 - [x] User Profile Management: View and edit user profile details. (`/profile`, `src/services/user_profile.ts`)
 - [x] Basic Chat Interface: Simulate conversations with mock data. Includes AI-suggested intention tagging. (`/chat`, `src/ai/flows/intention-tagging.ts`)
 - [x] Speed Dating Interface: UI for scheduling and providing feedback (simulated). (`/speed-dating`)
@@ -62,7 +62,8 @@ Une base dynamique qui identifie les expressions ambiguës ou sensibles. (`/risk
 #### Contenu :
 - [x] “Câlin”, “Je veux te voir”, “T’es sexy”, “Envie de te connaître”, etc. (*Covered by AI Flow*)
 - [x] Interprétations possibles + suggestions de clarification (*Covered by AI Flow*)
-- [ ] Mise à jour par : IA auto-apprenante + signalements utilisateurs (**Backend/Database/Feedback Loop**)
+- [~] Mise à jour par : signalements utilisateurs (feedback sur mots signalés et signalement de mots manqués implémentés, stockage Firestore) (**Backend/Database/Feedback Loop**)
+- [ ] Mise à jour par : IA auto-apprenante (nécessite pipeline de fine-tuning/mise à jour de listes dynamiques)
 
 ### 5. 🥶 Echanges à l’aveugle
 Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts` - *Frontend AI/Simulation*)
@@ -88,7 +89,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 ## 🚧 Modules à développer (Frontend Simulation Status)
 - [x] 1. Moteur de matching (IA émotionnelle + reconnaissance faciale + logique "semblable/contraire") (`/facial-analysis-matching`, `/blind-exchange-mode` - *Frontend AI/Simulation*)
 - [x] 2. Coach IA conversationnel temps réel (`/ai-conversation-coach` - *Frontend AI*)
-- [x] 3. Dictionnaire d'expressions sensibles (`/risky-words-dictionary` - *Frontend AI*)
+- [~] 3. Dictionnaire d'expressions sensibles (`/risky-words-dictionary` - *Frontend AI + User Feedback*)
 - [x] 4. Mode "Rencontre à l'aveugle" (`/blind-exchange-mode` - *Frontend AI/Simulation*)
 - [x] 5. Système de gamification (`/rewards` - *Frontend UI*, needs backend logic)
 - [x] 6. Interface speed dating dynamique (`/speed-dating` - *Frontend UI + Feedback Simulation*)
@@ -99,7 +100,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[x] Correspondance par Analyse Faciale :** (`/facial-analysis-matching` - *Simulation*)
 *   **[x] Mode d'Échange à l'Aveugle :** (`/blind-exchange-mode` - *AI/Simulation*)
 *   **[x] Coach Conversationnel IA (avec Bonus de Style):** (`/ai-conversation-coach` - *AI*)
-*   **[x] Dictionnaire IA des Mots à Risque :** (`/risky-words-dictionary` - *AI*)
+*   **[~] Dictionnaire IA des Mots à Risque :** (`/risky-words-dictionary` - *AI + User Feedback*)
 *   **[~] Jeu :** (`/game` - *General Knowledge and Times Up games now use Firebase for preferences/points/rewards/leaderboard.*)
 *   **[~] Speed Dating :** (`/speed-dating` - *UI + Enhanced Feedback Simulation*, needs backend for scheduling/matching/feedback persistence)
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API*)
@@ -110,7 +111,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 
 ## Features to Implement / Enhance (Requires Backend & Advanced Logic):
 
-*   **[~] Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels. (*User profiles, rewards, points, game preferences/scores now use Firebase Firestore. Other areas like chat, geolocation matching still need backend.*)
+*   **[~] Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels. (*User profiles, rewards, points, game preferences/scores, risky word feedback now use Firebase Firestore. Other areas like chat, geolocation matching still need backend.*)
 *   **[~] Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth). (*Firebase Auth implemented for email/password. Profile creation linked. Further enhancements needed for social logins, password reset, email verification.*)
 *   **[~] Système de récompenses (avancé):** Concevoir et implémenter le système de points, modes cachés, accès premium (logique backend + UI). (*Points and badges stored in Firestore. Premium feature unlocking logic partially simulated.*)
 *   **[ ] Modération de Contenu:** Intégrer un service de modération externe (API) pour le texte et les médias générés par les utilisateurs.
@@ -119,7 +120,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[~] Améliorations des Jeux:** Ajouter plus de jeux, de la variété, un système de scores persistant et des classements (backend requis). (*General Knowledge and Times Up games enhanced with preferences, scoring, rewards, and leaderboard via Firebase.*)
 *   **[~] Feedback Post-Speed Dating (Persistance):** Connecter l'interface de feedback (`/speed-dating`) à un backend pour stocker les avis. (*Feedback submission state simulated on frontend.*)
 *   **[ ] Dévoilement progressif (Blind Exchange):** Implémenter la logique pour révéler les informations progressivement dans le chat (`/blind-exchange-mode`).
-*   **[ ] Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage et le signalement utilisateur (`/risky-words-dictionary`).
+*   **[~] Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage via signalements utilisateurs (feedback sur mots signalés et signalement de mots manqués implémentés, stockage Firestore). L'aspect auto-apprentissage (fine-tuning IA) est encore à faire. (`/risky-words-dictionary`, `src/services/feedback_service.ts`)
 *   **[~] Tags d'intention (Chat - Avancé):** Affiner la logique IA backend pour analyser/suggérer des tags d'intention (`/chat`).
 
 
