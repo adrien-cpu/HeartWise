@@ -2,20 +2,16 @@
 /**
  * @fileOverview Root layout for the application.
  * @module RootLayout
- * @description This file defines the main layout structure for all pages,
- *              including HTML, body, font setup, and internationalization providers.
- *              It ensures that server-side fetched i18n messages are passed
- *              to a client boundary for client-side provider initialization.
+ * @description This file defines the main HTML shell for the application,
+ *              including <html> and <body> tags, global CSS, and font setup.
+ *              Locale-specific providers are handled by the nested `src/app/[locale]/layout.tsx`.
  */
 
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { getMessages, setRequestLocale } from 'next-intl/server';
-import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/settings';
-import { metadata as appMetadata } from '@/app/metadata';
-import { ClientSideI18n } from '@/components/ClientSideI18n';
-import './globals.css';
+import './globals.css'; // Global styles
+import { metadata as appMetadata } from '@/app/metadata'; // Base metadata
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -33,73 +29,26 @@ export const metadata: Metadata = appMetadata;
 //   themeColor: '...',
 // }
 
-// Enable static rendering for all locales
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
-
-/**
- * RootLayout component (Server Component).
- * Sets up the basic HTML structure, fonts, fetches i18n messages,
- * and passes locale and messages to the ClientSideI18n boundary.
- *
- * @param {object} props - The props for the RootLayout component.
- * @param {React.ReactNode} props.children - The children to render within the layout.
- * @param {object} props.params - The route parameters.
- * @param {string} props.params.locale - The current locale from the URL.
- * @returns {Promise<JSX.Element>} The rendered RootLayout component.
- */
-export default async function RootLayout({
+// This RootLayout is the true root and provides the <html> and <body> shell.
+// It does not handle locale directly; its children (which will be the output of
+// `src/app/[locale]/layout.tsx`) will handle locale-specific setup.
+export default function RootLayout({
   children,
-  params: { locale: rawUrlLocale },
 }: {
   children: ReactNode;
-  params: { locale: string };
 }) {
-  // Determine the effective locale
-  let effectiveLocale: Locale;
-
-  if (isValidLocale(rawUrlLocale)) {
-    effectiveLocale = rawUrlLocale;
-  } else {
-    console.warn(`[RootLayout] URL locale "${rawUrlLocale}" is invalid or not directly supported. Using default locale "${defaultLocale}". Middleware should handle redirection for completely unsupported locales.`);
-    effectiveLocale = defaultLocale;
-  }
-
-  // Set the request locale for server-side i18n utilities like getMessages()
-  setRequestLocale(effectiveLocale);
-
-  let messagesForClient: AbstractIntlMessages;
-  const localeForClient: Locale = effectiveLocale; // The locale we intend to use for the client
-
-  try {
-    // getMessages() will use the locale set by setRequestLocale.
-    // It directly returns the messages object for the effectiveLocale.
-    const loadedMessages = await getMessages(); 
-
-    if (loadedMessages && typeof loadedMessages === 'object' && Object.keys(loadedMessages).length > 0) {
-      messagesForClient = loadedMessages;
-    } else {
-      // This case means getMessages() returned empty or invalid messages for the 'effectiveLocale'
-      console.error(`[RootLayout] Messages object from getMessages for locale "${effectiveLocale}" is missing, empty, or not an object. Using empty messages for client. This might indicate a problem with the JSON files or the import in getRequestConfig.`);
-      messagesForClient = {}; // Fallback to empty messages
-    }
-
-  } catch (error: any) {
-    console.error(`[RootLayout] Critical failure in getMessages for effective locale "${effectiveLocale}". Error: ${error.message}.`);
-    messagesForClient = {}; // Fallback to empty messages
-    console.warn(`[RootLayout] Falling back to empty messages for ClientSideI18n due to catastrophic message loading error for locale "${localeForClient}".`);
-  }
-  
-  // Final sanity check for the lang attribute for <html> tag
-  const langForHtml = isValidLocale(localeForClient) ? localeForClient : defaultLocale;
-
+  // The `lang` attribute on the <html> tag is important for accessibility and SEO.
+  // `next-intl`'s middleware should ideally set this attribute based on the detected locale
+  // when using the App Router with a `[locale]` segment.
+  // If not, a default can be set here, but dynamic setting based on locale is preferred.
+  // For now, we'll set a default and assume middleware or subsequent layouts might adjust it
+  // or that Next.js/next-intl handles this correctly at a higher level.
+  // The hydration error related to `lang` mismatch often stems from nested `<html>` tags
+  // where the inner one had a different `lang`. Removing the nested `<html>` tag is the primary fix.
   return (
-    <html lang={langForHtml}>
+    <html lang="en"> {/* Default lang, next-intl middleware should override this based on URL */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ClientSideI18n locale={localeForClient} messages={messagesForClient}>
-          {children}
-        </ClientSideI18n>
+        {children}
       </body>
     </html>
   );
