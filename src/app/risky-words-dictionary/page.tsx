@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -11,26 +12,28 @@ import { useToast } from '@/hooks/use-toast';
 import { analyzeTextForRiskyWords, RiskyWordAnalysis } from '@/ai/flows/risky-words-dictionary';
 import { submitRiskyWordFeedback, reportMissedRiskyWord } from '@/services/feedback_service';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, AlertTriangle, Check, Send } from 'lucide-react';
+import { Loader2, AlertTriangle, Check, Send, ShieldAlert } from 'lucide-react'; // Added ShieldAlert
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { moderateText, ModerationResult } from '@/services/moderation_service'; // Import moderation service
 
 /**
  * @fileOverview Implements the Risky Words Dictionary page component.
  * Allows users to input text, receive analysis on potentially risky phrases,
  * provide feedback on flagged items, and report words/phrases missed by the AI.
+ * Includes content moderation check before analysis.
  */
 
 /**
  * RiskyWordsDictionaryPage component.
  *
  * @component
- * @description Displays an interface for analyzing text using the Risky Words Dictionary AI flow,
- *              allowing users to submit feedback on the analysis and report missed risky words.
+ * @description Displays an interface for analyzing text using the Risky Words Dictionary AI flow.
  * @returns {JSX.Element} The rendered RiskyWordsDictionaryPage component.
  */
 export default function RiskyWordsDictionaryPage() {
   const t = useTranslations('RiskyWordsDictionary');
+  const tChat = useTranslations('Chat'); // For moderation messages
   const { toast } = useToast();
   const { currentUser } = useAuth();
 
@@ -39,20 +42,14 @@ export default function RiskyWordsDictionaryPage() {
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
-  // State for feedback on flagged words
   const [submittingFeedbackId, setSubmittingFeedbackId] = useState<string | null>(null);
   const [submittedFeedbackItems, setSubmittedFeedbackItems] = useState<{ [itemId: string]: 'accurate' | 'not_risky' }>({});
 
-  // State for reporting missed words
   const [missedWordReport, setMissedWordReport] = useState('');
   const [missedWordReason, setMissedWordReason] = useState('');
   const [isSubmittingMissedWord, setIsSubmittingMissedWord] = useState(false);
 
 
-  /**
-   * Handles the text analysis request.
-   * @async
-   */
   const handleAnalyzeText = async () => {
     if (!inputText.trim()) {
       toast({
@@ -66,7 +63,20 @@ export default function RiskyWordsDictionaryPage() {
     setIsLoadingAnalysis(true);
     setAnalysisError(null);
     setAnalysisResult([]);
-    setSubmittedFeedbackItems({}); // Clear previous feedback states
+    setSubmittedFeedbackItems({}); 
+
+    // First, moderate the input text
+    const moderationResult: ModerationResult = await moderateText(inputText.trim());
+    if (!moderationResult.isSafe) {
+        toast({
+            variant: 'destructive',
+            title: tChat('moderationBlockTitle'), // Using Chat translation for consistency
+            description: `${t('moderationFailedBeforeAnalysis')} ${moderationResult.issues?.map(issue => issue.category).join(', ')}`,
+            duration: 7000,
+        });
+        setIsLoadingAnalysis(false);
+        return;
+    }
 
     try {
       const result = await analyzeTextForRiskyWords({ textToAnalyze: inputText });
@@ -83,7 +93,7 @@ export default function RiskyWordsDictionaryPage() {
              });
          }
     } catch (err: any) {
-      console.error("Error analyzing text:", err);
+      console.error("Error analyzing text for risky words:", err);
       setAnalysisError(t('analysisError'));
       toast({
         variant: 'destructive',
@@ -95,18 +105,12 @@ export default function RiskyWordsDictionaryPage() {
     }
   };
 
-  /**
-   * Handles submission of feedback for a specific flagged word.
-   * @async
-   * @param {RiskyWordAnalysis} item - The analysis item being given feedback on.
-   * @param {'accurate' | 'not_risky'} feedbackType - The type of feedback.
-   */
   const handleFeedbackSubmit = async (item: RiskyWordAnalysis, feedbackType: 'accurate' | 'not_risky') => {
     if (!currentUser) {
         toast({ variant: 'destructive', title: t('errorTitle'), description: t('authRequiredError') });
         return;
     }
-    if (submittedFeedbackItems[item.id]) return; // Prevent re-submission
+    if (submittedFeedbackItems[item.id]) return; 
 
     setSubmittingFeedbackId(item.id);
     try {
@@ -127,10 +131,6 @@ export default function RiskyWordsDictionaryPage() {
     }
   };
 
-  /**
-   * Handles submission of a report for a word missed by the AI.
-   * @async
-   */
   const handleReportMissedWord = async () => {
     if (!currentUser) {
         toast({ variant: 'destructive', title: t('errorTitle'), description: t('authRequiredError') });
@@ -144,7 +144,7 @@ export default function RiskyWordsDictionaryPage() {
     try {
         await reportMissedRiskyWord({
             userId: currentUser.uid,
-            originalText: inputText, // Assumes originalText is still relevant
+            originalText: inputText, 
             missedWord: missedWordReport,
             reason: missedWordReason,
         });
@@ -275,7 +275,7 @@ export default function RiskyWordsDictionaryPage() {
            <p className="mt-6 text-center text-muted-foreground">{t('noRiskyWordsFound')}</p>
        )}
 
-      {currentUser && inputText && !isLoadingAnalysis && ( // Show report form if user is logged in and text was analyzed
+      {currentUser && inputText && !isLoadingAnalysis && ( 
         <Card className="max-w-2xl mx-auto mt-8 shadow-lg border">
             <CardHeader>
                 <CardTitle>{t('reportMissedTitle')}</CardTitle>

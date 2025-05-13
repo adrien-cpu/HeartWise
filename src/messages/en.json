@@ -47,6 +47,8 @@
     "namePlaceholder": "Your Name",
     "signupButton": "Sign Up",
     "alreadyAccountPrompt": "Already have an account?",
+    "passwordResetLinkSent": "Password reset link sent to your email.",
+    "loginLink": "Login",
     "signupSuccessTitle": "Signup Successful",
     "signupSuccessDesc": "Welcome to HeartWise! Your account has been created.",
     "signupErrorTitle": "Signup Failed",
@@ -293,7 +295,10 @@
     "fileTooLargeDesc": "Image size should not exceed 5MB.",
     "invalidFileTypeTitle": "Invalid File Type",
     "invalidFileTypeDesc": "Please upload an image file (e.g., JPG, PNG).",
-    "emailLabel": "Email"
+    "emailLabel": "Email",
+    "bioModerationNote": "Your bio will be checked for appropriateness.",
+    "bioModerationFailed": "Your bio could not be saved due to moderation issues:",
+    "imageModerationFailed": "Your profile picture could not be saved due to moderation issues:"
   },
   "SpeedDating": {
     "title": "Speed Dating",
@@ -360,7 +365,11 @@
     "errorLoadingProfile": "Error loading your profile.",
     "unknownUser": "Unknown User",
     "aiSuggestedTagTooltip": "AI Suggestion (click to use)",
-    "typingIndicator": "Typing..."
+    "typingIndicator": "Typing...",
+    "moderationBlockTitle": "Content Moderation",
+    "moderationBlockDesc": "Your message could not be sent due to: ",
+    "messageModerated": "[This message was not sent due to content policy]",
+    "messageBlockedByModeration": "Message blocked by content moderation."
   },
   "RiskyWordsDictionary": {
     "title": "Risky Words Dictionary",
@@ -402,7 +411,8 @@
     "reportSubmittedTitle": "Report Submitted",
     "reportSubmittedDesc": "Thank you for helping improve the dictionary!",
     "reportSubmitError": "Failed to submit your report. Please try again.",
-    "missedWordEmptyError": "Please enter the word/phrase you want to report."
+    "missedWordEmptyError": "Please enter the word/phrase you want to report.",
+    "moderationFailedBeforeAnalysis": "Text could not be analyzed due to content policy violations:"
   },
   "RewardsPage": {
     "title": "Your Rewards",

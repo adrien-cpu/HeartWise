@@ -10,19 +10,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
-import { get_user, update_user_profile, UserProfile, UserReward } from '@/services/user_profile';
+import { get_user, update_user_profile, UserProfile } from '@/services/user_profile'; // Removed UserReward as it's not directly used here
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Upload, ShieldAlert } from 'lucide-react'; // Added ShieldAlert
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Timestamp } from 'firebase/firestore';
+import { moderateText, ModerationResult, moderateImage } from '@/services/moderation_service'; // Import moderation service
 
 
 /**
  * @fileOverview Profile page component.
  * @module ProfilePage
- * @description This page allows users to view and edit their profile details, now backed by Firestore. Requires authentication.
+ * @description This page allows users to view and edit their profile details, now backed by Firestore. Includes content moderation for bio and simulated moderation for profile pictures. Requires authentication.
  */
 
 // Example interests - this list could come from a config or backend in a real app
@@ -36,13 +37,14 @@ const allInterests = ["Reading", "Hiking", "Photography", "Cooking", "Travel", "
  */
 export default function ProfilePage() {
   const t = useTranslations('ProfilePage');
+  const tChat = useTranslations('Chat'); // For moderation messages
   const { toast } = useToast();
   const { currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [initialProfileData, setInitialProfileData] = useState<UserProfile | null>(null); // To track original data for cancel
-  const [loadingData, setLoadingData] = useState(true); // Combined loading state
+  const [initialProfileData, setInitialProfileData] = useState<UserProfile | null>(null); 
+  const [loadingData, setLoadingData] = useState(true); 
   const [isEditing, setIsEditing] = useState(false);
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -64,7 +66,7 @@ export default function ProfilePage() {
       try {
         const userProfile = await get_user(currentUser.uid);
         setProfile(userProfile);
-        setInitialProfileData(userProfile); // Store initial data for cancel
+        setInitialProfileData(userProfile); 
         setPreviewUrl(userProfile.profilePicture || null);
       } catch (error) {
         console.error("Failed to fetch profile:", error);
@@ -115,8 +117,7 @@ export default function ProfilePage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Basic client-side validation (optional, add more as needed)
-      if (file.size > 5 * 1024 * 1024) { // Max 5MB
+      if (file.size > 5 * 1024 * 1024) { 
         toast({ variant: 'destructive', title: t('fileTooLargeTitle'), description: t('fileTooLargeDesc') });
         return;
       }
@@ -139,71 +140,92 @@ export default function ProfilePage() {
     }
   };
 
-  // Mock function for profile picture upload - in a real app, this would upload to Firebase Storage
   const mockUploadProfilePicture = async (file: File, userId: string): Promise<string> => {
     console.log(`Simulating upload of ${file.name} for user ${userId}...`);
-    // In a real app:
-    // const storageRef = ref(storage, `profilePictures/${userId}/${file.name}`);
-    // await uploadBytes(storageRef, file);
-    // const downloadURL = await getDownloadURL(storageRef);
-    // return downloadURL;
-    await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate upload delay
-    return URL.createObjectURL(file); // For local preview, replace with actual URL
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
+    
+    // Simulate image moderation during upload
+    const tempUrl = URL.createObjectURL(file); // Create a temporary URL for moderation simulation
+    const imageModerationResult: ModerationResult = await moderateImage(tempUrl);
+    // URL.revokeObjectURL(tempUrl); // Clean up temporary URL if not needed further by actual upload
+
+    if (!imageModerationResult.isSafe) {
+        toast({
+            variant: 'destructive',
+            title: tChat('moderationBlockTitle'),
+            description: `${t('imageModerationFailed')} ${imageModerationResult.issues?.map(issue => issue.category).join(', ')}`,
+            duration: 7000,
+        });
+        throw new Error("Image moderation failed"); // Stop the upload process
+    }
+    
+    return URL.createObjectURL(file); // Return new object URL for preview if safe
   };
 
   const handleUpdateProfile = async () => {
     if (!profile || !currentUser) return;
     setIsSaving(true);
-    let uploadedImageUrl = profile.profilePicture; // Keep existing if no new file
+    
+    // Moderate bio text
+    if (profile.bio) {
+        const bioModerationResult: ModerationResult = await moderateText(profile.bio);
+        if (!bioModerationResult.isSafe) {
+            toast({
+                variant: "destructive",
+                title: tChat('moderationBlockTitle'),
+                description: `${t('bioModerationFailed')} ${bioModerationResult.issues?.map(issue => issue.category).join(', ')}`,
+                duration: 7000,
+            });
+            setIsSaving(false);
+            return;
+        }
+    }
+
+    let uploadedImageUrl = profile.profilePicture; 
 
     try {
        if (profilePictureFile) {
-         // In a real app, you'd upload to Firebase Storage and get the URL.
-         // For now, we'll use the local preview URL, but acknowledge this is not persistent for others.
-         // This mockUpload will just simulate the delay and return a local URL.
-         // A real implementation would be: uploadedImageUrl = await uploadFileToFirebaseStorage(profilePictureFile, currentUser.uid);
          uploadedImageUrl = await mockUploadProfilePicture(profilePictureFile, currentUser.uid);
-         // If using local object URLs for preview, you might not need to setPreviewUrl again if uploadedImageUrl IS the previewUrl
        }
 
       const updatedProfileData: UserProfile = {
         ...profile,
         id: currentUser.uid,
         profilePicture: uploadedImageUrl,
-        dataAiHint: profile.name ? `${profile.name.split(' ')[0].toLowerCase()} person` : 'person', // Simple hint
-        // Ensure timestamps are handled correctly (updatedAt is set by update_user_profile service)
+        dataAiHint: profile.name ? `${profile.name.split(' ')[0].toLowerCase()} person` : 'person', 
       };
 
       const newSavedProfile = await update_user_profile(currentUser.uid, updatedProfileData);
-      setProfile(newSavedProfile); // Update local state with data from Firestore
-      setInitialProfileData(newSavedProfile); // Update initial data to new saved state
-      if (newSavedProfile.profilePicture) { // Update preview URL from Firestore result
+      setProfile(newSavedProfile); 
+      setInitialProfileData(newSavedProfile); 
+      if (newSavedProfile.profilePicture) { 
         setPreviewUrl(newSavedProfile.profilePicture);
       }
-
 
       toast({
         title: t('updateSuccessTitle'),
         description: t('updateSuccessDescription'),
       });
       setIsEditing(false);
-      setProfilePictureFile(null); // Clear file after successful update
-    } catch (error) {
+      setProfilePictureFile(null); 
+    } catch (error: any) { // Catch specific error from moderation
       console.error("Failed to update profile:", error);
-      toast({
-        variant: "destructive",
-        title: t('updateErrorTitle'),
-        description: t('updateErrorDescription'),
-      });
+      if (error.message !== "Image moderation failed") { // Don't double-toast if it's already handled
+        toast({
+          variant: "destructive",
+          title: t('updateErrorTitle'),
+          description: t('updateErrorDescription'),
+        });
+      }
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleCancelEdit = () => {
-    setProfile(initialProfileData); // Restore original data
-    setPreviewUrl(initialProfileData?.profilePicture || null); // Restore original preview
-    setProfilePictureFile(null); // Clear any selected file
+    setProfile(initialProfileData); 
+    setPreviewUrl(initialProfileData?.profilePicture || null); 
+    setProfilePictureFile(null); 
     setIsEditing(false);
   };
 
@@ -257,7 +279,7 @@ export default function ProfilePage() {
                           <Upload className="h-8 w-8 text-white" />
                       </div>
                   )}
-                  {isSaving && profilePictureFile && ( // Show loader only when uploading new pic
+                  {isSaving && profilePictureFile && ( 
                       <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-full">
                           <Loader2 className="h-10 w-10 text-white animate-spin" />
                       </div>
@@ -310,6 +332,7 @@ export default function ProfilePage() {
                   disabled={isSaving}
                   rows={4}
                 />
+                 <p className="text-xs text-muted-foreground">{t('bioModerationNote')}</p>
               </div>
               <div className="space-y-2">
                 <Label>{t('interestsLabel')}</Label>

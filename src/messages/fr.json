@@ -47,6 +47,7 @@
     "namePlaceholder": "Votre Nom",
     "signupButton": "S'inscrire",
     "alreadyAccountPrompt": "Vous avez déjà un compte ?",
+    "passwordResetLinkSent": "Le lien de réinitialisation du mot de passe a été envoyé à votre adresse e-mail.",
     "loginLink": "Se connecter",
     "signupSuccessTitle": "Inscription Réussie",
     "signupSuccessDesc": "Bienvenue sur HeartWise ! Votre compte a été créé.",
@@ -294,7 +295,10 @@
     "fileTooLargeDesc": "La taille de l'image ne doit pas dépasser 5Mo.",
     "invalidFileTypeTitle": "Type de Fichier Invalide",
     "invalidFileTypeDesc": "Veuillez télécharger un fichier image (ex: JPG, PNG).",
-    "emailLabel": "E-mail"
+    "emailLabel": "E-mail",
+    "bioModerationNote": "Votre biographie sera vérifiée pour son contenu.",
+    "bioModerationFailed": "Votre biographie n'a pas pu être enregistrée en raison de problèmes de modération :",
+    "imageModerationFailed": "Votre photo de profil n'a pas pu être enregistrée en raison de problèmes de modération :"
   },
   "SpeedDating": {
     "title": "Speed Dating",
@@ -361,7 +365,11 @@
     "errorLoadingProfile": "Erreur lors du chargement de votre profil.",
     "unknownUser": "Utilisateur Inconnu",
     "aiSuggestedTagTooltip": "Suggestion IA (cliquer pour utiliser)",
-    "typingIndicator": "Écrit..."
+    "typingIndicator": "Écrit...",
+    "moderationBlockTitle": "Modération de Contenu",
+    "moderationBlockDesc": "Votre message n'a pas pu être envoyé en raison de : ",
+    "messageModerated": "[Ce message n'a pas été envoyé en raison de la politique de contenu]",
+    "messageBlockedByModeration": "Message bloqué par la modération de contenu."
   },
   "RiskyWordsDictionary": {
     "title": "Dictionnaire des Mots à Risque",
@@ -403,7 +411,8 @@
     "reportSubmittedTitle": "Signalement Envoyé",
     "reportSubmittedDesc": "Merci d'aider à améliorer le dictionnaire !",
     "reportSubmitError": "Échec de l'envoi de votre signalement. Veuillez réessayer.",
-    "missedWordEmptyError": "Veuillez entrer l'expression que vous souhaitez signaler."
+    "missedWordEmptyError": "Veuillez entrer l'expression que vous souhaitez signaler.",
+    "moderationFailedBeforeAnalysis": "Le texte n'a pas pu être analysé en raison de violations de la politique de contenu :"
   },
   "RewardsPage": {
     "title": "Vos Récompenses",
@@ -417,7 +426,7 @@
     "badge_profile_complete_name": "Profil Pro",
     "badge_profile_complete_desc": "A complété les détails de son profil.",
     "badge_first_chat_name": "Brise-Glace",
-    "badge_first_chat_desc": "A initié sa première discussion.",
+    "badge_first_desc": "A initié sa première discussion.",
     "badge_first_match_name": "Entremetteur",
     "badge_first_match_desc": "A obtenu sa première correspondance !",
     "badge_speed_dater_name": "Speed Dater",
