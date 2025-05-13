@@ -39,12 +39,13 @@ export default function RootLayout({
   children: ReactNode;
 }) {
   // The `lang` attribute on the <html> tag is important for accessibility and SEO.
-  // It will be set to 'en' by default here. The client-side ClientSideI18n component
-  // within the [locale] layout will update it based on the actual resolved locale if necessary.
-  // Next-intl middleware also plays a role in how the initial lang might be set
-  // if the [locale] segment is at the very root of the URL structure handled by middleware.
+  // It will be set to 'en' by default here. The ClientSideI18n component
+  // (or similar logic in [locale]/layout.tsx) will update it based on the actual resolved locale if necessary.
+  // Next-intl middleware also plays a role in how the initial lang might be set.
   return (
     <html lang="en">
+      {/* Next.js implicitly handles the <head> tag and merges metadata.
+          Ensure no whitespace or text nodes are direct children of <html> here. */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <SidebarProvider>
