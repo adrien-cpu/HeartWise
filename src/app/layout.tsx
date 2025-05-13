@@ -11,7 +11,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { getMessages, setRequestLocale } from 'next-intl/server'; // Use setRequestLocale for static rendering
+import { getMessages, setRequestLocale } from 'next-intl/server';
 import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/settings';
 import { metadata as appMetadata } from '@/app/metadata';
 import { ClientSideI18n } from '@/components/ClientSideI18n';
@@ -56,57 +56,60 @@ export default async function RootLayout({
   children: ReactNode;
   params: { locale: string };
 }) {
-  // Validate the locale from the URL. If invalid, use the default.
-  // Middleware should ideally handle redirection for invalid locales.
+  // Determine the effective locale
   const effectiveLocale: Locale = isValidLocale(rawUrlLocale) ? rawUrlLocale : defaultLocale;
 
-  if (!isValidLocale(rawUrlLocale)) {
-    console.warn(`[RootLayout] URL locale "${rawUrlLocale}" is invalid. Using default locale "${effectiveLocale}". Middleware should handle redirection.`);
+  // Warn if the URL locale was invalid but allow `effectiveLocale` to proceed
+  if (rawUrlLocale && !isValidLocale(rawUrlLocale)) {
+    console.warn(`[RootLayout] URL locale "${rawUrlLocale}" is invalid or not directly supported. Using default locale "${effectiveLocale}". Middleware should typically handle redirection for completely unsupported locales.`);
   }
 
-  // Set the locale for the current request. This is necessary for
-  // server-side rendering and for `getMessages` to work correctly.
+  // Set the request locale for server-side i18n utilities like getMessages()
+  // This is crucial for getMessages() to pick up the correct locale context.
   setRequestLocale(effectiveLocale);
 
-  let messages;
-  let actualLocaleForMessages: Locale = effectiveLocale; // Initialize with the current effective locale
+  let messagesPayload;
+  let messagesForClient;
+  let localeForClient: Locale = defaultLocale; // Fallback to defaultLocale
 
   try {
-    // getMessages will call the getRequestConfig from your i18n setup.
-    // The .locale property in the result from getMessages indicates the locale
-    // for which messages were actually loaded (could be default if fallback occurred).
-    const result = await getMessages({ locale: effectiveLocale });
-    messages = result.messages;
+    // getMessages() will use the locale set by setRequestLocale.
+    messagesPayload = await getMessages(); // No need to pass locale explicitly if setRequestLocale is used
 
-    // Trust the locale returned by getMessages if it's valid, as it reflects fallbacks.
-    if (result.locale && isValidLocale(result.locale)) {
-      actualLocaleForMessages = result.locale;
+    // Validate the locale returned by getMessages against our supported locales.
+    // messagesPayload.locale should ideally match effectiveLocale or defaultLocale if a fallback occurred within getRequestConfig.
+    if (messagesPayload && messagesPayload.locale && isValidLocale(messagesPayload.locale)) {
+      localeForClient = messagesPayload.locale;
     } else {
-      console.error(`[RootLayout] Received invalid or undefined locale ("${result.locale}") from getMessages, even though initial candidate was "${effectiveLocale}". Using effectiveLocale: "${effectiveLocale}" for ClientSideI18n.`);
-      actualLocaleForMessages = effectiveLocale; // Fallback to the validated URL locale or default
+      console.error(`[RootLayout] Received invalid or undefined locale ("${messagesPayload?.locale}") from getMessages. Defaulting to "${defaultLocale}" for client. Effective locale was "${effectiveLocale}".`);
+      localeForClient = defaultLocale; // Ensure a valid locale is passed to client
     }
 
-    if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
-      console.error(`[RootLayout] Messages object for locale "${actualLocaleForMessages}" (derived from getMessages result.locale: "${result.locale}") is empty or invalid. This suggests a critical failure in message loading, even fallbacks.`);
-      messages = {}; // Pass empty messages to prevent provider crash; translations will be missing.
+    // Ensure messages is a valid object, defaulting to empty if issues.
+    if (messagesPayload && typeof messagesPayload.messages === 'object' && messagesPayload.messages !== null) {
+      messagesForClient = messagesPayload.messages;
+      if (Object.keys(messagesForClient).length === 0) {
+        console.warn(`[RootLayout] Messages object for locale "${localeForClient}" (from getMessages result) is empty. This might indicate missing translations or a loading issue in getRequestConfig.`);
+      }
+    } else {
+      console.error(`[RootLayout] Messages object from getMessages for locale "${localeForClient}" is missing or not an object. Using empty messages for client.`);
+      messagesForClient = {};
     }
+
   } catch (error: any) {
-    console.error(`[RootLayout] Critical failure in getMessages for locale "${effectiveLocale}". Error: ${error.message}.`);
-    messages = {}; // Fallback to empty messages
-    actualLocaleForMessages = defaultLocale; // Fallback to default locale for rendering
-    console.warn(`[RootLayout] Falling back to default locale "${actualLocaleForMessages}" for ClientSideI18n due to message loading error.`);
+    console.error(`[RootLayout] Critical failure in getMessages or processing its result for effective locale "${effectiveLocale}". Error: ${error.message}.`);
+    messagesForClient = {}; // Fallback to empty messages
+    localeForClient = defaultLocale; // Fallback to default locale
+    console.warn(`[RootLayout] Falling back to default locale "${localeForClient}" and empty messages for ClientSideI18n due to catastrophic message loading error.`);
   }
   
-  // Ensure actualLocaleForMessages is a valid Locale type before rendering
-  if (!isValidLocale(actualLocaleForMessages)) {
-    console.error(`[RootLayout] actualLocaleForMessages is STILL invalid ("${actualLocaleForMessages}") before rendering. This is a critical state. Using hardcoded '${defaultLocale}'.`);
-    actualLocaleForMessages = defaultLocale;
-  }
+  // Final sanity check for the lang attribute for <html> tag
+  const langForHtml = isValidLocale(localeForClient) ? localeForClient : defaultLocale;
 
   return (
-    <html lang={actualLocaleForMessages}>
+    <html lang={langForHtml}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ClientSideI18n locale={actualLocaleForMessages} messages={messages}>
+        <ClientSideI18n locale={localeForClient} messages={messagesForClient}>
           {children}
         </ClientSideI18n>
       </body>

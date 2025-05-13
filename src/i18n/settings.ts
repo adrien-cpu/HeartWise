@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Configuration settings for internationalization (i18n) using next-intl.
  * @module i18nSettings
@@ -7,9 +8,14 @@
  */
 
 import { getRequestConfig } from 'next-intl/server';
-// import { notFound } from 'next/navigation'; // notFound should not be called from getRequestConfig directly if it causes issues in RootLayout
+import type { AbstractIntlMessages } from 'next-intl';
 
-// Define and export constants directly in this file
+// Static imports for message files
+// Assuming messages/en.json and messages/fr.json are at src/messages.
+// The path is relative to this file (src/i18n/settings.ts).
+import enMessages from '../messages/en.json';
+import frMessages from '../messages/fr.json';
+
 export const locales = ['en', 'fr'] as const;
 export type Locale = typeof locales[number];
 export const defaultLocale: Locale = 'en';
@@ -35,7 +41,7 @@ export const pathnames = {
 
 /**
  * Checks if the provided locale string is a valid and supported locale.
- * @param {string} locale - The locale string to validate.
+ * @param {any} locale - The locale string to validate.
  * @returns {locale is Locale} True if the locale is valid, false otherwise.
  */
 export function isValidLocale(locale: any): locale is Locale {
@@ -54,47 +60,35 @@ export default getRequestConfig(async ({ locale: rawLocale }) => {
     determinedLocale = defaultLocale;
   }
 
-  let messages;
-  try {
-    // Path is relative to this file (src/i18n/settings.ts)
-    messages = (await import(`../../messages/${determinedLocale}.json`)).default;
-    if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
-      // This indicates that the message file was found but is empty or malformed.
-      console.error(`[i18n-config] Loaded empty or invalid messages for locale: ${determinedLocale}.`);
-      throw new Error(`Empty/invalid messages for ${determinedLocale}.`);
-    }
-  } catch (error) {
-    // This catch block handles failure to load messages for 'determinedLocale' (e.g., file not found, JSON parse error)
-    console.error(`[i18n-config] Failed to load messages for locale "${determinedLocale}". Attempting fallback to default locale "${defaultLocale}". Error: ${error instanceof Error ? error.message : String(error)}`);
-    if (determinedLocale !== defaultLocale) {
-      try {
-        messages = (await import(`../../messages/${defaultLocale}.json`)).default;
-        if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
-          console.error(`[i18n-config] CRITICAL: Default locale messages ("${defaultLocale}") are also missing, empty, or invalid after fallback attempt.`);
-          throw new Error(`Critical: Default locale messages ("${defaultLocale}") also failed to load or are invalid.`);
-        }
-        determinedLocale = defaultLocale; // Update determinedLocale as we are now using default's messages
-        console.log(`[i18n-config] Successfully loaded fallback messages for "${determinedLocale}".`);
-      } catch (fallbackError) {
-        console.error(`[i18n-config] CRITICAL ERROR: Failed to load fallback default locale messages ("${defaultLocale}"): ${fallbackError instanceof Error ? fallbackError.message : String(fallbackError)}`);
-        messages = {}; // Ultimate fallback: empty messages to prevent app crash
-      }
-    } else {
-      // This means the original determinedLocale was already defaultLocale, and it failed to load.
-      console.error(`[i18n-config] CRITICAL ERROR: Default locale messages ("${defaultLocale}") are missing, empty, or invalid.`);
-      messages = {};
-    }
+  let messages: AbstractIntlMessages;
+  switch (determinedLocale) {
+    case 'en':
+      messages = enMessages as AbstractIntlMessages;
+      break;
+    case 'fr':
+      messages = frMessages as AbstractIntlMessages;
+      break;
+    default:
+      // This case should not be reached if determinedLocale is correctly typed and defaulted.
+      console.warn(`[i18n-config] Fallback to English messages for an unexpected locale: ${determinedLocale}`);
+      messages = enMessages as AbstractIntlMessages;
+      determinedLocale = 'en'; // Ensure determinedLocale is set to what messages are loaded for
+      break;
   }
 
-  // Final safety check on determinedLocale before returning.
-  // This ensures that the 'locale' field in the returned object is always a valid 'en' or 'fr'.
-  if (!isValidLocale(determinedLocale)) {
-    console.error(`[i18n-config] determinedLocale ("${determinedLocale}") became invalid before returning. This indicates a severe logic flaw. Forcing to defaultLocale ("${defaultLocale}").`);
-    determinedLocale = defaultLocale;
+  if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
+    console.error(`[i18n-config] Statically imported messages for locale: "${determinedLocale}" are empty or invalid. This indicates a problem with the JSON file itself or the import.`);
+    // Fallback to an empty object for messages to prevent app crash,
+    // and ensure the locale reflects this empty state (or the default).
+    return {
+      locale: determinedLocale, // Return the locale we attempted, even if messages are empty
+      messages: {},
+    };
   }
-
+  
   return {
-    locale: determinedLocale, // This is the locale for which messages are being returned.
-    messages: messages
+    locale: determinedLocale,
+    messages: messages,
   };
 });
+
