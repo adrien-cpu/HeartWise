@@ -11,8 +11,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 import './globals.css'; // Global styles
 import { metadata as appMetadata } from '@/app/metadata'; // Base metadata
-import { SidebarProvider } from "@/components/ui/sidebar"; // Global provider
-import { AuthProvider } from '@/contexts/AuthContext';   // Global provider
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AuthProvider } from '@/contexts/AuthContext';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,7 +31,7 @@ export const metadata: Metadata = appMetadata;
  * This is the primary layout that wraps the entire application.
  * It sets up global providers like AuthProvider and SidebarProvider.
  * Internationalization (i18n) specific logic (like NextIntlClientProvider)
- * should be handled in the nested `[locale]/layout.tsx`.
+ * is handled in the nested `[locale]/layout.tsx`.
  *
  * @param {object} props - The props for the RootLayout component.
  * @param {React.ReactNode} props.children - The children to render within the layout.
@@ -43,11 +43,9 @@ export default function RootLayout({
   children: ReactNode;
 }) {
   // The `lang` attribute on the <html> tag is important for accessibility and SEO.
-  // It will be set to 'en' by default here. The ClientSideI18n component
-  // (or similar logic in [locale]/layout.tsx) will update it based on the actual resolved locale if necessary.
-  // Next-intl middleware also plays a role in how the initial lang might be set.
+  // It's set to 'en' by default here. The ClientSideI18n component
+  // (or similar logic in [locale]/layout.tsx) will update it based on the actual resolved locale.
   // Next.js implicitly handles the <head> tag and merges metadata.
-  // Ensure no whitespace or text nodes are direct children of <html> here.
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
