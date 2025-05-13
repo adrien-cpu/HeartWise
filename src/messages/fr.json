@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -62,7 +61,10 @@
     "passwordResetErrorTitle": "Échec de la Réinitialisation",
     "passwordResetErrorDefault": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "passwordResetErrorUserNotFound": "Aucun compte trouvé avec cette adresse e-mail.",
-    "rememberPasswordPrompt": "Vous vous souvenez de votre mot de passe ?"
+    "rememberPasswordPrompt": "Vous vous souvenez de votre mot de passe ?",
+    "firebaseApiKeyError": "Erreur de configuration de l'application. Veuillez contacter le support.",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe"
   },
   "GeolocationMeeting": {
     "title": "Trouver des Connexions à Proximité",

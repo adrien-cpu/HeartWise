@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -62,7 +61,10 @@
     "passwordResetErrorTitle": "Password Reset Failed",
     "passwordResetErrorDefault": "An unexpected error occurred. Please try again.",
     "passwordResetErrorUserNotFound": "No account found with this email address.",
-    "rememberPasswordPrompt": "Remember your password?"
+    "rememberPasswordPrompt": "Remember your password?",
+    "firebaseApiKeyError": "Application configuration error. Please contact support.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "GeolocationMeeting": {
     "title": "Find Nearby Connections",

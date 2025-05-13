@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { SubmitHandler } from 'react-hook-form';
@@ -16,13 +15,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, LogIn } from 'lucide-react';
+import { Loader2, LogIn, Eye, EyeOff } from 'lucide-react'; // Added Eye and EyeOff icons
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 /**
  * @fileOverview Login page component.
  * @module LoginPage
- * @description Allows users to log in using their email and password.
+ * @description Allows users to log in using their email and password. Includes password visibility toggle.
  */
 
 const loginSchema = z.object({
@@ -42,6 +41,7 @@ export default function LoginPage(): JSX.Element {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   const {
     register,
@@ -66,6 +66,8 @@ export default function LoginPage(): JSX.Element {
       let errorMessage = t('loginErrorDefault');
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         errorMessage = t('loginErrorInvalidCredentials');
+      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.') {
+        errorMessage = t('firebaseApiKeyError');
       }
       setError(errorMessage);
       toast({
@@ -76,6 +78,13 @@ export default function LoginPage(): JSX.Element {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  /**
+   * Toggles the visibility of the password input field.
+   */
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -115,14 +124,27 @@ export default function LoginPage(): JSX.Element {
                   {t('forgotPasswordLink')}
                 </Link>
               </div>
-              <Input
-                id="password"
-                type="password"
-                {...register('password')}
-                placeholder="••••••••"
-                disabled={isLoading}
-                aria-invalid={errors.password ? "true" : "false"}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'} // Toggle input type
+                  {...register('password')}
+                  placeholder="••••••••"
+                  disabled={isLoading}
+                  aria-invalid={errors.password ? "true" : "false"}
+                  className="pr-10" // Add padding for the icon
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                  onClick={togglePasswordVisibility}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
@@ -143,4 +165,3 @@ export default function LoginPage(): JSX.Element {
     </div>
   );
 }
-
