@@ -10,7 +10,7 @@
 - [x] User Profile Management: View and edit user profile details. (`/profile`, `src/services/user_profile.ts`)
 - [x] Basic Chat Interface: Simulate conversations with mock data. Includes AI-suggested intention tagging. (`/chat`, `src/ai/flows/intention-tagging.ts`)
 - [x] Speed Dating Interface: UI for scheduling and providing feedback (simulated). (`/speed-dating`)
-- [~] General Knowledge Game: Basic question/answer game with category preferences, persistent scores, and leaderboard. (`/game`, `src/services/user_profile.ts` - *Times Up game mode exists, GK game enhanced with Firestore persistence for scores/prefs/leaderboard*)
+- [~] General Knowledge Game: Basic question/answer game with category preferences, persistent scores, and leaderboard. (`/game`, `src/services/user_profile.ts` - *Times Up game mode now also integrated with user points/rewards and leaderboard refresh.*)
 - [x] Rewards System: Display earned badges and points. (`/rewards`)
 
 ## Style Guidelines:
@@ -100,7 +100,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[x] Mode d'Échange à l'Aveugle :** (`/blind-exchange-mode` - *AI/Simulation*)
 *   **[x] Coach Conversationnel IA (avec Bonus de Style):** (`/ai-conversation-coach` - *AI*)
 *   **[x] Dictionnaire IA des Mots à Risque :** (`/risky-words-dictionary` - *AI*)
-*   **[~] Jeu :** (`/game` - *General Knowledge game now uses Firebase for preferences/points/leaderboard. Times Up game mode exists.*)
+*   **[~] Jeu :** (`/game` - *General Knowledge and Times Up games now use Firebase for preferences/points/rewards/leaderboard.*)
 *   **[x] Speed Dating :** (`/speed-dating` - *UI + Feedback Simulation*, needs backend for scheduling/matching/feedback persistence)
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API*)
 *   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Data now uses Firebase Firestore*)
@@ -116,7 +116,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[ ] Modération de Contenu:** Intégrer un service de modération externe (API) pour le texte et les médias générés par les utilisateurs.
 *   **[ ] Notifications:** Mettre en place des notifications push (e.g., via Firebase Cloud Messaging) pour les nouveaux messages, matchs, etc.
 *   **[ ] Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer une solution WebRTC (e.g., Twilio, Agora) pour les appels vidéo/audio dans `/chat`.
-*   **[~] Améliorations des Jeux:** Ajouter plus de jeux (comme Times Up), de la variété, un système de scores persistant et des classements (backend requis). (*General Knowledge game enhanced with preferences, scoring, and leaderboard via Firebase. Times Up game UI exists.*)
+*   **[~] Améliorations des Jeux:** Ajouter plus de jeux, de la variété, un système de scores persistant et des classements (backend requis). (*General Knowledge and Times Up games enhanced with preferences, scoring, rewards, and leaderboard via Firebase.*)
 *   **[ ] Feedback Post-Speed Dating (Persistance):** Connecter l'interface de feedback (`/speed-dating`) à un backend pour stocker les avis.
 *   **[ ] Dévoilement progressif (Blind Exchange):** Implémenter la logique pour révéler les informations progressivement dans le chat (`/blind-exchange-mode`).
 *   **[ ] Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage et le signalement utilisateur (`/risky-words-dictionary`).
