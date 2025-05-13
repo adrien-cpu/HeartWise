@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Locale-specific layout for the application.
  * @module LocaleLayout
@@ -10,17 +9,14 @@
  *              handled by the root layout (src/app/layout.tsx).
  */
 
-import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import type { AbstractIntlMessages } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server'; // Use setRequestLocale for static rendering
 import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/settings';
-import { metadata as appMetadata } from '@/app/metadata'; // Base metadata
+// metadata can be exported here if it's locale-specific or managed in page.tsx
+// For now, global metadata is in src/app/metadata.ts
 import { ClientSideI18n } from '@/components/ClientSideI18n';
-// Global CSS is imported in the root src/app/layout.tsx
-// Fonts are also handled in the root src/app/layout.tsx
-
-// export const metadata: Metadata = appMetadata; // Metadata can be exported here if it's locale-specific
-// For now, using global metadata from app/metadata.ts, potentially overridden by pages.
+// Global CSS and Fonts are imported in the root src/app/layout.tsx
 
 // Enable static rendering for all locales
 export function generateStaticParams() {
@@ -51,17 +47,21 @@ export default async function LocaleLayout({
   } else {
     console.warn(`[LocaleLayout] URL locale "${rawUrlLocale}" is invalid or not directly supported. Using default locale "${defaultLocale}". Middleware should handle redirection for completely unsupported locales.`);
     effectiveLocale = defaultLocale;
+    // If you want to show a 404 for invalid locales not caught by middleware (e.g. if middleware is bypassed or misconfigured):
+    // import { notFound } from 'next/navigation';
+    // notFound();
   }
 
   // Set the request locale for server-side i18n utilities like getMessages()
-  // This is crucial for next-intl to work correctly in Server Components.
+  // This is crucial for next-intl to work correctly in Server Components within this layout.
   setRequestLocale(effectiveLocale);
 
   let messagesForClient: AbstractIntlMessages;
-  const localeForClient: Locale = effectiveLocale;
+  const localeForClient: Locale = effectiveLocale; // Use the determined effective locale for the client
 
   try {
-    const loadedMessages = await getMessages(); // getMessages() will use the locale set by setRequestLocale.
+    // getMessages() will use the locale set by setRequestLocale.
+    const loadedMessages = await getMessages(); 
     
     if (loadedMessages && typeof loadedMessages === 'object' && Object.keys(loadedMessages).length > 0) {
       messagesForClient = loadedMessages;
@@ -70,6 +70,7 @@ export default async function LocaleLayout({
       messagesForClient = {}; // Fallback to empty messages
     }
   } catch (error: any) {
+    // This catch block handles errors specifically from getMessages()
     console.error(`[LocaleLayout] Critical failure in getMessages for effective locale "${effectiveLocale}". Error: ${error.message}.`);
     messagesForClient = {}; // Fallback to empty messages
     console.warn(`[LocaleLayout] Falling back to empty messages for ClientSideI18n due to catastrophic message loading error for locale "${localeForClient}".`);
@@ -83,4 +84,3 @@ export default async function LocaleLayout({
     </ClientSideI18n>
   );
 }
-

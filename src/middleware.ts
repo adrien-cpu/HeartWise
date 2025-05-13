@@ -1,7 +1,3 @@
-
-import createMiddleware from 'next-intl/middleware';
-import { locales, localePrefix, defaultLocale, pathnames } from '@/i18n/settings';
-
 /**
  * @fileOverview Middleware for handling internationalization (i18n) routing.
  * @module Middleware
@@ -11,6 +7,9 @@ import { locales, localePrefix, defaultLocale, pathnames } from '@/i18n/settings
  *
  * @see https://next-intl.dev/docs/routing/middleware
  */
+import createMiddleware from 'next-intl/middleware';
+import { locales, localePrefix, defaultLocale, pathnames } from '@/i18n/settings';
+
 export default createMiddleware({
   // A list of all locales that are supported
   locales,
@@ -19,12 +18,20 @@ export default createMiddleware({
   defaultLocale,
 
   // The prefixing strategy
+  // 'as-needed': default locale doesn't have a prefix (e.g. /about)
+  // 'always': all locales have a prefix (e.g. /en/about, /fr/about)
   localePrefix,
 
   // Pathnames for internationalized routing (optional but recommended for complex apps)
   // If you have specific path translations, define them in settings.ts
-  // e.g., pathnames: { '/about': { en: '/about-us', fr: '/a-propos' } }
+  // e.g., pathnames: { '/': '/', '/about': { en: '/about-us', fr: '/a-propos' } }
   pathnames,
+
+  // Optional: Custom locale detection logic
+  // localeDetection: (request) => {
+  //   // Your custom logic to determine the locale
+  //   return defaultLocale; // Or detected locale
+  // }
 });
 
 /**
@@ -41,7 +48,10 @@ export const config = {
     // - … if they start with `/api`, `/_next` or `/_vercel`
     // - … the ones containing a dot (e.g. `favicon.ico`)
     '/((?!api|_next|_vercel|.*\\..*).*)',
-    // Optional: Match all pathnames within specific directories if needed, e.g.,
-    // '/(en|fr)/users/:path*'
+
+    // Optional: Match all pathnames within specific directories if needed,
+    // e.g., for localized assets if not handled by the public folder directly.
+    // But typically, next-intl handles pages and not direct asset paths.
+    // '/(en|fr)/some-specific-path/:path*'
   ]
 };
