@@ -339,7 +339,16 @@
     "authErrorTitle": "Authentication Required",
     "authErrorDesc": "You need to be logged in to perform this action.",
     "sessionNotSelectedError": "No session selected for feedback.",
-    "loginToSchedule": "Please log in to schedule a session."
+    "loginToSchedule": "Please log in to schedule a session.",
+    "availableSessionsTitle": "Available Sessions for Your Interests",
+    "registerButton": "Register",
+    "noSessionsFoundTitle": "No Sessions Found",
+    "noSessionsFoundDesc": "No available speed dating sessions match your selected interests right now. Try adjusting your interests or check back later!",
+    "sessionsFoundTitle": "Sessions Found!",
+    "sessionsFoundDesc": "{count, plural, =1 {One session matches your interests.} other {# sessions match your interests.}}",
+    "registrationSuccessTitle": "Registered!",
+    "registrationSuccessDesc": "You've successfully registered for the speed dating session.",
+    "registrationErrorDesc": "Failed to register for the session. Please try again."
   },
   "Chat": {
     "title": "Chat",
@@ -372,7 +381,9 @@
     "moderationBlockTitle": "Content Moderation",
     "moderationBlockDesc": "Your message could not be sent due to: ",
     "messageModerated": "[This message was not sent due to content policy]",
-    "messageBlockedByModeration": "Message blocked by content moderation."
+    "messageBlockedByModeration": "Message blocked by content moderation.",
+    "noMessagesYet": "No messages yet. Say hello!",
+    "redirectingToLogin": "Redirecting to login..."
   },
   "RiskyWordsDictionary": {
     "title": "Risky Words Dictionary",

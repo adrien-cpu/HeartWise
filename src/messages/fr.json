@@ -339,7 +339,16 @@
     "authErrorTitle": "Authentification Requise",
     "authErrorDesc": "Vous devez être connecté(e) pour effectuer cette action.",
     "sessionNotSelectedError": "Aucune session sélectionnée pour donner un avis.",
-    "loginToSchedule": "Veuillez vous connecter pour planifier une session."
+    "loginToSchedule": "Veuillez vous connecter pour planifier une session.",
+    "availableSessionsTitle": "Sessions Disponibles pour Vos Intérêts",
+    "registerButton": "S'inscrire",
+    "noSessionsFoundTitle": "Aucune Session Trouvée",
+    "noSessionsFoundDesc": "Aucune session de speed dating disponible ne correspond à vos intérêts. Essayez de modifier vos intérêts ou revenez plus tard !",
+    "sessionsFoundTitle": "Sessions Trouvées !",
+    "sessionsFoundDesc": "{count, plural, =1 {Une session correspond à vos intérêts.} other {# sessions correspondent à vos intérêts.}}",
+    "registrationSuccessTitle": "Inscrit(e) !",
+    "registrationSuccessDesc": "Vous êtes bien inscrit(e) à la session de speed dating.",
+    "registrationErrorDesc": "Échec de l'inscription à la session. Veuillez réessayer."
   },
   "Chat": {
     "title": "Discussion",
@@ -372,7 +381,9 @@
     "moderationBlockTitle": "Modération de Contenu",
     "moderationBlockDesc": "Votre message n'a pas pu être envoyé en raison de : ",
     "messageModerated": "[Ce message n'a pas été envoyé en raison de la politique de contenu]",
-    "messageBlockedByModeration": "Message bloqué par la modération de contenu."
+    "messageBlockedByModeration": "Message bloqué par la modération de contenu.",
+    "noMessagesYet": "Aucun message pour l'instant. Dites bonjour !",
+    "redirectingToLogin": "Redirection vers la connexion..."
   },
   "RiskyWordsDictionary": {
     "title": "Dictionnaire des Mots à Risque",

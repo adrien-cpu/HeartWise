@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -8,118 +7,129 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Loader2, CalendarClock, Users, Heart, Frown, Meh, Send, CheckCircle2 } from 'lucide-react'; // Added CheckCircle2
+import { Loader2, CalendarClock, Users, Heart, Frown, Meh, Send, CheckCircle2 } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
-// import { get_user_speed_dating_schedule, set_user_speed_dating_schedule } from '@/services/user_profile'; // Assuming this service exists and handles schedule
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import { 
+  submitSpeedDatingFeedback, 
+  getFeedbackForSessionByUser,
+  createSpeedDatingSession,
+  registerForSpeedDatingSession,
+  findAvailableSessions,
+  getUpcomingSessionsForUser,
+  SpeedDatingSession, // Service-defined type
+  SpeedDatingFeedbackData 
+} from '@/services/speed_dating_service';
+import { Timestamp } from 'firebase/firestore';
 
-// Mock data structure for Speed Dating Session
-interface SpeedDatingSession {
-  id: string;
-  dateTime: Date;
-  interests: string[];
-  participantsCount: number;
-  status: 'scheduled' | 'completed' | 'in-progress';
-  feedbackSubmitted?: boolean; // New flag
-}
-
-// Mock data for partners met during a session
+// Mock data for partners met during a session (kept for frontend display logic)
 interface MetPartner {
     id: string;
     name: string;
 }
 
-// Mock interests
+// Mock interests (kept for frontend display logic)
 const availableInterests = ["Movies", "Travel", "Food", "Tech", "Books", "Music", "Sports"];
 
 /**
  * @fileOverview Implements the SpeedDatingPage component.
  * @module SpeedDatingPage
  * @description Displays the Speed Dating interface, allowing users to schedule sessions based on interests
- *              and providing a simulated feedback mechanism for completed sessions.
- *              **Requires Backend:** Real scheduling, matching, session management, and feedback storage.
+ *              and providing a feedback mechanism for completed sessions, with feedback persisted to Firestore.
+ *              User authentication is required.
  */
 export default function SpeedDatingPage() {
   const t = useTranslations('SpeedDating');
   const { toast } = useToast();
+  const { currentUser, loading: authLoading } = useAuth();
+  const router = useRouter();
+
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [upcomingSessions, setUpcomingSessions] = useState<SpeedDatingSession[]>([]);
+  const [availableFilteredSessions, setAvailableFilteredSessions] = useState<SpeedDatingSession[]>([]);
+  
   const [loadingSessions, setLoadingSessions] = useState(true);
-  const [isProcessing, setIsProcessing] = useState(false); // Combined loading state for scheduling/feedback
+  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedSessionForFeedback, setSelectedSessionForFeedback] = useState<SpeedDatingSession | null>(null);
-  const [feedback, setFeedback] = useState<{ [partnerId: string]: { rating: string; comment: string } }>({});
+  
+  const [feedback, setFeedback] = useState<{ [partnerId: string]: { rating: 'positive' | 'neutral' | 'negative' | ''; comment: string } }>({});
 
-  // Mock user ID - replace with actual user identification
-  const userId = 'user1';
-
-  // Mock partners for the completed session
-  const mockPartners: MetPartner[] = [
+  // Mock partners - in a real app, this would be dynamically fetched based on the selectedSessionForFeedback
+  const mockPartners: MetPartner[] = selectedSessionForFeedback?.id === 'sd-completed-mock' ? [
+      { id: 'partnerA_from_sd0', name: 'Alex' },
+      { id: 'partnerB_from_sd0', name: 'Bella' },
+  ] : [ // Default mock if no specific session implies partners
       { id: 'partner1', name: 'Charlie' },
       { id: 'partner2', name: 'Diana' },
-      { id: 'partner3', name: 'Ethan' },
   ];
 
-  // Fetch upcoming sessions on mount
-  useEffect(() => {
-    const fetchSessions = async () => {
-      setLoadingSessions(true);
-      setError(null);
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate delay
-        const mockSessions: SpeedDatingSession[] = [
-           { id: 'sd0', dateTime: new Date(Date.now() - 1 * 60 * 60 * 1000), interests: ["Sports", "Music"], participantsCount: 6, status: 'completed', feedbackSubmitted: false },
-          { id: 'sd1', dateTime: new Date(Date.now() + 2 * 60 * 60 * 1000), interests: ["Movies", "Food"], participantsCount: 8, status: 'scheduled' },
-          { id: 'sd2', dateTime: new Date(Date.now() + 24 * 60 * 60 * 1000), interests: ["Tech", "Books"], participantsCount: 12, status: 'scheduled' },
-          { id: 'sd3', dateTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), interests: ["Travel", "Music"], participantsCount: 5, status: 'scheduled' },
-        ];
-        setUpcomingSessions(mockSessions.sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime()));
-      } catch (err) {
-        console.error("Failed to fetch sessions:", err);
-        setError(t('fetchError'));
-        toast({ variant: 'destructive', title: t('errorTitle'), description: t('fetchError') });
-      } finally {
-        setLoadingSessions(false);
+  const fetchUserSessions = useCallback(async () => {
+    if (!currentUser) return;
+    setLoadingSessions(true);
+    try {
+      const sessions = await getUpcomingSessionsForUser(currentUser.uid);
+      
+      // Check feedback status for completed sessions
+      for (const session of sessions) {
+        if (session.status === 'completed' && !session.feedbackSubmitted) {
+          const existingFeedback = await getFeedbackForSessionByUser(currentUser.uid, session.id);
+          if (existingFeedback.length > 0) { // Simple check: if any feedback exists
+            session.feedbackSubmitted = true;
+          }
+        }
       }
-    };
-    fetchSessions();
-  }, [t, toast]);
+      setUpcomingSessions(sessions.sort((a, b) => (a.dateTime as Timestamp).toDate().getTime() - (b.dateTime as Timestamp).toDate().getTime()));
+    } catch (err) {
+      console.error("Failed to fetch user sessions:", err);
+      setError(t('fetchError'));
+      toast({ variant: 'destructive', title: t('errorTitle'), description: t('fetchError') });
+    } finally {
+      setLoadingSessions(false);
+    }
+  }, [currentUser, t, toast]);
 
-  // Handle interest selection
+  useEffect(() => {
+    if (!authLoading && currentUser) {
+        fetchUserSessions();
+    } else if (!authLoading && !currentUser) {
+        setLoadingSessions(false); // Not logged in, stop loading
+    }
+  }, [authLoading, currentUser, fetchUserSessions]);
+
+
   const handleInterestChange = (interest: string, checked: boolean) => {
     setSelectedInterests(prev =>
       checked ? [...prev, interest] : prev.filter(i => i !== interest)
     );
   };
-
-  // Handle scheduling a session
-  const handleScheduleSession = async () => {
+  
+  const handleFindSession = async () => {
+    if (!currentUser) {
+      toast({ variant: 'destructive', title: t('authErrorTitle'), description: t('authErrorDesc') });
+      router.push('/login');
+      return;
+    }
     if (selectedInterests.length === 0) {
       toast({ variant: 'destructive', title: t('selectInterestsErrorTitle'), description: t('selectInterestsErrorDesc') });
       return;
     }
-
     setIsProcessing(true);
     setError(null);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      toast({ title: t('scheduleSuccessTitle'), description: t('scheduleSuccess') });
-      
-       const newSession: SpeedDatingSession = {
-         id: `sd-${Date.now()}`,
-         dateTime: new Date(Date.now() + (Math.random() * 5 + 1) * 24 * 60 * 60 * 1000), // Random future date within 1-5 days
-         interests: [...selectedInterests],
-         participantsCount: Math.floor(Math.random() * 10) + 2,
-         status: 'scheduled',
-         feedbackSubmitted: false,
-       };
-       setUpcomingSessions(prev => [...prev, newSession].sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime()));
-       setSelectedInterests([]);
+      const foundSessions = await findAvailableSessions(selectedInterests);
+      setAvailableFilteredSessions(foundSessions);
+      if (foundSessions.length === 0) {
+        toast({ title: t('noSessionsFoundTitle'), description: t('noSessionsFoundDesc') });
+      } else {
+        toast({ title: t('sessionsFoundTitle'), description: t('sessionsFoundDesc', {count: foundSessions.length}) });
+      }
     } catch (err) {
-      console.error("Failed to schedule session:", err);
+      console.error("Failed to find sessions:", err);
       setError(t('scheduleError'));
       toast({ variant: 'destructive', title: t('errorTitle'), description: t('scheduleError') });
     } finally {
@@ -127,46 +137,80 @@ export default function SpeedDatingPage() {
     }
   };
 
-  // Handle opening the feedback form
+  const handleRegisterForSession = async (sessionId: string) => {
+    if (!currentUser) {
+      router.push('/login');
+      return;
+    }
+    setIsProcessing(true);
+    try {
+      await registerForSpeedDatingSession(currentUser.uid, sessionId);
+      toast({ title: t('registrationSuccessTitle'), description: t('registrationSuccessDesc')});
+      await fetchUserSessions(); // Refresh user's upcoming sessions
+      setAvailableFilteredSessions(prev => prev.filter(s => s.id !== sessionId)); // Remove from available list
+    } catch (err) {
+      console.error("Failed to register for session:", err);
+      toast({ variant: 'destructive', title: t('errorTitle'), description: t('registrationErrorDesc') });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+
   const handleProvideFeedback = (session: SpeedDatingSession) => {
+     if (!currentUser) {
+      router.push('/login');
+      return;
+    }
     if (session.feedbackSubmitted) {
         toast({title: t('feedbackAlreadySubmittedTitle'), description: t('feedbackAlreadySubmittedDesc')});
         return;
     }
     setSelectedSessionForFeedback(session);
-    const initialFeedback: { [partnerId: string]: { rating: string; comment: string } } = {};
-    mockPartners.forEach(p => {
+    const initialFeedback: { [partnerId: string]: { rating: 'positive' | 'neutral' | 'negative' | ''; comment: string } } = {};
+    // In a real app, you'd fetch partners for this specific session
+    // For now, using generic mockPartners
+    mockPartners.forEach(p => { 
         initialFeedback[p.id] = { rating: '', comment: '' };
     });
     setFeedback(initialFeedback);
   };
 
-  // Handle changes in the feedback form
   const handleFeedbackChange = (partnerId: string, type: 'rating' | 'comment', value: string) => {
     setFeedback(prev => ({
       ...prev,
       [partnerId]: {
         ...prev[partnerId],
-        [type]: value,
+        [type]: type === 'rating' ? (value as 'positive' | 'neutral' | 'negative' | '') : value,
       },
     }));
   };
 
-  // Handle submitting feedback
   const handleSubmitFeedback = async () => {
-      if (!selectedSessionForFeedback) return;
-      console.log("Submitting feedback:", feedback); // This would be an API call
+      if (!selectedSessionForFeedback || !currentUser) {
+          if (!currentUser) router.push('/login');
+          return;
+      }
       setIsProcessing(true);
       try {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+        const feedbackPromises = Object.entries(feedback).map(([partnerId, feedbackEntry]) => {
+            if (feedbackEntry.rating) { 
+                const partnerName = mockPartners.find(p => p.id === partnerId)?.name || 'Unknown Partner';
+                const feedbackPayload: Omit<SpeedDatingFeedbackData, 'id' | 'timestamp'> = {
+                    userId: currentUser.uid,
+                    sessionId: selectedSessionForFeedback.id,
+                    partnerId: partnerId,
+                    partnerName: partnerName,
+                    rating: feedbackEntry.rating,
+                    comment: feedbackEntry.comment,
+                };
+                return submitSpeedDatingFeedback(feedbackPayload);
+            }
+            return Promise.resolve(null);
+        });
+        await Promise.all(feedbackPromises);
         toast({ title: t('feedbackSubmittedTitle'), description: t('feedbackSubmittedDesc') });
-        
-        // Update the session to mark feedback as submitted
-         setUpcomingSessions(prevSessions =>
-           prevSessions.map(s =>
-             s.id === selectedSessionForFeedback.id ? { ...s, feedbackSubmitted: true } : s
-           )
-         );
+        await fetchUserSessions(); // Refresh to show feedbackSubmitted = true
         setSelectedSessionForFeedback(null);
         setFeedback({});
       } catch (error) {
@@ -177,6 +221,15 @@ export default function SpeedDatingPage() {
       }
   };
 
+  if (authLoading) {
+      return (
+        <div className="container mx-auto py-8 px-4 flex items-center justify-center min-h-[calc(100vh-150px)]">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      );
+  }
+
+
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold text-center mb-8">{t('title')}</h1>
@@ -184,11 +237,11 @@ export default function SpeedDatingPage() {
       {selectedSessionForFeedback ? (
           <Card className="max-w-2xl mx-auto">
               <CardHeader>
-                <CardTitle>{t('feedbackTitle', { date: selectedSessionForFeedback.dateTime.toLocaleDateString() })}</CardTitle>
+                <CardTitle>{t('feedbackTitle', { date: (selectedSessionForFeedback.dateTime as Timestamp).toDate().toLocaleDateString() })}</CardTitle>
                 <CardDescription>{t('feedbackDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                 {mockPartners.map(partner => (
+                 {mockPartners.map(partner => ( // Still using mockPartners for feedback form structure
                     <div key={partner.id} className="border p-4 rounded-md space-y-3 bg-muted/50">
                         <h3 className="font-semibold">{t('feedbackFor', { name: partner.name })}</h3>
                         <div>
@@ -269,20 +322,43 @@ export default function SpeedDatingPage() {
                   ))}
                 </div>
               </div>
+              {availableFilteredSessions.length > 0 && (
+                <div className="mt-6 space-y-3">
+                  <h3 className="font-semibold">{t('availableSessionsTitle')}</h3>
+                  <ul className="max-h-60 overflow-y-auto space-y-2 pr-2">
+                    {availableFilteredSessions.map(session => (
+                       <li key={session.id} className="p-3 border rounded-md bg-muted/50 flex justify-between items-center">
+                          <div>
+                            <p className="text-sm font-medium">{(session.dateTime as Timestamp).toDate().toLocaleDateString()}</p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {session.interests.map(intr => <Badge key={intr} variant="secondary" className="text-xs">{intr}</Badge>)}
+                            </div>
+                          </div>
+                          <Button size="sm" onClick={() => handleRegisterForSession(session.id)} disabled={isProcessing}>
+                            {t('registerButton')}
+                          </Button>
+                       </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </CardContent>
             <CardFooter>
-              <Button onClick={handleScheduleSession} disabled={isProcessing || selectedInterests.length === 0} className="w-full sm:w-auto">
+              <Button onClick={handleFindSession} disabled={isProcessing || selectedInterests.length === 0 || !currentUser} className="w-full sm:w-auto">
                 {isProcessing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t('scheduleButton')}
               </Button>
             </CardFooter>
             {error && <p className="px-6 pb-4 text-sm text-destructive">{error}</p>}
+             {!currentUser && !authLoading && (
+                <p className="px-6 pb-4 text-sm text-muted-foreground">{t('loginToSchedule')}</p>
+            )}
           </Card>
 
           <Card className="shadow-lg border">
             <CardHeader>
               <CardTitle>{t('upcomingSessions')}</CardTitle>
-              <CardDescription>{t('upcomingSessionsDesc')}</CardDescription>
+              <CardDescription>{t('upcomingSessionsDesc')}</CardHeader>
             </CardHeader>
             <CardContent>
               {loadingSessions ? (
@@ -302,7 +378,7 @@ export default function SpeedDatingPage() {
                       <div className="flex items-center justify-between mb-1">
                          <span className="font-medium flex items-center text-sm">
                            <CalendarClock className="mr-2 h-4 w-4 text-muted-foreground"/>
-                           {session.dateTime.toLocaleString([], {dateStyle: 'medium', timeStyle: 'short'})}
+                           {(session.dateTime as Timestamp).toDate().toLocaleString([], {dateStyle: 'medium', timeStyle: 'short'})}
                          </span>
                          <Badge variant="secondary" className="flex items-center text-xs">
                            <Users className="mr-1 h-3 w-3"/> {session.participantsCount} {t('participants')}
@@ -320,7 +396,7 @@ export default function SpeedDatingPage() {
                                {t('feedbackSubmittedShort')}
                              </div>
                            ) : (
-                             <Button size="sm" variant="outline" onClick={() => handleProvideFeedback(session)} disabled={isProcessing}>
+                             <Button size="sm" variant="outline" onClick={() => handleProvideFeedback(session)} disabled={isProcessing || !currentUser}>
                                {t('provideFeedbackButton')}
                              </Button>
                            )
