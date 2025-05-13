@@ -303,13 +303,19 @@
     "feedbackDescription": "Share your thoughts on the partners you met.",
     "feedbackFor": "Feedback for {name}",
     "ratingLabel": "Overall Impression",
+    "ratingLabelFor": "Overall impression of {name}",
     "commentLabel": "Comments (Optional)",
+    "commentLabelFor": "Comments about {name} (Optional)",
     "commentPlaceholder": "Any specific thoughts?",
     "submitFeedbackButton": "Submit Feedback",
     "feedbackSubmittedTitle": "Feedback Submitted",
     "feedbackSubmittedDesc": "Thank you for your feedback!",
     "feedbackErrorDesc": "Failed to submit feedback. Please try again.",
-    "cancelButton": "Cancel"
+    "cancelButton": "Cancel",
+    "participants": "participants",
+    "feedbackAlreadySubmittedTitle": "Feedback Sent",
+    "feedbackAlreadySubmittedDesc": "You've already submitted feedback for this session.",
+    "feedbackSubmittedShort": "Feedback Submitted"
   },
   "Chat": {
     "title": "Chat",

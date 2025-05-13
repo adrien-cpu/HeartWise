@@ -303,13 +303,19 @@
     "feedbackDescription": "Partagez vos impressions sur les partenaires rencontrés.",
     "feedbackFor": "Avis pour {name}",
     "ratingLabel": "Impression Générale",
+    "ratingLabelFor": "Impression générale de {name}",
     "commentLabel": "Commentaires (Optionnel)",
+    "commentLabelFor": "Commentaires à propos de {name} (Optionnel)",
     "commentPlaceholder": "Des remarques particulières ?",
     "submitFeedbackButton": "Envoyer l'Avis",
     "feedbackSubmittedTitle": "Avis Envoyé",
     "feedbackSubmittedDesc": "Merci pour votre retour !",
     "feedbackErrorDesc": "Échec de l'envoi de l'avis. Veuillez réessayer.",
-    "cancelButton": "Annuler"
+    "cancelButton": "Annuler",
+    "participants": "participants",
+    "feedbackAlreadySubmittedTitle": "Avis Envoyé",
+    "feedbackAlreadySubmittedDesc": "Vous avez déjà envoyé un avis pour cette session.",
+    "feedbackSubmittedShort": "Avis Envoyé"
   },
   "Chat": {
     "title": "Discussion",

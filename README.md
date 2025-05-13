@@ -101,7 +101,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[x] Coach Conversationnel IA (avec Bonus de Style):** (`/ai-conversation-coach` - *AI*)
 *   **[x] Dictionnaire IA des Mots à Risque :** (`/risky-words-dictionary` - *AI*)
 *   **[~] Jeu :** (`/game` - *General Knowledge and Times Up games now use Firebase for preferences/points/rewards/leaderboard.*)
-*   **[x] Speed Dating :** (`/speed-dating` - *UI + Feedback Simulation*, needs backend for scheduling/matching/feedback persistence)
+*   **[~] Speed Dating :** (`/speed-dating` - *UI + Enhanced Feedback Simulation*, needs backend for scheduling/matching/feedback persistence)
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API*)
 *   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Data now uses Firebase Firestore*)
 *   **[x] Outils de Communication Intégrés à l'Application (Chat avec Tag d'Intention IA):** (`/chat`, `src/ai/flows/intention-tagging.ts` - *Enhanced UI/Mock Data/AI Suggestion*, needs backend for real-time/persistence/calls)
@@ -117,10 +117,10 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[ ] Notifications:** Mettre en place des notifications push (e.g., via Firebase Cloud Messaging) pour les nouveaux messages, matchs, etc.
 *   **[ ] Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer une solution WebRTC (e.g., Twilio, Agora) pour les appels vidéo/audio dans `/chat`.
 *   **[~] Améliorations des Jeux:** Ajouter plus de jeux, de la variété, un système de scores persistant et des classements (backend requis). (*General Knowledge and Times Up games enhanced with preferences, scoring, rewards, and leaderboard via Firebase.*)
-*   **[ ] Feedback Post-Speed Dating (Persistance):** Connecter l'interface de feedback (`/speed-dating`) à un backend pour stocker les avis.
+*   **[~] Feedback Post-Speed Dating (Persistance):** Connecter l'interface de feedback (`/speed-dating`) à un backend pour stocker les avis. (*Feedback submission state simulated on frontend.*)
 *   **[ ] Dévoilement progressif (Blind Exchange):** Implémenter la logique pour révéler les informations progressivement dans le chat (`/blind-exchange-mode`).
 *   **[ ] Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage et le signalement utilisateur (`/risky-words-dictionary`).
-*   **[ ] Tags d'intention (Chat - Avancé):** Affiner la logique IA backend pour analyser/suggérer des tags d'intention (`/chat`).
+*   **[~] Tags d'intention (Chat - Avancé):** Affiner la logique IA backend pour analyser/suggérer des tags d'intention (`/chat`).
 
 
 *Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality. Features marked with *~* are partially implemented.*
