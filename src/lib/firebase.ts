@@ -1,13 +1,13 @@
-
 /**
  * @fileOverview Firebase configuration and initialization.
- * @module lib/firebase
- * @description Initializes Firebase app with configurations from environment variables.
- *              Exports Firebase auth and firestore instances.
+ * @module firebase
+ * @description Initializes and exports Firebase services like Auth and Firestore.
+ *              It reads Firebase configuration from environment variables.
  */
-import { initializeApp, getApp, getApps, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore'; // Uncomment if you use Firestore
+
+import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -21,16 +21,29 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
+/**
+ * Firebase application instance.
+ * @type {FirebaseApp}
+ */
 let app: FirebaseApp;
+
+// Initialize Firebase only if it hasn't been initialized yet
 if (!getApps().length) {
   app = initializeApp(firebaseConfig);
 } else {
-  app = getApp();
+  app = getApps()[0];
 }
 
+/**
+ * Firebase Authentication instance.
+ * @type {Auth}
+ */
 const auth: Auth = getAuth(app);
-const firestore: Firestore = getFirestore(app); // Enable Firestore
 
-export { app, auth, firestore }; // Export auth and firestore
+/**
+ * Firebase Firestore instance.
+ * @type {Firestore}
+ */
+const firestore: Firestore = getFirestore(app);
 
+export { app, auth, firestore, firebaseConfig };
