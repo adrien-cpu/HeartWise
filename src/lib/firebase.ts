@@ -33,3 +33,4 @@ const auth: Auth = getAuth(app);
 const firestore: Firestore = getFirestore(app); // Enable Firestore
 
 export { app, auth, firestore }; // Export auth and firestore
+
