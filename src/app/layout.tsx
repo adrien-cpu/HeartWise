@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Root layout for the application.
  * @module RootLayout
@@ -46,7 +45,7 @@ export default function RootLayout({
   // The hydration error related to `lang` mismatch often stems from nested `<html>` tags
   // where the inner one had a different `lang`. Removing the nested `<html>` tag is the primary fix.
   return (
-    <html lang="en"> {/* Default lang, next-intl middleware should override this based on URL */}
+    <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
       </body>
