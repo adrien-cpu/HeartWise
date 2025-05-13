@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Root layout for the application.
  * @module RootLayout
@@ -9,8 +10,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
-import './globals.css'; // Global styles
-import { metadata as appMetadata } from '@/app/metadata'; // Base metadata
+import './globals.css'; // Global styles are imported here
+import { metadata as appMetadata } from '@/app/metadata';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from '@/contexts/AuthContext';
 
@@ -42,16 +43,17 @@ export default function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  // The `lang` attribute on the <html> tag is important for accessibility and SEO.
-  // It's set to 'en' by default here. The ClientSideI18n component
-  // (or similar logic in [locale]/layout.tsx) will update it based on the actual resolved locale.
+  // The `lang` attribute on the <html> tag is set here.
+  // It might be dynamically updated on the client-side by ClientSideI18n if locale changes.
   // Next.js implicitly handles the <head> tag and merges metadata.
+  // Ensure no whitespace or text nodes are direct children of <html>.
   return (
     <html lang="en">
+      {/* The <head> is managed by Next.js metadata. Only <body> should be a direct child here. */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <SidebarProvider>
-            {children} {/* Children will typically be src/app/[locale]/layout.tsx */}
+            {children} {/* This will render the content from [locale]/layout.tsx and then the page */}
           </SidebarProvider>
         </AuthProvider>
       </body>
