@@ -15,7 +15,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/settings';
 import { metadata as appMetadata } from '@/app/metadata';
 import { ClientSideI18n } from '@/components/ClientSideI18n';
-import './globals.css';
+import '../globals.css'; // Corrected import path
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
