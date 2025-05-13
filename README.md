@@ -10,7 +10,7 @@
 - [x] User Profile Management: View and edit user profile details. (`/profile`, `src/services/user_profile.ts`)
 - [x] Basic Chat Interface: Simulate conversations with mock data. Includes AI-suggested intention tagging. (`/chat`, `src/ai/flows/intention-tagging.ts`)
 - [x] Speed Dating Interface: UI for scheduling and providing feedback (simulated). (`/speed-dating`)
-- [x] General Knowledge Game: Basic question/answer game. (`/game`)
+- [~] General Knowledge Game: Basic question/answer game with category preferences, persistent scores, and leaderboard. (`/game`, `src/services/user_profile.ts` - *Times Up game mode exists, GK game enhanced with Firestore persistence for scores/prefs/leaderboard*)
 - [x] Rewards System: Display earned badges and points. (`/rewards`)
 
 ## Style Guidelines:
@@ -100,7 +100,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[x] Mode d'Échange à l'Aveugle :** (`/blind-exchange-mode` - *AI/Simulation*)
 *   **[x] Coach Conversationnel IA (avec Bonus de Style):** (`/ai-conversation-coach` - *AI*)
 *   **[x] Dictionnaire IA des Mots à Risque :** (`/risky-words-dictionary` - *AI*)
-*   **[x] Jeu :** (`/game` - *UI/Basic Logic*, needs backend for preferences/points persistence)
+*   **[~] Jeu :** (`/game` - *General Knowledge game now uses Firebase for preferences/points/leaderboard. Times Up game mode exists.*)
 *   **[x] Speed Dating :** (`/speed-dating` - *UI + Feedback Simulation*, needs backend for scheduling/matching/feedback persistence)
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API*)
 *   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Data now uses Firebase Firestore*)
@@ -110,13 +110,13 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 
 ## Features to Implement / Enhance (Requires Backend & Advanced Logic):
 
-*   **[~] Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels. (*User profiles, rewards, points now use Firebase Firestore. Other areas like chat, geolocation matching still need backend.*)
+*   **[~] Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels. (*User profiles, rewards, points, game preferences/scores now use Firebase Firestore. Other areas like chat, geolocation matching still need backend.*)
 *   **[~] Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth). (*Firebase Auth implemented for email/password. Profile creation linked. Further enhancements needed for social logins, password reset, email verification.*)
 *   **[~] Système de récompenses (avancé):** Concevoir et implémenter le système de points, modes cachés, accès premium (logique backend + UI). (*Points and badges stored in Firestore. Premium feature unlocking logic partially simulated.*)
 *   **[ ] Modération de Contenu:** Intégrer un service de modération externe (API) pour le texte et les médias générés par les utilisateurs.
 *   **[ ] Notifications:** Mettre en place des notifications push (e.g., via Firebase Cloud Messaging) pour les nouveaux messages, matchs, etc.
 *   **[ ] Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer une solution WebRTC (e.g., Twilio, Agora) pour les appels vidéo/audio dans `/chat`.
-*   **[ ] Améliorations des Jeux:** Ajouter plus de jeux (comme Times Up), de la variété, un système de scores persistant et des classements (backend requis).
+*   **[~] Améliorations des Jeux:** Ajouter plus de jeux (comme Times Up), de la variété, un système de scores persistant et des classements (backend requis). (*General Knowledge game enhanced with preferences, scoring, and leaderboard via Firebase. Times Up game UI exists.*)
 *   **[ ] Feedback Post-Speed Dating (Persistance):** Connecter l'interface de feedback (`/speed-dating`) à un backend pour stocker les avis.
 *   **[ ] Dévoilement progressif (Blind Exchange):** Implémenter la logique pour révéler les informations progressivement dans le chat (`/blind-exchange-mode`).
 *   **[ ] Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage et le signalement utilisateur (`/risky-words-dictionary`).

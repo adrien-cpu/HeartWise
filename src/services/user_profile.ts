@@ -18,6 +18,9 @@ import {
   increment,
   DocumentData,
   DocumentSnapshot,
+  query,
+  orderBy,
+  limit
 } from 'firebase/firestore';
 
 /**
@@ -82,20 +85,26 @@ const mapDocumentToUserProfile = (docSnap: DocumentSnapshot<DocumentData>): User
   return {
     id: docSnap.id,
     ...data,
-    // Ensure rewards have dateEarned as Timestamp (Firestore handles this, but good for consistency)
-    rewards: data.rewards?.map((reward: any) => ({
+    rewards: data.rewards?.map((reward: UserReward) => ({ // Explicitly type reward here
       ...reward,
-      dateEarned: reward.dateEarned instanceof Timestamp ? reward.dateEarned : Timestamp.fromDate(new Date(reward.dateEarned.seconds * 1000)),
+      dateEarned: reward.dateEarned instanceof Timestamp ? reward.dateEarned : Timestamp.fromDate(new Date((reward.dateEarned as unknown as { seconds: number }).seconds * 1000)),
     })) || [],
     createdAt: data.createdAt instanceof Timestamp ? data.createdAt : undefined,
     updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt : undefined,
+    // Ensure all optional fields that we provide defaults for are present
+    points: data.points ?? 0,
+    premiumFeatures: data.premiumFeatures ?? { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+    gamePreferences: data.gamePreferences ?? [],
+    speedDatingSchedule: data.speedDatingSchedule ?? [],
+    interests: data.interests ?? [],
+    privacySettings: data.privacySettings ?? { showLocation: true, showOnlineStatus: true },
   } as UserProfile;
 };
 
 
 /**
  * Retrieves the profile for a given user ID from Firestore.
- * Initializes rewards, points, and premium features if missing on first fetch (though creation should handle this).
+ * Initializes rewards, points, and premium features if missing.
  * @async
  * @function get_user
  * @param {string} userId - The ID of the user.
@@ -103,25 +112,32 @@ const mapDocumentToUserProfile = (docSnap: DocumentSnapshot<DocumentData>): User
  * @throws {Error} If the user is not found or an error occurs.
  */
 export async function get_user(userId: string): Promise<UserProfile> {
-  console.log(`Fetching profile for user from Firestore: ${userId}`);
   const userDocRef = doc(firestore, 'users', userId);
   const userDocSnap = await getDoc(userDocRef);
 
   if (!userDocSnap.exists()) {
+    // Consider creating a default profile if it doesn't exist, or throw specific error
+    // For now, throwing error as per original logic.
     throw new Error(`User with ID ${userId} not found in Firestore.`);
   }
 
-  let userProfile = mapDocumentToUserProfile(userDocSnap) as UserProfile; // Assert not null due to previous check
+  let userProfile = mapDocumentToUserProfile(userDocSnap);
 
-  // Ensure defaults are set if somehow missing (though setDoc on creation should handle this)
+  // If userProfile is somehow null here (shouldn't be due to exists() check), handle it.
+  if (!userProfile) {
+      throw new Error(`Failed to map document for user ID ${userId}.`);
+  }
+  
+  // Ensure defaults for fields that might be missing in older documents
+  // mapDocumentToUserProfile already handles this, but this is an extra safeguard.
   userProfile.rewards = userProfile.rewards || [];
   userProfile.points = userProfile.points || 0;
   userProfile.premiumFeatures = userProfile.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
   userProfile.speedDatingSchedule = userProfile.speedDatingSchedule || [];
   userProfile.gamePreferences = userProfile.gamePreferences || [];
   userProfile.privacySettings = userProfile.privacySettings || { showLocation: true, showOnlineStatus: true };
-  
-  console.log("Fetched profile from Firestore:", userProfile);
+  userProfile.interests = userProfile.interests || [];
+
   return userProfile;
 }
 
@@ -136,34 +152,38 @@ export async function get_user(userId: string): Promise<UserProfile> {
  * @throws {Error} If the update/creation fails.
  */
 export async function update_user_profile(userId: string, profileData: Partial<UserProfile>): Promise<UserProfile> {
-  console.log(`Updating/Creating profile for user in Firestore: ${userId}`, profileData);
   const userDocRef = doc(firestore, 'users', userId);
 
-  const dataToSet: Partial<UserProfile> & { updatedAt: Timestamp; createdAt?: Timestamp } = {
+  // Prepare data with updatedAt timestamp
+  const dataToUpdate: Partial<UserProfile> & { updatedAt: Timestamp; createdAt?: Timestamp } = {
     ...profileData,
     updatedAt: Timestamp.now(),
   };
 
+  // Check if document exists to set createdAt and initial defaults
   const docSnap = await getDoc(userDocRef);
   if (!docSnap.exists()) {
-    dataToSet.createdAt = Timestamp.now();
-    dataToSet.points = profileData.points || 0; // Initialize points if creating
-    dataToSet.rewards = profileData.rewards || []; // Initialize rewards if creating
-    dataToSet.premiumFeatures = profileData.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
-    dataToSet.privacySettings = profileData.privacySettings || { showLocation: true, showOnlineStatus: true };
-    dataToSet.interests = profileData.interests || [];
-    dataToSet.gamePreferences = profileData.gamePreferences || [];
-    dataToSet.speedDatingSchedule = profileData.speedDatingSchedule || [];
-
+    dataToUpdate.createdAt = Timestamp.now();
+    // Initialize fields if creating a new profile
+    dataToUpdate.points = profileData.points ?? 0;
+    dataToUpdate.rewards = profileData.rewards ?? [];
+    dataToUpdate.premiumFeatures = profileData.premiumFeatures ?? { advancedFilters: false, profileBoost: false, exclusiveModes: false };
+    dataToUpdate.privacySettings = profileData.privacySettings ?? { showLocation: true, showOnlineStatus: true };
+    dataToUpdate.interests = profileData.interests ?? [];
+    dataToUpdate.gamePreferences = profileData.gamePreferences ?? [];
+    dataToUpdate.speedDatingSchedule = profileData.speedDatingSchedule ?? [];
+    if (!profileData.profilePicture) { // Add default placeholder if none provided during creation
+        dataToUpdate.profilePicture = `https://picsum.photos/seed/${userId}/200`;
+        dataToUpdate.dataAiHint = "person placeholder";
+    }
   }
   
   // Ensure dataAiHint is set if not provided but name is
-  if (!dataToSet.dataAiHint && dataToSet.name) {
-    dataToSet.dataAiHint = `${dataToSet.name.split(' ')[0].toLowerCase()} person`;
+  if (!dataToUpdate.dataAiHint && dataToUpdate.name) {
+    dataToUpdate.dataAiHint = `${dataToUpdate.name.split(' ')[0].toLowerCase()} person`;
   }
 
-
-  await setDoc(userDocRef, dataToSet, { merge: true });
+  await setDoc(userDocRef, dataToUpdate, { merge: true });
   
   const updatedProfile = await get_user(userId); // Fetch the merged profile
   await checkAndUnlockPremiumFeatures(userId, updatedProfile); // Check for unlocks after profile update
@@ -185,11 +205,15 @@ export async function get_user_rewards(userId: string): Promise<UserReward[]> {
 /**
  * Checks and potentially unlocks premium features based on user's points and rewards.
  * This function is called internally after points or rewards are updated.
+ * @async
+ * @function checkAndUnlockPremiumFeatures
  * @param {string} userId - The ID of the user.
  * @param {UserProfile} currentUserProfile - The current user profile to check against.
+ * @returns {Promise<void>}
  */
 async function checkAndUnlockPremiumFeatures(userId: string, currentUserProfile: UserProfile): Promise<void> {
     const userDocRef = doc(firestore, 'users', userId);
+    // Ensure premiumFeatures exists, defaulting if not
     const currentFeatures = currentUserProfile.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
     const newFeatures: PremiumFeatures = { ...currentFeatures };
     let changed = false;
@@ -197,20 +221,24 @@ async function checkAndUnlockPremiumFeatures(userId: string, currentUserProfile:
     const userPoints = currentUserProfile.points || 0;
     const userRewards = currentUserProfile.rewards || [];
 
+    const ADVANCED_FILTERS_POINTS_THRESHOLD = 500;
+    const PROFILE_BOOST_BADGE_TYPE = 'top_contributor';
+    const EXCLUSIVE_MODES_BADGE_TYPE = 'game_master';
+
     // Unlock Advanced Filters by points
-    if (!newFeatures.advancedFilters && userPoints >= 500) { // Using a constant would be better
+    if (!newFeatures.advancedFilters && userPoints >= ADVANCED_FILTERS_POINTS_THRESHOLD) {
         newFeatures.advancedFilters = true;
         changed = true;
     }
 
     // Unlock Profile Boost by 'top_contributor' badge
-    if (!newFeatures.profileBoost && userRewards.some(r => r.type === 'top_contributor')) {
+    if (!newFeatures.profileBoost && userRewards.some(r => r.type === PROFILE_BOOST_BADGE_TYPE)) {
         newFeatures.profileBoost = true;
         changed = true;
     }
 
     // Unlock Exclusive Modes by 'game_master' badge
-    if (!newFeatures.exclusiveModes && userRewards.some(r => r.type === 'game_master')) {
+    if (!newFeatures.exclusiveModes && userRewards.some(r => r.type === EXCLUSIVE_MODES_BADGE_TYPE)) {
         newFeatures.exclusiveModes = true;
         changed = true;
     }
@@ -231,16 +259,15 @@ async function checkAndUnlockPremiumFeatures(userId: string, currentUserProfile:
  * @returns {Promise<boolean>} A promise resolving to true if the reward was added, false otherwise.
  */
 export async function add_user_reward(userId: string, rewardData: Omit<UserReward, 'id' | 'dateEarned'>): Promise<boolean> {
-  console.log(`Attempting to add reward type ${rewardData.type} for user in Firestore: ${userId}`);
   const userDocRef = doc(firestore, 'users', userId);
-  const userProfile = await get_user(userId); // Get current profile
+  const userProfile = await get_user(userId); 
 
   const hasReward = userProfile.rewards!.some(r => r.type === rewardData.type);
 
   if (!hasReward) {
     const newReward: UserReward = {
       ...rewardData,
-      id: `rwd-${Date.now()}-${Math.random().toString(16).slice(2)}`, // More unique ID
+      id: `rwd-${Date.now()}-${Math.random().toString(16).slice(2)}`,
       dateEarned: Timestamp.now(),
     };
     const pointsToAward = getPointsForReward(rewardData.type);
@@ -251,7 +278,6 @@ export async function add_user_reward(userId: string, rewardData: Omit<UserRewar
       updatedAt: Timestamp.now(),
     });
     console.log(`Reward ${rewardData.type} added for user ${userId}. Points added: ${pointsToAward}.`);
-    // Fetch updated profile to pass to checkAndUnlockPremiumFeatures
     const updatedProfile = await get_user(userId);
     await checkAndUnlockPremiumFeatures(userId, updatedProfile);
     return true;
@@ -263,6 +289,8 @@ export async function add_user_reward(userId: string, rewardData: Omit<UserRewar
 
 /**
  * Retrieves the speed dating schedule for a user from Firestore.
+ * @async
+ * @function get_user_speed_dating_schedule
  * @param {string} userId - The ID of the user.
  * @returns {Promise<string[]>} A promise resolving to the user's schedule.
  */
@@ -273,6 +301,8 @@ export async function get_user_speed_dating_schedule(userId: string): Promise<st
 
 /**
  * Sets the speed dating schedule for a user in Firestore.
+ * @async
+ * @function set_user_speed_dating_schedule
  * @param {string} userId - The ID of the user.
  * @param {string[]} schedule - The new schedule.
  * @returns {Promise<void>}
@@ -284,6 +314,8 @@ export async function set_user_speed_dating_schedule(userId: string, schedule: s
 
 /**
  * Retrieves the game preferences for a user from Firestore.
+ * @async
+ * @function get_user_game_preferences
  * @param {string} userId - The ID of the user.
  * @returns {Promise<string[]>} A promise resolving to the user's game preferences.
  */
@@ -294,6 +326,8 @@ export async function get_user_game_preferences(userId: string): Promise<string[
 
 /**
  * Sets the game preferences for a user in Firestore.
+ * @async
+ * @function set_user_game_preferences
  * @param {string} userId - The ID of the user.
  * @param {string[]} preferences - The new game preferences.
  * @returns {Promise<void>}
@@ -324,25 +358,40 @@ export async function get_user_points(userId: string): Promise<number> {
  * @returns {Promise<number>} A promise resolving to the user's new total points.
  */
 export async function add_user_points(userId: string, pointsToAdd: number): Promise<number> {
-  console.log(`Adding ${pointsToAdd} points to user in Firestore: ${userId}`);
   const userDocRef = doc(firestore, 'users', userId);
-  await updateDoc(userDocRef, {
-    points: increment(pointsToAdd),
-    updatedAt: Timestamp.now(),
-  });
-  const updatedProfile = await get_user(userId); // Fetch updated profile
+  
+  // Ensure user profile exists before trying to increment points
+  const userProfileSnapshot = await getDoc(userDocRef);
+  if (!userProfileSnapshot.exists()) {
+    // If user doesn't exist, create them with initial points
+    // This might be an edge case if signup/profile creation didn't run first
+    await update_user_profile(userId, { points: pointsToAdd });
+  } else {
+    // User exists, increment points
+    await updateDoc(userDocRef, {
+      points: increment(pointsToAdd),
+      updatedAt: Timestamp.now(),
+    });
+  }
+
+  const updatedProfile = await get_user(userId); 
   await checkAndUnlockPremiumFeatures(userId, updatedProfile);
   return updatedProfile.points || 0;
 }
 
-// Helper function to determine points for a reward type
+/**
+ * Helper function to determine points for a reward type.
+ * @function getPointsForReward
+ * @param {string} rewardType - The type of the reward.
+ * @returns {number} The number of points associated with the reward type.
+ */
 function getPointsForReward(rewardType: string): number {
   switch (rewardType) {
     case 'profile_complete': return 50;
     case 'first_chat': return 20;
     case 'first_match': return 30;
     case 'speed_dater': return 25;
-    case 'game_winner': return 15;
+    case 'game_winner': return 15; // Points specifically for winning a game round/session
     case 'blind_exchange_participant': return 20;
     case 'explorer': return 10;
     case 'chat_enthusiast': return 35;
@@ -353,21 +402,18 @@ function getPointsForReward(rewardType: string): number {
 }
 
 /**
- * Retrieves all user profiles from Firestore (for leaderboard simulation).
+ * Retrieves all user profiles from Firestore, ordered by points for leaderboard.
  * @async
  * @function get_all_users
  * @returns {Promise<UserProfile[]>} A promise that resolves to an array of all user profiles.
  */
 export async function get_all_users(): Promise<UserProfile[]> {
-  console.log("Fetching all user profiles from Firestore for leaderboard");
-  const querySnapshot = await getDocs(usersCollection);
+  const q = query(usersCollection, orderBy("points", "desc"), limit(100)); // Example: limit to top 100 for performance
+  const querySnapshot = await getDocs(q);
   const users: UserProfile[] = [];
   querySnapshot.forEach((docSnap) => {
     const user = mapDocumentToUserProfile(docSnap);
     if (user) {
-      // Ensure defaults for sorting purposes if any are missing
-      user.points = user.points || 0;
-      user.rewards = user.rewards || [];
       users.push(user);
     }
   });

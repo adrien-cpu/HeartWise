@@ -181,6 +181,7 @@
     "categoryScience": "Science",
     "categoryGeography": "Géographie",
     "categoryArt": "Art",
+    "categoryGeneralCulture": "Culture Générale",
     "prefsUpdatedTitle": "Préférences Mises à Jour",
     "prefsUpdatedDesc": "Vos préférences de quiz ont été enregistrées.",
     "errorLoadingPrefs": "Impossible de charger les préférences de jeu.",
@@ -199,11 +200,11 @@
     "badgeGameWinnerName": "As du Quiz",
     "badgeGameWinnerDesc": "A obtenu un bon score dans un quiz.",
     "errorUpdatingScore": "Impossible de mettre à jour vos points ou récompenses.",
-    "correctAnswerWas": "La bonne réponse était {answer}.",
+    "correctAnswerWas": "La bonne réponse était : {answer}.",
     "viewResults": "Voir les Résultats",
     "noQuestionsForPrefs": "Aucune question disponible pour vos préférences. Affichage de toutes les catégories.",
     "noQuestionsAvailable": "Aucune question de quiz n'a pu être chargée.",
-    "noMoreQuestions": "Plus de questions disponibles.",
+    "noMoreQuestions": "Plus de questions disponibles dans cette catégorie.",
     "rankingsTitle": "Classement",
     "rankingsDesc": "Voyez où vous vous situez !",
     "rankHeader": "Rang",
@@ -229,7 +230,9 @@
     "anonymousUser": "Utilisateur Anonyme",
     "badgeEarnedTitle": "Badge Gagné !",
     "badgeEarnedDesc": "Vous avez gagné le badge {badgeName} !",
-    "pointsAwardedTitle": "Points Attribués !"
+    "pointsAwardedTitle": "Points Attribués !",
+    "errorLoadingData": "Erreur lors du chargement des données du jeu. Veuillez réessayer.",
+    "mustBeLoggedIn": "Vous devez être connecté(e) pour jouer."
   },
   "ProfilePage": {
     "title": "Profil Utilisateur",

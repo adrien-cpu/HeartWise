@@ -181,6 +181,7 @@
     "categoryScience": "Science",
     "categoryGeography": "Geography",
     "categoryArt": "Art",
+    "categoryGeneralCulture": "General Culture",
     "prefsUpdatedTitle": "Preferences Updated",
     "prefsUpdatedDesc": "Your trivia preferences have been saved.",
     "errorLoadingPrefs": "Could not load game preferences.",
@@ -199,11 +200,11 @@
     "badgeGameWinnerName": "Quiz Whiz",
     "badgeGameWinnerDesc": "Scored high in a trivia game.",
     "errorUpdatingScore": "Could not update your points or rewards.",
-    "correctAnswerWas": "The correct answer was {answer}.",
+    "correctAnswerWas": "The correct answer was: {answer}.",
     "viewResults": "View Results",
     "noQuestionsForPrefs": "No questions available for your selected preferences. Showing all categories.",
     "noQuestionsAvailable": "No trivia questions could be loaded.",
-    "noMoreQuestions": "No more questions available.",
+    "noMoreQuestions": "No more questions available in this category.",
     "rankingsTitle": "Leaderboard",
     "rankingsDesc": "See how you stack up!",
     "rankHeader": "Rank",
@@ -229,7 +230,9 @@
     "anonymousUser": "Anonymous User",
     "badgeEarnedTitle": "Badge Earned!",
     "badgeEarnedDesc": "You've earned the {badgeName} badge!",
-    "pointsAwardedTitle": "Points Awarded!"
+    "pointsAwardedTitle": "Points Awarded!",
+    "errorLoadingData": "Error loading game data. Please try again.",
+    "mustBeLoggedIn": "You must be logged in to play."
   },
   "ProfilePage": {
     "title": "User Profile",
