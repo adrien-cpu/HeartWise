@@ -11,7 +11,6 @@ import { getRequestConfig } from 'next-intl/server';
 import type { AbstractIntlMessages } from 'next-intl';
 
 // Static imports for message files
-// Assuming messages/en.json and messages/fr.json are at src/messages.
 // The path is relative to this file (src/i18n/settings.ts).
 import enMessages from '../messages/en.json';
 import frMessages from '../messages/fr.json';
@@ -37,15 +36,16 @@ export const pathnames = {
   '/dashboard': '/dashboard',
   '/login': '/login',
   '/signup': '/signup',
+  '/forgot-password': '/forgot-password',
 } as const;
 
 /**
  * Checks if the provided locale string is a valid and supported locale.
- * @param {any} locale - The locale string to validate.
- * @returns {locale is Locale} True if the locale is valid, false otherwise.
+ * @param {any} rawLocale - The locale string to validate.
+ * @returns {rawLocale is Locale} True if the locale is valid, false otherwise.
  */
-export function isValidLocale(locale: any): locale is Locale {
-  return locales.includes(locale);
+export function isValidLocale(rawLocale: any): rawLocale is Locale {
+  return locales.includes(rawLocale);
 }
 
 // Main configuration logic for next-intl
@@ -55,8 +55,7 @@ export default getRequestConfig(async ({ locale: rawLocale }) => {
   if (isValidLocale(rawLocale)) {
     determinedLocale = rawLocale;
   } else {
-    // This console log is helpful for debugging middleware or routing issues.
-    console.warn(`[i18n-config] Invalid or undefined rawLocale "${rawLocale ?? 'undefined'}" received. Using default locale "${defaultLocale}".`);
+    console.warn(`[i18n-config] Invalid or undefined rawLocale "${rawLocale ?? 'undefined'}" received by getRequestConfig. Using default locale "${defaultLocale}". This might indicate an issue with middleware or URL structure.`);
     determinedLocale = defaultLocale;
   }
 
@@ -69,20 +68,24 @@ export default getRequestConfig(async ({ locale: rawLocale }) => {
       messages = frMessages as AbstractIntlMessages;
       break;
     default:
-      // This case should not be reached if determinedLocale is correctly typed and defaulted.
-      console.warn(`[i18n-config] Fallback to English messages for an unexpected locale: ${determinedLocale}`);
+      // This case should ideally not be reached if determinedLocale is correctly typed and defaulted.
+      // However, as a safeguard:
+      console.error(`[i18n-config] CRITICAL: Reached default case in message loading for locale: "${determinedLocale}". This should not happen. Loading English messages as a last resort.`);
       messages = enMessages as AbstractIntlMessages;
-      determinedLocale = 'en'; // Ensure determinedLocale is set to what messages are loaded for
+      // It's important that the locale returned matches the messages loaded.
+      // If we load 'en' messages, we should return 'en' as the locale.
+      determinedLocale = 'en';
       break;
   }
-
+  
+  // Additional check for empty or invalid messages object
   if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
-    console.error(`[i18n-config] Statically imported messages for locale: "${determinedLocale}" are empty or invalid. This indicates a problem with the JSON file itself or the import.`);
-    // Fallback to an empty object for messages to prevent app crash,
-    // and ensure the locale reflects this empty state (or the default).
+    console.error(`[i18n-config] Statically imported messages for locale "${determinedLocale}" are empty or invalid. Check the JSON file and import path. Using empty messages for client.`);
+    // Return the locale we attempted to load, but with empty messages to prevent full crash.
+    // The application will likely show missing translation warnings.
     return {
-      locale: determinedLocale, // Return the locale we attempted, even if messages are empty
-      messages: {},
+      locale: determinedLocale,
+      messages: {}, 
     };
   }
   
@@ -91,5 +94,3 @@ export default getRequestConfig(async ({ locale: rawLocale }) => {
     messages: messages,
   };
 });
-
-

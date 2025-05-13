@@ -1,3 +1,4 @@
+
 # **App Name**: HeartWise
 
 ## Core Features:
@@ -112,7 +113,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 ## Features to Implement / Enhance (Requires Backend & Advanced Logic):
 
 *   **[~] Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels. (*User profiles, rewards, points, game preferences/scores, risky word feedback now use Firebase Firestore. Other areas like chat, geolocation matching still need backend.*)
-*   **[~] Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth). (*Firebase Auth implemented for email/password. Profile creation linked. Further enhancements needed for social logins, password reset, email verification.*)
+*   **[~] Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth). (*Firebase Auth implemented for email/password and profile creation. Password reset via email added. Further enhancements needed for social logins, email verification.*)
 *   **[~] Système de récompenses (avancé):** Concevoir et implémenter le système de points, modes cachés, accès premium (logique backend + UI). (*Points and badges stored in Firestore. Premium feature unlocking logic partially simulated.*)
 *   **[ ] Modération de Contenu:** Intégrer un service de modération externe (API) pour le texte et les médias générés par les utilisateurs.
 *   **[ ] Notifications:** Mettre en place des notifications push (e.g., via Firebase Cloud Messaging) pour les nouveaux messages, matchs, etc.

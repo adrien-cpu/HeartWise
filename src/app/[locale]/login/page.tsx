@@ -37,7 +37,7 @@ type LoginFormInputs = z.infer<typeof loginSchema>;
  * @returns {JSX.Element} The rendered login page.
  */
 export default function LoginPage(): JSX.Element {
-  const t = useTranslations('Auth'); // Assuming an 'Auth' namespace in your translation files
+  const t = useTranslations('Auth');
   const { toast } = useToast();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -109,7 +109,14 @@ export default function LoginPage(): JSX.Element {
               {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="password">{t('passwordLabel')}</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{t('passwordLabel')}</Label>
+                <Link href="/forgot-password" passHref legacyBehavior>
+                  <a className="text-sm font-medium text-primary hover:underline">
+                    {t('forgotPasswordLink')}
+                  </a>
+                </Link>
+              </div>
               <Input
                 id="password"
                 type="password"

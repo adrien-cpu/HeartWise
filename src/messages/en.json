@@ -52,7 +52,17 @@
     "signupSuccessDesc": "Welcome to HeartWise! Your account has been created.",
     "signupErrorTitle": "Signup Failed",
     "signupErrorDefault": "An unexpected error occurred. Please try again.",
-    "signupErrorEmailInUse": "This email address is already in use."
+    "signupErrorEmailInUse": "This email address is already in use.",
+    "forgotPasswordTitle": "Forgot Your Password?",
+    "forgotPasswordDescription": "Enter your email address and we'll send you a link to reset your password.",
+    "forgotPasswordLink": "Forgot password?",
+    "sendResetEmailButton": "Send Reset Email",
+    "passwordResetEmailSentTitle": "Password Reset Email Sent",
+    "passwordResetEmailSentDesc": "If an account exists for this email, a password reset link has been sent. Please check your inbox (and spam folder).",
+    "passwordResetErrorTitle": "Password Reset Failed",
+    "passwordResetErrorDefault": "An unexpected error occurred. Please try again.",
+    "passwordResetErrorUserNotFound": "No account found with this email address.",
+    "rememberPasswordPrompt": "Remember your password?"
   },
   "GeolocationMeeting": {
     "title": "Find Nearby Connections",

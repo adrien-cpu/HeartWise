@@ -52,7 +52,17 @@
     "signupSuccessDesc": "Bienvenue sur HeartWise ! Votre compte a été créé.",
     "signupErrorTitle": "Échec de l'Inscription",
     "signupErrorDefault": "Une erreur inattendue s'est produite. Veuillez réessayer.",
-    "signupErrorEmailInUse": "Cette adresse e-mail est déjà utilisée."
+    "signupErrorEmailInUse": "Cette adresse e-mail est déjà utilisée.",
+    "forgotPasswordTitle": "Mot de Passe Oublié ?",
+    "forgotPasswordDescription": "Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+    "forgotPasswordLink": "Mot de passe oublié ?",
+    "sendResetEmailButton": "Envoyer l'E-mail de Réinitialisation",
+    "passwordResetEmailSentTitle": "E-mail de Réinitialisation Envoyé",
+    "passwordResetEmailSentDesc": "Si un compte existe pour cet e-mail, un lien de réinitialisation de mot de passe a été envoyé. Veuillez vérifier votre boîte de réception (et votre dossier spam).",
+    "passwordResetErrorTitle": "Échec de la Réinitialisation",
+    "passwordResetErrorDefault": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "passwordResetErrorUserNotFound": "Aucun compte trouvé avec cette adresse e-mail.",
+    "rememberPasswordPrompt": "Vous vous souvenez de votre mot de passe ?"
   },
   "GeolocationMeeting": {
     "title": "Trouver des Connexions à Proximité",
