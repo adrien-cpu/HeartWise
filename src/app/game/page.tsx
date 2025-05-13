@@ -139,7 +139,7 @@ const GamePage = (): JSX.Element => {
          description: t('gameOverScore', { score: gkScore }),
        });
         if (currentUser && gkScore > 0) {
-            if (gkScore >= Math.floor(gkQuestions.length / 2) && gkQuestions.length > 0) {
+            if (gkScore >= Math.floor(gkQuestions.length / 2) && gkQuestions.length > 0) { // Example: badge for 50% correct
                  try {
                     await add_user_reward(currentUser.uid, {
                         name: t('badgeGameWinnerName'),
@@ -168,7 +168,7 @@ const GamePage = (): JSX.Element => {
        const currentQuestion = gkQuestions[currentGkQuestionIndex];
        toast({
          title: t('timesUpTitle'),
-         description: currentQuestion ? t('correctAnswerWas', { answer: currentQuestion.answer }) : t('timesUpDesc'),
+         description: currentQuestion ? t('correctAnswerWas', { answer: currentQuestion.answers[0] }) : t('timesUpDesc'), // Assuming first answer is correct
          variant: 'destructive'
        });
         const nextQuestionTimer = setTimeout(() => {
@@ -198,7 +198,7 @@ const GamePage = (): JSX.Element => {
     if (correct) {
       const newScore = gkScore + 1;
       setGkScore(newScore);
-      const pointsAwarded = 10;
+      const pointsAwarded = 10; // Points for a correct GK answer
       try {
         await add_user_points(currentUser.uid, pointsAwarded);
         toast({
@@ -222,6 +222,7 @@ const GamePage = (): JSX.Element => {
   const startGkGame = () => {
     if (gkQuestions.length === 0) {
          toast({ variant: 'destructive', title: t('error'), description: t('noQuestionsForPrefs') });
+         // Fallback to all questions if preferred categories yield no questions
          setGkQuestions(allGKQuestions.sort(() => Math.random() - 0.5));
     }
     setGkScore(0);
@@ -246,12 +247,14 @@ const GamePage = (): JSX.Element => {
     } catch (error) {
       console.error("Failed to save game preferences:", error);
       toast({ variant: 'destructive', title: t('error'), description: t('errorSavingPrefs') });
+      // Revert to old preferences on error
       const oldPreferences = await get_user_game_preferences(currentUser.uid);
       setGamePreferences(oldPreferences);
     }
   };
 
   const handleTimesUpGameComplete = async () => {
+    // This callback can be used to refresh leaderboard or user stats after Time's Up game
     await refreshLeaderboard();
   };
   
@@ -267,7 +270,9 @@ const GamePage = (): JSX.Element => {
       </div>
     );
   }
+
    if (!currentUser) {
+     // This should ideally be handled by a higher-level auth guard or redirect in AuthContext
      return <div className="container mx-auto p-4 text-center"><p className="text-destructive">{t('mustBeLoggedIn')}</p></div>;
    }
 
@@ -290,6 +295,7 @@ const GamePage = (): JSX.Element => {
     }
 
      if (!currentQuestion) {
+        // This case should ideally be handled by the game over logic in handleGkNextQuestion
         return (
           <div className="text-center p-6">
             <p className="text-muted-foreground">{t('noMoreQuestions')}</p>
@@ -308,7 +314,7 @@ const GamePage = (): JSX.Element => {
               <div className="timer-wrapper">
                  <CountdownCircleTimer
                    isPlaying={gkIsPlaying && !gkQuestionOver}
-                   key={currentGkQuestionIndex}
+                   key={currentGkQuestionIndex} // Re-renders timer on question change
                    duration={15}
                    initialRemainingTime={gkTimeRemaining}
                    colors={['#004777', '#F7B801', '#A30000', '#A30000']}
