@@ -6,7 +6,7 @@
  *              Locale-specific providers and message loading are handled by the nested `src/app/[locale]/layout.tsx`.
  */
 
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import type { ReactNode } from 'react';
 import './globals.css'; // Global styles
@@ -42,10 +42,10 @@ export default function RootLayout({
   // It will be set to 'en' by default here. The ClientSideI18n component
   // (or similar logic in [locale]/layout.tsx) will update it based on the actual resolved locale if necessary.
   // Next-intl middleware also plays a role in how the initial lang might be set.
+  // Next.js implicitly handles the <head> tag and merges metadata.
+  // Ensure no whitespace or text nodes are direct children of <html> here.
   return (
     <html lang="en">
-      {/* Next.js implicitly handles the <head> tag and merges metadata.
-          Ensure no whitespace or text nodes are direct children of <html> here. */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <SidebarProvider>
