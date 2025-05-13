@@ -111,10 +111,8 @@ export default function LoginPage(): JSX.Element {
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">{t('passwordLabel')}</Label>
-                <Link href="/forgot-password" passHref legacyBehavior>
-                  <a className="text-sm font-medium text-primary hover:underline">
-                    {t('forgotPasswordLink')}
-                  </a>
+                <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+                  {t('forgotPasswordLink')}
                 </Link>
               </div>
               <Input
@@ -145,3 +143,4 @@ export default function LoginPage(): JSX.Element {
     </div>
   );
 }
+
