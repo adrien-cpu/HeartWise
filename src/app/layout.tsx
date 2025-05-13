@@ -26,9 +26,17 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = appMetadata;
 
-// This RootLayout is the true root and provides the <html> and <body> shell.
-// It does not handle locale directly; its children (which will be the output of
-// `src/app/[locale]/layout.tsx`) will handle locale-specific setup.
+/**
+ * RootLayout component (Server Component).
+ * This is the primary layout that wraps the entire application.
+ * It sets up global providers like AuthProvider and SidebarProvider.
+ * Internationalization (i18n) specific logic (like NextIntlClientProvider)
+ * should be handled in the nested `[locale]/layout.tsx`.
+ *
+ * @param {object} props - The props for the RootLayout component.
+ * @param {React.ReactNode} props.children - The children to render within the layout.
+ * @returns {JSX.Element} The rendered RootLayout component.
+ */
 export default function RootLayout({
   children,
 }: {
@@ -42,7 +50,6 @@ export default function RootLayout({
   // Ensure no whitespace or text nodes are direct children of <html> here.
   return (
     <html lang="en">
-      {/* Head content is implicitly managed by Next.js via the Metadata API and <Head> components if used in pages/app segments. */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <SidebarProvider>
