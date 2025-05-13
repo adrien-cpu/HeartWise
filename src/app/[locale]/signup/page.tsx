@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { SubmitHandler } from 'react-hook-form';
@@ -15,9 +16,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UserPlus, Eye, EyeOff } from 'lucide-react'; // Added Eye and EyeOff icons
+import { Loader2, UserPlus, Eye, EyeOff, AlertTriangle } from 'lucide-react'; 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { update_user_profile } from '@/services/user_profile';
+import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
 
 /**
  * @fileOverview Signup page component.
@@ -41,9 +43,11 @@ export default function SignupPage(): JSX.Element {
   const t = useTranslations('Auth');
   const { toast } = useToast();
   const router = useRouter();
+  const { isFirebaseConfigured } = useAuth(); // Get Firebase config status
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showPassword, setShowPassword] = useState(false); 
 
   const {
     register,
@@ -54,16 +58,28 @@ export default function SignupPage(): JSX.Element {
   });
 
   const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
+    if (!isFirebaseConfigured) {
+        setError(t('firebaseConfigError'));
+        toast({
+            variant: 'destructive',
+            title: t('signupErrorTitle'),
+            description: t('firebaseConfigError'),
+        });
+        return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       await updateProfile(userCredential.user, { displayName: data.name });
 
+      // Create a basic profile in Firestore
       await update_user_profile(userCredential.user.uid, {
         id: userCredential.user.uid,
         name: data.name,
         email: data.email,
+        // Using a placeholder for profilePicture and dataAiHint
         profilePicture: `https://picsum.photos/seed/${userCredential.user.uid}/200`,
         dataAiHint: "person placeholder",
         bio: "",
@@ -77,7 +93,7 @@ export default function SignupPage(): JSX.Element {
         title: t('signupSuccessTitle'),
         description: t('signupSuccessDesc'),
       });
-      router.push('/');
+      router.push('/'); 
     } catch (err: any) {
       console.error('Signup error:', err);
       let errorMessage = t('signupErrorDefault');
@@ -85,6 +101,8 @@ export default function SignupPage(): JSX.Element {
         errorMessage = t('signupErrorEmailInUse');
       } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.') {
         errorMessage = t('firebaseApiKeyError');
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMessage = t('networkError');
       }
       setError(errorMessage);
       toast({
@@ -115,8 +133,16 @@ export default function SignupPage(): JSX.Element {
           <CardDescription>{t('signupDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
+           {!isFirebaseConfigured && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>{t('configErrorTitle')}</AlertTitle>
+              <AlertDescription>{t('firebaseConfigErrorUserFriendly')}</AlertDescription>
+            </Alert>
+          )}
           {error && (
             <Alert variant="destructive" className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
               <AlertTitle>{t('signupErrorTitle')}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -129,7 +155,7 @@ export default function SignupPage(): JSX.Element {
                 type="text"
                 {...register('name')}
                 placeholder={t('namePlaceholder')}
-                disabled={isLoading}
+                disabled={isLoading || !isFirebaseConfigured}
                 aria-invalid={errors.name ? "true" : "false"}
               />
               {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
@@ -141,7 +167,7 @@ export default function SignupPage(): JSX.Element {
                 type="email"
                 {...register('email')}
                 placeholder="name@example.com"
-                disabled={isLoading}
+                disabled={isLoading || !isFirebaseConfigured}
                 aria-invalid={errors.email ? "true" : "false"}
               />
               {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
@@ -151,12 +177,12 @@ export default function SignupPage(): JSX.Element {
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? 'text' : 'password'} // Toggle input type
+                  type={showPassword ? 'text' : 'password'}
                   {...register('password')}
                   placeholder="••••••••"
-                  disabled={isLoading}
+                  disabled={isLoading || !isFirebaseConfigured}
                   aria-invalid={errors.password ? "true" : "false"}
-                  className="pr-10" // Add padding for the icon
+                  className="pr-10" 
                 />
                 <Button
                   type="button"
@@ -165,13 +191,14 @@ export default function SignupPage(): JSX.Element {
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
                   onClick={togglePasswordVisibility}
                   aria-label={showPassword ? t('hidePassword') : t('showPassword')}
+                  disabled={!isFirebaseConfigured}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || !isFirebaseConfigured}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('signupButton')}
             </Button>

@@ -9,6 +9,9 @@ import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 
+// Log at the very start to confirm the module is being loaded
+console.log("[Firebase Init] Module loaded. Reading environment variables...");
+
 // Ensure these environment variables are correctly set in your .env.local file
 const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 const authDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
@@ -17,6 +20,16 @@ const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
 const messagingSenderId = process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID;
 const appId = process.env.NEXT_PUBLIC_FIREBASE_APP_ID;
 const measurementId = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID; // Optional
+
+// Log the values of environment variables as they are read
+console.log(`[Firebase Init] NEXT_PUBLIC_FIREBASE_API_KEY: ${apiKey ? 'SET' : 'NOT SET'}`);
+console.log(`[Firebase Init] NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${authDomain ? 'SET' : 'NOT SET'}`);
+console.log(`[Firebase Init] NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${projectId ? 'SET' : 'NOT SET'}`);
+console.log(`[Firebase Init] NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${storageBucket ? 'SET' : 'NOT SET'}`);
+console.log(`[Firebase Init] NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${messagingSenderId ? 'SET' : 'NOT SET'}`);
+console.log(`[Firebase Init] NEXT_PUBLIC_FIREBASE_APP_ID: ${appId ? 'SET' : 'NOT SET'}`);
+console.log(`[Firebase Init] NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${measurementId ? 'SET' : 'NOT SET'}`);
+
 
 let criticalConfigError = false;
 const missingVars: string[] = [];
@@ -31,10 +44,10 @@ if (!projectId) missingVars.push("NEXT_PUBLIC_FIREBASE_PROJECT_ID");
 
 
 if (missingVars.length > 0) {
-  console.error(`CRITICAL_FIREBASE_CONFIG_ERROR: The following Firebase environment variables are missing or empty in your .env file: ${missingVars.join(', ')}. Please ensure they are correctly set and your Next.js development server has been restarted.`);
+  console.error(`[Firebase Init] CRITICAL_FIREBASE_CONFIG_ERROR: The following Firebase environment variables are missing or empty: ${missingVars.join(', ')}. Please ensure they are correctly set in your .env file and your Next.js development server has been restarted.`);
   criticalConfigError = true;
 } else {
-  console.log("Firebase configuration variables (API Key, Auth Domain, Project ID) appear to be present.");
+  console.log("[Firebase Init] Required Firebase configuration variables (API Key, Auth Domain, Project ID) appear to be present.");
 }
 
 // Your web app's Firebase configuration
@@ -48,44 +61,59 @@ const firebaseConfig = {
   measurementId: measurementId, // Optional
 };
 
+console.log("[Firebase Init] Firebase Config Object:", firebaseConfig);
+
+
 /**
  * Firebase application instance.
  * @type {FirebaseApp}
  */
 let app: FirebaseApp;
+/**
+ * Firebase Auth instance.
+ * @type {Auth}
+ */
 let auth: Auth;
+/**
+ * Firebase Firestore instance.
+ * @type {Firestore}
+ */
 let firestore: Firestore;
 
 // Initialize Firebase only if it hasn't been initialized yet and no critical errors
 if (!criticalConfigError) {
   if (!getApps().length) {
     try {
+      console.log("[Firebase Init] Initializing Firebase app...");
       app = initializeApp(firebaseConfig);
-      console.log("Firebase initialized successfully with Project ID:", firebaseConfig.projectId);
+      console.log("[Firebase Init] Firebase app initialized successfully. Project ID from initialized app:", app.options.projectId);
       auth = getAuth(app);
       firestore = getFirestore(app);
+      console.log("[Firebase Init] Firebase Auth and Firestore services initialized.");
     } catch (e: any) {
-      console.error("Firebase initializeApp failed. This can happen if config values are present but malformed (e.g., incorrect format), or there's an issue with the Firebase SDK itself. Config used:", firebaseConfig, "Actual Error:", e.message);
-      criticalConfigError = true; // Mark as critical error if initializeApp fails
-      // Create dummy objects to prevent further crashes, though operations will fail.
-      app = {} as FirebaseApp;
-      auth = {} as Auth;
-      firestore = {} as Firestore;
+      console.error("[Firebase Init] Firebase initializeApp FAILED. This can happen if config values are present but malformed (e.g., incorrect format), or there's an issue with the Firebase SDK itself. Error:", e.message, "Stack:", e.stack);
+      criticalConfigError = true; 
+      // Create dummy objects to prevent further crashes if auth/firestore are accessed,
+      // though operations will fail.
+      app = {} as FirebaseApp; // Provide a default empty object
+      auth = {} as Auth; // Provide a default empty object
+      firestore = {} as Firestore; // Provide a default empty object
     }
   } else {
     app = getApps()[0];
-    console.log("Firebase app already initialized.");
+    console.log("[Firebase Init] Firebase app already initialized. Project ID:", app.options.projectId);
     auth = getAuth(app);
     firestore = getFirestore(app);
+    console.log("[Firebase Init] Using existing Firebase Auth and Firestore services.");
   }
 } else {
   // This case means criticalConfigError was true, and we didn't attempt initialization.
-  console.error("Firebase was not initialized due to missing or invalid configuration. Please check your .env file and restart the server.");
+  console.error("[Firebase Init] Firebase was NOT initialized due to missing or invalid configuration. Please check your .env file and restart the server.");
   // Create dummy objects to prevent further crashes if auth/firestore are accessed,
   // though operations will fail.
-  app = {} as FirebaseApp;
-  auth = {} as Auth;
-  firestore = {} as Firestore;
+  app = {} as FirebaseApp; // Provide a default empty object
+  auth = {} as Auth; // Provide a default empty object
+  firestore = {} as Firestore; // Provide a default empty object
 }
 
-export { app, auth, firestore, firebaseConfig };
+export { app, auth, firestore, firebaseConfig, criticalConfigError };

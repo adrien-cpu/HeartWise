@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -46,7 +47,6 @@
     "namePlaceholder": "Votre Nom",
     "signupButton": "S'inscrire",
     "alreadyAccountPrompt": "Vous avez déjà un compte ?",
-    "loginLink": "Se connecter",
     "signupSuccessTitle": "Inscription Réussie",
     "signupSuccessDesc": "Bienvenue sur HeartWise ! Votre compte a été créé.",
     "signupErrorTitle": "Échec de l'Inscription",
@@ -62,9 +62,13 @@
     "passwordResetErrorDefault": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "passwordResetErrorUserNotFound": "Aucun compte trouvé avec cette adresse e-mail.",
     "rememberPasswordPrompt": "Vous vous souvenez de votre mot de passe ?",
-    "firebaseApiKeyError": "Erreur de configuration de l'application. Veuillez contacter le support.",
+    "firebaseApiKeyError": "Erreur de configuration de l'application. Veuillez contacter le support ou vérifier la console.",
     "showPassword": "Afficher le mot de passe",
-    "hidePassword": "Masquer le mot de passe"
+    "hidePassword": "Masquer le mot de passe",
+    "firebaseConfigError": "Firebase n'est pas configuré correctement. Veuillez vérifier votre installation.",
+    "configErrorTitle": "Erreur de Configuration",
+    "firebaseConfigErrorUserFriendly": "L'application n'est pas correctement configurée pour se connecter à nos services. Veuillez réessayer plus tard ou contacter le support si le problème persiste.",
+    "networkError": "Une erreur réseau s'est produite. Veuillez vérifier votre connexion internet et réessayer."
   },
   "GeolocationMeeting": {
     "title": "Trouver des Connexions à Proximité",

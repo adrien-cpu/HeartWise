@@ -15,8 +15,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, KeyRound } from 'lucide-react'; // Added KeyRound icon
+import { Loader2, Mail, KeyRound, AlertTriangle } from 'lucide-react'; 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
 
 /**
  * @fileOverview Forgot Password page component.
@@ -37,6 +38,8 @@ type ForgotPasswordFormInputs = z.infer<typeof forgotPasswordSchema>;
 export default function ForgotPasswordPage(): JSX.Element {
   const t = useTranslations('Auth');
   const { toast } = useToast();
+  const { isFirebaseConfigured } = useAuth(); // Get Firebase config status
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -50,6 +53,16 @@ export default function ForgotPasswordPage(): JSX.Element {
   });
 
   const onSubmit: SubmitHandler<ForgotPasswordFormInputs> = async (data) => {
+    if (!isFirebaseConfigured) {
+        setError(t('firebaseConfigError'));
+        toast({
+            variant: 'destructive',
+            title: t('passwordResetErrorTitle'),
+            description: t('firebaseConfigError'),
+        });
+        return;
+    }
+
     setIsLoading(true);
     setError(null);
     setSuccessMessage(null);
@@ -65,8 +78,11 @@ export default function ForgotPasswordPage(): JSX.Element {
       let errorMessage = t('passwordResetErrorDefault');
       if (err.code === 'auth/user-not-found') {
         errorMessage = t('passwordResetErrorUserNotFound');
+      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.') {
+        errorMessage = t('firebaseApiKeyError');
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMessage = t('networkError');
       }
-      // Other Firebase error codes can be handled here e.g. auth/invalid-email
       setError(errorMessage);
       toast({
         variant: 'destructive',
@@ -89,8 +105,16 @@ export default function ForgotPasswordPage(): JSX.Element {
           <CardDescription>{t('forgotPasswordDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
+           {!isFirebaseConfigured && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>{t('configErrorTitle')}</AlertTitle>
+              <AlertDescription>{t('firebaseConfigErrorUserFriendly')}</AlertDescription>
+            </Alert>
+          )}
           {error && (
             <Alert variant="destructive" className="mb-4">
+               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>{t('passwordResetErrorTitle')}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -111,12 +135,12 @@ export default function ForgotPasswordPage(): JSX.Element {
                   type="email"
                   {...register('email')}
                   placeholder="name@example.com"
-                  disabled={isLoading}
+                  disabled={isLoading || !isFirebaseConfigured}
                   aria-invalid={errors.email ? "true" : "false"}
                 />
                 {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading || !isFirebaseConfigured}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t('sendResetEmailButton')}
               </Button>

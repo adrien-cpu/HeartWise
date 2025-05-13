@@ -4,8 +4,11 @@
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User as FirebaseUser, signOut as firebaseSignOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase'; // Firebase auth instance
+import { auth, criticalConfigError } from '@/lib/firebase'; // Firebase auth instance and error flag
 import { Loader2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from 'lucide-react';
+
 
 /**
  * @interface AuthContextType
@@ -15,6 +18,7 @@ interface AuthContextType {
   currentUser: FirebaseUser | null;
   loading: boolean;
   logout: () => Promise<void>;
+  isFirebaseConfigured: boolean; // New flag
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -50,8 +54,15 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
   const [currentUser, setCurrentUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isFirebaseConfigured, setIsFirebaseConfigured] = useState(!criticalConfigError);
+
 
   useEffect(() => {
+    if (!isFirebaseConfigured) {
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
       setLoading(false);
@@ -59,7 +70,7 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
-  }, []);
+  }, [isFirebaseConfigured]);
 
   /**
    * Logs out the current user.
@@ -68,6 +79,10 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
    * @returns {Promise<void>}
    */
   const logout = async (): Promise<void> => {
+    if (!isFirebaseConfigured) {
+      console.warn("[AuthContext] Firebase not configured. Logout called but will not proceed.");
+      return;
+    }
     try {
       await firebaseSignOut(auth);
     } catch (error) {
@@ -80,7 +95,23 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
     currentUser,
     loading,
     logout,
+    isFirebaseConfigured,
   };
+
+  if (!isFirebaseConfigured) {
+    return (
+      <div className="flex items-center justify-center h-screen w-screen bg-background p-4">
+        <Alert variant="destructive" className="max-w-lg">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle>Firebase Configuration Error</AlertTitle>
+          <AlertDescription>
+            Firebase is not configured correctly. Please check the server console logs for details on missing environment variables (e.g., <code>NEXT_PUBLIC_FIREBASE_API_KEY</code>). Ensure your <code>.env</code> file is set up and the application is restarted. Authentication and other Firebase-dependent features will not work.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
 
   // Show a loading spinner while checking auth state
   if (loading) {

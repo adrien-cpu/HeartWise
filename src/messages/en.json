@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -46,7 +47,6 @@
     "namePlaceholder": "Your Name",
     "signupButton": "Sign Up",
     "alreadyAccountPrompt": "Already have an account?",
-    "loginLink": "Login",
     "signupSuccessTitle": "Signup Successful",
     "signupSuccessDesc": "Welcome to HeartWise! Your account has been created.",
     "signupErrorTitle": "Signup Failed",
@@ -62,9 +62,13 @@
     "passwordResetErrorDefault": "An unexpected error occurred. Please try again.",
     "passwordResetErrorUserNotFound": "No account found with this email address.",
     "rememberPasswordPrompt": "Remember your password?",
-    "firebaseApiKeyError": "Application configuration error. Please contact support.",
+    "firebaseApiKeyError": "Application configuration error. Please contact support or check console.",
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "firebaseConfigError": "Firebase is not configured correctly. Please check your setup.",
+    "configErrorTitle": "Configuration Error",
+    "firebaseConfigErrorUserFriendly": "The application is not properly configured to connect to our services. Please try again later or contact support if the issue persists.",
+    "networkError": "A network error occurred. Please check your internet connection and try again."
   },
   "GeolocationMeeting": {
     "title": "Find Nearby Connections",
