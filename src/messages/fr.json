@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -336,7 +335,11 @@
     "participants": "participants",
     "feedbackAlreadySubmittedTitle": "Avis Envoyé",
     "feedbackAlreadySubmittedDesc": "Vous avez déjà envoyé un avis pour cette session.",
-    "feedbackSubmittedShort": "Avis Envoyé"
+    "feedbackSubmittedShort": "Avis Envoyé",
+    "authErrorTitle": "Authentification Requise",
+    "authErrorDesc": "Vous devez être connecté(e) pour effectuer cette action.",
+    "sessionNotSelectedError": "Aucune session sélectionnée pour donner un avis.",
+    "loginToSchedule": "Veuillez vous connecter pour planifier une session."
   },
   "Chat": {
     "title": "Discussion",
@@ -426,7 +429,7 @@
     "badge_profile_complete_name": "Profil Pro",
     "badge_profile_complete_desc": "A complété les détails de son profil.",
     "badge_first_chat_name": "Brise-Glace",
-    "badge_first_desc": "A initié sa première discussion.",
+    "badge_first_chat_desc": "A initié sa première discussion.",
     "badge_first_match_name": "Entremetteur",
     "badge_first_match_desc": "A obtenu sa première correspondance !",
     "badge_speed_dater_name": "Speed Dater",

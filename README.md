@@ -9,7 +9,7 @@
 - [x] Risky Words Dictionary: Identify ambiguous or sensitive expressions in messages. (`/risky-words-dictionary`, `src/ai/flows/risky-words-dictionary.ts`, `src/services/feedback_service.ts`)
 - [x] User Profile Management: View and edit user profile details. (`/profile`, `src/services/user_profile.ts`)
 - [x] Basic Chat Interface: Simulate conversations with mock data. Includes AI-suggested intention tagging and content moderation (simulated). (`/chat`, `src/ai/flows/intention-tagging.ts`, `src/services/moderation_service.ts`)
-- [x] Speed Dating Interface: UI for scheduling and providing feedback (simulated). (`/speed-dating`)
+- [x] Speed Dating Interface: UI for scheduling and providing feedback. Feedback is now persisted to Firestore. (`/speed-dating`, `src/services/speed_dating_service.ts`)
 - [x] General Knowledge Game: Basic question/answer game with category preferences, persistent scores, and leaderboard. (`/game`, `src/services/user_profile.ts` - *Times Up game mode now also integrated with user points/rewards and leaderboard refresh.*)
 - [x] Rewards System: Display earned badges and points. (`/rewards`)
 
@@ -39,7 +39,7 @@ Une application de rencontre à la croisee de l'humain et de l'intelligence arti
 ### 1. 📲 Rencontres hybrides (virtuelles & réelles)
 - [x] **Rencontres géolocalisées** dans des lieux publics (cafés partenaires, événements) (`/geolocation-meeting` - *Frontend*)
 - [x] **Rencontres virtuelles classiques** via l'application (`/chat` - *Enhanced UI*, needs **real-time backend** & **video/audio call integration**)
-- [x] **Speed Dating digital** : sessions rapides avec matching + feedback immédiat (`/speed-dating` - *Frontend UI + Feedback Simulation*, needs **backend** for matching/scheduling/feedback persistence)
+- [x] **Speed Dating digital** : sessions rapides avec matching + feedback immédiat (`/speed-dating` - *Frontend UI + Feedback now persisted to Firestore*, needs **backend** for matching/scheduling)
 
 ### 2. 👁‍🗨️ Reconnaissance faciale + IA de Matching
 - [x] Analyse morphologique faciale (avec consentement) (`/facial-analysis-matching`, `src/services/face-analysis.ts` - *Frontend Simulation*)
@@ -92,7 +92,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 - [x] 3. Dictionnaire d'expressions sensibles (`/risky-words-dictionary` - *Frontend AI + User Feedback*)
 - [x] 4. Mode "Rencontre à l'aveugle" (`/blind-exchange-mode` - *Frontend AI/Simulation + Progressive Reveal*)
 - [x] 5. Système de gamification (`/rewards` - *Frontend UI + Backend Logic for points/badges, premium feature unlocking simulated*)
-- [x] 6. Interface speed dating dynamique (`/speed-dating` - *Frontend UI + Feedback Simulation*)
+- [x] 6. Interface speed dating dynamique (`/speed-dating` - *Frontend UI + Feedback now persisted to Firestore*)
 - [x] 7. Tableau de bord utilisateur intelligent (conseils personnalisés) (`/dashboard` - *Frontend UI/Firebase Data*)
 
 ## Implemented Features (Frontend Simulation):
@@ -102,7 +102,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[x] Coach Conversationnel IA (avec Bonus de Style):** (`/ai-conversation-coach` - *AI*)
 *   **[x] Dictionnaire IA des Mots à Risque :** (`/risky-words-dictionary` - *AI + User Feedback via Firebase*)
 *   **[x] Jeu :** (`/game` - *General Knowledge and Times Up games use Firebase for preferences/points/rewards/leaderboard.*)
-*   **[x] Speed Dating :** (`/speed-dating` - *UI + Enhanced Feedback Simulation*, needs backend for scheduling/matching/feedback persistence)
+*   **[x] Speed Dating :** (`/speed-dating` - *UI + Feedback now persisted to Firestore*, needs backend for scheduling/matching)
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API*)
 *   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Data now uses Firebase Firestore, simulated content moderation for bio/images*)
 *   **[x] Outils de Communication Intégrés à l'Application (Chat avec Tag d'Intention IA):** (`/chat`, `src/ai/flows/intention-tagging.ts` - *Enhanced UI/Mock Data/AI Suggestion, simulated content moderation*)
@@ -111,14 +111,14 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 
 ## Features to Implement / Enhance (Requires Backend & Advanced Logic):
 
-*   **[~] Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels. (*User profiles, rewards, points, game preferences/scores, risky word feedback now use Firebase Firestore. Chat, geolocation matching, speed dating persistence still need full backend integration.*)
+*   **[~] Intégration Backend Réelle:** Remplacer toutes les données et services simulés par des appels API réels. (*User profiles, rewards, points, game preferences/scores, risky word feedback, speed dating feedback now use Firebase Firestore. Chat, geolocation matching, speed dating scheduling still need full backend integration.*)
 *   **[x] Authentification Utilisateur:** Implémenter un système de connexion/inscription sécurisé (e.g., Firebase Auth, NextAuth). (*Firebase Auth implemented for email/password and profile creation. Password reset via email added.*)
 *   **[~] Système de récompenses (avancé):** Concevoir et implémenter le système de points, modes cachés, accès premium (logique backend + UI). (*Points and badges stored in Firestore. Premium feature unlocking logic based on points/badges implemented and displayed.*)
 *   **[~] Modération de Contenu:** Intégrer un service de modération externe (API) pour le texte et les médias générés par les utilisateurs. (*Simulated moderation for chat, bio, and images implemented via `src/services/moderation_service.ts`. Needs real API integration.*)
 *   **[ ] Notifications:** Mettre en place des notifications push (e.g., via Firebase Cloud Messaging) pour les nouveaux messages, matchs, etc.
 *   **[ ] Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer une solution WebRTC (e.g., Twilio, Agora) pour les appels vidéo/audio dans `/chat`.
 *   **[x] Améliorations des Jeux:** Ajouter plus de jeux, de la variété, un système de scores persistant et des classements (backend requis). (*General Knowledge and Times Up games enhanced with preferences, scoring, rewards, and leaderboard via Firebase.*)
-*   **[~] Feedback Post-Speed Dating (Persistance):** Connecter l'interface de feedback (`/speed-dating`) à un backend pour stocker les avis. (*Feedback submission state simulated on frontend.*)
+*   **[x] Feedback Post-Speed Dating (Persistance):** Connecter l'interface de feedback (`/speed-dating`) à un backend pour stocker les avis. (*Feedback submission now persisted to Firestore.*)
 *   **[x] Dévoilement progressif (Blind Exchange):** Implémenter la logique pour révéler les informations progressivement dans le chat (`/blind-exchange-mode`). (*Progressive reveal for interests, bio snippets, and photo implemented.*)
 *   **[x] Mise à jour IA (Risky Words):** Implémenter l'auto-apprentissage via signalements utilisateurs (feedback sur mots signalés et signalement de mots manqués implémentés, stockage Firestore). L'aspect auto-apprentissage (fine-tuning IA) est encore à faire. (`/risky-words-dictionary`, `src/services/feedback_service.ts`)
 *   **[x] Tags d'intention (Chat - Avancé):** Affiner la logique IA backend pour analyser/suggérer des tags d'intention (`/chat`). (*AI suggestion for intention tags added to chat input.*)

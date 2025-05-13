@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -336,7 +335,11 @@
     "participants": "participants",
     "feedbackAlreadySubmittedTitle": "Feedback Sent",
     "feedbackAlreadySubmittedDesc": "You've already submitted feedback for this session.",
-    "feedbackSubmittedShort": "Feedback Submitted"
+    "feedbackSubmittedShort": "Feedback Submitted",
+    "authErrorTitle": "Authentication Required",
+    "authErrorDesc": "You need to be logged in to perform this action.",
+    "sessionNotSelectedError": "No session selected for feedback.",
+    "loginToSchedule": "Please log in to schedule a session."
   },
   "Chat": {
     "title": "Chat",
