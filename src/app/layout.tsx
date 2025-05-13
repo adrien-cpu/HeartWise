@@ -26,10 +26,6 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = appMetadata;
 
-// export const viewport: Viewport = {
-//   themeColor: '...',
-// }
-
 // This RootLayout is the true root and provides the <html> and <body> shell.
 // It does not handle locale directly; its children (which will be the output of
 // `src/app/[locale]/layout.tsx`) will handle locale-specific setup.
@@ -46,6 +42,7 @@ export default function RootLayout({
   // Ensure no whitespace or text nodes are direct children of <html> here.
   return (
     <html lang="en">
+      {/* Head content is implicitly managed by Next.js via the Metadata API and <Head> components if used in pages/app segments. */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <SidebarProvider>
