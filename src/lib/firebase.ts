@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Firebase configuration and initialization.
  * @module firebase
@@ -22,13 +23,13 @@ const appId = process.env.NEXT_PUBLIC_FIREBASE_APP_ID;
 const measurementId = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID; // Optional
 
 // Log the values of environment variables as they are read
-console.log(`[Firebase Init] Trying to read NEXT_PUBLIC_FIREBASE_API_KEY: ${apiKey ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-console.log(`[Firebase Init] Trying to read NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${authDomain ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-console.log(`[Firebase Init] Trying to read NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${projectId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-console.log(`[Firebase Init] Trying to read NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${storageBucket ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-console.log(`[Firebase Init] Trying to read NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${messagingSenderId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-console.log(`[Firebase Init] Trying to read NEXT_PUBLIC_FIREBASE_APP_ID: ${appId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-console.log(`[Firebase Init] Trying to read NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${measurementId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
+console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_API_KEY: ${apiKey ? 'FOUND (value starts with: ' + String(apiKey).substring(0,5) + '...)' : 'NOT FOUND or EMPTY'}`);
+console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${authDomain ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
+console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${projectId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
+// console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${storageBucket ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
+// console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${messagingSenderId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
+// console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_APP_ID: ${appId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
+// console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${measurementId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
 
 
 let criticalConfigError = false;
@@ -65,7 +66,12 @@ const firebaseConfig = {
 };
 
 if (!criticalConfigError) {
-    console.log("[Firebase Init] Attempting to use Firebase Config Object:", firebaseConfig);
+    // Avoid logging the full config object which includes the API key
+    console.log("[Firebase Init] Firebase Config Object (excluding API key for security):", { 
+        authDomain: firebaseConfig.authDomain, 
+        projectId: firebaseConfig.projectId,
+        // Add other non-sensitive keys if needed for debugging
+    });
 }
 
 

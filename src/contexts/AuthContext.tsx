@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, User as FirebaseUser, signOut as firebaseSignOut } from 'firebase/auth';
-import { auth, criticalConfigError } from '@/lib/firebase'; // Firebase auth instance and error flag
+import { auth, criticalConfigError, firebaseConfig } from '@/lib/firebase'; // Firebase auth instance and error flag
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from 'lucide-react';
@@ -101,11 +101,21 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
   if (!isFirebaseConfigured) {
     return (
       <div className="flex items-center justify-center h-screen w-screen bg-background p-4">
-        <Alert variant="destructive" className="max-w-lg">
+        <Alert variant="destructive" className="max-w-lg shadow-lg">
           <AlertTriangle className="h-5 w-5" />
-          <AlertTitle>Firebase Configuration Error</AlertTitle>
-          <AlertDescription>
-            Firebase is not configured correctly. Please check the server console logs for details on missing environment variables (e.g., <code>NEXT_PUBLIC_FIREBASE_API_KEY</code>). Ensure your <code>.env</code> file is set up and the application is restarted. Authentication and other Firebase-dependent features will not work.
+          <AlertTitle className="font-bold text-lg">Firebase Configuration Error</AlertTitle>
+          <AlertDescription className="mt-2 space-y-2">
+            <p>The application cannot connect to Firebase services. This is usually due to missing or incorrect Firebase configuration settings.</p>
+            <p>Please ensure the following environment variables are correctly set in your <code>.env.local</code> file:</p>
+            <ul className="list-disc list-inside space-y-1 text-sm pl-4 bg-muted p-3 rounded-md">
+              <li><code>NEXT_PUBLIC_FIREBASE_API_KEY</code></li>
+              <li><code>NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN</code></li>
+              <li><code>NEXT_PUBLIC_FIREBASE_PROJECT_ID</code></li>
+              {/* Add others if they become critical, e.g., APP_ID */}
+            </ul>
+            <p>You can find these values in your Firebase project settings: <br/> <strong>Project Settings</strong> &gt; <strong>General</strong> &gt; <strong>Your apps</strong> &gt; (Select your web app) &gt; <strong>Firebase SDK snippet</strong> &gt; <strong>Config</strong>.</p>
+            <p>After adding or correcting these variables, you <strong>must restart your Next.js development server</strong> for the changes to take effect.</p>
+            <p className="mt-3 text-xs text-muted-foreground">Current API Key from env (first 5 chars): {firebaseConfig.apiKey ? String(firebaseConfig.apiKey).substring(0,5) + '...' : 'MISSING'}</p>
           </AlertDescription>
         </Alert>
       </div>
@@ -124,4 +134,3 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
