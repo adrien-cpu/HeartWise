@@ -124,3 +124,4 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
+

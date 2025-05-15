@@ -75,7 +75,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 - L'utilisateur ne voit que :
   - [x] Un pourcentage de compatibilité (*Frontend AI*)
   - [x] Une bulle de discussion neutre (*Frontend UI*)
-- [x] Les infos se dévoilent **progressivement** selon l'engagement mutuel (*Progressive reveal for interests, bio snippets, and photo implemented via message count milestones.*)
+  - [x] Les infos se dévoilent **progressivement** selon l'engagement mutuel (*Progressive reveal for interests, bio snippets, and photo implemented via message count milestones.*)
 
 ### 6. 🚀 Bonus et gamification
 - [x] 🌟 **Bonus de style** : suggestions personnalisées du coach IA selon ton niveau de confort, ton style (romantique, direct, poétique, etc.) (`/ai-conversation-coach`, `src/ai/flows/style-suggestions-flow.ts` - *Frontend AI*)
@@ -125,3 +125,5 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 
 
 *Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality. Features marked with *~* are partially implemented.*
+
+```

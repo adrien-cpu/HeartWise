@@ -49,7 +49,7 @@ export default function RootLayout({
   // Ensure no whitespace or text nodes are direct children of <html>.
   return (
     <html lang="en">
-      {/* The <head> is managed by Next.js metadata. Only <body> should be a direct child here. */}
+      {/* Head content is implicitly managed by Next.js via the Metadata API and <Head> components if used in pages/app segments. */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <SidebarProvider>
