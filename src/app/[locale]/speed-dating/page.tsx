@@ -8,26 +8,26 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Loader2, CalendarClock, Users, Heart, Frown, Meh, Send, CheckCircle2, Search } from 'lucide-react'; // Added Search
+import { Loader2, CalendarClock, Users, Heart, Frown, Meh, Send, CheckCircle2, Search } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { 
-  submitSpeedDatingFeedback, 
+import {
+  submitSpeedDatingFeedback,
   getFeedbackForSessionByUser,
-  createSpeedDatingSession as createSessionService, // Renamed to avoid conflict
+  createSpeedDatingSession as createSessionService,
   registerForSpeedDatingSession,
   findAvailableSessions,
   getUpcomingSessionsForUser,
-  type SpeedDatingSession, // Service-defined type
-  type SpeedDatingFeedbackData 
+  type SpeedDatingSession,
+  type SpeedDatingFeedbackData
 } from '@/services/speed_dating_service';
 import { Timestamp } from 'firebase/firestore';
-import { DatePicker } from '@/components/ui/date-picker'; // Assuming you have this component
-import { TimePicker } from '@/components/ui/time-picker'; // Assuming you have this component
+import { DatePicker } from '@/components/ui/date-picker';
+import { TimePicker } from '@/components/ui/time-picker';
 
 
 // Mock data for partners met during a session (kept for frontend display logic, will be dynamic later)
@@ -61,14 +61,14 @@ export default function SpeedDatingPage() {
 
   const [userSessions, setUserSessions] = useState<SpeedDatingSession[]>([]); // Sessions user is part of or created
   const [foundSessions, setFoundSessions] = useState<SpeedDatingSession[]>([]); // Sessions found via search
-  
+
   const [loadingUserSessions, setLoadingUserSessions] = useState(true);
   const [loadingFoundSessions, setLoadingFoundSessions] = useState(false);
   const [isProcessingAction, setIsProcessingAction] = useState(false); // For any button processing
 
   const [error, setError] = useState<string | null>(null);
   const [selectedSessionForFeedback, setSelectedSessionForFeedback] = useState<SpeedDatingSession | null>(null);
-  
+
   const [feedback, setFeedback] = useState<{ [partnerId: string]: { rating: 'positive' | 'neutral' | 'negative' | ''; comment: string } }>({});
 
   // Mock partners - in a real app, this would be dynamically fetched based on the selectedSessionForFeedback
@@ -106,7 +106,7 @@ export default function SpeedDatingPage() {
     if (!authLoading && currentUser) {
         fetchUserSessions();
     } else if (!authLoading && !currentUser) {
-        setLoadingUserSessions(false); 
+        setLoadingUserSessions(false);
     }
   }, [authLoading, currentUser, fetchUserSessions]);
 
@@ -117,22 +117,17 @@ export default function SpeedDatingPage() {
       checked ? [...prev, interest] : prev.filter(i => i !== interest)
     );
   };
-  
+
   const handleFindSessions = async () => {
     if (!currentUser) {
       toast({ variant: 'destructive', title: t('authErrorTitle'), description: t('authErrorDesc') });
       router.push('/login');
       return;
     }
-    // User can search with no interests to see all available
-    // if (selectedInterestsForSearch.length === 0) {
-    //   toast({ variant: 'destructive', title: t('selectInterestsErrorTitle'), description: t('selectInterestsErrorDesc') });
-    //   return;
-    // }
     setLoadingFoundSessions(true);
     setIsProcessingAction(true);
     setError(null);
-    setFoundSessions([]); // Clear previous results
+    setFoundSessions([]);
     try {
       const sessions = await findAvailableSessions(selectedInterestsForSearch);
       setFoundSessions(sessions);
@@ -143,7 +138,7 @@ export default function SpeedDatingPage() {
       }
     } catch (err) {
       console.error("Failed to find sessions:", err);
-      setError(t('scheduleError')); // Generic error message
+      setError(t('scheduleError'));
       toast({ variant: 'destructive', title: t('errorTitle'), description: t('scheduleError') });
     } finally {
       setLoadingFoundSessions(false);
@@ -189,8 +184,8 @@ export default function SpeedDatingPage() {
         maxParticipants: maxParticipantsForCreation
       });
       toast({ title: t('createSuccessTitle'), description: t('createSuccessDesc') });
-      setSelectedInterestsForCreation([]); // Reset creation form
-      await fetchUserSessions(); // Refresh user's session list
+      setSelectedInterestsForCreation([]);
+      await fetchUserSessions();
     } catch (err: any) {
       console.error("Failed to create session:", err);
       setError(err.message || t('createError'));
@@ -209,8 +204,8 @@ export default function SpeedDatingPage() {
     try {
       await registerForSpeedDatingSession(currentUser.uid, sessionId);
       toast({ title: t('registrationSuccessTitle'), description: t('registrationSuccessDesc')});
-      await fetchUserSessions(); // Refresh user's upcoming sessions
-      setFoundSessions(prev => prev.filter(s => s.id !== sessionId)); // Remove from available list
+      await fetchUserSessions();
+      setFoundSessions(prev => prev.filter(s => s.id !== sessionId));
     } catch (err: any) {
       console.error("Failed to register for session:", err);
       toast({ variant: 'destructive', title: t('errorTitle'), description: err.message || t('registrationErrorDesc') });
@@ -225,21 +220,19 @@ export default function SpeedDatingPage() {
       router.push('/login');
       return;
     }
-    if (session.feedbackSubmitted) { // Assuming feedbackSubmitted is on the session object from fetchUserSessions
+    if (session.feedbackSubmitted) {
         toast({title: t('feedbackAlreadySubmittedTitle'), description: t('feedbackAlreadySubmittedDesc')});
         return;
     }
     setSelectedSessionForFeedback(session);
-    // In a real app, fetch actual partners for this session ID.
-    // Using placeholder for now.
     const currentSessionPartners: MetPartner[] = session.participantIds
-        .filter(pid => pid !== currentUser.uid) // Exclude self
-        .map((pid, index) => ({ id: pid, name: `Partner ${index + 1} (ID: ${pid.substring(0,5)})` })); // Mock name based on ID
-    
+        .filter(pid => pid !== currentUser.uid)
+        .map((pid, index) => ({ id: pid, name: `Partner ${index + 1} (ID: ${pid.substring(0,5)})` }));
+
     setMockPartnersForFeedback(currentSessionPartners);
 
     const initialFeedback: { [partnerId: string]: { rating: 'positive' | 'neutral' | 'negative' | ''; comment: string } } = {};
-    currentSessionPartners.forEach(p => { 
+    currentSessionPartners.forEach(p => {
         initialFeedback[p.id] = { rating: '', comment: '' };
     });
     setFeedback(initialFeedback);
@@ -263,13 +256,13 @@ export default function SpeedDatingPage() {
       setIsProcessingAction(true);
       try {
         const feedbackPromises = Object.entries(feedback).map(([partnerId, feedbackEntry]) => {
-            if (feedbackEntry.rating) { 
+            if (feedbackEntry.rating) {
                 const partnerName = mockPartnersForFeedback.find(p => p.id === partnerId)?.name || 'Unknown Partner';
                 const feedbackPayload: Omit<SpeedDatingFeedbackData, 'id' | 'timestamp'> = {
                     userId: currentUser.uid,
                     sessionId: selectedSessionForFeedback.id,
                     partnerId: partnerId,
-                    partnerName: partnerName, 
+                    partnerName: partnerName,
                     rating: feedbackEntry.rating,
                     comment: feedbackEntry.comment,
                 };
@@ -279,7 +272,7 @@ export default function SpeedDatingPage() {
         });
         await Promise.all(feedbackPromises);
         toast({ title: t('feedbackSubmittedTitle'), description: t('feedbackSubmittedDesc') });
-        await fetchUserSessions(); 
+        await fetchUserSessions();
         setSelectedSessionForFeedback(null);
         setFeedback({});
       } catch (error) {
@@ -290,14 +283,13 @@ export default function SpeedDatingPage() {
       }
   };
 
-  if (authLoading && !currentUser) { // Show loader only if auth is loading AND user is not yet determined
+  if (authLoading && !currentUser) {
       return (
         <div className="container mx-auto py-8 px-4 flex items-center justify-center min-h-[calc(100vh-150px)]">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       );
   }
-
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -310,7 +302,7 @@ export default function SpeedDatingPage() {
                 <CardDescription>{t('feedbackDescription')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                 {mockPartnersForFeedback.length > 0 ? mockPartnersForFeedback.map(partner => ( 
+                 {mockPartnersForFeedback.length > 0 ? mockPartnersForFeedback.map(partner => (
                     <div key={partner.id} className="border p-4 rounded-md space-y-3 bg-muted/50">
                         <h3 className="font-semibold">{t('feedbackFor', { name: partner.name })}</h3>
                         <div>
@@ -364,7 +356,6 @@ export default function SpeedDatingPage() {
           </Card>
       ) : (
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Column 1: Create Session */}
           <Card className="lg:col-span-1 shadow-lg border">
             <CardHeader>
               <CardTitle>{t('createSessionTitle')}</CardTitle>
@@ -399,12 +390,12 @@ export default function SpeedDatingPage() {
               </div>
                <div>
                 <Label htmlFor="max-participants" className="font-semibold mb-2 block">{t('maxParticipantsLabel')}</Label>
-                <input 
-                    type="number" 
-                    id="max-participants" 
-                    value={maxParticipantsForCreation} 
-                    onChange={(e) => setMaxParticipantsForCreation(Math.max(2, Math.min(20, parseInt(e.target.value,10) || 2)))} 
-                    min="2" 
+                <input
+                    type="number"
+                    id="max-participants"
+                    value={maxParticipantsForCreation}
+                    onChange={(e) => setMaxParticipantsForCreation(Math.max(2, Math.min(20, parseInt(e.target.value,10) || 2)))}
+                    min="2"
                     max="20"
                     className="w-full p-2 border rounded-md"
                     disabled={isProcessingAction}
@@ -422,7 +413,6 @@ export default function SpeedDatingPage() {
             )}
           </Card>
 
-          {/* Column 2: Find & Join Sessions */}
           <Card className="lg:col-span-2 shadow-lg border">
             <CardHeader>
               <CardTitle>{t('findSessionTitle')}</CardTitle>
@@ -471,9 +461,9 @@ export default function SpeedDatingPage() {
                             </div>
                              <p className="text-xs text-muted-foreground mt-1">{t('participantsCount', { current: session.participantsCount, max: session.maxParticipants })}</p>
                           </div>
-                          <Button 
-                            size="sm" 
-                            onClick={() => handleRegisterForSession(session.id)} 
+                          <Button
+                            size="sm"
+                            onClick={() => handleRegisterForSession(session.id)}
                             disabled={isProcessingAction || session.participantIds.includes(currentUser?.uid || '')}
                             className="mt-2 sm:mt-0"
                            >
@@ -494,8 +484,6 @@ export default function SpeedDatingPage() {
             )}
           </Card>
 
-
-          {/* Column 3 / Row 2: User's Upcoming/Registered Sessions */}
            <Card className="lg:col-span-3 shadow-lg border">
             <CardHeader>
               <CardTitle>{t('upcomingSessions')}</CardTitle>
@@ -531,12 +519,12 @@ export default function SpeedDatingPage() {
                         ))}
                       </div>
                        {session.status === 'completed' && (
-                           (session as any).feedbackSubmitted ? ( // Cast to any if feedbackSubmitted isn't on service type but added in UI
+                           (session as any).feedbackSubmitted ?
                              <div className="flex items-center text-sm text-green-600">
                                <CheckCircle2 className="mr-1 h-4 w-4" />
                                {t('feedbackSubmittedShort')}
                              </div>
-                           ) : (
+                           : (
                              <Button size="sm" variant="outline" onClick={() => handleProvideFeedback(session)} disabled={isProcessingAction || !currentUser}>
                                {t('provideFeedbackButton')}
                              </Button>
@@ -566,3 +554,5 @@ export default function SpeedDatingPage() {
     </div>
   );
 }
+
+    
