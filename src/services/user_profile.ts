@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Provides services for managing user profile data, including rewards and points, using Firestore.
  * @module user_profile
@@ -118,18 +119,38 @@ export async function get_user(userId: string): Promise<UserProfile> {
   if (!userDocSnap.exists()) {
     // Consider creating a default profile if it doesn't exist, or throw specific error
     // For now, throwing error as per original logic.
-    throw new Error(`User with ID ${userId} not found in Firestore.`);
+    // Create a default profile for a new user during signup flow instead.
+    console.warn(`User with ID ${userId} not found in Firestore. Returning a default structure.`);
+    const defaultProfile: UserProfile = {
+        id: userId,
+        name: "New User",
+        email: "", // Should be set during signup
+        bio: "",
+        interests: [],
+        profilePicture: `https://placehold.co/200x200.png`,
+        dataAiHint: "person placeholder",
+        privacySettings: { showLocation: true, showOnlineStatus: true },
+        rewards: [],
+        points: 0,
+        speedDatingSchedule: [],
+        gamePreferences: [],
+        premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+    };
+    // Optionally, save this default profile to Firestore if appropriate here,
+    // or ensure it's created during user registration.
+    // await setDoc(userDocRef, defaultProfile); // Uncomment to auto-create if needed here
+    return defaultProfile;
   }
 
   let userProfile = mapDocumentToUserProfile(userDocSnap);
 
-  // If userProfile is somehow null here (shouldn't be due to exists() check), handle it.
   if (!userProfile) {
-      throw new Error(`Failed to map document for user ID ${userId}.`);
+      // This case should be rare if exists() check passes and mapping is robust
+      throw new Error(`Failed to map document for user ID ${userId}. Data might be malformed.`);
   }
   
-  // Ensure defaults for fields that might be missing in older documents
-  // mapDocumentToUserProfile already handles this, but this is an extra safeguard.
   userProfile.rewards = userProfile.rewards || [];
   userProfile.points = userProfile.points || 0;
   userProfile.premiumFeatures = userProfile.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
@@ -137,6 +158,9 @@ export async function get_user(userId: string): Promise<UserProfile> {
   userProfile.gamePreferences = userProfile.gamePreferences || [];
   userProfile.privacySettings = userProfile.privacySettings || { showLocation: true, showOnlineStatus: true };
   userProfile.interests = userProfile.interests || [];
+  userProfile.profilePicture = userProfile.profilePicture || `https://placehold.co/200x200.png`;
+  userProfile.dataAiHint = userProfile.dataAiHint || (userProfile.name ? `${userProfile.name.split(' ')[0].toLowerCase()} person` : 'person placeholder');
+
 
   return userProfile;
 }
@@ -154,17 +178,14 @@ export async function get_user(userId: string): Promise<UserProfile> {
 export async function update_user_profile(userId: string, profileData: Partial<UserProfile>): Promise<UserProfile> {
   const userDocRef = doc(firestore, 'users', userId);
 
-  // Prepare data with updatedAt timestamp
   const dataToUpdate: Partial<UserProfile> & { updatedAt: Timestamp; createdAt?: Timestamp } = {
     ...profileData,
     updatedAt: Timestamp.now(),
   };
 
-  // Check if document exists to set createdAt and initial defaults
   const docSnap = await getDoc(userDocRef);
   if (!docSnap.exists()) {
     dataToUpdate.createdAt = Timestamp.now();
-    // Initialize fields if creating a new profile
     dataToUpdate.points = profileData.points ?? 0;
     dataToUpdate.rewards = profileData.rewards ?? [];
     dataToUpdate.premiumFeatures = profileData.premiumFeatures ?? { advancedFilters: false, profileBoost: false, exclusiveModes: false };
@@ -172,21 +193,20 @@ export async function update_user_profile(userId: string, profileData: Partial<U
     dataToUpdate.interests = profileData.interests ?? [];
     dataToUpdate.gamePreferences = profileData.gamePreferences ?? [];
     dataToUpdate.speedDatingSchedule = profileData.speedDatingSchedule ?? [];
-    if (!profileData.profilePicture) { // Add default placeholder if none provided during creation
-        dataToUpdate.profilePicture = `https://picsum.photos/seed/${userId}/200`;
+    if (!profileData.profilePicture) {
+        dataToUpdate.profilePicture = `https://placehold.co/200x200.png`;
         dataToUpdate.dataAiHint = "person placeholder";
     }
   }
   
-  // Ensure dataAiHint is set if not provided but name is
   if (!dataToUpdate.dataAiHint && dataToUpdate.name) {
     dataToUpdate.dataAiHint = `${dataToUpdate.name.split(' ')[0].toLowerCase()} person`;
   }
 
   await setDoc(userDocRef, dataToUpdate, { merge: true });
   
-  const updatedProfile = await get_user(userId); // Fetch the merged profile
-  await checkAndUnlockPremiumFeatures(userId, updatedProfile); // Check for unlocks after profile update
+  const updatedProfile = await get_user(userId); 
+  await checkAndUnlockPremiumFeatures(userId, updatedProfile);
   return updatedProfile;
 }
 
@@ -213,7 +233,6 @@ export async function get_user_rewards(userId: string): Promise<UserReward[]> {
  */
 async function checkAndUnlockPremiumFeatures(userId: string, currentUserProfile: UserProfile): Promise<void> {
     const userDocRef = doc(firestore, 'users', userId);
-    // Ensure premiumFeatures exists, defaulting if not
     const currentFeatures = currentUserProfile.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
     const newFeatures: PremiumFeatures = { ...currentFeatures };
     let changed = false;
@@ -225,19 +244,16 @@ async function checkAndUnlockPremiumFeatures(userId: string, currentUserProfile:
     const PROFILE_BOOST_BADGE_TYPE = 'top_contributor';
     const EXCLUSIVE_MODES_BADGE_TYPE = 'game_master';
 
-    // Unlock Advanced Filters by points
     if (!newFeatures.advancedFilters && userPoints >= ADVANCED_FILTERS_POINTS_THRESHOLD) {
         newFeatures.advancedFilters = true;
         changed = true;
     }
 
-    // Unlock Profile Boost by 'top_contributor' badge
     if (!newFeatures.profileBoost && userRewards.some(r => r.type === PROFILE_BOOST_BADGE_TYPE)) {
         newFeatures.profileBoost = true;
         changed = true;
     }
 
-    // Unlock Exclusive Modes by 'game_master' badge
     if (!newFeatures.exclusiveModes && userRewards.some(r => r.type === EXCLUSIVE_MODES_BADGE_TYPE)) {
         newFeatures.exclusiveModes = true;
         changed = true;
@@ -360,14 +376,10 @@ export async function get_user_points(userId: string): Promise<number> {
 export async function add_user_points(userId: string, pointsToAdd: number): Promise<number> {
   const userDocRef = doc(firestore, 'users', userId);
   
-  // Ensure user profile exists before trying to increment points
   const userProfileSnapshot = await getDoc(userDocRef);
   if (!userProfileSnapshot.exists()) {
-    // If user doesn't exist, create them with initial points
-    // This might be an edge case if signup/profile creation didn't run first
     await update_user_profile(userId, { points: pointsToAdd });
   } else {
-    // User exists, increment points
     await updateDoc(userDocRef, {
       points: increment(pointsToAdd),
       updatedAt: Timestamp.now(),
@@ -391,7 +403,7 @@ function getPointsForReward(rewardType: string): number {
     case 'first_chat': return 20;
     case 'first_match': return 30;
     case 'speed_dater': return 25;
-    case 'game_winner': return 15; // Points specifically for winning a game round/session
+    case 'game_winner': return 15; 
     case 'blind_exchange_participant': return 20;
     case 'explorer': return 10;
     case 'chat_enthusiast': return 35;
@@ -401,13 +413,47 @@ function getPointsForReward(rewardType: string): number {
   }
 }
 
+// Mock users for candidate selection in AI matching flow.
+// In a real app, this would query the database, excluding the current user.
+const mockUsersForMatching: UserProfile[] = [
+    { id: 'mockUser1', name: 'Alex Doe', email: 'alex@example.com', bio: 'Loves hiking and reading.', interests: ['Hiking', 'Reading', 'Photography'], profilePicture: 'https://placehold.co/200x200.png?text=Alex', dataAiHint: 'man smiling', points: 120 },
+    { id: 'mockUser2', name: 'Brenda Smith', email: 'brenda@example.com', bio: 'Passionate about art and music.', interests: ['Art', 'Music', 'Travel'], profilePicture: 'https://placehold.co/200x200.png?text=Brenda', dataAiHint: 'woman nature', points: 250 },
+    { id: 'mockUser3', name: 'Charlie Brown', email: 'charlie@example.com', bio: 'Enjoys cooking and movies.', interests: ['Cooking', 'Movies', 'Gaming'], profilePicture: 'https://placehold.co/200x200.png?text=Charlie', dataAiHint: 'person thinking', points: 80 },
+    { id: 'mockUser4', name: 'Diana Prince', email: 'diana@example.com', bio: 'Tech enthusiast and avid gamer.', interests: ['Technology', 'Gaming', 'Science'], profilePicture: 'https://placehold.co/200x200.png?text=Diana', dataAiHint: 'woman glasses', points: 300 },
+];
+
+
 /**
  * Retrieves all user profiles from Firestore, ordered by points for leaderboard.
+ * For AI matching simulation, it returns a predefined list of mock users.
  * @async
  * @function get_all_users
- * @returns {Promise<UserProfile[]>} A promise that resolves to an array of all user profiles.
+ * @param {object} [options] - Optional parameters.
+ * @param {boolean} [options.forMatching=false] - If true, returns a mock list for matching simulation.
+ * @returns {Promise<UserProfile[]>} A promise that resolves to an array of user profiles.
  */
-export async function get_all_users(): Promise<UserProfile[]> {
+export async function get_all_users(options?: { forMatching?: boolean }): Promise<UserProfile[]> {
+  if (options?.forMatching) {
+    // Ensure mock users have default fields if not specified
+    return mockUsersForMatching.map(user => ({
+        ...{
+            bio: "",
+            interests: [],
+            profilePicture: `https://placehold.co/200x200.png`,
+            dataAiHint: "person placeholder",
+            privacySettings: { showLocation: true, showOnlineStatus: true },
+            rewards: [],
+            points: 0,
+            speedDatingSchedule: [],
+            gamePreferences: [],
+            premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+            createdAt: Timestamp.now(),
+            updatedAt: Timestamp.now(),
+        },
+        ...user
+    }));
+  }
+
   const q = query(usersCollection, orderBy("points", "desc"), limit(100)); // Example: limit to top 100 for performance
   const querySnapshot = await getDocs(q);
   const users: UserProfile[] = [];
@@ -431,3 +477,5 @@ export async function get_user_premium_features(userId: string): Promise<Premium
   const user = await get_user(userId);
   return user.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
 }
+
+```

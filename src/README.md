@@ -3,7 +3,7 @@
 
 ## Core Features:
 - [x] Geolocation Based Meeting: Enable users to find geolocated meetings in public places. (`/geolocation-meeting`)
-- [x] Facial Analysis and Matching: Analyze facial morphology (with consent) and cross-reference with psychological traits to find natural affinities, considering both similarities and opposites. (`/facial-analysis-matching`, `src/services/face-analysis.ts`)
+- [x] Facial Analysis and Matching: AI analyzes user's photo and suggests potential matches based on simulated facial and psychological traits from a mock user database. (`/facial-analysis-matching`, `src/services/face-analysis.ts`, `src/ai/flows/facial-match-suggestions.ts`)
 - [x] AI Conversation Coach: Analyse the messages written by the user and suggest reformulations if needed to create a good conversation. The LLM acts as a tool and will decide when to intervene. (`/ai-conversation-coach`, `src/ai/flows/conversation-coach.ts`, `src/ai/flows/style-suggestions-flow.ts`)
 - [x] Blind Exchange Mode: Offer a mode of meeting without photo, profile or information. The AI proposes a profile based on facial and emotional matching, common points and opposite polarities. (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts`)
 - [x] Intelligent User Dashboard: Display personalized advice and user stats. (`/dashboard`)
@@ -43,7 +43,7 @@ Une application de rencontre à la croisee de l'humain et de l'intelligence arti
 - [x] **Speed Dating digital** : sessions rapides avec matching + feedback immédiat (`/speed-dating` - *Frontend UI + Feedback persisted to Firestore, session creation/registration backend logic improved*, needs **advanced backend for matching**)
 
 ### 2. 👁‍🗨️ Reconnaissance faciale + IA de Matching
-- [x] Analyse morphologique faciale (avec consentement) (`/facial-analysis-matching`, `src/services/face-analysis.ts` - *Frontend Simulation*)
+- [x] Analyse morphologique faciale (avec consentement) (`/facial-analysis-matching`, `src/services/face-analysis.ts`, `src/ai/flows/facial-match-suggestions.ts` - *AI suggests profiles based on user photo and mock database analysis.*)
 - [x] Croisement avec les traits psychologiques pour affinités "naturelles" (`/facial-analysis-matching`, `/blind-exchange-mode` - *Frontend Simulation/AI*)
 - [x] Capacité à jouer sur les similarités ET les opposés (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts` - *Frontend AI*)
 
@@ -88,7 +88,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 - IA au service des **valeurs de respect, d'authenticité et de lien vrai**
 
 ## 🚧 Modules à développer (Frontend Simulation Status)
-- [x] 1. Moteur de matching (IA émotionnelle + reconnaissance faciale + logique "semblable/contraire") (`/facial-analysis-matching`, `/blind-exchange-mode` - *Frontend AI/Simulation*)
+- [x] 1. Moteur de matching (IA émotionnelle + reconnaissance faciale + logique "semblable/contraire") (`/facial-analysis-matching`, `/blind-exchange-mode` - *AI suggests profiles based on user photo and mock database analysis.*)
 - [x] 2. Coach IA conversationnel temps réel (`/ai-conversation-coach` - *Frontend AI*)
 - [x] 3. Dictionnaire d'expressions sensibles (`/risky-words-dictionary`, `src/ai/flows/risky-words-dictionary.ts` - *Frontend AI + User Feedback via Firestore*)
 - [x] 4. Mode "Rencontre à l'aveugle" (`/blind-exchange-mode` - *Frontend AI/Simulation + Progressive Reveal*)
@@ -98,7 +98,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 
 ## Implemented Features (Frontend Simulation):
 
-*   **[x] Correspondance par Analyse Faciale :** (`/facial-analysis-matching` - *Simulation*)
+*   **[x] Correspondance par Analyse Faciale :** (`/facial-analysis-matching` - *AI suggests profiles from mock data based on user photo analysis.*)
 *   **[x] Mode d'Échange à l'Aveugle :** (`/blind-exchange-mode` - *AI/Simulation + Progressive Reveal*)
 *   **[x] Coach Conversationnel IA (avec Bonus de Style):** (`/ai-conversation-coach` - *AI*)
 *   **[x] Dictionnaire IA des Mots à Risque :** (`/risky-words-dictionary` - *AI + User Feedback via Firebase*)
@@ -127,3 +127,5 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 
 
 *Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality. Features marked with *~* are partially implemented.*
+
+```

@@ -93,8 +93,29 @@
     "errorTitle": "Error"
   },
   "FacialAnalysisMatching": {
-    "title": "Facial Analysis & Matching",
+    "title": "Facial Analysis & Matching (Legacy - Manual)",
     "description": "Upload or provide URLs for two images to analyze simulated psychological traits and compatibility.",
+    "titleAiPowered": "AI Facial Match Suggester",
+    "descriptionAiPowered": "Upload or capture your photo, and our AI will suggest potential matches based on facial and psychological compatibility.",
+    "yourPhotoAlt": "Your photo",
+    "uploadOrCapturePrompt": "Upload your photo or use your camera.",
+    "uploadPhotoButton": "Upload Photo",
+    "useCameraButton": "Use Camera",
+    "capturePhotoButton": "Capture Photo",
+    "clearImageButton": "Clear Image / Use Another",
+    "findMatchesButton": "Find AI-Powered Matches",
+    "findingMatchesButton": "Finding Matches...",
+    "errorMissingImage": "Please upload or capture your photo first.",
+    "errorAuthRequired": "You must be logged in to find matches.",
+    "cameraAccessDeniedError": "Camera access denied. Please enable camera permissions in your browser settings.",
+    "cameraNotSupportedError": "Camera not supported or not found on this device.",
+    "matchesFoundTitle": "Matches Found!",
+    "matchesFoundDesc": "AI has found {count, plural, =1 {one potential match} other {# potential matches}} for you.",
+    "noMatchesFoundTitle": "No Matches Found",
+    "noMatchesFoundDesc": "The AI couldn't find suitable matches at this time. Try a different photo or check back later!",
+    "noMatchesFoundAfterSearch": "No matches found based on your photo. Try a different photo or widen your criteria if applicable.",
+    "suggestedMatchesTitle": "AI Match Suggestions",
+    "overallCompatibility": "Overall: {score}%",
     "image1UrlPlaceholder": "URL for Image 1",
     "image2UrlPlaceholder": "URL for Image 2",
     "imageAlt": "Image {number}",
@@ -114,7 +135,13 @@
     "analysisSuccessTitle": "Analysis Complete",
     "analysisSuccessDesc": "Simulated analysis and comparison finished.",
     "errorTitle": "Error",
-    "partialFailureError": "Could not complete analysis for both images."
+    "partialFailureError": "Could not complete analysis for both images.",
+    "viewProfileButton": "View Profile",
+    "fileTooLargeTitle": "File Too Large",
+    "fileTooLargeDesc": "Image size should not exceed 5MB.",
+    "invalidFileTypeTitle": "Invalid File Type",
+    "invalidFileTypeDesc": "Please upload an image file (e.g., JPG, PNG).",
+    "unknownUser": "User"
   },
   "AIConversationCoachPage": {
     "pageTitle": "AI Conversation Coach",
@@ -559,3 +586,4 @@
    }
 }
 
+```

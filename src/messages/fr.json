@@ -93,8 +93,29 @@
     "errorTitle": "Erreur"
   },
   "FacialAnalysisMatching": {
-    "title": "Analyse Faciale et Correspondance",
+    "title": "Analyse Faciale & Correspondance (Legacy - Manuel)",
     "description": "Téléchargez ou fournissez les URLs de deux images pour analyser des traits psychologiques simulés et la compatibilité.",
+    "titleAiPowered": "Suggestions de Match par IA Faciale",
+    "descriptionAiPowered": "Téléchargez ou capturez votre photo, et notre IA suggérera des partenaires potentiels basés sur la compatibilité faciale et psychologique.",
+    "yourPhotoAlt": "Votre photo",
+    "uploadOrCapturePrompt": "Téléchargez votre photo ou utilisez votre caméra.",
+    "uploadPhotoButton": "Télécharger Photo",
+    "useCameraButton": "Utiliser Caméra",
+    "capturePhotoButton": "Prendre Photo",
+    "clearImageButton": "Effacer / Autre Image",
+    "findMatchesButton": "Trouver des Matchs IA",
+    "findingMatchesButton": "Recherche de matchs...",
+    "errorMissingImage": "Veuillez d'abord télécharger ou capturer votre photo.",
+    "errorAuthRequired": "Vous devez être connecté(e) pour trouver des matchs.",
+    "cameraAccessDeniedError": "Accès caméra refusé. Veuillez activer les permissions dans votre navigateur.",
+    "cameraNotSupportedError": "Caméra non supportée ou non trouvée sur cet appareil.",
+    "matchesFoundTitle": "Matchs Trouvés !",
+    "matchesFoundDesc": "L'IA a trouvé {count, plural, =1 {un partenaire potentiel} other {# partenaires potentiels}} pour vous.",
+    "noMatchesFoundTitle": "Aucun Match Trouvé",
+    "noMatchesFoundDesc": "L'IA n'a pas trouvé de matchs pour le moment. Essayez une autre photo ou revenez plus tard !",
+    "noMatchesFoundAfterSearch": "Aucun match trouvé basé sur votre photo. Essayez une autre photo ou élargissez vos critères si applicable.",
+    "suggestedMatchesTitle": "Suggestions de Matchs par IA",
+    "overallCompatibility": "Global : {score}%",
     "image1UrlPlaceholder": "URL de l'Image 1",
     "image2UrlPlaceholder": "URL de l'Image 2",
     "imageAlt": "Image {number}",
@@ -114,7 +135,13 @@
     "analysisSuccessTitle": "Analyse Terminée",
     "analysisSuccessDesc": "L'analyse simulée et la comparaison sont terminées.",
     "errorTitle": "Erreur",
-    "partialFailureError": "Impossible de terminer l'analyse pour les deux images."
+    "partialFailureError": "Impossible de terminer l'analyse pour les deux images.",
+    "viewProfileButton": "Voir Profil",
+    "fileTooLargeTitle": "Fichier Trop Volumineux",
+    "fileTooLargeDesc": "La taille de l'image ne doit pas dépasser 5Mo.",
+    "invalidFileTypeTitle": "Type de Fichier Invalide",
+    "invalidFileTypeDesc": "Veuillez télécharger un fichier image (ex: JPG, PNG).",
+    "unknownUser": "Utilisateur"
   },
   "AIConversationCoachPage": {
     "pageTitle": "Coach IA Conversationnel",
@@ -559,3 +586,4 @@
    }
 }
 
+```
