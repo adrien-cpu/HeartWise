@@ -479,7 +479,11 @@
     "reportSubmittedDesc": "Thank you for helping improve the dictionary!",
     "reportSubmitError": "Failed to submit your report. Please try again.",
     "missedWordEmptyError": "Please enter the word/phrase you want to report.",
-    "moderationFailedBeforeAnalysis": "Text could not be analyzed due to content policy violations:"
+    "moderationFailedBeforeAnalysis": "Text could not be analyzed due to content policy violations:",
+    "feedbackAlreadySubmittedTitle": "Feedback Sent",
+    "feedbackAlreadySubmittedDesc": "You have already submitted feedback for this item.",
+    "loginForFeedback": "Please log in to provide feedback.",
+    "loginToReportMissed": "Please log in to report missed phrases."
   },
   "RewardsPage": {
     "title": "Your Rewards",
@@ -546,7 +550,13 @@
     "unlockProfileBoostDetails": "Earn the '{badgeName}' badge by being an active and helpful community member to get profile boosts.",
     "unlockExclusiveModesDetails": "Master the games and earn the '{badgeName}' badge to access exclusive game modes.",
     "unlockProgress": "Unlock Progress",
-    "useFeature": "Use Feature"
+    "useFeature": "Use Feature",
+    "authRequired": "Authentication is required to view this page.",
+    "featureLockedTitle": "Feature Locked",
+    "featureInDevelopment": "This feature is still under development. Thank you for your patience!",
+    "useAdvancedFilters": "Use Advanced Filters",
+    "activateProfileBoost": "Activate Boost",
+    "playExclusiveGames": "Play Exclusive Games"
   },
   "DashboardPage": {
     "welcome": "Welcome, {name}!",
@@ -581,9 +591,7 @@
     "profileDataUnavailable": "Profile data is currently unavailable.",
     "authenticating": "Authenticating..."
   },
-   "Sidebar": {
-      "toggleSidebar": "Toggle Sidebar"
-   }
+  "Sidebar": {
+    "toggleSidebar": "Toggle Sidebar"
+  }
 }
-
-```

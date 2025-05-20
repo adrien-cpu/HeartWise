@@ -12,16 +12,16 @@ import { useToast } from '@/hooks/use-toast';
 import { analyzeTextForRiskyWords, RiskyWordAnalysis } from '@/ai/flows/risky-words-dictionary';
 import { submitRiskyWordFeedback, reportMissedRiskyWord } from '@/services/feedback_service';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, AlertTriangle, Check, Send, ShieldAlert } from 'lucide-react'; // Added ShieldAlert
+import { Loader2, AlertTriangle, Check, Send, ShieldAlert } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { moderateText, ModerationResult } from '@/services/moderation_service'; // Import moderation service
+import { moderateText, ModerationResult } from '@/services/moderation_service';
 
 /**
  * @fileOverview Implements the Risky Words Dictionary page component.
  * Allows users to input text, receive analysis on potentially risky phrases,
  * provide feedback on flagged items, and report words/phrases missed by the AI.
- * Includes content moderation check before analysis.
+ * Includes content moderation check before analysis and requires authentication for feedback.
  */
 
 /**
@@ -63,14 +63,14 @@ export default function RiskyWordsDictionaryPage() {
     setIsLoadingAnalysis(true);
     setAnalysisError(null);
     setAnalysisResult([]);
-    setSubmittedFeedbackItems({}); 
+    setSubmittedFeedbackItems({});
 
     // First, moderate the input text
     const moderationResult: ModerationResult = await moderateText(inputText.trim());
     if (!moderationResult.isSafe) {
         toast({
             variant: 'destructive',
-            title: tChat('moderationBlockTitle'), // Using Chat translation for consistency
+            title: tChat('moderationBlockTitle'),
             description: `${t('moderationFailedBeforeAnalysis')} ${moderationResult.issues?.map(issue => issue.category).join(', ')}`,
             duration: 7000,
         });
@@ -110,7 +110,10 @@ export default function RiskyWordsDictionaryPage() {
         toast({ variant: 'destructive', title: t('errorTitle'), description: t('authRequiredError') });
         return;
     }
-    if (submittedFeedbackItems[item.id]) return; 
+    if (submittedFeedbackItems[item.id]) {
+        toast({ variant: 'default', title: t('feedbackAlreadySubmittedTitle'), description: t('feedbackAlreadySubmittedDesc') });
+        return;
+    }
 
     setSubmittingFeedbackId(item.id);
     try {
@@ -213,7 +216,7 @@ export default function RiskyWordsDictionaryPage() {
                 <AccordionItem value={item.id} key={item.id}>
                   <AccordionTrigger>
                     <span className="flex items-center gap-2 text-left">
-                      <AlertTriangle className="h-4 w-4 text-destructive flex-shrink-0" />
+                      <ShieldAlert className="h-4 w-4 text-destructive flex-shrink-0" />
                       &quot;{item.word}&quot;
                     </span>
                    </AccordionTrigger>
@@ -230,7 +233,7 @@ export default function RiskyWordsDictionaryPage() {
                         <h4 className="font-semibold mb-1 text-sm">{t('clarificationSuggestion')}</h4>
                         <p className="text-sm text-muted-foreground italic">&quot;{item.clarificationSuggestion}&quot;</p>
                     </div>
-                     {currentUser && (
+                     {currentUser ? (
                         <div>
                             <h4 className="font-semibold text-sm mt-4 mb-2">{t('feedbackTitle')}</h4>
                             <div className="flex space-x-2">
@@ -241,7 +244,7 @@ export default function RiskyWordsDictionaryPage() {
                                     disabled={submittingFeedbackId === item.id || !!submittedFeedbackItems[item.id]}
                                     aria-live="polite"
                                 >
-                                    {submittingFeedbackId === item.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {submittingFeedbackId === item.id && submittedFeedbackItems[item.id] !== 'accurate' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     {submittedFeedbackItems[item.id] === 'accurate' && <Check className="mr-2 h-4 w-4" />}
                                     {t('feedbackAccurate')}
                                 </Button>
@@ -252,7 +255,7 @@ export default function RiskyWordsDictionaryPage() {
                                     disabled={submittingFeedbackId === item.id || !!submittedFeedbackItems[item.id]}
                                     aria-live="polite"
                                 >
-                                    {submittingFeedbackId === item.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    {submittingFeedbackId === item.id && submittedFeedbackItems[item.id] !== 'not_risky' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     {submittedFeedbackItems[item.id] === 'not_risky' && <Check className="mr-2 h-4 w-4" />}
                                     {t('feedbackNotRisky')}
                                 </Button>
@@ -263,6 +266,8 @@ export default function RiskyWordsDictionaryPage() {
                                 </p>
                             )}
                         </div>
+                     ) : (
+                        <p className="text-xs text-muted-foreground mt-3">{t('loginForFeedback')}</p>
                      )}
                   </AccordionContent>
                 </AccordionItem>
@@ -275,7 +280,7 @@ export default function RiskyWordsDictionaryPage() {
            <p className="mt-6 text-center text-muted-foreground">{t('noRiskyWordsFound')}</p>
        )}
 
-      {currentUser && inputText && !isLoadingAnalysis && ( 
+      {currentUser && (
         <Card className="max-w-2xl mx-auto mt-8 shadow-lg border">
             <CardHeader>
                 <CardTitle>{t('reportMissedTitle')}</CardTitle>
@@ -320,6 +325,5 @@ export default function RiskyWordsDictionaryPage() {
             </CardFooter>
         </Card>
        )}
-    </div>
-  );
-}
+       {!currentUser && (
+         <p className="max-w-2xl mx

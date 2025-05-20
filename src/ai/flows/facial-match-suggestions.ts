@@ -17,6 +17,15 @@ import {
   FaceData 
 } from '@/services/face-analysis';
 
+// Type definition for a match candidate based on its usage
+interface MatchCandidate {
+  userId: string;
+  name: string | undefined;
+  psychologicalTraits: PsychologicalTraits;
+  interests: string[] | undefined;
+  facialCompatibilityScore: number;
+}
+
 // Schema for the psychological traits (re-defined here for explicitness if needed, or import directly)
 const PsychologicalTraitsSchema = z.object({
   openness: z.number().min(0).max(1).optional().describe("Openness to experience score (0-1)"),
@@ -202,5 +211,4 @@ const facialMatchSuggestionsFlow = ai.defineFlow(
  */
 export async function suggestFacialMatches(input: FacialMatchSuggestionsInput): Promise<FacialMatchSuggestionsOutput> {
   return facialMatchSuggestionsFlow(input);
-}
-```
+};

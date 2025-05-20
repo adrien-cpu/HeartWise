@@ -23,7 +23,8 @@ import {
   getDocs,
   getDoc,
   writeBatch,
-  limit
+  limit,
+  orderBy
 } from 'firebase/firestore';
 import type { UserProfile } from './user_profile';
 
@@ -59,6 +60,7 @@ export interface SpeedDatingSession {
   updatedAt: Timestamp; // Firestore Timestamp for last update
   // Optional: Brief details of participants for quick display, if needed later
   // participantDetails?: { [userId: string]: { name: string, profilePicture?: string } };
+  feedbackSubmitted?: boolean; // Added to track if the current user has submitted feedback
 }
 
 const sessionsCollection = collection(firestore, 'speedDatingSessions');

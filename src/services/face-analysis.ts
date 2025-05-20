@@ -193,5 +193,3 @@ export async function analyzeFaceData(faceData: FaceData): Promise<{ age?: numbe
 
     return { age, gender, emotion };
 }
-
-```

@@ -479,7 +479,11 @@
     "reportSubmittedDesc": "Merci d'aider à améliorer le dictionnaire !",
     "reportSubmitError": "Échec de l'envoi de votre signalement. Veuillez réessayer.",
     "missedWordEmptyError": "Veuillez entrer l'expression que vous souhaitez signaler.",
-    "moderationFailedBeforeAnalysis": "Le texte n'a pas pu être analysé en raison de violations de la politique de contenu :"
+    "moderationFailedBeforeAnalysis": "Le texte n'a pas pu être analysé en raison de violations de la politique de contenu :",
+    "feedbackAlreadySubmittedTitle": "Avis Déjà Envoyé",
+    "feedbackAlreadySubmittedDesc": "Vous avez déjà envoyé un avis pour cet élément.",
+    "loginForFeedback": "Veuillez vous connecter pour donner votre avis.",
+    "loginToReportMissed": "Veuillez vous connecter pour signaler des expressions manquées."
   },
   "RewardsPage": {
     "title": "Vos Récompenses",
@@ -546,7 +550,13 @@
     "unlockProfileBoostDetails": "Gagnez le badge '{badgeName}' en étant un membre actif et utile pour obtenir des boosts de profil.",
     "unlockExclusiveModesDetails": "Maîtrisez les jeux et gagnez le badge '{badgeName}' pour accéder aux modes de jeu exclusifs.",
     "unlockProgress": "Progression du déblocage",
-    "useFeature": "Utiliser"
+    "useFeature": "Utiliser",
+    "authRequired": "L'authentification est requise pour voir cette page.",
+    "featureLockedTitle": "Fonctionnalité Verrouillée",
+    "featureInDevelopment": "Cette fonctionnalité est encore en développement. Merci de votre patience !",
+    "useAdvancedFilters": "Utiliser Filtres Avancés",
+    "activateProfileBoost": "Activer Boost",
+    "playExclusiveGames": "Jouer aux Modes Exclusifs"
   },
   "DashboardPage": {
     "welcome": "Bienvenue, {name} !",
@@ -581,9 +591,9 @@
     "profileDataUnavailable": "Les données de profil sont actuellement indisponibles.",
     "authenticating": "Authentification en cours..."
   },
-   "Sidebar": {
-      "toggleSidebar": "Basculer la barre latérale"
-   }
+  "Sidebar": {
+    "toggleSidebar": "Basculer la Barre Latérale"
+  }
 }
 
-```
+    

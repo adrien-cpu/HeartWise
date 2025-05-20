@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { Loader2, CalendarClock, Users, Heart, Frown, Meh, Send, CheckCircle2 } 
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton';
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { 
@@ -358,7 +358,7 @@ export default function SpeedDatingPage() {
           <Card className="shadow-lg border">
             <CardHeader>
               <CardTitle>{t('upcomingSessions')}</CardTitle>
-              <CardDescription>{t('upcomingSessionsDesc')}</CardHeader>
+              <CardDescription>{t('upcomingSessionsDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
               {loadingSessions ? (

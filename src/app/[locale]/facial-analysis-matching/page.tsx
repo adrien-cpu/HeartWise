@@ -159,8 +159,7 @@ export default function FacialAnalysisMatchingPage() {
   };
   
   const getInitials = (name?: string): string => {
-    if (!name) return '?';
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    if (!name) return '?'; return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
   return (
@@ -281,5 +280,3 @@ export default function FacialAnalysisMatchingPage() {
     </div>
   );
 }
-
-```

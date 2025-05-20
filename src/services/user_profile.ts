@@ -412,7 +412,6 @@ function getPointsForReward(rewardType: string): number {
     default: return 5;
   }
 }
-
 // Mock users for candidate selection in AI matching flow.
 // In a real app, this would query the database, excluding the current user.
 const mockUsersForMatching: UserProfile[] = [
@@ -477,5 +476,3 @@ export async function get_user_premium_features(userId: string): Promise<Premium
   const user = await get_user(userId);
   return user.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
 }
-
-```
