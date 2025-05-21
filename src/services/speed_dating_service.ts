@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Provides services for managing speed dating sessions and feedback.
@@ -26,7 +25,8 @@ import {
   limit,
   orderBy
 } from 'firebase/firestore';
-import type { UserProfile } from './user_profile';
+import type { UserProfile } from './user_profile'; // For fetching participant details
+import { get_user } from './user_profile'; // To fetch full profiles for matchmaking
 
 /**
  * @interface SpeedDatingFeedbackData
@@ -37,7 +37,7 @@ export interface SpeedDatingFeedbackData {
   userId: string;
   sessionId: string;
   partnerId: string;
-  partnerName: string;
+  partnerName: string; // Name of the partner being reviewed
   rating: 'positive' | 'neutral' | 'negative' | '';
   comment?: string;
   timestamp: Timestamp;
@@ -48,8 +48,21 @@ export interface SpeedDatingFeedbackData {
  * @description Basic details of a participant for display within a session.
  */
 export interface SpeedDatingSessionParticipantDetails {
+  id: string; // User ID
   name: string;
   profilePicture?: string;
+  interests?: string[]; // Store interests for matchmaking
+}
+
+/**
+ * @interface SpeedDatingPairing
+ * @description Represents a pairing of two users for a specific round.
+ */
+export interface SpeedDatingPairing {
+  user1Id: string;
+  user2Id: string;
+  round: number;
+  // chatRoomId?: string; // Optional: if each pair gets a temporary private chat room
 }
 
 /**
@@ -60,17 +73,19 @@ export interface SpeedDatingSession {
   id: string; 
   creatorId: string;
   dateTime: Timestamp; 
-  interests: string[];
+  interests: string[]; // Interests the session is focused on
   participantIds: string[]; 
   participantsCount: number; 
   maxParticipants: number;
-  status: 'scheduled' | 'completed' | 'in-progress' | 'full' | 'cancelled'; 
+  status: 'scheduled' | 'in-progress' | 'completed' | 'full' | 'cancelled'; 
   createdAt: Timestamp; 
   updatedAt: Timestamp; 
-  participants?: { [userId: string]: SpeedDatingSessionParticipantDetails }; // Stores basic info of actual participants
-  feedbackSubmitted?: boolean; 
-  currentRound?: number; // For managing rounds during an "in-progress" session
-  pairings?: Array<{ user1: string, user2: string, round: number }>; // Conceptual: Store pairings for each round
+  // Store more detailed participant info for matchmaking and UI
+  participants: { [userId: string]: SpeedDatingSessionParticipantDetails };
+  feedbackSubmitted?: boolean; // Client-side flag, not persisted directly on session doc usually
+  currentRound?: number;
+  pairings?: SpeedDatingPairing[];
+  durationPerRoundMinutes?: number; // e.g., 5 minutes per round
 }
 
 const sessionsCollection = collection(firestore, 'speedDatingSessions');
@@ -82,26 +97,26 @@ const feedbackCollectionRef = collection(firestore, 'speedDatingFeedback');
  * @function createSpeedDatingSession
  * @param {object} sessionData - Data for the new session.
  * @param {string} sessionData.creatorId - ID of the user creating the session.
- * @param {UserProfile} sessionData.creatorProfile - Profile of the user creating the session.
  * @param {string[]} sessionData.interests - Interests for the session.
  * @param {Timestamp} sessionData.sessionDateTime - The date and time of the session.
  * @param {number} [sessionData.maxParticipants=10] - Maximum number of participants.
+ * @param {number} [sessionData.durationPerRoundMinutes=5] - Duration of each speed dating round.
  * @returns {Promise<string>} The ID of the newly created session document.
  * @throws {Error} If creation fails or Firebase is not configured.
  */
 export async function createSpeedDatingSession(sessionData: {
   creatorId: string;
-  creatorProfile: UserProfile; // Added creator's profile to store basic info
   interests: string[];
   sessionDateTime: Timestamp;
   maxParticipants?: number;
+  durationPerRoundMinutes?: number;
 }): Promise<string> {
   if (criticalConfigError) {
     console.error("Firebase is not configured. Cannot create speed dating session.");
     throw new Error("Application services are not available.");
   }
 
-  const { creatorId, creatorProfile, interests, sessionDateTime, maxParticipants = 10 } = sessionData;
+  const { creatorId, interests, sessionDateTime, maxParticipants = 10, durationPerRoundMinutes = 5 } = sessionData;
 
   if (interests.length === 0) {
     throw new Error("Session must have at least one interest.");
@@ -114,6 +129,11 @@ export async function createSpeedDatingSession(sessionData: {
   }
 
   try {
+    const creatorProfile = await get_user(creatorId); // Fetch creator's profile
+    if (!creatorProfile) {
+        throw new Error("Creator profile not found.");
+    }
+
     const now = serverTimestamp() as Timestamp; 
     const newSessionDocRef = await addDoc(sessionsCollection, {
       creatorId,
@@ -125,12 +145,17 @@ export async function createSpeedDatingSession(sessionData: {
       status: 'scheduled',
       createdAt: now,
       updatedAt: now,
-      participants: { // Store basic info of the creator
+      participants: {
         [creatorId]: {
+          id: creatorId,
           name: creatorProfile.name || 'Creator',
           profilePicture: creatorProfile.profilePicture || '',
+          interests: creatorProfile.interests || [],
         }
-      }
+      },
+      durationPerRoundMinutes,
+      currentRound: 0,
+      pairings: []
     } as Omit<SpeedDatingSession, 'id'>);
 
     console.log('New speed dating session created with ID:', newSessionDocRef.id);
@@ -146,18 +171,21 @@ export async function createSpeedDatingSession(sessionData: {
  * @async
  * @function registerForSpeedDatingSession
  * @param {string} userId - ID of the user to register.
- * @param {UserProfile} userProfile - Profile of the user to register.
  * @param {string} sessionId - ID of the session to register for.
  * @returns {Promise<void>}
  * @throws {Error} If registration fails, session is full, user already registered, or Firebase not configured.
  */
-export async function registerForSpeedDatingSession(userId: string, userProfile: UserProfile, sessionId: string): Promise<void> {
+export async function registerForSpeedDatingSession(userId: string, sessionId: string): Promise<void> {
   if (criticalConfigError) {
     console.error("Firebase is not configured. Cannot register for session.");
     throw new Error("Application services are not available.");
   }
 
   const sessionDocRef = doc(firestore, 'speedDatingSessions', sessionId);
+  const userProfile = await get_user(userId); // Fetch user's profile for details
+  if (!userProfile) {
+    throw new Error("User profile not found for registration.");
+  }
 
   try {
     const sessionSnap = await getDoc(sessionDocRef);
@@ -185,14 +213,16 @@ export async function registerForSpeedDatingSession(userId: string, userProfile:
     const newStatus = newParticipantsCount >= session.maxParticipants ? 'full' : 'scheduled';
     
     const participantDetail: SpeedDatingSessionParticipantDetails = {
+        id: userId,
         name: userProfile.name || 'Participant',
-        profilePicture: userProfile.profilePicture || ''
+        profilePicture: userProfile.profilePicture || '',
+        interests: userProfile.interests || [],
     };
 
     await updateDoc(sessionDocRef, {
       participantIds: arrayUnion(userId),
       participantsCount: increment(1),
-      [`participants.${userId}`]: participantDetail, // Store basic info of the new participant
+      [`participants.${userId}`]: participantDetail, 
       status: newStatus,
       updatedAt: serverTimestamp(),
     });
@@ -222,11 +252,12 @@ export async function findAvailableSessions(interests: string[]): Promise<SpeedD
   }
   
   let q;
+  const now = Timestamp.now();
   if (interests.length === 0) {
      q = query(
       sessionsCollection,
       where('status', '==', 'scheduled'),
-      where('dateTime', '>', Timestamp.now()), 
+      where('dateTime', '>', now), 
       orderBy('dateTime', 'asc'),
       limit(20) 
     );
@@ -235,7 +266,7 @@ export async function findAvailableSessions(interests: string[]): Promise<SpeedD
       sessionsCollection,
       where('interests', 'array-contains-any', interests),
       where('status', '==', 'scheduled'), 
-      where('dateTime', '>', Timestamp.now()), 
+      where('dateTime', '>', now), 
       orderBy('dateTime', 'asc'),
       limit(20) 
     );
@@ -247,6 +278,7 @@ export async function findAvailableSessions(interests: string[]): Promise<SpeedD
     const sessions: SpeedDatingSession[] = [];
     querySnapshot.forEach((doc) => {
       const sessionData = { id: doc.id, ...doc.data() } as SpeedDatingSession;
+      // Ensure participantsCount is less than maxParticipants
       if (sessionData.participantsCount < sessionData.maxParticipants) {
         sessions.push(sessionData);
       }
@@ -259,11 +291,11 @@ export async function findAvailableSessions(interests: string[]): Promise<SpeedD
 }
 
 /**
- * Gets upcoming (scheduled or in-progress) sessions a user is registered for.
+ * Gets upcoming (scheduled, full, in-progress) or recently completed sessions a user is registered for.
  * @async
  * @function getUpcomingSessionsForUser
  * @param {string} userId - The ID of the user.
- * @returns {Promise<SpeedDatingSession[]>} A list of upcoming sessions for the user.
+ * @returns {Promise<SpeedDatingSession[]>} A list of upcoming/recent sessions for the user.
  * @throws {Error} If fetching fails or Firebase is not configured.
  */
 export async function getUpcomingSessionsForUser(userId: string): Promise<SpeedDatingSession[]> {
@@ -275,8 +307,6 @@ export async function getUpcomingSessionsForUser(userId: string): Promise<SpeedD
   const q = query(
     sessionsCollection,
     where('participantIds', 'array-contains', userId),
-    // where('status', 'in', ['scheduled', 'in-progress', 'full']), // Keep 'full' if user is already in
-    // Fetch all sessions user is part of, then filter by date/status client-side or more specifically if needed
     orderBy('dateTime', 'asc') 
   );
 
@@ -287,10 +317,16 @@ export async function getUpcomingSessionsForUser(userId: string): Promise<SpeedD
       sessions.push({ id: doc.id, ...doc.data() } as SpeedDatingSession);
     });
 
-    // Filter for sessions that are upcoming, in-progress, or completed (for feedback)
+    // Filter for sessions that are not cancelled AND are either:
+    // 1. Not yet completed (dateTime is in the future or status is 'in-progress' or 'scheduled' or 'full')
+    // 2. Completed very recently (e.g., within last 2 hours, to allow feedback)
+    const twoHoursAgo = Timestamp.now().toMillis() - (2 * 60 * 60 * 1000);
     return sessions.filter(session => 
       session.status !== 'cancelled' && 
-      (session.status === 'completed' || (session.dateTime as Timestamp).toMillis() >= Timestamp.now().toMillis() - (2 * 60 * 60 * 1000)) // Allow feedback for sessions completed recently (e.g., within last 2 hours)
+      (session.status === 'in-progress' || session.status === 'scheduled' || session.status === 'full' || 
+       (session.status === 'completed' && (session.dateTime as Timestamp).toMillis() >= twoHoursAgo) ||
+       ((session.dateTime as Timestamp).toMillis() >= Timestamp.now().toMillis())
+      )
     );
   } catch (error) {
     console.error(`Error fetching sessions for user ${userId}:`, error);
@@ -362,7 +398,8 @@ export async function getFeedbackForSessionByUser(userId: string, sessionId: str
 }
 
 /**
- * Updates the status of a session. Typically called by a backend process.
+ * Updates the status of a session. Typically called by a backend process/Cloud Function.
+ * If status becomes 'in-progress', it attempts to run matchmaking.
  * @async
  * @function updateSessionStatus
  * @param {string} sessionId - ID of the session to update.
@@ -377,12 +414,16 @@ export async function updateSessionStatus(sessionId: string, newStatus: SpeedDat
     }
     const sessionDocRef = doc(firestore, 'speedDatingSessions', sessionId);
     try {
-        await updateDoc(sessionDocRef, {
+        const updateData: Partial<SpeedDatingSession> = {
             status: newStatus,
-            updatedAt: serverTimestamp()
-        });
+            updatedAt: serverTimestamp() as Timestamp
+        };
+        if (newStatus === 'in-progress') {
+            updateData.currentRound = 1; // Initialize round
+        }
+        await updateDoc(sessionDocRef, updateData);
         console.log(`Session ${sessionId} status updated to ${newStatus}.`);
-        // Conceptual: If status becomes 'in-progress', trigger matchmaking
+        
         if (newStatus === 'in-progress') {
             await runMatchmakingForSession(sessionId);
         }
@@ -393,9 +434,9 @@ export async function updateSessionStatus(sessionId: string, newStatus: SpeedDat
 }
 
 /**
- * Conceptual: Runs matchmaking for a session.
- * This would be complex and involve fetching all participant profiles, scoring compatibility,
- * and creating pairings for rounds.
+ * Conceptual: Runs matchmaking for a session when it becomes 'in-progress'.
+ * This function simulates creating pairings for rounds.
+ * A real implementation would involve more complex compatibility scoring.
  * @async
  * @function runMatchmakingForSession
  * @param {string} sessionId - ID of the session.
@@ -403,7 +444,7 @@ export async function updateSessionStatus(sessionId: string, newStatus: SpeedDat
  */
 export async function runMatchmakingForSession(sessionId: string): Promise<void> {
     if (criticalConfigError) {
-        console.error("Firebase is not configured. Cannot run matchmaking.");
+        console.error("Firebase is not configured. Cannot run matchmaking for session " + sessionId);
         return;
     }
     console.log(`Conceptual: Running matchmaking for session ${sessionId}...`);
@@ -414,40 +455,86 @@ export async function runMatchmakingForSession(sessionId: string): Promise<void>
         console.error(`Session ${sessionId} not found for matchmaking.`);
         return;
     }
-    const session = sessionSnap.data() as SpeedDatingSession;
-    if (session.status !== 'in-progress' && session.status !== 'full') { // Or just before 'in-progress'
-        console.warn(`Matchmaking for session ${sessionId} not run, status is ${session.status}.`);
+    const session = { id: sessionSnap.id, ...sessionSnap.data() } as SpeedDatingSession;
+    
+    if (session.status !== 'in-progress') { 
+        console.warn(`Matchmaking for session ${sessionId} not run, status is ${session.status}. Should be 'in-progress'.`);
         return;
     }
 
     const participantIds = session.participantIds;
     if (participantIds.length < 2) {
         console.warn(`Not enough participants in session ${sessionId} for matchmaking.`);
+        // Optionally set status to cancelled or completed if too few
+        // await updateSessionStatus(sessionId, 'cancelled');
         return;
     }
 
-    // Fetch profiles for all participants (simplified - in reality, fetch only needed data)
-    // const participantProfiles: UserProfile[] = [];
-    // for (const pId of participantIds) {
-    //     const userProfile = await get_user(pId); // Assuming get_user exists and fetches UserProfile
-    //     participantProfiles.push(userProfile);
-    // }
-    // console.log(`Fetched ${participantProfiles.length} profiles for matchmaking in session ${sessionId}.`);
+    // Fetch full profiles of participants if more complex matching is needed
+    // For now, we can use the 'participants' object stored in the session if it contains enough info (e.g., interests)
+    const participantsDetails = Object.values(session.participants || {});
 
-    // TODO: Implement actual matchmaking logic:
-    // 1. Score compatibility between all pairs of participants (e.g., based on shared interests, other profile data).
-    // 2. Create pairings for multiple rounds, ensuring users meet different people.
-    //    - Example: Round 1: (A,B), (C,D); Round 2: (A,C), (B,D) etc.
-    // 3. Store these pairings in the session document (e.g., session.pairings).
-    //    session.pairings = [{ user1: 'idA', user2: 'idB', round: 1 }, ...];
-    //    session.currentRound = 1;
-    //    await updateDoc(sessionDocRef, { pairings: session.pairings, currentRound: 1, updatedAt: serverTimestamp() });
+    // --- Simulated Matchmaking Logic ---
+    const pairings: SpeedDatingPairing[] = [];
+    let availableParticipants = [...participantIds];
+    
+    // Simple round-robin or random pairing for N rounds
+    // This is a very basic simulation. Real matchmaking would be more complex.
+    const numberOfRounds = Math.min(3, availableParticipants.length -1); // e.g., max 3 rounds or N-1 rounds
+    session.currentRound = 1;
 
-    console.log(`Conceptual: Matchmaking pairings would be generated and stored for session ${sessionId}.`);
-    // For now, just an example update
-    await updateDoc(sessionDocRef, { currentRound: 1, updatedAt: serverTimestamp() });
+    for (let round = 1; round <= numberOfRounds; round++) {
+        availableParticipants = [...participantIds].sort(() => Math.random() - 0.5); // Shuffle for each round
+        const currentRoundPairings: SpeedDatingPairing[] = [];
+        const pairedThisRound = new Set<string>();
+
+        for (let i = 0; i < availableParticipants.length; i++) {
+            if (pairedThisRound.has(availableParticipants[i])) continue;
+
+            for (let j = i + 1; j < availableParticipants.length; j++) {
+                if (pairedThisRound.has(availableParticipants[j])) continue;
+
+                // Basic compatibility: check for at least one shared interest (if available)
+                // In a real system, this would be a more sophisticated score.
+                const user1Details = session.participants[availableParticipants[i]];
+                const user2Details = session.participants[availableParticipants[j]];
+                let compatible = true; // Assume compatible for simulation
+                if(user1Details?.interests && user2Details?.interests){
+                    compatible = user1Details.interests.some(interest => user2Details.interests?.includes(interest));
+                }
+
+                if (compatible) { // For simulation, let's pair if basic check passes
+                     const newPairing: SpeedDatingPairing = {
+                        user1Id: availableParticipants[i],
+                        user2Id: availableParticipants[j],
+                        round: round
+                    };
+                    currentRoundPairings.push(newPairing);
+                    pairings.push(newPairing);
+                    pairedThisRound.add(availableParticipants[i]);
+                    pairedThisRound.add(availableParticipants[j]);
+                    break; // Move to next participant i
+                }
+            }
+        }
+        console.log(`Session ${sessionId}, Round ${round} Pairings:`, currentRoundPairings);
+    }
+    
+    // --- End Simulated Matchmaking Logic ---
+
+    try {
+        await updateDoc(sessionDocRef, { 
+            pairings: pairings, 
+            currentRound: pairings.length > 0 ? 1 : 0, // Set currentRound to 1 if pairings exist
+            updatedAt: serverTimestamp() 
+        });
+        console.log(`Matchmaking pairings generated and stored for session ${sessionId}. Total pairings: ${pairings.length}.`);
+    } catch (error) {
+        console.error(`Error updating session ${sessionId} with pairings:`, error);
+    }
 }
 
 // TODO: Implement backend Cloud Function triggers for:
-// - Automatically transitioning session statuses (scheduled -> in-progress -> completed).
+// - Automatically transitioning session statuses (scheduled -> in-progress -> completed) based on dateTime.
 // - Potentially running matchmaking when a session becomes 'full' or at its scheduled start time.
+// - Handling round transitions and timers if the session is 'in-progress'.

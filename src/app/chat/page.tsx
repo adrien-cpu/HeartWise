@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -33,13 +32,24 @@ import {
 import type { UserProfile } from '@/services/user_profile';
 import { Timestamp } from 'firebase/firestore';
 import { showNotification, requestNotificationPermission } from '@/lib/notifications';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 /**
  * @fileOverview Chat page component with real-time Firestore integration.
  * @module ChatPage
  * @description Displays the chat interface, allowing users to select conversations and send/receive messages.
  *              Features AI-suggested intention tagging and content moderation.
- *              Requires Firebase for backend.
+ *              Requires Firebase for backend. Video/Audio call buttons are placeholders.
  */
 
 const manualIntentionTags = [
@@ -52,6 +62,7 @@ const manualIntentionTags = [
 
 export default function ChatPage() {
   const t = useTranslations('Chat');
+  const tGlobal = useTranslations('Home'); // For common terms like "unknownUser"
   const { toast } = useToast();
   const { currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -74,9 +85,10 @@ export default function ChatPage() {
   
   const [isPartnerTyping, setIsPartnerTyping] = useState(false); 
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [showCallFeatureInfo, setShowCallFeatureInfo] = useState(false);
 
   useEffect(() => {
-    requestNotificationPermission(); // Request permission when component mounts
+    requestNotificationPermission(); 
   }, []);
 
   useEffect(() => {
@@ -96,12 +108,14 @@ export default function ChatPage() {
       setConversations(loadedConversations);
       if (loadedConversations.length > 0 && !selectedConversationId) {
         setSelectedConversationId(loadedConversations[0].id);
+      } else if (loadedConversations.length === 0) {
+        setSelectedConversationId(null); // No conversations, clear selection
       }
       setLoadingConversations(false);
     });
 
     return () => unsubscribe();
-  }, [currentUser, selectedConversationId]);
+  }, [currentUser, selectedConversationId]); // Keep selectedConversationId to potentially re-select if list changes
 
   useEffect(() => {
     if (!selectedConversationId) {
@@ -114,13 +128,12 @@ export default function ChatPage() {
       const oldMessagesCount = currentMessages.length;
       setCurrentMessages(loadedMessages);
       
-      // Notification for new messages from partner
       if (loadedMessages.length > oldMessagesCount && currentUser) {
         const lastMessage = loadedMessages[loadedMessages.length - 1];
-        if (lastMessage.senderId !== currentUser.uid && document.hidden) { // Only notify if tab is not active
-          showNotification(t('newNotificationMessageTitle', { name: lastMessage.senderName }), {
+        if (lastMessage.senderId !== currentUser.uid && document.hidden) {
+          showNotification(t('newNotificationMessageTitle', { name: lastMessage.senderName || tGlobal('unknownUser') }), {
             body: lastMessage.text.substring(0, 100) + (lastMessage.text.length > 100 ? '...' : ''),
-            icon: '/logo.png' // Replace with your app's logo URL
+            icon: '/logo.png' 
           });
         }
       }
@@ -131,7 +144,7 @@ export default function ChatPage() {
     });
     
     return () => unsubscribe();
-  }, [selectedConversationId, currentUser, t, currentMessages.length]); // Added currentMessages.length to dependencies
+  }, [selectedConversationId, currentUser, t, currentMessages.length, tGlobal]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -194,7 +207,7 @@ export default function ChatPage() {
       toast({
         variant: 'destructive',
         title: t('moderationBlockTitle'),
-        description: `${t('moderationBlockDesc')} ${moderationResult.issues?.map(issue => tChat(`moderationCategory_${issue.category}`, {}, {fallback: issue.category})).join(', ')}`,
+        description: `${t('moderationBlockDesc')} ${moderationResult.issues?.map(issue => t(`moderationCategory_${issue.category}`, {}, {fallback: issue.category})).join(', ')}`,
         duration: 7000,
       });
       setSendingMessage(false);
@@ -232,16 +245,12 @@ export default function ChatPage() {
 
     const partnerMessageData: Omit<Message, 'id' | 'timestamp'> = {
       senderId: otherParticipant.id,
-      senderName: otherParticipant.name || 'Partner',
+      senderName: otherParticipant.name || tGlobal('unknownUser'),
       text: `Reply to: "${userMessageText.substring(0, 15)}..." (simulated)`,
       status: 'delivered',
     };
-     // In a real app, this would be triggered by the other user.
-     // For simulation, we can log that a real message would be sent.
     console.log("Simulated partner response would be sent for:", partnerMessageData);
-    // If you wanted to add it to UI for demo (careful not to create loops with listeners):
-    // await sendChatMessage(convId, partnerMessageData); 
-  }, [selectedConversation, otherParticipant]);
+  }, [selectedConversation, otherParticipant, tGlobal]);
 
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -265,24 +274,10 @@ export default function ChatPage() {
     return manualTag ? manualTag.icon : <Bot className="h-3 w-3 mr-1"/>;
   };
 
-  const handleStartVideoCall = () => {
-      if (!selectedConversation || !otherParticipant) return;
-      toast({ 
-        title: t('videoCallTitle'), 
-        description: t('videoCallFeatureDesc', { name: otherParticipant.name || t('unknownUser') }),
-        variant: "default",
-        duration: 5000
-      });
+  const handleCallFeatureClick = () => {
+    setShowCallFeatureInfo(true);
   };
-  const handleStartAudioCall = () => {
-      if (!selectedConversation || !otherParticipant) return;
-      toast({ 
-        title: t('audioCallTitle'), 
-        description: t('audioCallFeatureDesc', { name: otherParticipant.name || t('unknownUser') }),
-        variant: "default",
-        duration: 5000
-      });
-  };
+
 
   if (authLoading) {
     return (
@@ -326,7 +321,7 @@ export default function ChatPage() {
                 ) : conversations.length > 0 ? (
                     conversations.map(conv => {
                       const participantDetail = conv.participants && currentUser ? Object.values(conv.participants).find(p => p.id !== currentUser.uid) : null;
-                      const displayName = participantDetail?.name || t('unknownUser');
+                      const displayName = participantDetail?.name || tGlobal('unknownUser');
                       const displayPicture = participantDetail?.profilePicture;
                       const dataAiHint = participantDetail?.dataAiHint || "person";
 
@@ -373,17 +368,17 @@ export default function ChatPage() {
                 <CardHeader className="p-4 border-b flex flex-row items-center justify-between space-x-3 bg-card">
                     <div className="flex items-center space-x-3">
                     <Avatar className="h-10 w-10 border">
-                        <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || t('unknownUser')} data-ai-hint={otherParticipant.dataAiHint || "person"}/>
+                        <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || tGlobal('unknownUser')} data-ai-hint={otherParticipant.dataAiHint || "person"}/>
                         <AvatarFallback>{getInitials(otherParticipant.name)}</AvatarFallback>
                     </Avatar>
                         <div>
-                        <CardTitle className="text-lg">{otherParticipant.name || t('unknownUser')}</CardTitle>
+                        <CardTitle className="text-lg">{otherParticipant.name || tGlobal('unknownUser')}</CardTitle>
                          <CardDescription className={cn("text-xs", otherParticipant.isOnline ? "text-green-600" : "text-muted-foreground")}>
                             {otherParticipant.isOnline ? t('statusOnline') : t('statusOffline')}
                          </CardDescription>
                         </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1">
                          {otherParticipant.compatibilityScore !== undefined && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -399,7 +394,7 @@ export default function ChatPage() {
                         )}
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" onClick={handleStartAudioCall} aria-label={t('startAudioCall')}>
+                                <Button variant="ghost" size="icon" onClick={handleCallFeatureClick} aria-label={t('startAudioCall')}>
                                     <Phone className="h-5 w-5" />
                                 </Button>
                             </TooltipTrigger>
@@ -409,7 +404,7 @@ export default function ChatPage() {
                          </Tooltip>
                          <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" onClick={handleStartVideoCall} aria-label={t('startVideoCall')}>
+                                <Button variant="ghost" size="icon" onClick={handleCallFeatureClick} aria-label={t('startVideoCall')}>
                                     <Video className="h-5 w-5" />
                                 </Button>
                             </TooltipTrigger>
@@ -417,6 +412,19 @@ export default function ChatPage() {
                                 <p>{t('startVideoCall')}</p>
                             </TooltipContent>
                         </Tooltip>
+                         <AlertDialog open={showCallFeatureInfo} onOpenChange={setShowCallFeatureInfo}>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                <AlertDialogTitle>{t('videoAudioCallInfoTitle')}</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    {t('videoAudioCallInfoDesc', { name: otherParticipant.name || tGlobal('unknownUser') })}
+                                </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                <AlertDialogAction onClick={() => setShowCallFeatureInfo(false)}>{t('gotItButton')}</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
                     </div>
                 </CardHeader>
 
@@ -442,7 +450,7 @@ export default function ChatPage() {
                         >
                             {!isCurrentUserMsg && (
                             <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0">
-                                <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || t('unknownUser')} data-ai-hint={otherParticipant.dataAiHint || "person"}/>
+                                <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || tGlobal('unknownUser')} data-ai-hint={otherParticipant.dataAiHint || "person"}/>
                                 <AvatarFallback>{getInitials(otherParticipant.name)}</AvatarFallback>
                             </Avatar>
                             )}
@@ -505,7 +513,7 @@ export default function ChatPage() {
                      {isPartnerTyping && (
                          <div className="flex items-center space-x-2 mr-auto justify-start max-w-[85%]">
                             <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0">
-                                <AvatarImage src={otherParticipant?.profilePicture} alt={otherParticipant?.name || t('unknownUser')} data-ai-hint={otherParticipant?.dataAiHint || "person"}/>
+                                <AvatarImage src={otherParticipant?.profilePicture} alt={otherParticipant?.name || tGlobal('unknownUser')} data-ai-hint={otherParticipant?.dataAiHint || "person"}/>
                                 <AvatarFallback>{getInitials(otherParticipant?.name)}</AvatarFallback>
                             </Avatar>
                              <div className="rounded-lg px-3 py-2 bg-card text-card-foreground border rounded-bl-none shadow-sm">
@@ -587,4 +595,3 @@ export default function ChatPage() {
     </TooltipProvider>
   );
 }
-

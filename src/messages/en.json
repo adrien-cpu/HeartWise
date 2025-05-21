@@ -1,4 +1,3 @@
-
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -26,7 +25,8 @@
     "mainPageDescription": "The innovative dating app focused on emotional intelligence and genuine connection. Explore our features to find meaningful relationships.",
     "goToDashboard": "Go to Dashboard",
     "loginButton": "Login",
-    "signupButton": "Sign Up"
+    "signupButton": "Sign Up",
+    "unknownUser": "User"
   },
   "FeatureCards": {
     "learnMore": "Learn More",
@@ -61,7 +61,6 @@
     "namePlaceholder": "Your Name",
     "signupButton": "Sign Up",
     "alreadyAccountPrompt": "Already have an account?",
-    "passwordResetLinkSent": "Password reset link sent to your email.",
     "loginLink": "Login",
     "signupSuccessTitle": "Signup Successful",
     "signupSuccessDesc": "Welcome to HeartWise! Your account has been created.",
@@ -446,10 +445,8 @@
     "intentionTagTitle": "Intention",
     "startAudioCall": "Start Audio Call",
     "startVideoCall": "Start Video Call",
-    "videoCallTitle": "Video Call",
-    "videoCallFeatureDesc": "Video call with {name} - Feature coming soon!",
-    "audioCallTitle": "Audio Call",
-    "audioCallFeatureDesc": "Audio call with {name} - Feature coming soon!",
+    "videoCallFeatureDesc": "Video call with {name} - Feature coming soon! WebRTC integration needed.",
+    "audioCallFeatureDesc": "Audio call with {name} - Feature coming soon! WebRTC integration needed.",
     "messageFailedToSend": "Failed to send message.",
     "errorLoadingProfile": "Error loading your profile.",
     "unknownUser": "Unknown User",
@@ -464,7 +461,10 @@
     "messageBlockedByModeration": "Message blocked by content moderation.",
     "noMessagesYet": "No messages yet. Say hello!",
     "redirectingToLogin": "Redirecting to login...",
-    "newNotificationMessageTitle": "New message from {name}"
+    "newNotificationMessageTitle": "New message from {name}",
+    "videoAudioCallInfoTitle": "Calling Feature",
+    "videoAudioCallInfoDesc": "Video and audio call functionalities are planned for a future update and will require WebRTC integration. Thank you for your understanding!",
+    "gotItButton": "Got it!"
   },
   "RiskyWordsDictionary": {
     "title": "Risky Words Dictionary",
