@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Client-side internationalization setup.
  * @module ClientSideI18n
@@ -38,18 +39,22 @@ export function ClientSideI18n({
 }: ClientSideI18nProps): JSX.Element {
 
   useEffect(() => {
-    if (locale) {
+    // Update the lang attribute on the <html> tag on the client side
+    // when the locale changes or on initial mount.
+    if (locale && typeof document !== 'undefined') {
       document.documentElement.lang = locale;
     }
   }, [locale]);
   
   if (!messages || typeof messages !== 'object') { 
     console.error(`ClientSideI18n: Received invalid messages object (not an object or null/undefined) for locale: ${locale}. Rendering children without NextIntlClientProvider.`);
+    // Render children directly if messages are critically missing to avoid a full crash.
+    // This might lead to missing translations but keeps the app from breaking entirely.
     return <>{children}</>;
   }
   
-  if (Object.keys(messages).length === 0 && locale) { // Also check if locale is present before warning about empty messages for a specific locale
-      console.warn(`ClientSideI18n: Received empty messages object for locale: ${locale}. Translations might be missing or there was an error loading them.`);
+  if (Object.keys(messages).length === 0 && locale) {
+      console.warn(`ClientSideI18n: Received empty messages object for locale: ${locale}. Translations might be missing or there was an error loading them on the server.`);
   }
 
   return (

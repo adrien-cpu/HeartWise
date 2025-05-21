@@ -14,6 +14,7 @@ import './globals.css'; // Global styles are imported here
 import { metadata as appMetadata } from '@/app/metadata';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AuthProvider } from '@/contexts/AuthContext';
+import { defaultLocale } from '@/i18n/settings'; // Import defaultLocale
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -43,17 +44,16 @@ export default function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  // The `lang` attribute on the <html> tag is set here.
-  // It might be dynamically updated on the client-side by ClientSideI18n if locale changes.
-  // Next.js implicitly handles the <head> tag and merges metadata.
-  // Ensure no whitespace or text nodes are direct children of <html>.
+  // The `lang` attribute on the <html> tag is set here to the default.
+  // The `[locale]/layout.tsx` and `ClientSideI18n` will handle updating it
+  // for specific locales.
   return (
-    <html lang="en">
+    <html lang={defaultLocale}>
       {/* Head content is implicitly managed by Next.js via the Metadata API and <Head> components if used in pages/app segments. */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <SidebarProvider>
-            {children} {/* This will render the content from [locale]/layout.tsx and then the page */}
+            {children} {/* This will render the content from [locale]/layout.tsx */}
           </SidebarProvider>
         </AuthProvider>
       </body>

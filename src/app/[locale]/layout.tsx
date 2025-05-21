@@ -14,8 +14,7 @@ import type { AbstractIntlMessages } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/settings';
 import { ClientSideI18n } from '@/components/ClientSideI18n';
-// Global CSS is imported in src/app/layout.tsx
-// Fonts are also defined in src/app/layout.tsx
+// Global CSS and fonts are handled in the root src/app/layout.tsx
 
 // Enable static rendering for all locales
 export function generateStaticParams() {
@@ -45,11 +44,14 @@ export default async function LocaleLayout({
   if (isValidLocale(rawUrlLocale)) {
     effectiveLocale = rawUrlLocale;
   } else {
+    // This scenario should ideally be caught by middleware and redirected.
+    // If it reaches here, it's a fallback.
     console.warn(`[LocaleLayout] URL locale "${rawUrlLocale}" is invalid or not directly supported. Using default locale "${defaultLocale}". Middleware should handle redirection for completely unsupported locales.`);
     effectiveLocale = defaultLocale;
   }
 
-  // Ensures that server functions like `getLocale` know about the current locale.
+  // Ensures that server functions like `getLocale` (from next-intl/server) know about the current locale.
+  // This is critical for Server Components that use `useTranslations` or `getTranslations`.
   setRequestLocale(effectiveLocale);
 
   let messagesForClient: AbstractIntlMessages;
@@ -61,14 +63,12 @@ export default async function LocaleLayout({
     if (loadedMessages && typeof loadedMessages === 'object' && Object.keys(loadedMessages).length > 0) {
       messagesForClient = loadedMessages;
     } else {
-      // This indicates a problem with message loading in `i18n/settings.ts` or the JSON files.
-      console.error(`[LocaleLayout] Messages object from getMessages for locale "${effectiveLocale}" is missing, empty, or not an object. Using empty messages for client. Check i18n/settings.ts and message files.`);
-      messagesForClient = {}; // Fallback to empty messages
+      console.error(`[LocaleLayout] Messages object from getMessages for locale "${effectiveLocale}" is missing, empty, or not an object. Check i18n/settings.ts and message files. Using empty messages for client.`);
+      messagesForClient = {}; 
     }
   } catch (error: any) {
-    console.error(`[LocaleLayout] Critical failure in getMessages for effective locale "${effectiveLocale}". Error: ${error.message}. This usually means the i18n setup in settings.ts or middleware has an issue.`);
-    messagesForClient = {}; // Fallback to empty messages
-    console.warn(`[LocaleLayout] Falling back to empty messages for ClientSideI18n due to catastrophic message loading error for locale "${effectiveLocale}".`);
+    console.error(`[LocaleLayout] Critical failure in getMessages for locale "${effectiveLocale}". Error: ${error.message}. This usually means the i18n setup in settings.ts or middleware has an issue. Falling back to empty messages.`);
+    messagesForClient = {}; 
   }
 
   // This layout does not render <html> or <body>.
