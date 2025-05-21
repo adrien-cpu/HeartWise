@@ -54,6 +54,7 @@ export interface UserProfile {
   speedDatingSchedule?: string[]; 
   gamePreferences?: string[];
   premiumFeatures?: PremiumFeatures;
+  fcmTokens?: string[]; // For Firebase Cloud Messaging push notifications
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 }
@@ -94,6 +95,7 @@ const mapDocumentToUserProfile = (docSnap: DocumentSnapshot<DocumentData>): User
     speedDatingSchedule: data.speedDatingSchedule ?? [],
     interests: data.interests ?? [],
     privacySettings: data.privacySettings ?? { showLocation: true, showOnlineStatus: true },
+    fcmTokens: data.fcmTokens ?? [], // Initialize fcmTokens
   } as UserProfile;
 };
 
@@ -117,6 +119,7 @@ export async function get_user(userId: string): Promise<UserProfile> {
         privacySettings: { showLocation: true, showOnlineStatus: true },
         rewards: [], points: 0, speedDatingSchedule: [], gamePreferences: [],
         premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+        fcmTokens: [],
         createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
     };
     return defaultProfile;
@@ -140,6 +143,7 @@ export async function get_user(userId: string): Promise<UserProfile> {
         speedDatingSchedule: [],
         gamePreferences: [],
         premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+        fcmTokens: [],
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
     };
@@ -159,6 +163,7 @@ export async function get_user(userId: string): Promise<UserProfile> {
   userProfile.gamePreferences = userProfile.gamePreferences || [];
   userProfile.privacySettings = userProfile.privacySettings || { showLocation: true, showOnlineStatus: true };
   userProfile.interests = userProfile.interests || [];
+  userProfile.fcmTokens = userProfile.fcmTokens || [];
   userProfile.profilePicture = userProfile.profilePicture || `https://placehold.co/200x200.png`;
   userProfile.dataAiHint = userProfile.dataAiHint || (userProfile.name ? `${userProfile.name.split(' ')[0].toLowerCase()} person` : 'person placeholder');
 
@@ -198,6 +203,7 @@ export async function update_user_profile(userId: string, profileData: Partial<U
     dataToUpdate.interests = profileData.interests ?? [];
     dataToUpdate.gamePreferences = profileData.gamePreferences ?? [];
     dataToUpdate.speedDatingSchedule = profileData.speedDatingSchedule ?? [];
+    dataToUpdate.fcmTokens = profileData.fcmTokens ?? [];
     if (!profileData.profilePicture) {
         dataToUpdate.profilePicture = `https://placehold.co/200x200.png`;
         dataToUpdate.dataAiHint = "person placeholder";
@@ -274,6 +280,8 @@ async function checkAndUnlockPremiumFeatures(userId: string, currentUserProfile:
        console.log(`User ${userId} premium features updated:`, newFeatures);
        if (unlockedFeatureName) {
            showNotification("Premium Feature Unlocked!", { body: `You've unlocked: ${unlockedFeatureName}!`});
+           // Conceptual: Trigger backend to send push notification for feature unlock
+           // await triggerPushNotification(userId, "Premium Feature Unlocked!", `You've unlocked: ${unlockedFeatureName}!`);
        }
     }
 }
@@ -313,8 +321,10 @@ export async function add_user_reward(userId: string, rewardData: Omit<UserRewar
     });
     console.log(`Reward ${rewardData.type} added for user ${userId}. Points added: ${pointsToAward}.`);
     
-    // Show notification for new badge
     showNotification("Badge Earned!", { body: `You've earned the "${rewardData.name}" badge!` });
+    // Conceptual: Trigger backend to send push notification for new badge
+    // await triggerPushNotification(userId, "Badge Earned!", `You've earned the "${rewardData.name}" badge!`);
+
 
     const updatedProfile = await get_user(userId);
     await checkAndUnlockPremiumFeatures(userId, updatedProfile);
@@ -448,10 +458,10 @@ function getPointsForReward(rewardType: string): number {
 }
 
 const mockUsersForMatching: UserProfile[] = [
-    { id: 'mockUser1', name: 'Alex Doe', email: 'alex@example.com', bio: 'Loves hiking and reading.', interests: ['Hiking', 'Reading', 'Photography'], profilePicture: 'https://placehold.co/200x200.png?text=Alex', dataAiHint: 'man smiling', points: 120 },
-    { id: 'mockUser2', name: 'Brenda Smith', email: 'brenda@example.com', bio: 'Passionate about art and music.', interests: ['Art', 'Music', 'Travel'], profilePicture: 'https://placehold.co/200x200.png?text=Brenda', dataAiHint: 'woman nature', points: 250 },
-    { id: 'mockUser3', name: 'Charlie Brown', email: 'charlie@example.com', bio: 'Enjoys cooking and movies.', interests: ['Cooking', 'Movies', 'Gaming'], profilePicture: 'https://placehold.co/200x200.png?text=Charlie', dataAiHint: 'person thinking', points: 80 },
-    { id: 'mockUser4', name: 'Diana Prince', email: 'diana@example.com', bio: 'Tech enthusiast and avid gamer.', interests: ['Technology', 'Gaming', 'Science'], profilePicture: 'https://placehold.co/200x200.png?text=Diana', dataAiHint: 'woman glasses', points: 300 },
+    { id: 'mockUser1', name: 'Alex Doe', email: 'alex@example.com', bio: 'Loves hiking and reading.', interests: ['Hiking', 'Reading', 'Photography'], profilePicture: 'https://placehold.co/200x200.png?text=Alex', dataAiHint: 'man smiling', points: 120, fcmTokens: [] },
+    { id: 'mockUser2', name: 'Brenda Smith', email: 'brenda@example.com', bio: 'Passionate about art and music.', interests: ['Art', 'Music', 'Travel'], profilePicture: 'https://placehold.co/200x200.png?text=Brenda', dataAiHint: 'woman nature', points: 250, fcmTokens: [] },
+    { id: 'mockUser3', name: 'Charlie Brown', email: 'charlie@example.com', bio: 'Enjoys cooking and movies.', interests: ['Cooking', 'Movies', 'Gaming'], profilePicture: 'https://placehold.co/200x200.png?text=Charlie', dataAiHint: 'person thinking', points: 80, fcmTokens: [] },
+    { id: 'mockUser4', name: 'Diana Prince', email: 'diana@example.com', bio: 'Tech enthusiast and avid gamer.', interests: ['Technology', 'Gaming', 'Science'], profilePicture: 'https://placehold.co/200x200.png?text=Diana', dataAiHint: 'woman glasses', points: 300, fcmTokens: [] },
 ];
 
 
@@ -471,7 +481,7 @@ export async function get_all_users(options?: { forMatching?: boolean }): Promis
   }
   if (options?.forMatching) {
     return mockUsersForMatching.map(user => ({
-        ...{
+        ...{ // Default values for any potentially missing fields in mock data
             bio: "",
             interests: [],
             profilePicture: `https://placehold.co/200x200.png`,
@@ -482,6 +492,7 @@ export async function get_all_users(options?: { forMatching?: boolean }): Promis
             speedDatingSchedule: [],
             gamePreferences: [],
             premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+            fcmTokens: [],
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now(),
         },
@@ -511,4 +522,58 @@ export async function get_all_users(options?: { forMatching?: boolean }): Promis
 export async function get_user_premium_features(userId: string): Promise<PremiumFeatures> {
   const user = await get_user(userId);
   return user.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
+}
+
+
+/**
+ * Conceptual: Adds an FCM token to a user's profile.
+ * This would be called from the client after obtaining an FCM token.
+ * @async
+ * @function addFcmTokenToUserProfile
+ * @param {string} userId - The ID of the user.
+ * @param {string} token - The FCM device token.
+ * @returns {Promise<void>}
+ */
+export async function addFcmTokenToUserProfile(userId: string, token: string): Promise<void> {
+  if (criticalConfigError) {
+    console.error("Firebase is not configured. Cannot add FCM token.");
+    return;
+  }
+  const userDocRef = doc(firestore, 'users', userId);
+  try {
+    await updateDoc(userDocRef, {
+      fcmTokens: arrayUnion(token), // Use arrayUnion to add token if not already present
+      updatedAt: Timestamp.now(),
+    });
+    console.log(`FCM token added for user ${userId}`);
+  } catch (error) {
+    console.error(`Error adding FCM token for user ${userId}:`, error);
+  }
+}
+
+/**
+ * Conceptual: Removes an FCM token from a user's profile (e.g., on logout or token refresh).
+ * @async
+ * @function removeFcmTokenFromUserProfile
+ * @param {string} userId - The ID of the user.
+ * @param {string} token - The FCM device token to remove.
+ * @returns {Promise<void>}
+ */
+export async function removeFcmTokenFromUserProfile(userId: string, token: string): Promise<void> {
+  if (criticalConfigError) {
+    console.error("Firebase is not configured. Cannot remove FCM token.");
+    return;
+  }
+  const userDocRef = doc(firestore, 'users', userId);
+  try {
+    const user = await get_user(userId);
+    const updatedTokens = (user.fcmTokens || []).filter(t => t !== token);
+    await updateDoc(userDocRef, {
+      fcmTokens: updatedTokens,
+      updatedAt: Timestamp.now(),
+    });
+    console.log(`FCM token removed for user ${userId}`);
+  } catch (error) {
+    console.error(`Error removing FCM token for user ${userId}:`, error);
+  }
 }

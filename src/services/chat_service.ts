@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Provides services for managing chat conversations and messages using Firestore.
@@ -116,7 +117,7 @@ export async function createConversation(
     });
     
     if (foundConversationId) {
-      console.log(`Conversation between ${currentUserId} and ${targetUserProfile.id} already exists: ${foundConversationId}`);
+      console.log(`ChatService: Conversation between ${currentUserId} and ${targetUserProfile.id} already exists: ${foundConversationId}`);
       return foundConversationId;
     }
 
@@ -139,10 +140,10 @@ export async function createConversation(
     };
 
     await setDoc(conversationDocRef, newConversationData);
-    console.log('New conversation created with ID:', conversationId);
+    console.log('ChatService: New conversation created with ID:', conversationId);
     return conversationId;
   } catch (error) {
-    console.error('Error creating or getting conversation:', error);
+    console.error('ChatService: Error creating or getting conversation:', error);
     throw new Error('Failed to create or get conversation.');
   }
 }
@@ -180,14 +181,31 @@ export async function sendMessage(
       lastMessageTimestamp: now,
       lastMessageSenderId: messageData.senderId,
       updatedAt: now,
-      // Increment unread count for the other participant(s) - simplified for 2 users
-      // This part needs careful handling in a multi-user scenario or if one user is offline
+      // Increment unread count for the other participant(s)
+      // This requires knowing the other participant ID and handling it carefully.
+      // For a 2-person chat:
+      // const convSnap = await getDoc(conversationDocRef);
+      // if (convSnap.exists()) {
+      //   const convData = convSnap.data() as Conversation;
+      //   const otherParticipantId = convData.participantIds.find(id => id !== messageData.senderId);
+      //   if (otherParticipantId) {
+      //     await updateDoc(conversationDocRef, {
+      //       [`unreadCounts.${otherParticipantId}`]: increment(1)
+      //     });
+      //   }
+      // }
     }, { merge: true });
 
-    console.log('Message sent with ID:', docRef.id, 'to conversation:', conversationId);
+    console.log('ChatService: Message sent with ID:', docRef.id, 'to conversation:', conversationId);
+    
+    // Conceptual: Trigger backend to send push notification to other participants
+    // const conversation = (await getDoc(conversationDocRef)).data() as Conversation;
+    // const recipientIds = conversation.participantIds.filter(id => id !== messageData.senderId);
+    // await triggerPushNotification(recipientIds, `New message from ${messageData.senderName}`, messageData.text);
+
     return docRef.id;
   } catch (error) {
-    console.error('Error sending message:', error);
+    console.error('ChatService: Error sending message:', error);
     throw new Error('Failed to send message.');
   }
 }
@@ -222,7 +240,7 @@ export function getConversationsListener(
     });
     callback(conversations);
   }, (error) => {
-    console.error("Error listening to conversations:", error);
+    console.error("ChatService: Error listening to conversations:", error);
     // Optionally, notify the user through the callback or a toast
     callback([]); // Send empty array on error
   });
@@ -256,14 +274,24 @@ export function getMessagesListener(
     });
     callback(messages);
   }, (error) => {
-    console.error(`Error listening to messages for conversation ${conversationId}:`, error);
+    console.error(`ChatService: Error listening to messages for conversation ${conversationId}:`, error);
     callback([]);
   });
 
   return unsubscribe;
 }
 
+// Conceptual function placeholder for triggering push notifications
+// This would typically be a backend function (e.g., Cloud Function)
+// async function triggerPushNotification(recipientUserIds: string[], title: string, body: string) {
+//   console.log(`Conceptual: Triggering push notification to ${recipientUserIds.join(', ')}: "${title}" - "${body}"`);
+//   // 1. For each recipientUserId, get their FCM tokens from their UserProfile.
+//   // 2. Use Firebase Admin SDK to send messages to these tokens.
+//   // Example: admin.messaging().sendToDevice(tokens, payload);
+// }
+
 // Potential future functions:
 // - markMessagesAsRead(conversationId: string, userId: string)
 // - updateTypingIndicator(conversationId: string, userId: string, isTyping: boolean)
 // - getConversationById(conversationId: string): Promise<Conversation | null>
+

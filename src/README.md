@@ -1,13 +1,14 @@
+
 # **App Name**: HeartWise
 
 ## Core Features:
-- [x] Geolocation Based Meeting: Enable users to find geolocated meetings in public places. (`/geolocation-meeting`)
+- [x] Geolocation Based Meeting: Enable users to find geolocated meetings in public places. (`/geolocation-meeting` - *Frontend + Conceptual backend compatibility logic*)
 - [x] Facial Analysis and Matching: AI analyzes user's photo and suggests potential matches based on simulated facial and psychological traits from a mock user database. (`/facial-analysis-matching`, `src/services/face-analysis.ts`, `src/ai/flows/facial-match-suggestions.ts`)
 - [x] AI Conversation Coach: Analyse the messages written by the user and suggest reformulations if needed to create a good conversation. The LLM acts as a tool and will decide when to intervene. (`/ai-conversation-coach`, `src/ai/flows/conversation-coach.ts`, `src/ai/flows/style-suggestions-flow.ts`)
 - [x] Blind Exchange Mode: Offer a mode of meeting without photo, profile or information. The AI proposes a profile based on facial and emotional matching, common points and opposite polarities. (`/blind-exchange-mode`, `src/ai/flows/blind-exchange-profile.ts`)
 - [x] Intelligent User Dashboard: Display personalized advice and user stats. (`/dashboard`)
 - [x] Risky Words Dictionary: Identify ambiguous or sensitive expressions in messages. User feedback on suggestions is persisted. (`/risky-words-dictionary`, `src/ai/flows/risky-words-dictionary.ts`, `src/services/feedback_service.ts`)
-- [x] User Profile Management: View and edit user profile details. (`/profile`, `src/services/user_profile.ts`)
+- [x] User Profile Management: View and edit user profile details. Firebase Firestore backend. Content moderation for bio/images. (`/profile`, `src/services/user_profile.ts`, `src/services/moderation_service.ts`)
 - [x] Basic Chat Interface: Real-time chat with Firestore backend. Includes AI-suggested intention tagging and content moderation. (`/chat`, `src/ai/flows/intention-tagging.ts`, `src/services/moderation_service.ts`, `src/services/chat_service.ts`)
 - [x] Speed Dating Interface: UI for creating, finding, registering for sessions. Feedback persisted to Firestore. Conceptual backend logic for matchmaking and session status transitions in place. (`/speed-dating`, `src/services/speed_dating_service.ts`)
 - [x] General Knowledge Game: Trivia and Time's Up game modes. Persistent scores, preferences, and leaderboard via Firestore. (`/game`, `src/services/user_profile.ts`)
@@ -106,7 +107,7 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[x] Rencontre Géolocalisée :** (`/geolocation-meeting` - *Uses Browser Geolocation API + Conceptual backend compatibility logic*)
 *   **[x] Gestion Améliorée des Profils :** (`/profile` - *UI/Data now uses Firebase Firestore, content moderation for bio/images integrated*)
 *   **[x] Outils de Communication Intégrés à l'Application (Chat avec Tag d'Intention IA):** (`/chat`, `src/ai/flows/intention-tagging.ts` - *Enhanced UI/Real-time via Firestore/AI Suggestion, content moderation integrated, local notification on new message*)
-*   **[x] Système de récompenses :** (`/rewards` - *Displays Points/Badges from Firebase Firestore, premium feature unlocking implemented and displayed, local notification on badge/feature unlock*)
+*   **[x] Système de récompenses :** (`/rewards` - *Displays Points/Badges from Firebase Firestore, premium feature unlocking implemented and displayed, local notification on new badge/feature unlock*)
 *   **[x] Tableau de bord utilisateur intelligent :** (`/dashboard` - *Displays Advice/Stats from Firebase Firestore*)
 
 ## Features to Implement / Enhance (Requires Backend & Advanced Logic):
@@ -115,10 +116,10 @@ Un mode novateur de rencontre **sans photo, sans profil, sans informations**. (`
 *   **[x] Authentification Utilisateur:** Firebase Auth implemented (Email/Password, Profile Creation, Password Reset). Enhanced error handling and API key configuration guidance.
 *   **[x] Système de récompenses (avancé):** Points and badges stored in Firestore. Premium feature unlocking logic based on points/badges implemented and displayed on rewards page. Local notification on badge/feature unlock.
 *   **[~] Modération de Contenu:** Structure for real moderation API in place via `src/services/moderation_service.ts`. Simulated moderation for chat, bio, images, risky word input, and facial analysis photo upload integrated. *Requires actual external API integration for production.*
-*   **[~] Notifications:** Local browser notifications implemented for new chat messages, new badges, speed dating registration/creation. *Full push notifications (e.g., Firebase Cloud Messaging) for offline/background activity require backend setup.*
-*   **[ ] Rencontres Virtuelles (Appels Vidéo/Audio):** Intégrer une solution WebRTC (e.g., Twilio, Agora) pour les appels vidéo/audio dans `/chat`. (*UI placeholders added with "coming soon" messages and informational dialog.*)
-*   **[~] Speed Dating (Advanced Backend):** Session creation/registration/finding via Firestore. Feedback persisted. *Advanced matchmaking algorithms and robust session status transitions (e.g., automated start/end via backend triggers like Cloud Functions) are conceptualized in the service layer.*
-*   **[~] Mise à jour IA (Risky Words):** Feedback sur mots signalés et signalement de mots manqués implémentés (stockage Firestore). *L'aspect auto-apprentissage (fine-tuning IA ou mise à jour de listes dynamiques) est conceptualisé dans `feedback_service.ts` et nécessite un pipeline backend.*
+*   **[~] Notifications:** Local browser notifications implemented for new chat messages, new badges, speed dating registration/creation, and premium feature unlocks. Conceptual backend triggers identified. *Full push notifications (e.g., Firebase Cloud Messaging) for offline/background activity require backend setup and FCM token management (conceptual field added to UserProfile).*
+*   **[~] Rencontres Virtuelles (Appels Vidéo/Audio):** UI placeholders and informational dialog added to `/chat`. Conceptual service layer created in `src/services/webrtc_service.ts` outlining WebRTC structure. *Requires full WebRTC and signaling server integration.*
+*   **[~] Speed Dating (Advanced Backend):** Session creation/registration/finding via Firestore. Feedback persisted. Conceptual matchmaking algorithms and robust session status transitions (e.g., automated start/end via backend triggers like Cloud Functions) outlined in the service layer.
+*   **[~] Mise à jour IA (Risky Words):** Feedback sur mots signalés et signalement de mots manqués implémentés (stockage Firestore). Conceptual backend processing for auto-learning outlined in `feedback_service.ts`. *Requires a backend pipeline for model fine-tuning or dynamic list updates.*
 
 
 *Note: Features marked with *Simulation*, *AI*, or *UI* have frontend representations but may require backend logic for full functionality. Features marked with *~* are partially implemented or conceptualized at the backend/service layer.*
