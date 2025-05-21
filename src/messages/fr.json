@@ -54,6 +54,8 @@
     "signupErrorTitle": "Échec de l'Inscription",
     "signupErrorDefault": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "signupErrorEmailInUse": "Cette adresse e-mail est déjà utilisée.",
+    "signupErrorInvalidEmail": "L'adresse e-mail n'est pas valide.",
+    "signupErrorWeakPassword": "Le mot de passe est trop faible. Il doit contenir au moins 6 caractères.",
     "forgotPasswordTitle": "Mot de Passe Oublié ?",
     "forgotPasswordDescription": "Entrez votre adresse e-mail et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
     "forgotPasswordLink": "Mot de passe oublié ?",
@@ -141,7 +143,8 @@
     "fileTooLargeDesc": "La taille de l'image ne doit pas dépasser 5Mo.",
     "invalidFileTypeTitle": "Type de Fichier Invalide",
     "invalidFileTypeDesc": "Veuillez télécharger un fichier image (ex: JPG, PNG).",
-    "unknownUser": "Utilisateur"
+    "unknownUser": "Utilisateur",
+    "photoModerationFailed": "Votre photo n'a pas pu être traitée en raison de problèmes de modération :"
   },
   "AIConversationCoachPage": {
     "pageTitle": "Coach IA Conversationnel",
@@ -401,7 +404,13 @@
     "createError": "Échec de la création de la session de speed dating.",
     "findButton": "Trouver des Sessions",
     "noResultsHelp": "Aucune session trouvée pour les filtres actuels. Essayez d'élargir votre recherche ou de créer une nouvelle session.",
-    "noPartnersForFeedback": "Aucun partenaire listé pour cette session de feedback. Cela peut indiquer que la session n'est pas terminée ou que les données des participants sont indisponibles."
+    "noPartnersForFeedback": "Aucun partenaire listé pour cette session de feedback. Cela peut indiquer que la session n'est pas terminée ou que les données des participants sont indisponibles.",
+    "createSuccessNotifTitle": "Session Créée !",
+    "createSuccessNotifBody": "Votre nouvelle session de speed dating est planifiée.",
+    "registrationSuccessNotifTitle": "Inscription Confirmée",
+    "registrationSuccessNotifBody": "Vous êtes prêt(e) pour la session de speed dating !",
+    "feedbackSubmittedNotifTitle": "Avis Envoyé",
+    "feedbackSubmittedNotifBody": "Merci d'avoir partagé vos impressions !"
   },
   "Chat": {
     "title": "Discussion",
@@ -422,10 +431,10 @@
     "intentionTagTitle": "Intention",
     "startAudioCall": "Démarrer un appel audio",
     "startVideoCall": "Démarrer un appel vidéo",
-    "videoCallTitle": "Démarrage de l'appel vidéo...",
-    "videoCallDesc": "Connexion de l'appel vidéo avec {name}. (Nécessite un backend)",
-    "audioCallTitle": "Démarrage de l'appel audio...",
-    "audioCallDesc": "Connexion de l'appel audio avec {name}. (Nécessite un backend)",
+    "videoCallTitle": "Appel Vidéo",
+    "videoCallFeatureDesc": "Appel vidéo avec {name} - Fonctionnalité bientôt disponible !",
+    "audioCallTitle": "Appel Audio",
+    "audioCallFeatureDesc": "Appel audio avec {name} - Fonctionnalité bientôt disponible !",
     "messageFailedToSend": "Échec de l'envoi du message.",
     "errorLoadingProfile": "Erreur lors du chargement de votre profil.",
     "unknownUser": "Utilisateur Inconnu",
@@ -433,10 +442,14 @@
     "typingIndicator": "Écrit...",
     "moderationBlockTitle": "Modération de Contenu",
     "moderationBlockDesc": "Votre message n'a pas pu être envoyé en raison de : ",
+    "moderationCategory_profanity": "propos injurieux",
+    "moderationCategory_sensitive_content": "contenu sensible",
+    "moderationCategory_adult_content_simulated": "contenu potentiellement pour adultes (simulé)",
     "messageModerated": "[Ce message n'a pas été envoyé en raison de la politique de contenu]",
     "messageBlockedByModeration": "Message bloqué par la modération de contenu.",
     "noMessagesYet": "Aucun message pour l'instant. Dites bonjour !",
-    "redirectingToLogin": "Redirection vers la connexion..."
+    "redirectingToLogin": "Redirection vers la connexion...",
+    "newNotificationMessageTitle": "Nouveau message de {name}"
   },
   "RiskyWordsDictionary": {
     "title": "Dictionnaire des Mots à Risque",
@@ -480,6 +493,7 @@
     "reportSubmitError": "Échec de l'envoi de votre signalement. Veuillez réessayer.",
     "missedWordEmptyError": "Veuillez entrer l'expression que vous souhaitez signaler.",
     "moderationFailedBeforeAnalysis": "Le texte n'a pas pu être analysé en raison de violations de la politique de contenu :",
+    "inputModerationFailed": "Votre texte n'a pas pu être traité en raison de problèmes de modération :",
     "feedbackAlreadySubmittedTitle": "Avis Déjà Envoyé",
     "feedbackAlreadySubmittedDesc": "Vous avez déjà envoyé un avis pour cet élément.",
     "loginForFeedback": "Veuillez vous connecter pour donner votre avis.",
@@ -595,5 +609,3 @@
     "toggleSidebar": "Basculer la Barre Latérale"
   }
 }
-
-    

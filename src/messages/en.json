@@ -54,6 +54,8 @@
     "signupErrorTitle": "Signup Failed",
     "signupErrorDefault": "An unexpected error occurred. Please try again.",
     "signupErrorEmailInUse": "This email address is already in use.",
+    "signupErrorInvalidEmail": "The email address is not valid.",
+    "signupErrorWeakPassword": "Password is too weak. It should be at least 6 characters.",
     "forgotPasswordTitle": "Forgot Your Password?",
     "forgotPasswordDescription": "Enter your email address and we'll send you a link to reset your password.",
     "forgotPasswordLink": "Forgot password?",
@@ -141,7 +143,8 @@
     "fileTooLargeDesc": "Image size should not exceed 5MB.",
     "invalidFileTypeTitle": "Invalid File Type",
     "invalidFileTypeDesc": "Please upload an image file (e.g., JPG, PNG).",
-    "unknownUser": "User"
+    "unknownUser": "User",
+    "photoModerationFailed": "Your photo could not be processed due to moderation issues:"
   },
   "AIConversationCoachPage": {
     "pageTitle": "AI Conversation Coach",
@@ -401,7 +404,13 @@
     "createError": "Failed to create speed dating session.",
     "findButton": "Find Sessions",
     "noResultsHelp": "No sessions found for current filters. Try broadening your search or creating a new session.",
-    "noPartnersForFeedback": "No partners listed for this feedback session. This may indicate the session hasn't concluded or participant data is unavailable."
+    "noPartnersForFeedback": "No partners listed for this feedback session. This may indicate the session hasn't concluded or participant data is unavailable.",
+    "createSuccessNotifTitle": "Session Created!",
+    "createSuccessNotifBody": "Your new speed dating session is scheduled.",
+    "registrationSuccessNotifTitle": "Registration Confirmed",
+    "registrationSuccessNotifBody": "You're all set for the speed dating session!",
+    "feedbackSubmittedNotifTitle": "Feedback Sent",
+    "feedbackSubmittedNotifBody": "Thanks for sharing your thoughts!"
   },
   "Chat": {
     "title": "Chat",
@@ -422,10 +431,10 @@
     "intentionTagTitle": "Intention",
     "startAudioCall": "Start Audio Call",
     "startVideoCall": "Start Video Call",
-    "videoCallTitle": "Starting Video Call...",
-    "videoCallDesc": "Connecting video call with {name}. (Requires backend)",
-    "audioCallTitle": "Starting Audio Call...",
-    "audioCallDesc": "Connecting audio call with {name}. (Requires backend)",
+    "videoCallTitle": "Video Call",
+    "videoCallFeatureDesc": "Video call with {name} - Feature coming soon!",
+    "audioCallTitle": "Audio Call",
+    "audioCallFeatureDesc": "Audio call with {name} - Feature coming soon!",
     "messageFailedToSend": "Failed to send message.",
     "errorLoadingProfile": "Error loading your profile.",
     "unknownUser": "Unknown User",
@@ -433,10 +442,14 @@
     "typingIndicator": "Typing...",
     "moderationBlockTitle": "Content Moderation",
     "moderationBlockDesc": "Your message could not be sent due to: ",
+    "moderationCategory_profanity": "profanity",
+    "moderationCategory_sensitive_content": "sensitive content",
+    "moderationCategory_adult_content_simulated": "potentially adult content (simulated)",
     "messageModerated": "[This message was not sent due to content policy]",
     "messageBlockedByModeration": "Message blocked by content moderation.",
     "noMessagesYet": "No messages yet. Say hello!",
-    "redirectingToLogin": "Redirecting to login..."
+    "redirectingToLogin": "Redirecting to login...",
+    "newNotificationMessageTitle": "New message from {name}"
   },
   "RiskyWordsDictionary": {
     "title": "Risky Words Dictionary",
@@ -480,6 +493,7 @@
     "reportSubmitError": "Failed to submit your report. Please try again.",
     "missedWordEmptyError": "Please enter the word/phrase you want to report.",
     "moderationFailedBeforeAnalysis": "Text could not be analyzed due to content policy violations:",
+    "inputModerationFailed": "Your input text could not be processed due to moderation issues:",
     "feedbackAlreadySubmittedTitle": "Feedback Sent",
     "feedbackAlreadySubmittedDesc": "You have already submitted feedback for this item.",
     "loginForFeedback": "Please log in to provide feedback.",

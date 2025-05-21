@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -8,7 +9,7 @@
  *              Feedback is stored in Firestore for potential model retraining or analysis.
  */
 
-import { firestore } from '@/lib/firebase';
+import { firestore, criticalConfigError } from '@/lib/firebase';
 import { collection, addDoc, Timestamp, serverTimestamp } from 'firebase/firestore';
 
 /**
@@ -45,17 +46,20 @@ export interface RiskyWordFeedback {
 export async function submitRiskyWordFeedback(
   feedbackData: Omit<RiskyWordFeedback, 'id' | 'timestamp'>
 ): Promise<string> {
+  if (criticalConfigError) {
+    console.error("Firebase is not configured. Cannot submit risky word feedback.");
+    throw new Error("Application services are not available.");
+  }
   try {
     const feedbackCollectionRef = collection(firestore, 'riskyWordsFeedback');
     const docRef = await addDoc(feedbackCollectionRef, {
       ...feedbackData,
-      timestamp: serverTimestamp(), // Use server timestamp for consistency
+      timestamp: serverTimestamp(), 
     });
     console.log('Risky word feedback submitted with ID:', docRef.id);
     return docRef.id;
   } catch (error) {
     console.error('Error submitting risky word feedback:', error);
-    // Consider more specific error handling or re-throwing a custom error
     throw new Error('Failed to submit feedback to Firestore.');
   }
 }
@@ -91,6 +95,10 @@ export interface ReportMissedRiskyWord {
 export async function reportMissedRiskyWord(
   reportData: Omit<ReportMissedRiskyWord, 'id' | 'timestamp'>
 ): Promise<string> {
+    if (criticalConfigError) {
+      console.error("Firebase is not configured. Cannot report missed risky word.");
+      throw new Error("Application services are not available.");
+    }
     try {
         const reportsCollectionRef = collection(firestore, 'missedRiskyWordReports');
         const docRef = await addDoc(reportsCollectionRef, {
@@ -104,3 +112,41 @@ export async function reportMissedRiskyWord(
         throw new Error('Failed to submit report to Firestore.');
     }
 }
+
+/**
+ * Conceptual function for how feedback could be processed by a backend system.
+ * This would involve fetching feedback, analyzing patterns, and potentially
+ * updating an AI model or a dynamic list of risky words.
+ * This is a placeholder and would not be called directly from the client.
+ * @async
+ * @function processFeedbackForModelUpdate
+ * @param {Date} since - Optional date to process feedback since.
+ * @returns {Promise<void>}
+ */
+async function processFeedbackForModelUpdate(since?: Date): Promise<void> {
+  console.log("Conceptual: Starting processFeedbackForModelUpdate...");
+  // 1. Fetch feedback from 'riskyWordsFeedback' and 'missedRiskyWordReports' collections.
+  //    - Filter by date if 'since' is provided.
+  //    - Example: query(feedbackCollectionRef, where('timestamp', '>', Timestamp.fromDate(since)))
+  
+  // 2. Analyze the feedback:
+  //    - Identify words frequently marked 'not_risky' that the AI flagged.
+  //    - Identify words frequently reported as 'missed' that the AI didn't flag.
+  //    - Look for patterns in `originalText` and `reason` for missed words.
+
+  // 3. Prepare data for model retraining or updating dynamic lists:
+  //    - This could involve creating datasets for fine-tuning an LLM.
+  //    - Or, updating a blocklist/allowlist used by the Genkit flow.
+  
+  // 4. Trigger model retraining or update process (external to this function).
+
+  console.log("Conceptual: Feedback processing complete. Data would be ready for model update/retraining.");
+  // In a real scenario, this might involve:
+  // - Storing aggregated feedback insights.
+  // - Kicking off a separate ML training pipeline.
+  // - Updating a remote configuration or database that the Genkit flow reads.
+}
+
+// Note: The `processFeedbackForModelUpdate` function is purely conceptual
+// and illustrates where backend AI/ML logic would integrate.
+// It is not intended to be called from client-side code.

@@ -6,7 +6,7 @@
  *              Uses Firestore as the backend.
  */
 
-import { firestore } from '@/lib/firebase';
+import { firestore, criticalConfigError } from '@/lib/firebase';
 import {
   doc,
   getDoc,
@@ -23,6 +23,7 @@ import {
   orderBy,
   limit
 } from 'firebase/firestore';
+import { showNotification } from '@/lib/notifications'; // Import notification utility
 
 /**
  * Defines the structure for premium features available to users.
@@ -50,7 +51,7 @@ export interface UserProfile {
   };
   rewards?: UserReward[];
   points?: number;
-  speedDatingSchedule?: string[]; // Store as array of ISO date strings or structured objects
+  speedDatingSchedule?: string[]; 
   gamePreferences?: string[];
   premiumFeatures?: PremiumFeatures;
   createdAt?: Timestamp;
@@ -61,23 +62,18 @@ export interface UserProfile {
  * Represents a reward or badge earned by the user.
  */
 export interface UserReward {
-  id: string; // Unique ID for the reward instance
+  id: string; 
   name: string;
   description: string;
-  type: string; // e.g., 'profile_complete', 'first_chat', 'game_winner'
-  dateEarned: Timestamp; // Use Firestore Timestamp
-  icon?: string; // Optional: path to an icon or icon name
+  type: string; 
+  dateEarned: Timestamp; 
+  icon?: string; 
 }
 
-// Firestore collection reference
+
 const usersCollection = collection(firestore, 'users');
 
-/**
- * Helper function to convert Firestore Timestamps in rewards to Date objects for client-side usage if needed,
- * or ensure they are Timestamps for Firestore operations.
- * This example assumes we store Timestamps and UserReward expects Timestamp.
- * For data coming from Firestore, Timestamps are fine. For data going to Firestore, Date objects should be converted.
- */
+
 const mapDocumentToUserProfile = (docSnap: DocumentSnapshot<DocumentData>): UserProfile | null => {
   if (!docSnap.exists()) {
     return null;
@@ -86,13 +82,12 @@ const mapDocumentToUserProfile = (docSnap: DocumentSnapshot<DocumentData>): User
   return {
     id: docSnap.id,
     ...data,
-    rewards: data.rewards?.map((reward: UserReward) => ({ // Explicitly type reward here
+    rewards: data.rewards?.map((reward: UserReward) => ({ 
       ...reward,
       dateEarned: reward.dateEarned instanceof Timestamp ? reward.dateEarned : Timestamp.fromDate(new Date((reward.dateEarned as unknown as { seconds: number }).seconds * 1000)),
     })) || [],
     createdAt: data.createdAt instanceof Timestamp ? data.createdAt : undefined,
     updatedAt: data.updatedAt instanceof Timestamp ? data.updatedAt : undefined,
-    // Ensure all optional fields that we provide defaults for are present
     points: data.points ?? 0,
     premiumFeatures: data.premiumFeatures ?? { advancedFilters: false, profileBoost: false, exclusiveModes: false },
     gamePreferences: data.gamePreferences ?? [],
@@ -113,18 +108,28 @@ const mapDocumentToUserProfile = (docSnap: DocumentSnapshot<DocumentData>): User
  * @throws {Error} If the user is not found or an error occurs.
  */
 export async function get_user(userId: string): Promise<UserProfile> {
+  if (criticalConfigError) {
+    console.error("Firebase is not configured. Cannot get user profile.");
+    // Return a default structure or throw, depending on desired app behavior for unconfigured Firebase
+     const defaultProfile: UserProfile = {
+        id: userId, name: "User", email: "", bio: "", interests: [],
+        profilePicture: `https://placehold.co/200x200.png`, dataAiHint: "person placeholder",
+        privacySettings: { showLocation: true, showOnlineStatus: true },
+        rewards: [], points: 0, speedDatingSchedule: [], gamePreferences: [],
+        premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+        createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
+    };
+    return defaultProfile;
+  }
   const userDocRef = doc(firestore, 'users', userId);
   const userDocSnap = await getDoc(userDocRef);
 
   if (!userDocSnap.exists()) {
-    // Consider creating a default profile if it doesn't exist, or throw specific error
-    // For now, throwing error as per original logic.
-    // Create a default profile for a new user during signup flow instead.
     console.warn(`User with ID ${userId} not found in Firestore. Returning a default structure.`);
     const defaultProfile: UserProfile = {
         id: userId,
         name: "New User",
-        email: "", // Should be set during signup
+        email: "", 
         bio: "",
         interests: [],
         profilePicture: `https://placehold.co/200x200.png`,
@@ -138,16 +143,12 @@ export async function get_user(userId: string): Promise<UserProfile> {
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
     };
-    // Optionally, save this default profile to Firestore if appropriate here,
-    // or ensure it's created during user registration.
-    // await setDoc(userDocRef, defaultProfile); // Uncomment to auto-create if needed here
     return defaultProfile;
   }
 
   let userProfile = mapDocumentToUserProfile(userDocSnap);
 
   if (!userProfile) {
-      // This case should be rare if exists() check passes and mapping is robust
       throw new Error(`Failed to map document for user ID ${userId}. Data might be malformed.`);
   }
   
@@ -176,6 +177,10 @@ export async function get_user(userId: string): Promise<UserProfile> {
  * @throws {Error} If the update/creation fails.
  */
 export async function update_user_profile(userId: string, profileData: Partial<UserProfile>): Promise<UserProfile> {
+  if (criticalConfigError) {
+    console.error("Firebase is not configured. Cannot update user profile.");
+    throw new Error("Application services are unavailable.");
+  }
   const userDocRef = doc(firestore, 'users', userId);
 
   const dataToUpdate: Partial<UserProfile> & { updatedAt: Timestamp; createdAt?: Timestamp } = {
@@ -232,10 +237,12 @@ export async function get_user_rewards(userId: string): Promise<UserReward[]> {
  * @returns {Promise<void>}
  */
 async function checkAndUnlockPremiumFeatures(userId: string, currentUserProfile: UserProfile): Promise<void> {
+    if (criticalConfigError) return;
     const userDocRef = doc(firestore, 'users', userId);
     const currentFeatures = currentUserProfile.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
     const newFeatures: PremiumFeatures = { ...currentFeatures };
     let changed = false;
+    let unlockedFeatureName: string | null = null;
 
     const userPoints = currentUserProfile.points || 0;
     const userRewards = currentUserProfile.rewards || [];
@@ -247,27 +254,34 @@ async function checkAndUnlockPremiumFeatures(userId: string, currentUserProfile:
     if (!newFeatures.advancedFilters && userPoints >= ADVANCED_FILTERS_POINTS_THRESHOLD) {
         newFeatures.advancedFilters = true;
         changed = true;
+        unlockedFeatureName = "Advanced Filters";
     }
 
     if (!newFeatures.profileBoost && userRewards.some(r => r.type === PROFILE_BOOST_BADGE_TYPE)) {
         newFeatures.profileBoost = true;
         changed = true;
+        unlockedFeatureName = unlockedFeatureName ? `${unlockedFeatureName} & Profile Boost` : "Profile Boost";
     }
 
     if (!newFeatures.exclusiveModes && userRewards.some(r => r.type === EXCLUSIVE_MODES_BADGE_TYPE)) {
         newFeatures.exclusiveModes = true;
         changed = true;
+        unlockedFeatureName = unlockedFeatureName ? `${unlockedFeatureName} & Exclusive Modes` : "Exclusive Modes";
     }
 
     if (changed) {
        await updateDoc(userDocRef, { premiumFeatures: newFeatures, updatedAt: Timestamp.now() });
        console.log(`User ${userId} premium features updated:`, newFeatures);
+       if (unlockedFeatureName) {
+           showNotification("Premium Feature Unlocked!", { body: `You've unlocked: ${unlockedFeatureName}!`});
+       }
     }
 }
 
 /**
  * Adds a reward to a user's profile in Firestore (if they haven't earned it already).
  * Also adds points associated with the reward type and checks for premium feature unlocks.
+ * Triggers a local notification if a badge is awarded.
  * @async
  * @function add_user_reward
  * @param {string} userId - The ID of the user.
@@ -275,6 +289,10 @@ async function checkAndUnlockPremiumFeatures(userId: string, currentUserProfile:
  * @returns {Promise<boolean>} A promise resolving to true if the reward was added, false otherwise.
  */
 export async function add_user_reward(userId: string, rewardData: Omit<UserReward, 'id' | 'dateEarned'>): Promise<boolean> {
+  if (criticalConfigError) {
+    console.error("Firebase is not configured. Cannot add user reward.");
+    return false;
+  }
   const userDocRef = doc(firestore, 'users', userId);
   const userProfile = await get_user(userId); 
 
@@ -294,6 +312,10 @@ export async function add_user_reward(userId: string, rewardData: Omit<UserRewar
       updatedAt: Timestamp.now(),
     });
     console.log(`Reward ${rewardData.type} added for user ${userId}. Points added: ${pointsToAward}.`);
+    
+    // Show notification for new badge
+    showNotification("Badge Earned!", { body: `You've earned the "${rewardData.name}" badge!` });
+
     const updatedProfile = await get_user(userId);
     await checkAndUnlockPremiumFeatures(userId, updatedProfile);
     return true;
@@ -324,6 +346,10 @@ export async function get_user_speed_dating_schedule(userId: string): Promise<st
  * @returns {Promise<void>}
  */
 export async function set_user_speed_dating_schedule(userId: string, schedule: string[]): Promise<void> {
+  if (criticalConfigError) {
+    console.error("Firebase is not configured. Cannot set speed dating schedule.");
+    return;
+  }
   const userDocRef = doc(firestore, 'users', userId);
   await updateDoc(userDocRef, { speedDatingSchedule: schedule, updatedAt: Timestamp.now() });
 }
@@ -349,6 +375,10 @@ export async function get_user_game_preferences(userId: string): Promise<string[
  * @returns {Promise<void>}
  */
 export async function set_user_game_preferences(userId: string, preferences: string[]): Promise<void> {
+  if (criticalConfigError) {
+    console.error("Firebase is not configured. Cannot set game preferences.");
+    return;
+  }
   const userDocRef = doc(firestore, 'users', userId);
   await updateDoc(userDocRef, { gamePreferences: preferences, updatedAt: Timestamp.now() });
 }
@@ -374,6 +404,10 @@ export async function get_user_points(userId: string): Promise<number> {
  * @returns {Promise<number>} A promise resolving to the user's new total points.
  */
 export async function add_user_points(userId: string, pointsToAdd: number): Promise<number> {
+  if (criticalConfigError) {
+    console.error("Firebase is not configured. Cannot add user points.");
+    return 0; // Or throw error
+  }
   const userDocRef = doc(firestore, 'users', userId);
   
   const userProfileSnapshot = await getDoc(userDocRef);
@@ -412,8 +446,7 @@ function getPointsForReward(rewardType: string): number {
     default: return 5;
   }
 }
-// Mock users for candidate selection in AI matching flow.
-// In a real app, this would query the database, excluding the current user.
+
 const mockUsersForMatching: UserProfile[] = [
     { id: 'mockUser1', name: 'Alex Doe', email: 'alex@example.com', bio: 'Loves hiking and reading.', interests: ['Hiking', 'Reading', 'Photography'], profilePicture: 'https://placehold.co/200x200.png?text=Alex', dataAiHint: 'man smiling', points: 120 },
     { id: 'mockUser2', name: 'Brenda Smith', email: 'brenda@example.com', bio: 'Passionate about art and music.', interests: ['Art', 'Music', 'Travel'], profilePicture: 'https://placehold.co/200x200.png?text=Brenda', dataAiHint: 'woman nature', points: 250 },
@@ -432,8 +465,11 @@ const mockUsersForMatching: UserProfile[] = [
  * @returns {Promise<UserProfile[]>} A promise that resolves to an array of user profiles.
  */
 export async function get_all_users(options?: { forMatching?: boolean }): Promise<UserProfile[]> {
+  if (criticalConfigError && !options?.forMatching) { // Allow mock matching even if Firebase is down
+    console.error("Firebase is not configured. Cannot get all users.");
+    return [];
+  }
   if (options?.forMatching) {
-    // Ensure mock users have default fields if not specified
     return mockUsersForMatching.map(user => ({
         ...{
             bio: "",
@@ -453,7 +489,7 @@ export async function get_all_users(options?: { forMatching?: boolean }): Promis
     }));
   }
 
-  const q = query(usersCollection, orderBy("points", "desc"), limit(100)); // Example: limit to top 100 for performance
+  const q = query(usersCollection, orderBy("points", "desc"), limit(100)); 
   const querySnapshot = await getDocs(q);
   const users: UserProfile[] = [];
   querySnapshot.forEach((docSnap) => {

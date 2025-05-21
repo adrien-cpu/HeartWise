@@ -28,6 +28,7 @@ import {
 import { Timestamp } from 'firebase/firestore';
 import { DatePicker } from '@/components/ui/date-picker';
 import { TimePicker } from '@/components/ui/time-picker';
+import { showNotification, requestNotificationPermission } from '@/lib/notifications';
 
 
 // Mock data for partners met during a session (kept for frontend display logic, will be dynamic later)
@@ -71,10 +72,11 @@ export default function SpeedDatingPage() {
 
   const [feedback, setFeedback] = useState<{ [partnerId: string]: { rating: 'positive' | 'neutral' | 'negative' | ''; comment: string } }>({});
 
-  // Mock partners - in a real app, this would be dynamically fetched based on the selectedSessionForFeedback
-  // For now, if a session for feedback is selected, we'd fetch its participants.
-  // Placeholder:
   const [mockPartnersForFeedback, setMockPartnersForFeedback] = useState<MetPartner[]>([]);
+
+  useEffect(() => {
+    requestNotificationPermission(); // Request permission when component mounts
+  }, []);
 
 
   const fetchUserSessions = useCallback(async () => {
@@ -86,7 +88,7 @@ export default function SpeedDatingPage() {
         let feedbackSubmitted = false;
         if (session.status === 'completed') {
           const existingFeedback = await getFeedbackForSessionByUser(currentUser.uid, session.id);
-          if (existingFeedback.length > 0) { // Simple check
+          if (existingFeedback.length > 0) { 
             feedbackSubmitted = true;
           }
         }
@@ -184,6 +186,7 @@ export default function SpeedDatingPage() {
         maxParticipants: maxParticipantsForCreation
       });
       toast({ title: t('createSuccessTitle'), description: t('createSuccessDesc') });
+      showNotification(t('createSuccessNotifTitle'), { body: t('createSuccessNotifBody') });
       setSelectedInterestsForCreation([]);
       await fetchUserSessions();
     } catch (err: any) {
@@ -204,6 +207,7 @@ export default function SpeedDatingPage() {
     try {
       await registerForSpeedDatingSession(currentUser.uid, sessionId);
       toast({ title: t('registrationSuccessTitle'), description: t('registrationSuccessDesc')});
+      showNotification(t('registrationSuccessNotifTitle'), { body: t('registrationSuccessNotifBody') });
       await fetchUserSessions();
       setFoundSessions(prev => prev.filter(s => s.id !== sessionId));
     } catch (err: any) {
@@ -227,7 +231,8 @@ export default function SpeedDatingPage() {
     setSelectedSessionForFeedback(session);
     const currentSessionPartners: MetPartner[] = session.participantIds
         .filter(pid => pid !== currentUser.uid)
-        .map((pid, index) => ({ id: pid, name: `Partner ${index + 1} (ID: ${pid.substring(0,5)})` }));
+        .map((pid, index) => ({ id: pid, name: session.participants?.[pid]?.name || `Partner ${index + 1}` }));
+
 
     setMockPartnersForFeedback(currentSessionPartners);
 
@@ -272,6 +277,7 @@ export default function SpeedDatingPage() {
         });
         await Promise.all(feedbackPromises);
         toast({ title: t('feedbackSubmittedTitle'), description: t('feedbackSubmittedDesc') });
+        showNotification(t('feedbackSubmittedNotifTitle'), { body: t('feedbackSubmittedNotifBody') });
         await fetchUserSessions();
         setSelectedSessionForFeedback(null);
         setFeedback({});

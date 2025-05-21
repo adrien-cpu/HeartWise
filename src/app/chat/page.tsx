@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -29,8 +30,9 @@ import {
   getMessagesListener,
   createConversation as createNewConversation
 } from '@/services/chat_service';
-import type { UserProfile } from '@/services/user_profile'; // Keep for participant type
+import type { UserProfile } from '@/services/user_profile';
 import { Timestamp } from 'firebase/firestore';
+import { showNotification, requestNotificationPermission } from '@/lib/notifications';
 
 /**
  * @fileOverview Chat page component with real-time Firestore integration.
@@ -40,7 +42,6 @@ import { Timestamp } from 'firebase/firestore';
  *              Requires Firebase for backend.
  */
 
-// Available intention tags for manual selection
 const manualIntentionTags = [
   { value: 'friendly', label: 'Friendly', icon: <Smile className="h-4 w-4 mr-2"/> },
   { value: 'humor', label: 'Humor', icon: <Smile className="h-4 w-4 mr-2"/> },
@@ -71,17 +72,19 @@ export default function ChatPage() {
   const [isAnalyzingIntent, setIsAnalyzingIntent] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  const [isPartnerTyping, setIsPartnerTyping] = useState(false); // Placeholder for typing indicator
+  const [isPartnerTyping, setIsPartnerTyping] = useState(false); 
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Redirect if not authenticated
+  useEffect(() => {
+    requestNotificationPermission(); // Request permission when component mounts
+  }, []);
+
   useEffect(() => {
     if (!authLoading && !currentUser) {
       router.push('/login');
     }
   }, [authLoading, currentUser, router]);
 
-  // Fetch conversations for the current user
   useEffect(() => {
     if (!currentUser || !currentUser.uid) {
       setLoadingConversations(false);
@@ -100,7 +103,6 @@ export default function ChatPage() {
     return () => unsubscribe();
   }, [currentUser, selectedConversationId]);
 
-  // Fetch messages for the selected conversation
   useEffect(() => {
     if (!selectedConversationId) {
       setCurrentMessages([]);
@@ -109,22 +111,32 @@ export default function ChatPage() {
 
     setLoadingMessages(true);
     const unsubscribe = getMessagesListener(selectedConversationId, (loadedMessages) => {
+      const oldMessagesCount = currentMessages.length;
       setCurrentMessages(loadedMessages);
+      
+      // Notification for new messages from partner
+      if (loadedMessages.length > oldMessagesCount && currentUser) {
+        const lastMessage = loadedMessages[loadedMessages.length - 1];
+        if (lastMessage.senderId !== currentUser.uid && document.hidden) { // Only notify if tab is not active
+          showNotification(t('newNotificationMessageTitle', { name: lastMessage.senderName }), {
+            body: lastMessage.text.substring(0, 100) + (lastMessage.text.length > 100 ? '...' : ''),
+            icon: '/logo.png' // Replace with your app's logo URL
+          });
+        }
+      }
       setLoadingMessages(false);
-       // Scroll to bottom after messages load/update
        requestAnimationFrame(() => {
          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
        });
     });
     
     return () => unsubscribe();
-  }, [selectedConversationId]);
+  }, [selectedConversationId, currentUser, t, currentMessages.length]); // Added currentMessages.length to dependencies
 
-  // Scroll to bottom when new messages arrive for the selected conversation
   useEffect(() => {
     const timer = setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100); // Small delay to ensure DOM is updated
+    }, 100); 
     return () => clearTimeout(timer);
   }, [currentMessages]);
 
@@ -182,8 +194,8 @@ export default function ChatPage() {
       toast({
         variant: 'destructive',
         title: t('moderationBlockTitle'),
-        description: `${t('moderationBlockDesc')} ${moderationResult.issues?.map(issue => issue.category).join(', ')}`,
-        duration: 5000,
+        description: `${t('moderationBlockDesc')} ${moderationResult.issues?.map(issue => tChat(`moderationCategory_${issue.category}`, {}, {fallback: issue.category})).join(', ')}`,
+        duration: 7000,
       });
       setSendingMessage(false);
       return;
@@ -202,18 +214,14 @@ export default function ChatPage() {
       setNewMessage('');
       setSelectedIntention('');
       setAiSuggestedTag(null);
-      // Simulate partner response or typing indicator for demo (optional)
-      // simulatePartnerResponse(selectedConversationId, messageData.text);
     } catch (error) {
       console.error("Failed to send message:", error);
       toast({ variant: 'destructive', title: t('errorSendingMessage') });
-      // Optionally, update the message status in UI to 'error'
     } finally {
       setSendingMessage(false);
     }
   };
   
-  // Simplified simulate partner response
   const simulatePartnerResponse = useCallback(async (convId: string, userMessageText: string) => {
     if (!selectedConversation || !otherParticipant) return;
 
@@ -225,14 +233,14 @@ export default function ChatPage() {
     const partnerMessageData: Omit<Message, 'id' | 'timestamp'> = {
       senderId: otherParticipant.id,
       senderName: otherParticipant.name || 'Partner',
-      text: `Reply to: "${userMessageText.substring(0, 15)}..."`,
+      text: `Reply to: "${userMessageText.substring(0, 15)}..." (simulated)`,
       status: 'delivered',
     };
-    // This message would be added by the listener, not directly here in a real app
-    // For simulation, we can add it to demonstrate
-    // await sendChatMessage(convId, partnerMessageData); // This would be a loop if not careful
-    console.log("Simulated partner response would be sent by the other user in a real scenario.");
-
+     // In a real app, this would be triggered by the other user.
+     // For simulation, we can log that a real message would be sent.
+    console.log("Simulated partner response would be sent for:", partnerMessageData);
+    // If you wanted to add it to UI for demo (careful not to create loops with listeners):
+    // await sendChatMessage(convId, partnerMessageData); 
   }, [selectedConversation, otherParticipant]);
 
 
@@ -259,13 +267,21 @@ export default function ChatPage() {
 
   const handleStartVideoCall = () => {
       if (!selectedConversation || !otherParticipant) return;
-      toast({ title: t('videoCallTitle'), description: t('videoCallDesc', { name: otherParticipant.name }) });
-      // Full WebRTC integration is a large feature beyond this scope.
-      // This would involve setting up signaling, media streams, etc.
+      toast({ 
+        title: t('videoCallTitle'), 
+        description: t('videoCallFeatureDesc', { name: otherParticipant.name || t('unknownUser') }),
+        variant: "default",
+        duration: 5000
+      });
   };
   const handleStartAudioCall = () => {
       if (!selectedConversation || !otherParticipant) return;
-      toast({ title: t('audioCallTitle'), description: t('audioCallDesc', { name: otherParticipant.name }) });
+      toast({ 
+        title: t('audioCallTitle'), 
+        description: t('audioCallFeatureDesc', { name: otherParticipant.name || t('unknownUser') }),
+        variant: "default",
+        duration: 5000
+      });
   };
 
   if (authLoading) {
@@ -277,7 +293,6 @@ export default function ChatPage() {
   }
 
   if (!currentUser) {
-    // Should be redirected by useEffect, but as a fallback
     return (
       <div className="container mx-auto h-[calc(100vh-80px)] flex items-center justify-center p-0 md:p-4">
           <p>{t('redirectingToLogin')}</p> <Loader2 className="h-8 w-8 animate-spin text-primary ml-2"/>
@@ -290,7 +305,6 @@ export default function ChatPage() {
     <TooltipProvider>
         <div className="container mx-auto h-[calc(100vh-80px)] flex flex-col p-0 md:p-4">
         <Card className="flex flex-grow overflow-hidden h-full shadow-lg rounded-lg border">
-            {/* Conversation List Sidebar */}
             <div className="w-full md:w-1/3 border-r flex flex-col bg-card">
             <CardHeader className="p-4">
                 <CardTitle className="flex items-center gap-2"><MessagesSquare className="h-6 w-6 text-primary"/>{t('title')}</CardTitle>
@@ -353,11 +367,9 @@ export default function ChatPage() {
             </ScrollArea>
             </div>
 
-            {/* Chat Area */}
             <div className="w-full md:w-2/3 flex flex-col bg-muted/10">
             {selectedConversation && otherParticipant ? (
                 <>
-                {/* Chat Header */}
                 <CardHeader className="p-4 border-b flex flex-row items-center justify-between space-x-3 bg-card">
                     <div className="flex items-center space-x-3">
                     <Avatar className="h-10 w-10 border">
@@ -408,7 +420,6 @@ export default function ChatPage() {
                     </div>
                 </CardHeader>
 
-                {/* Messages Area */}
                 <ScrollArea className="flex-grow p-4 space-y-4 bg-muted/20" aria-live="polite">
                     {loadingMessages ? (
                          [...Array(8)].map((_, i) => (
@@ -441,7 +452,7 @@ export default function ChatPage() {
                                 isCurrentUserMsg
                                 ? "bg-primary text-primary-foreground rounded-br-none"
                                 : "bg-card text-card-foreground border rounded-bl-none",
-                                msg.status === 'moderated' ? "bg-yellow-100 border-yellow-400 text-yellow-700" : ""
+                                msg.status === 'moderated' ? "bg-yellow-100 border-yellow-400 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700" : ""
                             )}
                             >
                             {intentionInfo && msg.status !== 'moderated' && (
@@ -510,7 +521,6 @@ export default function ChatPage() {
                     <div ref={messagesEndRef} />
                 </ScrollArea>
 
-                {/* Message Input Area */}
                 <CardFooter className="p-4 border-t bg-card space-y-2 flex-col items-start">
                     <div className="flex w-full items-center space-x-2">
                         <div className="flex-grow relative">
@@ -577,3 +587,4 @@ export default function ChatPage() {
     </TooltipProvider>
   );
 }
+
