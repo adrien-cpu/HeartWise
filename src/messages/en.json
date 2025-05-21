@@ -80,14 +80,13 @@
     "passwordResetErrorDefault": "An unexpected error occurred. Please try again.",
     "passwordResetErrorUserNotFound": "No account found with this email address.",
     "passwordResetErrorInvalidEmail": "The email address format is not valid.",
-    "rememberPasswordPrompt": "Remember your password?",
     "firebaseApiKeyError": "Application configuration error with Firebase. Please contact support or check environment variables.",
     "firebaseApiKeyErrorDetailed": "There's an issue with the Firebase API key configuration. Please ensure 'NEXT_PUBLIC_FIREBASE_API_KEY' and other Firebase variables are correctly set in your .env.local file and that the server has been restarted. Also, verify the API key settings in your Firebase project console.",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "firebaseConfigError": "Firebase is not configured correctly. Authentication services are unavailable.",
     "configErrorTitle": "Configuration Error",
-    "firebaseConfigErrorUserFriendly": "The application is not properly configured to connect to our services. Please try again later or contact support if the issue persists.",
+    "firebaseConfigErrorUserFriendly": "The application is not properly configured to connect to our services. Please try again later or contact support if the issue persists. Check the server console for more details about missing environment variables.",
     "networkError": "A network error occurred. Please check your internet connection and try again."
   },
   "GeolocationMeeting": {

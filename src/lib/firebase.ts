@@ -13,7 +13,7 @@ import { getFirestore, type Firestore } from 'firebase/firestore';
 // Log at the very start to confirm the module is being loaded
 console.log("[Firebase Init] Module loaded. Reading environment variables...");
 
-// Ensure these environment variables are correctly set in your .env file
+// Ensure these environment variables are correctly set in your .env.local file
 const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
 const authDomain = process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN;
 const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
@@ -46,7 +46,7 @@ if (!projectId) missingVars.push("NEXT_PUBLIC_FIREBASE_PROJECT_ID");
 
 if (missingVars.length > 0) {
   console.error(`[Firebase Init] CRITICAL_FIREBASE_CONFIG_ERROR: The following Firebase environment variables are missing or empty: ${missingVars.join(', ')}. 
-    Please ensure they are correctly set in your .env file (e.g., .env.local for local development) and that your Next.js development server has been restarted.
+    Please ensure they are correctly set in your .env.local file (e.g., .env.local for local development) and that your Next.js development server has been restarted.
     You can find these values in your Firebase project settings under 'Project Settings' > 'General' > 'Your apps' > 'Firebase SDK snippet' > 'Config'.
     Firebase services (Authentication, Firestore, etc.) will NOT work correctly until these are provided.`);
   criticalConfigError = true;

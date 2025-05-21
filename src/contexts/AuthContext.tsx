@@ -115,7 +115,8 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
             </ul>
             <p>You can find these values in your Firebase project settings: <br/> <strong>Project Settings</strong> &gt; <strong>General</strong> &gt; <strong>Your apps</strong> &gt; (Select your web app) &gt; <strong>Firebase SDK snippet</strong> &gt; <strong>Config</strong>.</p>
             <p>After adding or correcting these variables, you <strong>must restart your Next.js development server</strong> for the changes to take effect.</p>
-            <p className="mt-3 text-xs text-muted-foreground">Current API Key from env (first 5 chars): {firebaseConfig.apiKey ? String(firebaseConfig.apiKey).substring(0,5) + '...' : 'MISSING'}</p>
+            <p className="mt-3 text-xs text-muted-foreground">Check your server console for detailed logs from `src/lib/firebase.ts` regarding which specific variables might be missing or empty.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Current API Key from env (first 5 chars): {firebaseConfig.apiKey ? String(firebaseConfig.apiKey).substring(0,5) + '...' : 'MISSING or EMPTY'}</p>
           </AlertDescription>
         </Alert>
       </div>

@@ -87,7 +87,7 @@
     "hidePassword": "Masquer le mot de passe",
     "firebaseConfigError": "Firebase n'est pas configuré correctement. Les services d'authentification sont indisponibles.",
     "configErrorTitle": "Erreur de Configuration",
-    "firebaseConfigErrorUserFriendly": "L'application n'est pas correctement configurée pour se connecter à nos services. Veuillez réessayer plus tard ou contacter le support si le problème persiste.",
+    "firebaseConfigErrorUserFriendly": "L'application n'est pas correctement configurée pour se connecter à nos services. Veuillez réessayer plus tard ou contacter le support si le problème persiste. Vérifiez la console du serveur pour plus de détails sur les variables d'environnement manquantes.",
     "networkError": "Une erreur réseau s'est produite. Veuillez vérifier votre connexion internet et réessayer."
   },
   "GeolocationMeeting": {
