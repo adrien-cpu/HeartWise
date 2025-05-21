@@ -23,7 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useTranslations, useLocale } from 'next-intl';
-import { locales, defaultLocale, isValidLocale } from '@/i18n/settings';
+import { locales, defaultLocale, isValidLocale, localePrefix } from '@/i18n/settings'; // Import defaultLocale & localePrefix
 import {
   Select,
   SelectContent,
@@ -32,8 +32,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext'; // Import useAuth hook
-import { Loader2 } from 'lucide-react'; // Import Loader2 for loading state
+import { useAuth } from '@/contexts/AuthContext'; 
+import { Loader2 } from 'lucide-react'; 
 
 /**
  * @fileOverview Home page component for the HeartWise application.
@@ -54,7 +54,7 @@ function LanguageSwitcher(): JSX.Element {
     const t = useTranslations('Home');
     const currentLocale = useLocale();
     const router = useRouter();
-    const pathname = usePathname();
+    const pathname = usePathname(); // From next/navigation, includes locale if present in URL
     const [isPending, startTransition] = useTransition();
 
     /**
@@ -63,12 +63,32 @@ function LanguageSwitcher(): JSX.Element {
      */
     const onSelectChange = (nextLocale: string) => {
         startTransition(() => {
-            let newPathname = pathname;
-            const pathSegments = pathname.split('/');
-            if (pathSegments.length > 1 && isValidLocale(pathSegments[1])) {
-                newPathname = pathname.substring(pathname.indexOf('/', 1));
+            let basePath = pathname;
+
+            // Remove current locale prefix if it exists and is part of the path
+            if (isValidLocale(currentLocale) && basePath.startsWith(`/${currentLocale}`)) {
+                basePath = basePath.substring(`/${currentLocale}`.length);
+                if (basePath === "") basePath = "/"; // Ensure root path is handled
             }
-            router.replace(`/${nextLocale}${newPathname}`);
+            
+            let newPath;
+            if (nextLocale === defaultLocale && localePrefix === 'as-needed') {
+                newPath = basePath;
+            } else {
+                newPath = `/${nextLocale}${basePath === '/' && basePath.length > 1 ? '' : basePath}`;
+            }
+
+            // Normalize the path (e.g., remove trailing slash if not root, ensure leading slash)
+            if (newPath !== '/' && newPath.endsWith('/')) {
+                newPath = newPath.slice(0, -1);
+            }
+            if (!newPath.startsWith('/')) {
+                newPath = `/${newPath}`;
+            }
+            if (newPath === '') newPath = '/';
+
+
+            router.replace(newPath);
         });
     };
 
