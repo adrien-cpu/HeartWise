@@ -6,9 +6,9 @@
  * @description Handles creating conversations, sending messages, and listening for real-time updates.
  */
 
-import { 
-  firestore, 
-  criticalConfigError 
+import {
+  firestore,
+  criticalConfigError
 } from '@/lib/firebase';
 import {
   collection,
@@ -22,10 +22,15 @@ import {
   doc,
   setDoc,
   getDocs,
+  getDoc, // Added getDoc
   limit,
-  Unsubscribe
+  Unsubscribe,
+  updateDoc, // Added updateDoc
+  increment // Added increment
 } from 'firebase/firestore';
 import type { UserProfile } from './user_profile';
+// Conceptual: Import a function to trigger backend push notifications
+// import { triggerPushNotification } from './notification_trigger_service'; // This service would use Firebase Admin SDK
 
 /**
  * @interface Message
@@ -45,9 +50,9 @@ export interface Message {
  * @interface ConversationParticipant
  * @description Extends UserProfile with chat-specific details.
  */
-export interface ConversationParticipant extends UserProfile {
-  compatibilityScore?: number;
-  isOnline?: boolean;
+export interface ConversationParticipant extends Pick<UserProfile, 'id' | 'name' | 'profilePicture' | 'dataAiHint' | 'interests'> {
+  compatibilityScore?: number; // Example: Could be pre-calculated and stored
+  isOnline?: boolean; // Example: Would require presence management
 }
 
 /**
@@ -61,7 +66,7 @@ export interface Conversation {
   lastMessageText?: string;
   lastMessageTimestamp?: Timestamp;
   lastMessageSenderId?: string;
-  unreadCounts?: { [userId: string]: number }; // Unread count for each user
+  unreadCounts: { [userId: string]: number }; // Unread count for each user
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -96,47 +101,48 @@ export async function createConversation(
     console.error("Firebase is not configured. Cannot create conversation.");
     throw new Error("Application services are not available.");
   }
+  if (!currentUserId || !currentUserProfile || !targetUserProfile || !targetUserProfile.id) {
+    throw new Error("Invalid user profiles provided for conversation creation.");
+  }
 
   const conversationId = getConversationDocId(currentUserId, targetUserProfile.id);
   const conversationDocRef = doc(conversationsCollection, conversationId);
 
   try {
-    const existingConversationSnap = await getDocs(
-      query(
-        conversationsCollection,
-        where('participantIds', 'array-contains', currentUserId)
-      )
-    );
-
-    let foundConversationId: string | null = null;
-    existingConversationSnap.forEach(doc => {
-      const data = doc.data() as Conversation;
-      if (data.participantIds.includes(targetUserProfile.id) && data.participantIds.length === 2) {
-        foundConversationId = doc.id;
-      }
-    });
-    
-    if (foundConversationId) {
-      console.log(`ChatService: Conversation between ${currentUserId} and ${targetUserProfile.id} already exists: ${foundConversationId}`);
-      return foundConversationId;
+    const docSnap = await getDoc(conversationDocRef);
+    if (docSnap.exists()) {
+      console.log(`ChatService: Conversation between ${currentUserId} and ${targetUserProfile.id} already exists: ${conversationId}`);
+      return conversationId;
     }
 
-    const now = serverTimestamp();
+    const now = serverTimestamp() as Timestamp; // Cast for typing, server will set it
     const newConversationData: Omit<Conversation, 'id'> = {
       participantIds: [currentUserId, targetUserProfile.id],
       participants: {
-        [currentUserId]: { ...currentUserProfile, id: currentUserId },
-        [targetUserProfile.id]: { ...targetUserProfile },
+        [currentUserId]: {
+          id: currentUserId,
+          name: currentUserProfile.name || 'User',
+          profilePicture: currentUserProfile.profilePicture || '',
+          dataAiHint: currentUserProfile.dataAiHint || 'person',
+          interests: currentUserProfile.interests || [],
+        },
+        [targetUserProfile.id]: {
+          id: targetUserProfile.id,
+          name: targetUserProfile.name || 'User',
+          profilePicture: targetUserProfile.profilePicture || '',
+          dataAiHint: targetUserProfile.dataAiHint || 'person',
+          interests: targetUserProfile.interests || [],
+        },
       },
       lastMessageText: "Conversation started",
-      lastMessageTimestamp: now as Timestamp, // Cast for typing, server will set it
-      lastMessageSenderId: currentUserId, 
+      lastMessageTimestamp: now,
+      lastMessageSenderId: currentUserId,
       unreadCounts: {
         [currentUserId]: 0,
         [targetUserProfile.id]: 0,
       },
-      createdAt: now as Timestamp,
-      updatedAt: now as Timestamp,
+      createdAt: now,
+      updatedAt: now,
     };
 
     await setDoc(conversationDocRef, newConversationData);
@@ -168,47 +174,83 @@ export async function sendMessage(
 
   try {
     const messagesCollectionRef = collection(firestore, `conversations/${conversationId}/messages`);
-    const now = serverTimestamp();
+    const nowServer = serverTimestamp(); // Use serverTimestamp for all timestamp operations
+
     const docRef = await addDoc(messagesCollectionRef, {
       ...messageData,
-      timestamp: now,
+      timestamp: nowServer,
     });
 
-    // Update last message in the conversation document
+    // Update last message and unread counts in the conversation document
     const conversationDocRef = doc(conversationsCollection, conversationId);
-    await setDoc(conversationDocRef, {
-      lastMessageText: messageData.text,
-      lastMessageTimestamp: now,
-      lastMessageSenderId: messageData.senderId,
-      updatedAt: now,
-      // Increment unread count for the other participant(s)
-      // This requires knowing the other participant ID and handling it carefully.
-      // For a 2-person chat:
-      // const convSnap = await getDoc(conversationDocRef);
-      // if (convSnap.exists()) {
-      //   const convData = convSnap.data() as Conversation;
-      //   const otherParticipantId = convData.participantIds.find(id => id !== messageData.senderId);
-      //   if (otherParticipantId) {
-      //     await updateDoc(conversationDocRef, {
-      //       [`unreadCounts.${otherParticipantId}`]: increment(1)
-      //     });
-      //   }
-      // }
-    }, { merge: true });
+    const convSnap = await getDoc(conversationDocRef);
+
+    if (convSnap.exists()) {
+      const convData = convSnap.data() as Conversation;
+      const updatePayload: Partial<Conversation> & { unreadCounts?: { [key: string]: any } } = {
+        lastMessageText: messageData.text,
+        lastMessageTimestamp: nowServer as Timestamp,
+        lastMessageSenderId: messageData.senderId,
+        updatedAt: nowServer as Timestamp,
+        unreadCounts: { ...convData.unreadCounts }, // Start with existing counts
+      };
+
+      // Increment unread count for other participant(s)
+      convData.participantIds.forEach(participantId => {
+        if (participantId !== messageData.senderId) {
+          if (updatePayload.unreadCounts) { // Type guard
+            updatePayload.unreadCounts[participantId] = increment(1);
+          }
+        } else {
+           // Reset unread count for the sender
+           if (updatePayload.unreadCounts) {
+             updatePayload.unreadCounts[participantId] = 0;
+           }
+        }
+      });
+      await updateDoc(conversationDocRef, updatePayload);
+
+      // Conceptual: Trigger push notification to other participants
+      const recipientIds = convData.participantIds.filter(id => id !== messageData.senderId);
+      // await triggerPushNotification(recipientIds, `New message from ${messageData.senderName}`, messageData.text, { conversationId });
+      console.log(`Conceptual: Would trigger push notification for new message in ${conversationId} to ${recipientIds.join(', ')}`);
+    }
 
     console.log('ChatService: Message sent with ID:', docRef.id, 'to conversation:', conversationId);
-    
-    // Conceptual: Trigger backend to send push notification to other participants
-    // const conversation = (await getDoc(conversationDocRef)).data() as Conversation;
-    // const recipientIds = conversation.participantIds.filter(id => id !== messageData.senderId);
-    // await triggerPushNotification(recipientIds, `New message from ${messageData.senderName}`, messageData.text);
-
     return docRef.id;
   } catch (error) {
     console.error('ChatService: Error sending message:', error);
     throw new Error('Failed to send message.');
   }
 }
+
+/**
+ * Marks messages as read for a user in a conversation.
+ * This typically means resetting their unread count for that conversation.
+ * @async
+ * @function markMessagesAsRead
+ * @param {string} conversationId - The ID of the conversation.
+ * @param {string} userId - The ID of the user for whom messages are being marked as read.
+ * @returns {Promise<void>}
+ */
+export async function markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
+  if (criticalConfigError) {
+    console.error("Firebase is not configured. Cannot mark messages as read.");
+    return;
+  }
+  const conversationDocRef = doc(conversationsCollection, conversationId);
+  try {
+    await updateDoc(conversationDocRef, {
+      [`unreadCounts.${userId}`]: 0,
+      updatedAt: serverTimestamp() // Optionally update updatedAt timestamp
+    });
+    console.log(`ChatService: Messages marked as read for user ${userId} in conversation ${conversationId}`);
+  } catch (error) {
+    console.error(`ChatService: Error marking messages as read for user ${userId} in conv ${conversationId}:`, error);
+    // Don't throw, as this is often a background operation
+  }
+}
+
 
 /**
  * Listens for real-time updates to a user's conversations.
@@ -223,26 +265,35 @@ export function getConversationsListener(
 ): Unsubscribe {
   if (criticalConfigError) {
     console.error("Firebase is not configured. Cannot listen for conversations.");
-    // Return a no-op unsubscribe function
     return () => {};
   }
 
   const q = query(
     conversationsCollection,
     where('participantIds', 'array-contains', userId),
-    orderBy('updatedAt', 'desc') // Order by most recently updated
+    orderBy('updatedAt', 'desc')
   );
 
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const conversations: Conversation[] = [];
     querySnapshot.forEach((doc) => {
-      conversations.push({ id: doc.id, ...doc.data() } as Conversation);
+      const data = doc.data();
+      conversations.push({
+        id: doc.id,
+        participantIds: data.participantIds,
+        participants: data.participants,
+        lastMessageText: data.lastMessageText,
+        lastMessageTimestamp: data.lastMessageTimestamp,
+        lastMessageSenderId: data.lastMessageSenderId,
+        unreadCounts: data.unreadCounts || {}, // Ensure unreadCounts exists
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      } as Conversation);
     });
     callback(conversations);
   }, (error) => {
     console.error("ChatService: Error listening to conversations:", error);
-    // Optionally, notify the user through the callback or a toast
-    callback([]); // Send empty array on error
+    callback([]);
   });
 
   return unsubscribe;
@@ -250,22 +301,30 @@ export function getConversationsListener(
 
 /**
  * Listens for real-time updates to messages within a specific conversation.
+ * Also marks messages as read for the current user when they view the conversation.
  * @function getMessagesListener
  * @param {string} conversationId - The ID of the conversation.
+ * @param {string} currentUserId - The ID of the current user (to mark messages as read).
  * @param {(messages: Message[]) => void} callback - Function to call with the updated messages list.
  * @returns {Unsubscribe} A function to unsubscribe from the listener.
  */
 export function getMessagesListener(
   conversationId: string,
+  currentUserId: string,
   callback: (messages: Message[]) => void
 ): Unsubscribe {
   if (criticalConfigError) {
     console.error("Firebase is not configured. Cannot listen for messages.");
     return () => {};
   }
-  
+
+  // Mark messages as read when this listener is attached (i.e., user opens the chat)
+  markMessagesAsRead(conversationId, currentUserId).catch(err => {
+    console.error("Failed to mark messages as read on listener attach:", err);
+  });
+
   const messagesCollectionRef = collection(firestore, `conversations/${conversationId}/messages`);
-  const q = query(messagesCollectionRef, orderBy('timestamp', 'asc'), limit(50)); // Get last 50 messages, ordered by time
+  const q = query(messagesCollectionRef, orderBy('timestamp', 'asc'), limit(100)); // Get last 100 messages
 
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     const messages: Message[] = [];
@@ -281,17 +340,32 @@ export function getMessagesListener(
   return unsubscribe;
 }
 
-// Conceptual function placeholder for triggering push notifications
-// This would typically be a backend function (e.g., Cloud Function)
-// async function triggerPushNotification(recipientUserIds: string[], title: string, body: string) {
-//   console.log(`Conceptual: Triggering push notification to ${recipientUserIds.join(', ')}: "${title}" - "${body}"`);
-//   // 1. For each recipientUserId, get their FCM tokens from their UserProfile.
-//   // 2. Use Firebase Admin SDK to send messages to these tokens.
-//   // Example: admin.messaging().sendToDevice(tokens, payload);
+// Conceptual: Placeholder for actual push notification triggering service.
+// This would typically live in a backend environment (e.g., Firebase Cloud Functions)
+// and use the Firebase Admin SDK.
+// async function triggerPushNotification(
+//   recipientUserIds: string[],
+//   title: string,
+//   body: string,
+//   data?: { [key: string]: string }
+// ) {
+//   if (criticalConfigError) return;
+//   console.log(`[Conceptual] ChatService: Triggering push notification to users: ${recipientUserIds.join(', ')}`);
+//   console.log(`[Conceptual] Title: ${title}, Body: ${body}, Data:`, data);
+
+//   for (const userId of recipientUserIds) {
+//     const userProfile = await get_user(userId); // Assuming get_user can be called from backend context
+//     if (userProfile && userProfile.fcmTokens && userProfile.fcmTokens.length > 0) {
+//       // Placeholder for Firebase Admin SDK messaging logic
+//       // e.g., admin.messaging().sendToDevice(userProfile.fcmTokens, { notification: { title, body }, data });
+//       console.log(`[Conceptual] Would send push to user ${userId} with tokens: ${userProfile.fcmTokens.join(', ')}`);
+//     } else {
+//       console.log(`[Conceptual] User ${userId} has no FCM tokens or profile not found.`);
+//     }
+//   }
 // }
 
 // Potential future functions:
-// - markMessagesAsRead(conversationId: string, userId: string)
 // - updateTypingIndicator(conversationId: string, userId: string, isTyping: boolean)
 // - getConversationById(conversationId: string): Promise<Conversation | null>
-
+// - blockUserInConversation(conversationId: string, currentUserId: string, targetUserId: string)
