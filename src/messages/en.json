@@ -8,7 +8,7 @@
     "aiConversationCoach": "AI Conversation Coach",
     "riskyWordsDictionary": "Risky Words Dictionary",
     "blindExchangeMode": "Blind Exchange Mode",
-    "game": "Game",
+    "game": "Game Hub",
     "speedDating": "Speed Dating",
     "chat": "Chat",
     "rewards": "Rewards",
@@ -27,6 +27,19 @@
     "goToDashboard": "Go to Dashboard",
     "loginButton": "Login",
     "signupButton": "Sign Up"
+  },
+  "FeatureCards": {
+    "learnMore": "Learn More",
+    "dashboardDescription": "Your personalized space for insights, stats, and quick access to features.",
+    "geolocationMeetingDescription": "Discover and meet people in public places near you.",
+    "facialAnalysisMatchingDescription": "AI suggests matches based on facial and psychological compatibility.",
+    "aiConversationCoachDescription": "Get AI-powered advice to enhance your chat conversations.",
+    "riskyWordsDictionaryDescription": "Check your messages for potentially ambiguous or sensitive phrases.",
+    "blindExchangeModeDescription": "Connect with someone new without seeing photos or profiles initially.",
+    "gameDescription": "Play fun games like Trivia and Time's Up to connect with others.",
+    "speedDatingDescription": "Join fast-paced, interest-based virtual speed dating sessions.",
+    "chatDescription": "Engage in real-time conversations with your matches.",
+    "rewardsDescription": "View your earned badges, points, and unlock premium features."
   },
   "Auth": {
     "loginTitle": "Login to Your Account",
@@ -69,7 +82,7 @@
     "firebaseApiKeyError": "Application configuration error. Please check your .env file or contact support.",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
-    "firebaseConfigError": "Firebase is not configured correctly. Please check your setup.",
+    "firebaseConfigError": "Firebase is not configured correctly. Authentication services are unavailable. Please ensure your environment variables are set up.",
     "configErrorTitle": "Configuration Error",
     "firebaseConfigErrorUserFriendly": "The application is not properly configured to connect to our services. Please try again later or contact support if the issue persists.",
     "networkError": "A network error occurred. Please check your internet connection and try again."

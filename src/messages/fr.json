@@ -7,8 +7,8 @@
     "facialAnalysisMatching": "Analyse Faciale et Correspondance",
     "aiConversationCoach": "Coach IA Conversationnel",
     "riskyWordsDictionary": "Dictionnaire des Mots à Risque",
-    "blindExchangeMode": "Mode d'échange à l'aveugle",
-    "game": "Jeux",
+    "blindExchangeMode": "Mode d'Échange à l'Aveugle",
+    "game": "Centre de Jeux",
     "speedDating": "Speed Dating",
     "chat": "Discussion",
     "rewards": "Récompenses",
@@ -27,6 +27,19 @@
     "goToDashboard": "Aller au Tableau de Bord",
     "loginButton": "Connexion",
     "signupButton": "Inscription"
+  },
+  "FeatureCards": {
+    "learnMore": "En savoir plus",
+    "dashboardDescription": "Votre espace personnalisé pour des aperçus, statistiques et accès rapides.",
+    "geolocationMeetingDescription": "Découvrez et rencontrez des personnes dans des lieux publics proches de vous.",
+    "facialAnalysisMatchingDescription": "L'IA suggère des profils basés sur la compatibilité faciale et psychologique.",
+    "aiConversationCoachDescription": "Recevez des conseils IA pour améliorer vos conversations par chat.",
+    "riskyWordsDictionaryDescription": "Vérifiez vos messages pour des phrases potentiellement ambiguës ou sensibles.",
+    "blindExchangeModeDescription": "Connectez-vous avec quelqu'un de nouveau sans voir de photos ni de profils initialement.",
+    "gameDescription": "Jouez à des jeux amusants comme le Quiz et le Time's Up pour créer des liens.",
+    "speedDatingDescription": "Participez à des sessions de speed dating virtuelles rapides basées sur les intérêts.",
+    "chatDescription": "Engagez des conversations en temps réel avec vos correspondances.",
+    "rewardsDescription": "Consultez vos badges gagnés, vos points et débloquez des fonctionnalités premium."
   },
   "Auth": {
     "loginTitle": "Connectez-vous à Votre Compte",
@@ -69,7 +82,7 @@
     "firebaseApiKeyError": "Erreur de configuration de l'application. Veuillez vérifier votre fichier .env ou contacter le support.",
     "showPassword": "Afficher le mot de passe",
     "hidePassword": "Masquer le mot de passe",
-    "firebaseConfigError": "Firebase n'est pas configuré correctement. Veuillez vérifier votre installation.",
+    "firebaseConfigError": "Firebase n'est pas configuré correctement. Les services d'authentification sont indisponibles. Assurez-vous que vos variables d'environnement sont configurées.",
     "configErrorTitle": "Erreur de Configuration",
     "firebaseConfigErrorUserFriendly": "L'application n'est pas correctement configurée pour se connecter à nos services. Veuillez réessayer plus tard ou contacter le support si le problème persiste.",
     "networkError": "Une erreur réseau s'est produite. Veuillez vérifier votre connexion internet et réessayer."

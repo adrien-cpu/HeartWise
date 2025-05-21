@@ -21,6 +21,7 @@ import {
 import { Icons } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useTranslations, useLocale } from 'next-intl';
 import { locales, defaultLocale, isValidLocale } from '@/i18n/settings';
 import {
@@ -39,6 +40,7 @@ import { Loader2 } from 'lucide-react'; // Import Loader2 for loading state
  * @module HomePage
  * @description This component serves as the main landing page and includes the primary navigation sidebar.
  *              It displays links to core features and adapts the sidebar footer based on user authentication state.
+ *              The main content area now features a grid of cards highlighting core functionalities.
  */
 
 
@@ -61,7 +63,6 @@ function LanguageSwitcher(): JSX.Element {
      */
     const onSelectChange = (nextLocale: string) => {
         startTransition(() => {
-            // Remove current locale prefix if it exists
             let newPathname = pathname;
             const pathSegments = pathname.split('/');
             if (pathSegments.length > 1 && isValidLocale(pathSegments[1])) {
@@ -87,6 +88,38 @@ function LanguageSwitcher(): JSX.Element {
       );
 }
 
+interface FeatureCardProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  link: string;
+  learnMoreText: string;
+}
+
+function FeatureCard({ icon, title, description, link, learnMoreText }: FeatureCardProps) {
+  return (
+    <Card className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300 border">
+      <CardHeader className="flex flex-row items-center gap-3 pb-3">
+        <div className="p-2 bg-primary/10 rounded-md text-primary">
+          {React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6" })}
+        </div>
+        <CardTitle className="text-lg">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-grow">
+        <CardDescription className="text-sm leading-relaxed">{description}</CardDescription>
+      </CardContent>
+      <CardFooter>
+        <Link href={link} passHref className="w-full">
+          <Button variant="outline" className="w-full">
+            {learnMoreText}
+          </Button>
+        </Link>
+      </CardFooter>
+    </Card>
+  );
+}
+
+
 /**
  * Home page layout component.
  *
@@ -97,15 +130,11 @@ function LanguageSwitcher(): JSX.Element {
  */
 export default function Home(): JSX.Element {
   const t = useTranslations('Home');
-  const { currentUser, loading: authLoading, logout } = useAuth(); // Get auth state and logout function
+  const tCards = useTranslations('FeatureCards');
+  const { currentUser, loading: authLoading, logout } = useAuth();
 
-  /**
-   * Generates initials from a user's name for avatar fallbacks.
-   * @param {string | null | undefined} name - The user's name.
-   * @returns {string} The initials (e.g., "JD" for "John Doe").
-   */
   const getInitials = (name?: string | null): string => {
-    if (!name) return 'U'; // Default for User
+    if (!name) return 'U'; 
     const nameParts = name.split(' ');
     if (nameParts.length > 1 && nameParts[0] && nameParts[nameParts.length - 1]) {
       return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase();
@@ -113,8 +142,20 @@ export default function Home(): JSX.Element {
     return name.substring(0, 2).toUpperCase();
   };
 
+  const features = [
+    { id: 'dashboard', icon: <Icons.home />, link: '/dashboard' },
+    { id: 'geolocationMeeting', icon: <Icons.mapPin />, link: '/geolocation-meeting' },
+    { id: 'facialAnalysisMatching', icon: <Icons.scanFace />, link: '/facial-analysis-matching' },
+    { id: 'aiConversationCoach', icon: <Icons.messageSquare />, link: '/ai-conversation-coach' },
+    { id: 'riskyWordsDictionary', icon: <Icons.book />, link: '/risky-words-dictionary' },
+    { id: 'blindExchangeMode', icon: <Icons.eyeOff />, link: '/blind-exchange-mode' },
+    { id: 'game', icon: <Icons.gamepad />, link: '/game' },
+    { id: 'speedDating', icon: <Icons.zap />, link: '/speed-dating' },
+    { id: 'chat', icon: <Icons.messageCircle />, link: '/chat' },
+    { id: 'rewards', icon: <Icons.award />, link: '/rewards' },
+  ];
+
   return (
-    // SidebarProvider is now in ClientSideI18n, via RootLayout
     <div className="flex h-screen">
         <Sidebar className="bg-card text-card-foreground border-r">
             <SidebarHeader>
@@ -144,78 +185,16 @@ export default function Home(): JSX.Element {
               <SidebarGroup>
                 <SidebarGroupLabel>{t('features')}</SidebarGroupLabel>
                 <SidebarMenu>
-                  <SidebarMenuItem>
-                    <Link href="/geolocation-meeting">
-                      <SidebarMenuButton>
-                        <Icons.mapPin className="mr-2"/>
-                        <span>{t('geolocationMeeting')}</span>
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Link href="/facial-analysis-matching">
-                      <SidebarMenuButton>
-                        <Icons.scanFace className="mr-2"/>
-                        <span>{t('facialAnalysisMatching')}</span>
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Link href="/ai-conversation-coach">
-                      <SidebarMenuButton>
-                        <Icons.messageSquare className="mr-2"/>
-                        <span>{t('aiConversationCoach')}</span>
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                   <SidebarMenuItem>
-                     <Link href="/risky-words-dictionary">
-                       <SidebarMenuButton>
-                         <Icons.book className="mr-2"/>
-                         <span>{t('riskyWordsDictionary')}</span>
-                       </SidebarMenuButton>
-                     </Link>
-                   </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <Link href="/blind-exchange-mode">
-                      <SidebarMenuButton>
-                        <Icons.eyeOff className="mr-2"/>
-                        <span>{t('blindExchangeMode')}</span>
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                   <SidebarMenuItem>
-                    <Link href="/game">
-                      <SidebarMenuButton>
-                        <Icons.gamepad className="mr-2"/>
-                        <span>{t('game')}</span>
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                    <SidebarMenuItem>
-                    <Link href="/speed-dating">
-                      <SidebarMenuButton>
-                        <Icons.zap className="mr-2"/>
-                        <span>{t('speedDating')}</span>
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                   <SidebarMenuItem>
-                    <Link href="/chat">
-                      <SidebarMenuButton>
-                        <Icons.messageCircle className="mr-2"/>
-                        <span>{t('chat')}</span>
-                      </SidebarMenuButton>
-                    </Link>
-                  </SidebarMenuItem>
-                   <SidebarMenuItem>
-                      <Link href="/rewards">
+                  {features.filter(f => f.id !== 'dashboard').map(feature => ( // Exclude dashboard as it's already in navigation
+                    <SidebarMenuItem key={feature.id}>
+                      <Link href={feature.link}>
                         <SidebarMenuButton>
-                          <Icons.award className="mr-2"/>
-                          <span>{t('rewards')}</span>
+                          {React.cloneElement(feature.icon as React.ReactElement, { className: "mr-2" })}
+                          <span>{t(feature.id as any)}</span>
                         </SidebarMenuButton>
                       </Link>
                     </SidebarMenuItem>
+                  ))}
                 </SidebarMenu>
               </SidebarGroup>
                <div className="mt-auto p-2">
@@ -246,7 +225,6 @@ export default function Home(): JSX.Element {
                     <DropdownMenuItem asChild>
                         <Link href="/profile"><Icons.user className="mr-2"/>{t('profile')}</Link>
                     </DropdownMenuItem>
-                    {/* <DropdownMenuItem><Icons.settings className="mr-2"/>{t('settings')}</DropdownMenuItem> */}
                     <DropdownMenuSeparator/>
                     <DropdownMenuItem onClick={logout}>
                         <Icons.logOut className="mr-2"/>{t('logout')}
@@ -266,15 +244,25 @@ export default function Home(): JSX.Element {
             </SidebarFooter>
           </Sidebar>
 
-        <main className="flex flex-col items-center justify-center min-h-screen p-8 lg:ml-[var(--sidebar-width)] transition-[margin-left] duration-300 ease-in-out group-data-[sidebar-state=collapsed]/sidebar-wrapper:lg:ml-[var(--sidebar-width-icon)]">
-             <h1 className="text-4xl font-bold mb-4 text-center">{t('mainPageTitle')}</h1>
-             <p className="text-lg text-center max-w-prose mb-8 text-muted-foreground">{t('mainPageDescription')}</p>
-             <Link href="/dashboard">
-               <Button size="lg" variant="default">{t('goToDashboard')}</Button>
-             </Link>
+        <main className="flex-1 flex-col p-4 md:p-8 overflow-y-auto lg:ml-[var(--sidebar-width)] transition-[margin-left] duration-300 ease-in-out group-data-[sidebar-state=collapsed]/sidebar-wrapper:lg:ml-[var(--sidebar-width-icon)]">
+             <div className="max-w-5xl mx-auto">
+                 <h1 className="text-3xl md:text-4xl font-bold mb-4 text-center text-foreground">{t('mainPageTitle')}</h1>
+                 <p className="text-md md:text-lg text-center max-w-2xl mx-auto mb-10 text-muted-foreground">{t('mainPageDescription')}</p>
+
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {features.map((feature) => (
+                        <FeatureCard
+                        key={feature.id}
+                        icon={feature.icon}
+                        title={t(feature.id as any)}
+                        description={tCards(`${feature.id}Description` as any)}
+                        link={feature.link}
+                        learnMoreText={tCards('learnMore')}
+                        />
+                    ))}
+                 </div>
+             </div>
         </main>
     </div>
   );
 }
-
-
