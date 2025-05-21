@@ -41,7 +41,7 @@ export default function LoginPage(): JSX.Element {
   const t = useTranslations('Auth');
   const { toast } = useToast();
   const router = useRouter();
-  const { isFirebaseConfigured } = useAuth(); // Get Firebase config status
+  const { isFirebaseConfigured } = useAuth(); 
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +61,7 @@ export default function LoginPage(): JSX.Element {
         toast({
             variant: 'destructive',
             title: t('loginErrorTitle'),
-            description: t('firebaseConfigError'),
+            description: t('firebaseConfigErrorUserFriendly'),
         });
         return;
     }
@@ -76,15 +76,16 @@ export default function LoginPage(): JSX.Element {
       });
       router.push('/'); 
     } catch (err: any) {
-      console.error('Login error:', err);
+      console.error('Login error:', err.code, err.message);
       let errorMessage = t('loginErrorDefault');
-      // More specific error mapping
       if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
         errorMessage = t('loginErrorInvalidCredentials');
-      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.') {
-        errorMessage = t('firebaseApiKeyError');
+      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.' || err.message?.includes('API key not valid')) {
+        errorMessage = t('firebaseApiKeyErrorDetailed');
       } else if (err.code === 'auth/network-request-failed') {
         errorMessage = t('networkError');
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = t('loginErrorInvalidEmail');
       }
       setError(errorMessage);
       toast({
@@ -191,4 +192,3 @@ export default function LoginPage(): JSX.Element {
     </div>
   );
 }
-

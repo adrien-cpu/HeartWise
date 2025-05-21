@@ -43,7 +43,7 @@ export default function SignupPage(): JSX.Element {
   const t = useTranslations('Auth');
   const { toast } = useToast();
   const router = useRouter();
-  const { isFirebaseConfigured } = useAuth(); // Get Firebase config status
+  const { isFirebaseConfigured } = useAuth(); 
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,7 +63,7 @@ export default function SignupPage(): JSX.Element {
         toast({
             variant: 'destructive',
             title: t('signupErrorTitle'),
-            description: t('firebaseConfigError'),
+            description: t('firebaseConfigErrorUserFriendly'),
         });
         return;
     }
@@ -79,7 +79,6 @@ export default function SignupPage(): JSX.Element {
         id: userCredential.user.uid,
         name: data.name,
         email: data.email,
-        // Using a placeholder for profilePicture and dataAiHint
         profilePicture: `https://picsum.photos/seed/${userCredential.user.uid}/200`,
         dataAiHint: "person placeholder",
         bio: "",
@@ -95,14 +94,18 @@ export default function SignupPage(): JSX.Element {
       });
       router.push('/'); 
     } catch (err: any) {
-      console.error('Signup error:', err);
+      console.error('Signup error:', err.code, err.message);
       let errorMessage = t('signupErrorDefault');
       if (err.code === 'auth/email-already-in-use') {
         errorMessage = t('signupErrorEmailInUse');
-      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.') {
-        errorMessage = t('firebaseApiKeyError');
+      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.' || err.message?.includes('API key not valid')) {
+        errorMessage = t('firebaseApiKeyErrorDetailed');
       } else if (err.code === 'auth/network-request-failed') {
         errorMessage = t('networkError');
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = t('signupErrorInvalidEmail');
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = t('signupErrorWeakPassword');
       }
       setError(errorMessage);
       toast({
@@ -216,4 +219,3 @@ export default function SignupPage(): JSX.Element {
     </div>
   );
 }
-

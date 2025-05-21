@@ -38,7 +38,7 @@ type ForgotPasswordFormInputs = z.infer<typeof forgotPasswordSchema>;
 export default function ForgotPasswordPage(): JSX.Element {
   const t = useTranslations('Auth');
   const { toast } = useToast();
-  const { isFirebaseConfigured } = useAuth(); // Get Firebase config status
+  const { isFirebaseConfigured } = useAuth(); 
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +58,7 @@ export default function ForgotPasswordPage(): JSX.Element {
         toast({
             variant: 'destructive',
             title: t('passwordResetErrorTitle'),
-            description: t('firebaseConfigError'),
+            description: t('firebaseConfigErrorUserFriendly'),
         });
         return;
     }
@@ -74,14 +74,16 @@ export default function ForgotPasswordPage(): JSX.Element {
         description: t('passwordResetEmailSentDesc'),
       });
     } catch (err: any) {
-      console.error('Password reset error:', err);
+      console.error('Password reset error:', err.code, err.message);
       let errorMessage = t('passwordResetErrorDefault');
       if (err.code === 'auth/user-not-found') {
         errorMessage = t('passwordResetErrorUserNotFound');
-      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.') {
-        errorMessage = t('firebaseApiKeyError');
+      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.' || err.message?.includes('API key not valid')) {
+        errorMessage = t('firebaseApiKeyErrorDetailed');
       } else if (err.code === 'auth/network-request-failed') {
         errorMessage = t('networkError');
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = t('passwordResetErrorInvalidEmail');
       }
       setError(errorMessage);
       toast({
@@ -159,4 +161,3 @@ export default function ForgotPasswordPage(): JSX.Element {
     </div>
   );
 }
-
