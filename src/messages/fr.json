@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
@@ -61,7 +62,15 @@
     "namePlaceholder": "Votre Nom",
     "signupButton": "S'inscrire",
     "alreadyAccountPrompt": "Vous avez déjà un compte ?",
-    "loginLink": "Se connecter",
+    "passwordResetErrorInvalidEmail": "Le format de l'adresse e-mail n'est pas valide.",
+    "firebaseApiKeyError": "Erreur de configuration de l'application avec Firebase. Veuillez contacter le support ou vérifier les variables d'environnement.",
+    "firebaseApiKeyErrorDetailed": "Un problème est survenu avec la configuration de la clé API Firebase. Assurez-vous que 'NEXT_PUBLIC_FIREBASE_API_KEY' et les autres variables Firebase sont correctement définies dans votre fichier .env.local et que le serveur a été redémarré. Vérifiez également les paramètres de la clé API dans votre console de projet Firebase. Consultez les logs du serveur pour plus de détails.",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "firebaseConfigError": "Firebase n'est pas configuré correctement. Les services d'authentification sont indisponibles.",
+    "configErrorTitle": "Erreur de Configuration",
+    "firebaseConfigErrorUserFriendly": "L'application n'est pas correctement configurée pour se connecter à nos services. Veuillez réessayer plus tard ou contacter le support si le problème persiste. Vérifiez la console du serveur pour plus de détails sur les variables d'environnement manquantes.",
+    "networkError": "Une erreur réseau s'est produite. Veuillez vérifier votre connexion internet et réessayer.",
     "signupSuccessTitle": "Inscription Réussie",
     "signupSuccessDesc": "Bienvenue sur HeartWise ! Votre compte a été créé.",
     "signupErrorTitle": "Échec de l'Inscription",
@@ -77,16 +86,7 @@
     "passwordResetEmailSentDesc": "Si un compte existe pour cet e-mail, un lien de réinitialisation de mot de passe a été envoyé. Veuillez vérifier votre boîte de réception (et votre dossier spam).",
     "passwordResetErrorTitle": "Échec de la Réinitialisation",
     "passwordResetErrorDefault": "Une erreur inattendue s'est produite. Veuillez réessayer.",
-    "passwordResetErrorUserNotFound": "Aucun compte trouvé avec cette adresse e-mail.",
-    "passwordResetErrorInvalidEmail": "Le format de l'adresse e-mail n'est pas valide.",
-    "firebaseApiKeyError": "Erreur de configuration de l'application avec Firebase. Veuillez contacter le support ou vérifier les variables d'environnement.",
-    "firebaseApiKeyErrorDetailed": "Un problème est survenu avec la configuration de la clé API Firebase. Assurez-vous que 'NEXT_PUBLIC_FIREBASE_API_KEY' et les autres variables Firebase sont correctement définies dans votre fichier .env.local et que le serveur a été redémarré. Vérifiez également les paramètres de la clé API dans votre console de projet Firebase.",
-    "showPassword": "Afficher le mot de passe",
-    "hidePassword": "Masquer le mot de passe",
-    "firebaseConfigError": "Firebase n'est pas configuré correctement. Les services d'authentification sont indisponibles.",
-    "configErrorTitle": "Erreur de Configuration",
-    "firebaseConfigErrorUserFriendly": "L'application n'est pas correctement configurée pour se connecter à nos services. Veuillez réessayer plus tard ou contacter le support si le problème persiste. Vérifiez la console du serveur pour plus de détails sur les variables d'environnement manquantes.",
-    "networkError": "Une erreur réseau s'est produite. Veuillez vérifier votre connexion internet et réessayer."
+    "passwordResetErrorUserNotFound": "Aucun compte trouvé avec cette adresse e-mail."
   },
   "GeolocationMeeting": {
     "title": "Trouver des Connexions à Proximité",
@@ -158,7 +158,8 @@
     "invalidFileTypeTitle": "Type de Fichier Invalide",
     "invalidFileTypeDesc": "Veuillez télécharger un fichier image (ex: JPG, PNG).",
     "unknownUser": "Utilisateur",
-    "photoModerationFailed": "Votre photo n'a pas pu être traitée en raison de problèmes de modération :"
+    "photoModerationFailed": "Votre photo n'a pas pu être traitée en raison de problèmes de modération :",
+    "inputModerationFailed": "Votre photo n'a pas pu être traitée en raison de la politique de modération. Problèmes : "
   },
   "AIConversationCoachPage": {
     "pageTitle": "Coach IA Conversationnel",
@@ -457,6 +458,7 @@
     "moderationCategory_profanity": "propos injurieux",
     "moderationCategory_sensitive_content": "contenu sensible",
     "moderationCategory_adult_content_simulated": "contenu potentiellement pour adultes (simulé)",
+    "moderationCategory_VIOLENCE_SIMULATED": "violence simulée",
     "messageModerated": "[Ce message n'a pas été envoyé en raison de la politique de contenu]",
     "messageBlockedByModeration": "Message bloqué par la modération de contenu.",
     "noMessagesYet": "Aucun message pour l'instant. Dites bonjour !",
@@ -464,7 +466,14 @@
     "newNotificationMessageTitle": "Nouveau message de {name}",
     "videoAudioCallInfoTitle": "Fonctionnalité d'Appel",
     "videoAudioCallInfoDesc": "Les fonctionnalités d'appel vidéo et audio sont prévues pour une mise à jour future et nécessiteront l'intégration de WebRTC. Merci de votre compréhension !",
-    "gotItButton": "Compris !"
+    "gotItButton": "Compris !",
+    "callStartErrorTitle": "Erreur d'Appel",
+    "callStartErrorDesc": "Impossible de démarrer l'appel. Veuillez vérifier les permissions et réessayer.",
+    "callEndedTitle": "Appel Terminé",
+    "callEndedDesc": "L'appel a été terminé.",
+    "localVideoLabel": "Vous",
+    "remoteVideoLabel": "{name}",
+    "hangUpButton": "Raccrocher"
   },
   "RiskyWordsDictionary": {
     "title": "Dictionnaire des Mots à Risque",
@@ -508,7 +517,7 @@
     "reportSubmitError": "Échec de l'envoi de votre signalement. Veuillez réessayer.",
     "missedWordEmptyError": "Veuillez entrer l'expression que vous souhaitez signaler.",
     "moderationFailedBeforeAnalysis": "Le texte n'a pas pu être analysé en raison de violations de la politique de contenu :",
-    "inputModerationFailed": "Votre texte n'a pas pu être traité en raison de problèmes de modération :",
+    "inputModerationFailed": "Votre texte n'a pas pu être traité en raison de problèmes de modération : ",
     "feedbackAlreadySubmittedTitle": "Avis Déjà Envoyé",
     "feedbackAlreadySubmittedDesc": "Vous avez déjà envoyé un avis pour cet élément.",
     "loginForFeedback": "Veuillez vous connecter pour donner votre avis.",

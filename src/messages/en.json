@@ -1,3 +1,4 @@
+
 {
   "Home": {
     "tagline": "Find meaningful connections.",
@@ -61,7 +62,6 @@
     "namePlaceholder": "Your Name",
     "signupButton": "Sign Up",
     "alreadyAccountPrompt": "Already have an account?",
-    "loginLink": "Login",
     "signupSuccessTitle": "Signup Successful",
     "signupSuccessDesc": "Welcome to HeartWise! Your account has been created.",
     "signupErrorTitle": "Signup Failed",
@@ -80,7 +80,7 @@
     "passwordResetErrorUserNotFound": "No account found with this email address.",
     "passwordResetErrorInvalidEmail": "The email address format is not valid.",
     "firebaseApiKeyError": "Application configuration error with Firebase. Please contact support or check environment variables.",
-    "firebaseApiKeyErrorDetailed": "There's an issue with the Firebase API key configuration. Please ensure 'NEXT_PUBLIC_FIREBASE_API_KEY' and other Firebase variables are correctly set in your .env.local file and that the server has been restarted. Also, verify the API key settings in your Firebase project console.",
+    "firebaseApiKeyErrorDetailed": "There's an issue with the Firebase API key configuration. Please ensure 'NEXT_PUBLIC_FIREBASE_API_KEY' and other Firebase variables are correctly set in your .env.local file and that the server has been restarted. Also, verify the API key settings in your Firebase project console. Check server logs for more details.",
     "showPassword": "Show password",
     "hidePassword": "Hide password",
     "firebaseConfigError": "Firebase is not configured correctly. Authentication services are unavailable.",
@@ -158,7 +158,8 @@
     "invalidFileTypeTitle": "Invalid File Type",
     "invalidFileTypeDesc": "Please upload an image file (e.g., JPG, PNG).",
     "unknownUser": "User",
-    "photoModerationFailed": "Your photo could not be processed due to moderation issues:"
+    "photoModerationFailed": "Your photo could not be processed due to moderation issues:",
+    "inputModerationFailed": "Your photo input could not be processed due to moderation policy. Issues: "
   },
   "AIConversationCoachPage": {
     "pageTitle": "AI Conversation Coach",
@@ -457,6 +458,7 @@
     "moderationCategory_profanity": "profanity",
     "moderationCategory_sensitive_content": "sensitive content",
     "moderationCategory_adult_content_simulated": "potentially adult content (simulated)",
+    "moderationCategory_VIOLENCE_SIMULATED": "simulated violence",
     "messageModerated": "[This message was not sent due to content policy]",
     "messageBlockedByModeration": "Message blocked by content moderation.",
     "noMessagesYet": "No messages yet. Say hello!",
@@ -464,7 +466,14 @@
     "newNotificationMessageTitle": "New message from {name}",
     "videoAudioCallInfoTitle": "Calling Feature",
     "videoAudioCallInfoDesc": "Video and audio call functionalities are planned for a future update and will require WebRTC integration. Thank you for your understanding!",
-    "gotItButton": "Got it!"
+    "gotItButton": "Got it!",
+    "callStartErrorTitle": "Call Error",
+    "callStartErrorDesc": "Could not start the call. Please check permissions and try again.",
+    "callEndedTitle": "Call Ended",
+    "callEndedDesc": "The call has been ended.",
+    "localVideoLabel": "You",
+    "remoteVideoLabel": "{name}",
+    "hangUpButton": "Hang Up"
   },
   "RiskyWordsDictionary": {
     "title": "Risky Words Dictionary",
@@ -508,7 +517,7 @@
     "reportSubmitError": "Failed to submit your report. Please try again.",
     "missedWordEmptyError": "Please enter the word/phrase you want to report.",
     "moderationFailedBeforeAnalysis": "Text could not be analyzed due to content policy violations:",
-    "inputModerationFailed": "Your input text could not be processed due to moderation issues:",
+    "inputModerationFailed": "Your input text could not be processed due to moderation issues: ",
     "feedbackAlreadySubmittedTitle": "Feedback Sent",
     "feedbackAlreadySubmittedDesc": "You have already submitted feedback for this item.",
     "loginForFeedback": "Please log in to provide feedback.",

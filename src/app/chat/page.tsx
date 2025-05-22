@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -8,29 +9,27 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Send, HeartHandshake, Smile, Info, Heart, Video, Phone, AlertCircle, Bot, MessagesSquare, ShieldAlert, UserX } from 'lucide-react';
+import { Loader2, Send, HeartHandshake, Smile, Info, Heart, Video, Phone, AlertCircle, Bot, MessagesSquare, ShieldAlert, PhoneOff } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { tagMessageIntent, IntentionTaggingOutput } from '@/ai/flows/intention-tagging'; 
+import { tagMessageIntent, IntentionTaggingOutput } from '@/ai/flows/intention-tagging';
 import { moderateText, ModerationResult } from '@/services/moderation_service';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { 
-  Message, 
-  Conversation, 
-  ConversationParticipant,
+import {
+  Message,
+  Conversation,
   sendMessage as sendChatMessage,
   getConversationsListener,
   getMessagesListener,
-  createConversation as createNewConversation
+  markMessagesAsRead,
 } from '@/services/chat_service';
-import type { UserProfile } from '@/services/user_profile';
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, serverTimestamp } from 'firebase/firestore';
 import { showNotification, requestNotificationPermission } from '@/lib/notifications';
 import {
   AlertDialog,
@@ -41,16 +40,27 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-/**
- * @fileOverview Chat page component with real-time Firestore integration.
- * @module ChatPage
- * @description Displays the chat interface, allowing users to select conversations and send/receive messages.
- *              Features AI-suggested intention tagging and content moderation.
- *              Requires Firebase for backend. Video/Audio call buttons are placeholders.
- */
+import {
+  RTCConnection,
+  initializePeerConnection,
+  getLocalStream,
+  addLocalStreamToPeerConnection,
+  createOfferSdp,
+  createAnswerSdp,
+  setRemoteSdp,
+  addIceCandidate,
+  sendSignalingMessageViaFirestore,
+  listenForSignalingMessagesFromFirestore,
+  closeWebRTCConnection,
+  getSignalingChannelId,
+  initializeSignalingChannel,
+  OfferMessage,
+  AnswerMessage,
+  IceCandidateMessage,
+  HangupMessage,
+  SignalingMessage
+} from '@/services/webrtc_service';
 
 const manualIntentionTags = [
   { value: 'friendly', label: 'Friendly', icon: <Smile className="h-4 w-4 mr-2"/> },
@@ -62,7 +72,7 @@ const manualIntentionTags = [
 
 export default function ChatPage() {
   const t = useTranslations('Chat');
-  const tGlobal = useTranslations('Home'); // For common terms like "unknownUser"
+  const tGlobal = useTranslations('Home');
   const { toast } = useToast();
   const { currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -72,23 +82,58 @@ export default function ChatPage() {
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [selectedIntention, setSelectedIntention] = useState<string>('');
-  
+
   const [loadingConversations, setLoadingConversations] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
-  
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+
   const [aiSuggestedTag, setAiSuggestedTag] = useState<IntentionTaggingOutput | null>(null);
   const [isAnalyzingIntent, setIsAnalyzingIntent] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const [isPartnerTyping, setIsPartnerTyping] = useState(false); 
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const [showCallFeatureInfo, setShowCallFeatureInfo] = useState(false);
+
+  const [isPartnerTyping, setIsPartnerTyping] = useState(false);
+  const [showLegacyCallFeatureInfo, setShowLegacyCallFeatureInfo] = useState(false);
+
+  // WebRTC State
+  const [rtcConnection, setRtcConnection] = useState<RTCConnection | null>(null);
+
+
+  // Initialize WebRTC connection state
+  const initRtcState = useCallback((targetUserId?: string): RTCConnection => ({
+    peerConnection: null,
+    localStream: null,
+    remoteStream: null,
+    signalingChannelId: currentUser && targetUserId ? getSignalingChannelId(currentUser.uid, targetUserId) : null,
+    callStatus: 'idle',
+    isInitiator: false,
+    targetUserId: targetUserId,
+    onRemoteStreamReady: (stream) => {
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = stream;
+      }
+      setRtcConnection(prev => prev ? ({ ...prev, remoteStream: stream, callStatus: 'active' }) : null);
+    },
+    onCallEnded: () => {
+       if(localVideoRef.current && localVideoRef.current.srcObject){
+        (localVideoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+        localVideoRef.current.srcObject = null;
+      }
+      if(remoteVideoRef.current && remoteVideoRef.current.srcObject){
+        (remoteVideoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+        remoteVideoRef.current.srcObject = null;
+      }
+      setRtcConnection(prev => prev ? ({ ...prev, callStatus: 'ended', localStream: null, remoteStream: null, peerConnection: null }) : null);
+      toast({ title: t('callEndedTitle'), description: t('callEndedDesc') });
+    }
+  }), [currentUser, t, toast]);
+
 
   useEffect(() => {
-    requestNotificationPermission(); 
+    requestNotificationPermission();
   }, []);
 
   useEffect(() => {
@@ -100,7 +145,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!currentUser || !currentUser.uid) {
       setLoadingConversations(false);
-      return;
+      return () => {};
     }
 
     setLoadingConversations(true);
@@ -109,49 +154,198 @@ export default function ChatPage() {
       if (loadedConversations.length > 0 && !selectedConversationId) {
         setSelectedConversationId(loadedConversations[0].id);
       } else if (loadedConversations.length === 0) {
-        setSelectedConversationId(null); // No conversations, clear selection
+        setSelectedConversationId(null);
       }
       setLoadingConversations(false);
     });
 
     return () => unsubscribe();
-  }, [currentUser, selectedConversationId]); // Keep selectedConversationId to potentially re-select if list changes
+  }, [currentUser, selectedConversationId]);
 
   useEffect(() => {
-    if (!selectedConversationId) {
+    if (!selectedConversationId || !currentUser?.uid) {
       setCurrentMessages([]);
-      return;
+      return () => {};
     }
 
     setLoadingMessages(true);
-    const unsubscribe = getMessagesListener(selectedConversationId, (loadedMessages) => {
+    const unsubscribe = getMessagesListener(selectedConversationId, currentUser.uid, (loadedMessages) => {
       const oldMessagesCount = currentMessages.length;
       setCurrentMessages(loadedMessages);
-      
+
       if (loadedMessages.length > oldMessagesCount && currentUser) {
         const lastMessage = loadedMessages[loadedMessages.length - 1];
         if (lastMessage.senderId !== currentUser.uid && document.hidden) {
           showNotification(t('newNotificationMessageTitle', { name: lastMessage.senderName || tGlobal('unknownUser') }), {
             body: lastMessage.text.substring(0, 100) + (lastMessage.text.length > 100 ? '...' : ''),
-            icon: '/logo.png' 
+            icon: '/logo.png'
           });
         }
       }
       setLoadingMessages(false);
-       requestAnimationFrame(() => {
-         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-       });
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      });
     });
-    
+
     return () => unsubscribe();
   }, [selectedConversationId, currentUser, t, currentMessages.length, tGlobal]);
 
+
+  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
+  const otherParticipant = selectedConversation && currentUser ?
+    Object.values(selectedConversation.participants).find(p => p.id !== currentUser.uid)
+    : null;
+
+
+  // WebRTC Signaling Listener
   useEffect(() => {
-    const timer = setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100); 
-    return () => clearTimeout(timer);
-  }, [currentMessages]);
+    if (!currentUser || !rtcConnection?.signalingChannelId || !otherParticipant?.id) {
+      if (rtcConnection?.unsubscribeSignaling) {
+        rtcConnection.unsubscribeSignaling();
+        setRtcConnection(prev => prev ? { ...prev, unsubscribeSignaling: undefined } : null);
+      }
+      return;
+    }
+
+    if (rtcConnection.unsubscribeSignaling) return; // Already listening
+
+    const unsubscribe = listenForSignalingMessagesFromFirestore(
+      rtcConnection.signalingChannelId,
+      currentUser.uid,
+      async (message: SignalingMessage) => {
+        if (!rtcConnection?.peerConnection && message.type !== 'offer') {
+            console.warn("WebRTC: PeerConnection not initialized, cannot process message:", message);
+            return;
+        }
+        switch (message.type) {
+          case 'offer':
+            if (rtcConnection.callStatus === 'idle' || rtcConnection.callStatus === 'receiving') {
+              setRtcConnection(prev => prev ? ({ ...prev, callStatus: 'receiving', isInitiator: false }) : null);
+              console.log("WebRTC: Received offer, attempting to create answer...", message.sdp);
+              if (!rtcConnection.localStream) {
+                const stream = await getLocalStream();
+                setRtcConnection(prev => prev ? ({ ...prev, localStream: stream }) : null);
+                if(localVideoRef.current) localVideoRef.current.srcObject = stream;
+                addLocalStreamToPeerConnection(rtcConnection.peerConnection!, stream);
+              }
+              const answer = await createAnswerSdp(rtcConnection.peerConnection!, message.sdp);
+              const answerMessage: AnswerMessage = { type: 'answer', sdp: answer, senderId: currentUser.uid, timestamp: serverTimestamp() };
+              await sendSignalingMessageViaFirestore(rtcConnection.signalingChannelId!, currentUser.uid, answerMessage);
+              setRtcConnection(prev => prev ? ({ ...prev, callStatus: 'active'}) : null);
+            }
+            break;
+          case 'answer':
+            if (rtcConnection.callStatus === 'dialing') {
+              console.log("WebRTC: Received answer", message.sdp);
+              await setRemoteSdp(rtcConnection.peerConnection!, message.sdp);
+              setRtcConnection(prev => prev ? ({ ...prev, callStatus: 'active'}) : null);
+            }
+            break;
+          case 'candidate':
+            if (message.candidate) {
+              console.log("WebRTC: Received ICE candidate", message.candidate);
+              await addIceCandidate(rtcConnection.peerConnection!, message.candidate);
+            }
+            break;
+          case 'hangup':
+            console.log("WebRTC: Received hangup signal.");
+            if(rtcConnection.onCallEnded) rtcConnection.onCallEnded();
+            closeWebRTCConnection(rtcConnection);
+            break;
+        }
+      }
+    );
+    setRtcConnection(prev => prev ? ({...prev, unsubscribeSignaling: unsubscribe}) : null);
+
+    return () => {
+      if (rtcConnection?.unsubscribeSignaling) rtcConnection.unsubscribeSignaling();
+    };
+  }, [rtcConnection, currentUser, otherParticipant?.id]);
+
+
+  const handleStartCall = useCallback(async (video: boolean) => {
+    if (!currentUser || !otherParticipant) return;
+    if (rtcConnection?.callStatus === 'active' || rtcConnection?.callStatus === 'dialing') {
+        toast({title: "Call In Progress", description: "You are already in a call or dialing."});
+        return;
+    }
+
+    const newRtcState = initRtcState(otherParticipant.id);
+    setRtcConnection(newRtcState);
+    
+    console.log("WebRTC: Starting call, video:", video);
+    newRtcState.isInitiator = true;
+    newRtcState.callStatus = 'dialing';
+
+    try {
+      const stream = await getLocalStream({ video, audio: true });
+      newRtcState.localStream = stream;
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      }
+
+      const pc = initializePeerConnection(
+        newRtcState,
+        async (candidate) => {
+          if (candidate && newRtcState.signalingChannelId) {
+            const candidateMessage: IceCandidateMessage = { type: 'candidate', candidate, senderId: currentUser.uid, timestamp: serverTimestamp()};
+            await sendSignalingMessageViaFirestore(newRtcState.signalingChannelId, currentUser.uid, candidateMessage);
+          }
+        },
+        (event) => { // onRemoteTrackReceived
+          if (remoteVideoRef.current && event.streams[0]) {
+             console.log("Setting remote stream to video element");
+            remoteVideoRef.current.srcObject = event.streams[0];
+            newRtcState.remoteStream = event.streams[0];
+             newRtcState.callStatus = 'active';
+             setRtcConnection({...newRtcState});
+          }
+        },
+        async () => { // onNegotiationNeeded
+          if (newRtcState.isInitiator && newRtcState.peerConnection && newRtcState.signalingChannelId) {
+            console.log("WebRTC: Negotiation needed, creating new offer...");
+            const offer = await createOfferSdp(newRtcState.peerConnection);
+            const offerMessage: OfferMessage = { type: 'offer', sdp: offer, senderId: currentUser.uid, timestamp: serverTimestamp() };
+            await sendSignalingMessageViaFirestore(newRtcState.signalingChannelId, currentUser.uid, offerMessage);
+          }
+        },
+        (connectionState) => { // onConnectionStateChange
+            setRtcConnection(prev => prev ? ({ ...prev, callStatus: connectionState === 'connected' ? 'active' : prev.callStatus }) : null);
+            if (connectionState === 'failed' || connectionState === 'disconnected' || connectionState === 'closed') {
+                if (newRtcState.onCallEnded) newRtcState.onCallEnded();
+            }
+        }
+      );
+      newRtcState.peerConnection = pc;
+      addLocalStreamToPeerConnection(pc, stream);
+      
+      await initializeSignalingChannel(newRtcState.signalingChannelId!);
+      // Create offer after ensuring peer connection and local stream are set up
+      // Negotiationneeded event should fire if it's the initiator.
+      // If negotiationneeded doesn't fire reliably at first, an explicit offer creation can be done here.
+      // For initiator, the onnegotiationneeded handler will create and send the offer.
+
+      setRtcConnection({...newRtcState}); // Update state with peerConnection and localStream
+
+    } catch (error: any) {
+      console.error("WebRTC: Error starting call:", error);
+      toast({ variant: "destructive", title: t('callStartErrorTitle'), description: error.message || t('callStartErrorDesc') });
+      if (newRtcState.onCallEnded) newRtcState.onCallEnded();
+    }
+  }, [currentUser, otherParticipant, rtcConnection, toast, t, initRtcState]);
+
+  const handleHangUp = useCallback(async () => {
+    if (!rtcConnection || !currentUser?.uid || !otherParticipant?.id) return;
+    console.log("WebRTC: Hanging up call.");
+    
+    if (rtcConnection.signalingChannelId) {
+       const hangupMsg: HangupMessage = { type: 'hangup', senderId: currentUser.uid, timestamp: serverTimestamp()};
+       await sendSignalingMessageViaFirestore(rtcConnection.signalingChannelId, currentUser.uid, hangupMsg);
+    }
+    await closeWebRTCConnection(rtcConnection); // This will call onCallEnded
+    setRtcConnection(initRtcState(otherParticipant.id)); // Reset state
+  }, [rtcConnection, currentUser, otherParticipant, initRtcState]);
 
 
   const analyzeIntent = useCallback(async (message: string, context: string) => {
@@ -165,7 +359,7 @@ export default function ChatPage() {
       setAiSuggestedTag(result);
     } catch (error) {
       console.error("Error analyzing message intent:", error);
-      setAiSuggestedTag(null); 
+      setAiSuggestedTag(null);
     } finally {
       setIsAnalyzingIntent(false);
     }
@@ -179,9 +373,9 @@ export default function ChatPage() {
       const currentConversationHistory = currentMessages.slice(-5).map(m => `${m.senderName}: ${m.text}`).join('\n') || '';
       debounceTimeoutRef.current = setTimeout(() => {
         analyzeIntent(newMessage, currentConversationHistory);
-      }, 750); 
+      }, 750);
     } else {
-      setAiSuggestedTag(null); 
+      setAiSuggestedTag(null);
       setIsAnalyzingIntent(false);
     }
     return () => {
@@ -191,17 +385,9 @@ export default function ChatPage() {
     };
   }, [newMessage, analyzeIntent, currentMessages]);
 
-  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
-  const otherParticipant = selectedConversation && currentUser ? 
-    Object.values(selectedConversation.participants).find(p => p.id !== currentUser.uid)
-    : null;
-
-
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversationId || !currentUser || !currentUser.displayName || !selectedConversation) return;
-
     setSendingMessage(true);
-
     const moderationResult: ModerationResult = await moderateText(newMessage.trim());
     if (!moderationResult.isSafe) {
       toast({
@@ -213,7 +399,6 @@ export default function ChatPage() {
       setSendingMessage(false);
       return;
     }
-
     const messageData: Omit<Message, 'id' | 'timestamp'> = {
       senderId: currentUser.uid,
       senderName: currentUser.displayName,
@@ -221,7 +406,6 @@ export default function ChatPage() {
       intentionTag: selectedIntention || aiSuggestedTag?.detectedIntention || undefined,
       status: 'sent',
     };
-
     try {
       await sendChatMessage(selectedConversationId, messageData);
       setNewMessage('');
@@ -234,24 +418,6 @@ export default function ChatPage() {
       setSendingMessage(false);
     }
   };
-  
-  const simulatePartnerResponse = useCallback(async (convId: string, userMessageText: string) => {
-    if (!selectedConversation || !otherParticipant) return;
-
-    setIsPartnerTyping(true);
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1500));
-    setIsPartnerTyping(false);
-
-    const partnerMessageData: Omit<Message, 'id' | 'timestamp'> = {
-      senderId: otherParticipant.id,
-      senderName: otherParticipant.name || tGlobal('unknownUser'),
-      text: `Reply to: "${userMessageText.substring(0, 15)}..." (simulated)`,
-      status: 'delivered',
-    };
-    console.log("Simulated partner response would be sent for:", partnerMessageData);
-  }, [selectedConversation, otherParticipant, tGlobal]);
-
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -274,9 +440,7 @@ export default function ChatPage() {
     return manualTag ? manualTag.icon : <Bot className="h-3 w-3 mr-1"/>;
   };
 
-  const handleCallFeatureClick = () => {
-    setShowCallFeatureInfo(true);
-  };
+  const isCallActive = rtcConnection?.callStatus === 'active' || rtcConnection?.callStatus === 'dialing' || rtcConnection?.callStatus === 'receiving';
 
 
   if (authLoading) {
@@ -286,7 +450,6 @@ export default function ChatPage() {
       </div>
     );
   }
-
   if (!currentUser) {
     return (
       <div className="container mx-auto h-[calc(100vh-80px)] flex items-center justify-center p-0 md:p-4">
@@ -294,7 +457,6 @@ export default function ChatPage() {
       </div>
     );
   }
-
 
   return (
     <TooltipProvider>
@@ -333,11 +495,18 @@ export default function ChatPage() {
                             "w-full justify-start h-auto py-3 px-3 text-left rounded-md transition-colors relative",
                             selectedConversationId === conv.id ? "bg-primary/10 text-primary font-semibold" : "hover:bg-muted/50"
                             )}
-                            onClick={() => setSelectedConversationId(conv.id)}
+                            onClick={() => {
+                                setSelectedConversationId(conv.id);
+                                if(rtcConnection && rtcConnection.callStatus !== 'idle') { // Hang up if switching conv during a call
+                                    handleHangUp();
+                                }
+                                const targetUser = Object.values(conv.participants).find(p => p.id !== currentUser.uid);
+                                setRtcConnection(initRtcState(targetUser?.id));
+                            }}
                             aria-current={selectedConversationId === conv.id ? "page" : undefined}
                         >
-                            <Avatar className="h-10 w-10 mr-3 border">
-                            <AvatarImage src={displayPicture} alt={displayName} data-ai-hint={dataAiHint} />
+                            <Avatar className="h-10 w-10 mr-3 border" data-ai-hint={dataAiHint}>
+                            <AvatarImage src={displayPicture} alt={displayName}  />
                             <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
                             </Avatar>
                             <div className="flex-grow overflow-hidden">
@@ -367,8 +536,8 @@ export default function ChatPage() {
                 <>
                 <CardHeader className="p-4 border-b flex flex-row items-center justify-between space-x-3 bg-card">
                     <div className="flex items-center space-x-3">
-                    <Avatar className="h-10 w-10 border">
-                        <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || tGlobal('unknownUser')} data-ai-hint={otherParticipant.dataAiHint || "person"}/>
+                    <Avatar className="h-10 w-10 border" data-ai-hint={otherParticipant.dataAiHint || "person"}>
+                        <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || tGlobal('unknownUser')} />
                         <AvatarFallback>{getInitials(otherParticipant.name)}</AvatarFallback>
                     </Avatar>
                         <div>
@@ -392,41 +561,52 @@ export default function ChatPage() {
                                 </TooltipContent>
                             </Tooltip>
                         )}
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" onClick={handleCallFeatureClick} aria-label={t('startAudioCall')}>
-                                    <Phone className="h-5 w-5" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{t('startAudioCall')}</p>
-                            </TooltipContent>
-                         </Tooltip>
-                         <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" onClick={handleCallFeatureClick} aria-label={t('startVideoCall')}>
-                                    <Video className="h-5 w-5" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{t('startVideoCall')}</p>
-                            </TooltipContent>
-                        </Tooltip>
-                         <AlertDialog open={showCallFeatureInfo} onOpenChange={setShowCallFeatureInfo}>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                <AlertDialogTitle>{t('videoAudioCallInfoTitle')}</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    {t('videoAudioCallInfoDesc', { name: otherParticipant.name || tGlobal('unknownUser') })}
-                                </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                <AlertDialogAction onClick={() => setShowCallFeatureInfo(false)}>{t('gotItButton')}</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                        {isCallActive ? (
+                             <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="destructive" size="icon" onClick={handleHangUp} aria-label={t('hangUpButton')}>
+                                        <PhoneOff className="h-5 w-5" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>{t('hangUpButton')}</p></TooltipContent>
+                             </Tooltip>
+                        ) : (
+                            <>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" onClick={() => handleStartCall(false)} aria-label={t('startAudioCall')}>
+                                        <Phone className="h-5 w-5" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>{t('startAudioCall')}</p></TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" onClick={() => handleStartCall(true)} aria-label={t('startVideoCall')}>
+                                        <Video className="h-5 w-5" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent><p>{t('startVideoCall')}</p></TooltipContent>
+                            </Tooltip>
+                            </>
+                        )}
                     </div>
                 </CardHeader>
+
+                {isCallActive && (
+                    <div className="p-2 border-b bg-black">
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="relative aspect-video bg-muted rounded overflow-hidden">
+                                <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                                <p className="absolute bottom-1 left-1 text-xs text-white bg-black/50 px-1 rounded">{t('localVideoLabel')}</p>
+                            </div>
+                            <div className="relative aspect-video bg-muted rounded overflow-hidden">
+                                <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                                 <p className="absolute bottom-1 left-1 text-xs text-white bg-black/50 px-1 rounded">{t('remoteVideoLabel', {name: otherParticipant.name || ''})}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <ScrollArea className="flex-grow p-4 space-y-4 bg-muted/20" aria-live="polite">
                     {loadingMessages ? (
@@ -449,8 +629,8 @@ export default function ChatPage() {
                             )}
                         >
                             {!isCurrentUserMsg && (
-                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0">
-                                <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || tGlobal('unknownUser')} data-ai-hint={otherParticipant.dataAiHint || "person"}/>
+                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint={otherParticipant.dataAiHint || "person"}>
+                                <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || tGlobal('unknownUser')} />
                                 <AvatarFallback>{getInitials(otherParticipant.name)}</AvatarFallback>
                             </Avatar>
                             )}
@@ -502,8 +682,8 @@ export default function ChatPage() {
                             )}
                             </div>
                             {isCurrentUserMsg && (
-                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0">
-                                <AvatarImage src={currentUser?.photoURL || undefined} alt={currentUser?.displayName || 'You'} data-ai-hint={"user profile"}/>
+                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint="user profile">
+                                <AvatarImage src={currentUser?.photoURL || undefined} alt={currentUser?.displayName || 'You'} />
                                 <AvatarFallback>{getInitials(currentUser?.displayName || 'You')}</AvatarFallback>
                             </Avatar>
                             )}
@@ -512,8 +692,8 @@ export default function ChatPage() {
                     })}
                      {isPartnerTyping && (
                          <div className="flex items-center space-x-2 mr-auto justify-start max-w-[85%]">
-                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0">
-                                <AvatarImage src={otherParticipant?.profilePicture} alt={otherParticipant?.name || tGlobal('unknownUser')} data-ai-hint={otherParticipant?.dataAiHint || "person"}/>
+                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint={otherParticipant?.dataAiHint || "person"}>
+                                <AvatarImage src={otherParticipant?.profilePicture} alt={otherParticipant?.name || tGlobal('unknownUser')} />
                                 <AvatarFallback>{getInitials(otherParticipant?.name)}</AvatarFallback>
                             </Avatar>
                              <div className="rounded-lg px-3 py-2 bg-card text-card-foreground border rounded-bl-none shadow-sm">
@@ -538,8 +718,8 @@ export default function ChatPage() {
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyPress={handleKeyPress}
-                            disabled={sendingMessage}
-                            className="flex-grow pr-20" 
+                            disabled={sendingMessage || isCallActive}
+                            className="flex-grow pr-20"
                             aria-label={t('sendMessagePlaceholder')}
                             aria-busy={sendingMessage}
                             />
@@ -560,13 +740,13 @@ export default function ChatPage() {
                                 </Tooltip>
                             )}
                         </div>
-                        <Button aria-label={t('sendButton')} title={t('sendButton')} type="button" size="icon" onClick={handleSendMessage} disabled={sendingMessage || !newMessage.trim()}>
+                        <Button aria-label={t('sendButton')} title={t('sendButton')} type="button" size="icon" onClick={handleSendMessage} disabled={sendingMessage || !newMessage.trim() || isCallActive}>
                         {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                         </Button>
                     </div>
                     <div className="flex items-center space-x-2 w-full">
                         <Label htmlFor="intention-select" className="text-xs text-muted-foreground whitespace-nowrap">{t('intentionTagLabel')}:</Label>
-                        <Select value={selectedIntention} onValueChange={setSelectedIntention} disabled={sendingMessage}>
+                        <Select value={selectedIntention} onValueChange={setSelectedIntention} disabled={sendingMessage || isCallActive}>
                             <SelectTrigger id="intention-select" className="h-8 text-xs flex-grow" aria-label={t('selectIntentionPlaceholder')}>
                             <SelectValue placeholder={t('selectIntentionPlaceholder')} />
                             </SelectTrigger>
@@ -595,3 +775,4 @@ export default function ChatPage() {
     </TooltipProvider>
   );
 }
+
