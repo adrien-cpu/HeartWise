@@ -271,7 +271,7 @@ export default function ProfilePage() {
                       onClick={handleAvatarClick}
                       data-ai-hint={profile.dataAiHint || "person placeholder"}
                     >
-                    <AvatarImage src={previewUrl || undefined} alt={profile.name || currentUser.displayName || 'User'} />
+                    <AvatarImage src={previewUrl || undefined} alt={profile.name || currentUser.displayName || 'User'} priority={true} />
                     <AvatarFallback className="text-3xl sm:text-4xl">{getInitials(profile.name || currentUser.displayName)}</AvatarFallback>
                   </Avatar>
                   {isEditing && (

@@ -1,7 +1,8 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
+import dynamic from 'next/dynamic';
 import { useTranslations } from "next-intl";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import { useToast } from "@/hooks/use-toast";
@@ -12,8 +13,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trophy, Loader2, ListOrdered, Play, Check, X, RotateCcw, Gamepad2 } from "lucide-react"; // Added Gamepad2
-import TimesUpGame from "@/components/game/times-up";
+import { Trophy, Loader2, ListOrdered, Play, Check, X, RotateCcw, Gamepad2 } from "lucide-react";
+// import TimesUpGame from "@/components/game/times-up"; // Import dynamically
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,6 +22,13 @@ import { Question, Difficulty } from '@/ai/questionnaires/questionnaire_structur
 import * as ExampleQuestions from '@/ai/questionnaires/examples';
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
+
+// Dynamically import TimesUpGame
+const TimesUpGame = dynamic(() => import('@/components/game/times-up'), {
+  loading: () => <div className="flex justify-center items-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>,
+  ssr: false // Time's Up game might have client-side specific logic that's better off not SSR'd
+});
+
 
 // Combine all example questions into one array
 const allGKQuestions: Question[] = [
@@ -467,7 +475,9 @@ const GamePage = (): JSX.Element => {
         </TabsContent>
 
         <TabsContent value="times-up" className="mt-6 flex flex-col items-center space-y-6">
+          <Suspense fallback={<div className="flex justify-center items-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
            <TimesUpGame userId={currentUser.uid} onGameComplete={handleTimesUpGameComplete} />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="rankings" className="mt-6 flex flex-col items-center space-y-6">

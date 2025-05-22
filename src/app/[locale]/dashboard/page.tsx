@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -165,7 +166,7 @@ export default function LocalizedDashboardPage() {
           ) : profile ? (
             <div className="flex items-center space-x-4">
               <Avatar className="h-16 w-16 border" data-ai-hint={profile.dataAiHint || "user"}>
-                <AvatarImage src={profile.profilePicture || undefined} alt={profile.name || currentUser.displayName || t('userAlt')} />
+                <AvatarImage src={profile.profilePicture || undefined} alt={profile.name || currentUser.displayName || t('userAlt')} priority={true} />
                 <AvatarFallback className="text-2xl">{getInitials(profile.name || currentUser.displayName)}</AvatarFallback>
               </Avatar>
               <div>
