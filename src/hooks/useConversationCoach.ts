@@ -15,9 +15,10 @@ interface ConversationCoachHook {
     styleSuggestions: StyleSuggestion[];
     isLoadingAdvice: boolean;
     isLoadingStyles: boolean;
+    setIsLoadingAdvice: (loading: boolean) => void;
+    setIsLoadingStyles: (loading: boolean) => void;
     getAdvice: () => Promise<void>;
-    // Corrected to accept input if the underlying getStyleSuggestions requires it
-    getStyleSuggestions: (input?: Partial<StyleSuggestionsInput>) => Promise<void>; 
+    getStyleSuggestions: (input?: Partial<StyleSuggestionsInput>) => Promise<void>;
 }
 
 export const useConversationCoach = (): ConversationCoachHook => {
@@ -54,18 +55,18 @@ export const useConversationCoach = (): ConversationCoachHook => {
     };
 
     const handleGetStyleSuggestions = async (input?: Partial<StyleSuggestionsInput>) => {
-         const finalInput: StyleSuggestionsInput = {
-             userProfile: input?.userProfile || user1Profile,
-             partnerProfile: input?.partnerProfile || user2Profile,
-             conversationContext: input?.conversationContext || conversationHistory,
-             userComfortLevel: input?.userComfortLevel || userComfortLevel,
-         };
+        const finalInput: StyleSuggestionsInput = {
+            userProfile: input?.userProfile || user1Profile,
+            partnerProfile: input?.partnerProfile || user2Profile,
+            conversationContext: input?.conversationContext || conversationHistory,
+            userComfortLevel: input?.userComfortLevel || userComfortLevel,
+        };
 
-         if (!finalInput.userProfile || !finalInput.partnerProfile) {
-             console.error("Missing required input for getting style suggestions (userProfile or partnerProfile).");
-             setStyleSuggestions([{ styleName: "Error", description: "Missing profile information.", examples: [] }]); // Provide feedback
-             return;
-         }
+        if (!finalInput.userProfile || !finalInput.partnerProfile) {
+            console.error("Missing required input for getting style suggestions (userProfile or partnerProfile).");
+            setStyleSuggestions([{ styleName: "Error", description: "Missing profile information.", examples: [] }]); // Provide feedback
+            return;
+        }
         setIsLoadingStyles(true);
         setStyleSuggestions([]);
         try {
@@ -92,6 +93,8 @@ export const useConversationCoach = (): ConversationCoachHook => {
         styleSuggestions,
         isLoadingAdvice,
         isLoadingStyles,
+        setIsLoadingAdvice,
+        setIsLoadingStyles,
         getAdvice,
         getStyleSuggestions: handleGetStyleSuggestions, // Assign the new handler
     };

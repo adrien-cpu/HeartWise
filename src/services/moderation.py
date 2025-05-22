@@ -46,12 +46,22 @@ def moderate_content(content):
     Returns:
         bool: True if the content is safe, False otherwise.
     """
-    try:
+    if not isinstance(content, str):
+        raise ValueError("Content must be a string")
+    
+    if not content.strip():
+        return True  # Empty content is considered safe
         
+    try:
+        # TODO: Implement actual content moderation logic here
+        # For now, we'll use a simple placeholder
         result = json.loads('{"result": true}')
         return result["result"]
+    except json.JSONDecodeError as e:
+        print(f"Error parsing moderation result: {e}")
+        return False
     except Exception as e:
-        print(f"Error moderating content: {e}")
+        print(f"Unexpected error during content moderation: {e}")
         return False
 
 

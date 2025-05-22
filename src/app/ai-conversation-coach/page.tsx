@@ -34,7 +34,9 @@ const AIConversationCoachPage: React.FC = () => {
     advice,
     styleSuggestions,
     isLoadingAdvice,
+    setIsLoadingAdvice,
     isLoadingStyles,
+    setIsLoadingStyles,
     getAdvice,
     getStyleSuggestions,
   } = useConversationCoach();
@@ -42,10 +44,25 @@ const AIConversationCoachPage: React.FC = () => {
   // Wrap the hook functions to include toast notifications
   const handleGetAdvice = async () => {
     if (!conversationHistory || !user1Profile || !user2Profile) {
-        toast({ title: t('missingInputError'), description: t('fillFieldsError'), variant: 'destructive'});
-        return;
+      toast({
+        title: t('missingInputError'),
+        description: t('fillFieldsError'),
+        variant: 'destructive'
+      });
+      return;
     }
+
+    if (!conversationHistory.trim()) {
+      toast({
+        title: t('emptyConversationError'),
+        description: t('conversationRequiredError'),
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
+      setIsLoadingAdvice(true);
       await getAdvice();
       toast({
         title: t('adviceGenerated'),
@@ -53,20 +70,38 @@ const AIConversationCoachPage: React.FC = () => {
       });
     } catch (error) {
       console.error("Error generating advice:", error);
+      const errorMessage = error instanceof Error ? error.message : t('unknownError');
       toast({
         title: t('errorGeneratingAdvice'),
-        description: t('adviceGenerationFailed'),
+        description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsLoadingAdvice(false);
     }
   };
 
   const handleGetStyleSuggestions = async () => {
-      if (!user1Profile || !user2Profile) {
-        toast({ title: t('missingProfileError'), description: t('fillProfileFieldsError'), variant: 'destructive'});
-        return;
+    if (!user1Profile || !user2Profile) {
+      toast({
+        title: t('missingProfileError'),
+        description: t('fillProfileFieldsError'),
+        variant: 'destructive'
+      });
+      return;
     }
+
+    if (!user1Profile.trim() || !user2Profile.trim()) {
+      toast({
+        title: t('emptyProfileError'),
+        description: t('profileRequiredError'),
+        variant: 'destructive'
+      });
+      return;
+    }
+
     try {
+      setIsLoadingStyles(true);
       await getStyleSuggestions();
       toast({
         title: t('styleSuggestionsGenerated'),
@@ -74,11 +109,14 @@ const AIConversationCoachPage: React.FC = () => {
       });
     } catch (error) {
       console.error("Error generating style suggestions:", error);
+      const errorMessage = error instanceof Error ? error.message : t('unknownError');
       toast({
         title: t('errorGeneratingStyles'),
-        description: t('styleGenerationFailed'),
+        description: errorMessage,
         variant: "destructive",
       });
+    } finally {
+      setIsLoadingStyles(false);
     }
   };
 

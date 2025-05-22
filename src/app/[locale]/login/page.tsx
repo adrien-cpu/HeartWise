@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { SubmitHandler } from 'react-hook-form';
@@ -9,7 +8,7 @@ import * as z from 'zod';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -54,19 +53,74 @@ export default function LoginPage(): JSX.Element {
   const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
     setIsLoading(true);
     setError(null);
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      setError(t('invalidEmailFormat'));
+      toast({
+        variant: 'destructive',
+        title: t('loginErrorTitle'),
+        description: t('invalidEmailFormat'),
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate password length
+    if (data.password.length < 6) {
+      setError(t('passwordTooShort'));
+      toast({
+        variant: 'destructive',
+        title: t('loginErrorTitle'),
+        description: t('passwordTooShort'),
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+
+      if (!userCredential.user) {
+        throw new Error(t('loginErrorDefault'));
+      }
+
+      // Verify email if required
+      if (!userCredential.user.emailVerified) {
+        await sendEmailVerification(userCredential.user);
+        toast({
+          title: t('verificationEmailSent'),
+          description: t('pleaseVerifyEmail'),
+        });
+      }
+
       toast({
         title: t('loginSuccessTitle'),
         description: t('loginSuccessDesc'),
       });
-      router.push('/'); // Redirect to home or dashboard after login
+      router.push('/');
     } catch (err: any) {
       console.error('Login error:', err);
       let errorMessage = t('loginErrorDefault');
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        errorMessage = t('loginErrorInvalidCredentials');
+
+      switch (err.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          errorMessage = t('loginErrorInvalidCredentials');
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = t('loginErrorTooManyAttempts');
+          break;
+        case 'auth/network-request-failed':
+          errorMessage = t('loginErrorNetwork');
+          break;
+        case 'auth/user-disabled':
+          errorMessage = t('loginErrorAccountDisabled');
+          break;
       }
+
       setError(errorMessage);
       toast({
         variant: 'destructive',

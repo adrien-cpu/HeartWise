@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -26,8 +25,8 @@ interface SpeedDatingSession {
 
 // Mock data for partners met during a session
 interface MetPartner {
-    id: string;
-    name: string;
+  id: string;
+  name: string;
 }
 
 // Mock interests
@@ -58,9 +57,9 @@ export default function SpeedDatingPage() {
 
   // Mock partners for the completed session
   const mockPartners: MetPartner[] = [
-      { id: 'partner1', name: 'Charlie' },
-      { id: 'partner2', name: 'Diana' },
-      { id: 'partner3', name: 'Ethan' },
+    { id: 'partner1', name: 'Charlie' },
+    { id: 'partner2', name: 'Diana' },
+    { id: 'partner3', name: 'Ethan' },
   ];
 
   // Fetch upcoming sessions on mount
@@ -72,35 +71,79 @@ export default function SpeedDatingPage() {
         // Simulate API call to fetch upcoming sessions
         // Replace with actual API call: const sessions = await fetchUpcomingSpeedDatingSessions();
         await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate delay
+
         const mockSessions: SpeedDatingSession[] = [
-           { id: 'sd0', dateTime: new Date(Date.now() - 1 * 60 * 60 * 1000), interests: ["Sports", "Music"], participantsCount: 6, status: 'completed' }, // Completed session
+          { id: 'sd0', dateTime: new Date(Date.now() - 1 * 60 * 60 * 1000), interests: ["Sports", "Music"], participantsCount: 6, status: 'completed' },
           { id: 'sd1', dateTime: new Date(Date.now() + 2 * 60 * 60 * 1000), interests: ["Movies", "Food"], participantsCount: 8, status: 'scheduled' },
           { id: 'sd2', dateTime: new Date(Date.now() + 24 * 60 * 60 * 1000), interests: ["Tech", "Books"], participantsCount: 12, status: 'scheduled' },
           { id: 'sd3', dateTime: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), interests: ["Travel", "Music"], participantsCount: 5, status: 'scheduled' },
         ];
-        setUpcomingSessions(mockSessions);
+
+        // Validate sessions data
+        const validSessions = mockSessions.filter(session => {
+          if (!session.id || !session.dateTime || !Array.isArray(session.interests) ||
+            typeof session.participantsCount !== 'number' || !session.status) {
+            console.warn(`Invalid session data found: ${JSON.stringify(session)}`);
+            return false;
+          }
+          return true;
+        });
+
+        if (validSessions.length === 0) {
+          throw new Error(t('noValidSessions'));
+        }
+
+        setUpcomingSessions(validSessions);
       } catch (err) {
         console.error("Failed to fetch sessions:", err);
-        setError(t('fetchError'));
-        toast({ variant: 'destructive', title: t('errorTitle'), description: t('fetchError') });
+        const errorMessage = err instanceof Error ? err.message : t('fetchError');
+        setError(errorMessage);
+        toast({
+          variant: 'destructive',
+          title: t('errorTitle'),
+          description: errorMessage
+        });
       } finally {
         setLoadingSessions(false);
       }
     };
     fetchSessions();
-  }, [t, toast]); // Added t and toast to dependency array
+  }, [t, toast]);
 
   // Handle interest selection
   const handleInterestChange = (interest: string, checked: boolean) => {
-    setSelectedInterests(prev =>
-      checked ? [...prev, interest] : prev.filter(i => i !== interest)
-    );
+    if (!interest || typeof interest !== 'string') {
+      console.warn('Invalid interest value received:', interest);
+      return;
+    }
+
+    setSelectedInterests(prev => {
+      const newInterests = checked
+        ? [...prev, interest]
+        : prev.filter(i => i !== interest);
+
+      // Ensure no duplicate interests
+      return [...new Set(newInterests)];
+    });
   };
 
   // Handle scheduling a session
   const handleScheduleSession = async () => {
     if (selectedInterests.length === 0) {
-      toast({ variant: 'destructive', title: t('selectInterestsErrorTitle'), description: t('selectInterestsErrorDesc') });
+      toast({
+        variant: 'destructive',
+        title: t('selectInterestsErrorTitle'),
+        description: t('selectInterestsErrorDesc')
+      });
+      return;
+    }
+
+    if (selectedInterests.length > 5) {
+      toast({
+        variant: 'destructive',
+        title: t('tooManyInterestsErrorTitle'),
+        description: t('tooManyInterestsErrorDesc')
+      });
       return;
     }
 
@@ -108,30 +151,38 @@ export default function SpeedDatingPage() {
     setError(null);
     try {
       // Simulate API call to schedule a session
-      // Replace with actual API call: await scheduleSpeedDating(userId, selectedInterests);
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // In a real app, you might update the user's schedule via a service:
-      // await set_user_speed_dating_schedule(userId, selectedInterests); // Adapt service if needed
+      const newSession: SpeedDatingSession = {
+        id: `sd-${Date.now()}`,
+        dateTime: new Date(Date.now() + Math.random() * 5 * 24 * 60 * 60 * 1000),
+        interests: [...selectedInterests],
+        participantsCount: Math.floor(Math.random() * 10) + 2,
+        status: 'scheduled',
+      };
 
-      toast({ title: t('scheduleSuccessTitle'), description: t('scheduleSuccess') });
-      setSelectedInterests([]); // Reset selection after scheduling
+      // Validate new session before adding
+      if (!newSession.id || !newSession.dateTime || !Array.isArray(newSession.interests) ||
+        typeof newSession.participantsCount !== 'number' || !newSession.status) {
+        throw new Error(t('invalidSessionData'));
+      }
 
-      // Add a mock scheduled session to the list for immediate UI update (remove if refetching)
-       const newSession: SpeedDatingSession = {
-         id: `sd-${Date.now()}`,
-         dateTime: new Date(Date.now() + Math.random() * 5 * 24 * 60 * 60 * 1000), // Random future date
-         interests: [...selectedInterests],
-         participantsCount: Math.floor(Math.random() * 10) + 2, // Random participants
-         status: 'scheduled',
-       };
-       setUpcomingSessions(prev => [...prev, newSession].sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime()));
-
+      setUpcomingSessions(prev => [...prev, newSession].sort((a, b) => a.dateTime.getTime() - b.dateTime.getTime()));
+      toast({
+        title: t('scheduleSuccessTitle'),
+        description: t('scheduleSuccess')
+      });
+      setSelectedInterests([]);
 
     } catch (err) {
       console.error("Failed to schedule session:", err);
-      setError(t('scheduleError'));
-      toast({ variant: 'destructive', title: t('errorTitle'), description: t('scheduleError') });
+      const errorMessage = err instanceof Error ? err.message : t('scheduleError');
+      setError(errorMessage);
+      toast({
+        variant: 'destructive',
+        title: t('errorTitle'),
+        description: errorMessage
+      });
     } finally {
       setIsScheduling(false);
     }
@@ -143,7 +194,7 @@ export default function SpeedDatingPage() {
     // Initialize feedback state for the selected session's partners
     const initialFeedback: { [partnerId: string]: { rating: string; comment: string } } = {};
     mockPartners.forEach(p => {
-        initialFeedback[p.id] = { rating: '', comment: '' };
+      initialFeedback[p.id] = { rating: '', comment: '' };
     });
     setFeedback(initialFeedback);
   };
@@ -161,23 +212,23 @@ export default function SpeedDatingPage() {
 
   // Handle submitting feedback
   const handleSubmitFeedback = async () => {
-      if (!selectedSessionForFeedback) return;
-       // **Requires Backend:** API endpoint to submit feedback.
-      console.log("Submitting feedback:", feedback);
-      setIsScheduling(true); // Reuse scheduling loader state
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-        toast({ title: t('feedbackSubmittedTitle'), description: t('feedbackSubmittedDesc') });
-        setSelectedSessionForFeedback(null); // Close feedback form
-        setFeedback({});
-         // Optionally update the session status locally if needed, or refetch
-         setUpcomingSessions(prev => prev.map(s => s.id === selectedSessionForFeedback.id ? { ...s, status: 'completed' } : s));
-      } catch (error) {
-         console.error("Failed to submit feedback:", error);
-         toast({ variant: 'destructive', title: t('errorTitle'), description: t('feedbackErrorDesc') });
-      } finally {
-        setIsScheduling(false);
-      }
+    if (!selectedSessionForFeedback) return;
+    // **Requires Backend:** API endpoint to submit feedback.
+    console.log("Submitting feedback:", feedback);
+    setIsScheduling(true); // Reuse scheduling loader state
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      toast({ title: t('feedbackSubmittedTitle'), description: t('feedbackSubmittedDesc') });
+      setSelectedSessionForFeedback(null); // Close feedback form
+      setFeedback({});
+      // Optionally update the session status locally if needed, or refetch
+      setUpcomingSessions(prev => prev.map(s => s.id === selectedSessionForFeedback.id ? { ...s, status: 'completed' } : s));
+    } catch (error) {
+      console.error("Failed to submit feedback:", error);
+      toast({ variant: 'destructive', title: t('errorTitle'), description: t('feedbackErrorDesc') });
+    } finally {
+      setIsScheduling(false);
+    }
   };
 
   return (
@@ -185,61 +236,61 @@ export default function SpeedDatingPage() {
       <h1 className="text-3xl font-bold text-center mb-8">{t('title')}</h1>
 
       {selectedSessionForFeedback ? (
-          // Feedback Form View
-          <Card>
-              <CardHeader>
-                <CardTitle>{t('feedbackTitle', { date: selectedSessionForFeedback.dateTime.toLocaleDateString() })}</CardTitle>
-                <CardDescription>{t('feedbackDescription')}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                 {mockPartners.map(partner => (
-                    <div key={partner.id} className="border p-4 rounded-md space-y-3">
-                        <h3 className="font-semibold">{t('feedbackFor', { name: partner.name })}</h3>
-                        <div>
-                             <Label className="mb-2 block text-sm">{t('ratingLabel')}</Label>
-                             <RadioGroup
-                                value={feedback[partner.id]?.rating || ''}
-                                onValueChange={(value) => handleFeedbackChange(partner.id, 'rating', value)}
-                                className="flex space-x-4"
-                             >
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="positive" id={`${partner.id}-positive`} />
-                                  <Label htmlFor={`${partner.id}-positive`}><Heart className="h-5 w-5 text-green-500"/></Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="neutral" id={`${partner.id}-neutral`} />
-                                  <Label htmlFor={`${partner.id}-neutral`}><Meh className="h-5 w-5 text-yellow-500"/></Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="negative" id={`${partner.id}-negative`} />
-                                  <Label htmlFor={`${partner.id}-negative`}><Frown className="h-5 w-5 text-red-500"/></Label>
-                                </div>
-                              </RadioGroup>
-                        </div>
-                        <div>
-                           <Label htmlFor={`${partner.id}-comment`} className="mb-2 block text-sm">{t('commentLabel')}</Label>
-                            <Textarea
-                                id={`${partner.id}-comment`}
-                                placeholder={t('commentPlaceholder')}
-                                value={feedback[partner.id]?.comment || ''}
-                                onChange={(e) => handleFeedbackChange(partner.id, 'comment', e.target.value)}
-                                rows={2}
-                            />
-                        </div>
+        // Feedback Form View
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('feedbackTitle', { date: selectedSessionForFeedback.dateTime.toLocaleDateString() })}</CardTitle>
+            <CardDescription>{t('feedbackDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {mockPartners.map(partner => (
+              <div key={partner.id} className="border p-4 rounded-md space-y-3">
+                <h3 className="font-semibold">{t('feedbackFor', { name: partner.name })}</h3>
+                <div>
+                  <Label className="mb-2 block text-sm">{t('ratingLabel')}</Label>
+                  <RadioGroup
+                    value={feedback[partner.id]?.rating || ''}
+                    onValueChange={(value) => handleFeedbackChange(partner.id, 'rating', value)}
+                    className="flex space-x-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="positive" id={`${partner.id}-positive`} />
+                      <Label htmlFor={`${partner.id}-positive`}><Heart className="h-5 w-5 text-green-500" /></Label>
                     </div>
-                 ))}
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                 <Button variant="outline" onClick={() => setSelectedSessionForFeedback(null)} disabled={isScheduling}>
-                     {t('cancelButton')}
-                 </Button>
-                 <Button onClick={handleSubmitFeedback} disabled={isScheduling}>
-                    {isScheduling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    <Send className="mr-2 h-4 w-4"/>
-                    {t('submitFeedbackButton')}
-                 </Button>
-              </CardFooter>
-          </Card>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="neutral" id={`${partner.id}-neutral`} />
+                      <Label htmlFor={`${partner.id}-neutral`}><Meh className="h-5 w-5 text-yellow-500" /></Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="negative" id={`${partner.id}-negative`} />
+                      <Label htmlFor={`${partner.id}-negative`}><Frown className="h-5 w-5 text-red-500" /></Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                <div>
+                  <Label htmlFor={`${partner.id}-comment`} className="mb-2 block text-sm">{t('commentLabel')}</Label>
+                  <Textarea
+                    id={`${partner.id}-comment`}
+                    placeholder={t('commentPlaceholder')}
+                    value={feedback[partner.id]?.comment || ''}
+                    onChange={(e) => handleFeedbackChange(partner.id, 'comment', e.target.value)}
+                    rows={2}
+                  />
+                </div>
+              </div>
+            ))}
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button variant="outline" onClick={() => setSelectedSessionForFeedback(null)} disabled={isScheduling}>
+              {t('cancelButton')}
+            </Button>
+            <Button onClick={handleSubmitFeedback} disabled={isScheduling}>
+              {isScheduling && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <Send className="mr-2 h-4 w-4" />
+              {t('submitFeedbackButton')}
+            </Button>
+          </CardFooter>
+        </Card>
       ) : (
         // Default View: Scheduling and Upcoming Sessions
         <div className="grid md:grid-cols-2 gap-8">
@@ -294,8 +345,8 @@ export default function SpeedDatingPage() {
                 <div className="space-y-4">
                   {[...Array(3)].map((_, i) => (
                     <div key={i} className="space-y-2">
-                       <Skeleton className="h-5 w-3/4" />
-                       <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-5 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
                     </div>
                   ))}
                 </div>
@@ -304,30 +355,30 @@ export default function SpeedDatingPage() {
                   {upcomingSessions.map((session) => (
                     <li key={session.id} className="border-b pb-3 last:border-b-0 last:pb-0">
                       <div className="flex items-center justify-between mb-1">
-                         <span className="font-medium flex items-center">
-                           <CalendarClock className="mr-2 h-4 w-4 text-muted-foreground"/>
-                           {session.dateTime.toLocaleString()}
-                         </span>
-                         <Badge variant="secondary" className="flex items-center">
-                           <Users className="mr-1 h-3 w-3"/> {session.participantsCount}
-                         </Badge>
+                        <span className="font-medium flex items-center">
+                          <CalendarClock className="mr-2 h-4 w-4 text-muted-foreground" />
+                          {session.dateTime.toLocaleString()}
+                        </span>
+                        <Badge variant="secondary" className="flex items-center">
+                          <Users className="mr-1 h-3 w-3" /> {session.participantsCount}
+                        </Badge>
                       </div>
                       <div className="flex flex-wrap gap-1 my-2">
                         {session.interests.map(interest => (
                           <Badge key={interest} variant="outline" className="text-xs">{interest}</Badge>
                         ))}
                       </div>
-                       {session.status === 'completed' && (
-                           <Button size="sm" variant="outline" onClick={() => handleProvideFeedback(session)}>
-                                {t('provideFeedbackButton')}
-                           </Button>
-                       )}
-                       {session.status === 'in-progress' && (
-                           <Badge variant="default">{t('sessionInProgress')}</Badge>
-                       )}
-                       {session.status === 'scheduled' && (
-                            <Badge variant="outline">{t('sessionScheduled')}</Badge>
-                       )}
+                      {session.status === 'completed' && (
+                        <Button size="sm" variant="outline" onClick={() => handleProvideFeedback(session)}>
+                          {t('provideFeedbackButton')}
+                        </Button>
+                      )}
+                      {session.status === 'in-progress' && (
+                        <Badge variant="default">{t('sessionInProgress')}</Badge>
+                      )}
+                      {session.status === 'scheduled' && (
+                        <Badge variant="outline">{t('sessionScheduled')}</Badge>
+                      )}
                     </li>
                   ))}
                 </ul>
