@@ -402,11 +402,11 @@ export default function ChatPage() {
       senderName: CURRENT_USER_NAME,
       text: newMessage.trim(),
       timestamp: new Date(),
-      intentionTag: selectedIntention || aiSuggestedTag?.detectedIntention || undefined, // Prioritize manual, then AI, then none
-      status: 'sent',
+      intentionTag: selectedIntention || aiSuggestedTag?.detectedIntention || undefined,
+      status: 'sent' as const,
     };
 
-    const originalMessageText = newMessage.trim(); // Store text before clearing
+    const originalMessageText = newMessage.trim();
 
     setConversations(prev =>
       prev.map(conv =>
@@ -422,18 +422,11 @@ export default function ChatPage() {
     );
     setNewMessage('');
     setSelectedIntention('');
-    setAiSuggestedTag(null); // Clear AI suggestion after sending
-    requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    });
-
+    setAiSuggestedTag(null);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 700)); // Simulate sending delay
-
-      // Simulate partner response after a short delay
+      await new Promise(resolve => setTimeout(resolve, 700));
       simulatePartnerResponse(selectedConversationId, originalMessageText);
-
     } catch (error) {
       console.error("Failed to send message:", error);
       toast({
@@ -442,7 +435,9 @@ export default function ChatPage() {
       });
       setConversations(prev => prev.map(conv => {
         if (conv.id === selectedConversationId) {
-          const msgs = conv.messages.map(msg => msg.id === tempId ? { ...msg, status: 'error' } : msg);
+          const msgs = conv.messages.map(msg =>
+            msg.id === tempId ? { ...msg, status: 'error' as const } : msg
+          );
           return { ...conv, messages: msgs };
         }
         return conv;
@@ -473,11 +468,17 @@ export default function ChatPage() {
 
   const handleStartVideoCall = () => {
     if (!selectedConversation) return;
-    console.log(`Initiating video call with ${selectedConversation.participant.name}`);
-    toast({ title: t('videoCallTitle'), description: t('videoCallDesc', { name: selectedConversation.participant.name }) });
+    const participantName = selectedConversation.participant.name || t('unknownUser');
+    console.log(`Initiating video call with ${participantName}`);
+    toast({
+      title: t('videoCallTitle'),
+      description: t('videoCallDesc', { name: participantName })
+    });
   };
+
   const handleStartAudioCall = async () => {
     if (!selectedConversation) return;
+    const participantName = selectedConversation.participant.name || t('unknownUser');
 
     try {
       // Simulate API call to initiate call
@@ -485,7 +486,7 @@ export default function ChatPage() {
 
       toast({
         title: t('audioCallTitle'),
-        description: t('audioCallDesc', { name: selectedConversation.participant.name })
+        description: t('audioCallDesc', { name: participantName })
       });
     } catch (error) {
       console.error("Failed to start audio call:", error);
@@ -498,6 +499,21 @@ export default function ChatPage() {
     }
   };
 
+  const formatTimestamp = (date: Date | string | number | undefined): string => {
+    if (!date) return '';
+    const messageDate = new Date(date);
+    const now = new Date();
+    const diff = now.getTime() - messageDate.getTime();
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    if (diff < oneDay) {
+      return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } else if (diff < 7 * oneDay) {
+      return messageDate.toLocaleDateString([], { weekday: 'short' });
+    } else {
+      return messageDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    }
+  };
 
   return (
     <TooltipProvider>
