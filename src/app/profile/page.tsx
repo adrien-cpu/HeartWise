@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Upload, ShieldAlert } from 'lucide-react'; // Added ShieldAlert
 import { useAuth } from '@/contexts/AuthContext';
+import AuthGuard from '@/components/auth-guard';
 import { useRouter } from 'next/navigation';
 import { Timestamp } from 'firebase/firestore';
 import { moderateText, ModerationResult, moderateImage } from '@/services/moderation_service'; // Import moderation service
@@ -52,12 +53,7 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (authLoading) {
-      return; 
-    }
-
     if (!currentUser) {
-      router.push('/login'); 
       return;
     }
 
@@ -82,7 +78,7 @@ export default function ProfilePage() {
       }
     };
     fetchProfile();
-  }, [currentUser, authLoading, router, t, toast]);
+  }, [currentUser, t, toast]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

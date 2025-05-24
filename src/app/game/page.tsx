@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback, Suspense } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import dynamic from 'next/dynamic';
 import { useTranslations } from "next-intl";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Question, Difficulty } from '@/ai/questionnaires/questionnaire_structure';
 import * as ExampleQuestions from '@/ai/questionnaires/examples';
 import { useAuth } from "@/contexts/AuthContext";
+import AuthGuard from "@/components/auth-guard";
 import { useRouter } from "next/navigation";
 
 // Dynamically import TimesUpGame
@@ -75,21 +76,6 @@ const GamePage = (): JSX.Element => {
   const [gkIsPlaying, setGkIsPlaying] = useState(false);
 
 
-  const refreshLeaderboard = useCallback(async () => {
-    if (!currentUser) return;
-    setIsRefreshingLeaderboard(true);
-    try {
-        const users = await get_all_users();
-        const sortedUsers = users.sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
-        setLeaderboardData(sortedUsers);
-    } catch (error) {
-         console.error("Failed to reload leaderboard data:", error);
-         toast({ variant: "destructive", title: t('error'), description: t('errorLoadingLeaderboard')});
-    } finally {
-        setIsRefreshingLeaderboard(false);
-    }
-  }, [currentUser, t, toast]);
-
 
   // Load initial data (preferences, leaderboard)
   useEffect(() => {
@@ -99,6 +85,19 @@ const GamePage = (): JSX.Element => {
       return;
     }
 
+    const refreshLeaderboard = async () => {
+      setIsRefreshingLeaderboard(true);
+      try {
+          const users = await get_all_users();
+          const sortedUsers = users.sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
+          setLeaderboardData(sortedUsers);
+      } catch (error) {
+           console.error("Failed to reload leaderboard data:", error);
+           toast({ variant: "destructive", title: t('error'), description: t('errorLoadingLeaderboard')});
+      } finally {
+          setIsRefreshingLeaderboard(false);
+      }
+    };
     const loadData = async () => {
       setLoadingPageData(true);
       try {
@@ -110,7 +109,7 @@ const GamePage = (): JSX.Element => {
         toast({ variant: 'destructive', title: t('error'), description: t('errorLoadingData') });
       } finally {
         setLoadingPageData(false);
-      }
+      };
     };
     loadData();
   }, [currentUser, authLoading, router, toast, t, refreshLeaderboard]);
@@ -132,6 +131,19 @@ const GamePage = (): JSX.Element => {
     setUserGkAnswer("");
     setGkTimeRemaining(15);
   }, [gamePreferences]);
+
+   const refreshLeaderboard = useCallback(async () => {
+    if (!currentUser) return;
+    setIsRefreshingLeaderboard(true);
+    try {
+        const users = await get_all_users();
+        const sortedUsers = users.sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
+        setLeaderboardData(sortedUsers);
+    } catch (error) {
+         console.error("Failed to reload leaderboard data:", error);
+    } finally {
+        setIsRefreshingLeaderboard(false);
+    }}, [currentUser]);
 
   const handleGkNextQuestion = useCallback(async () => {
      if (currentGkQuestionIndex + 1 < gkQuestions.length) {
@@ -270,19 +282,6 @@ const GamePage = (): JSX.Element => {
       if (!name) return '?';
       return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
-
-  if (authLoading || (loadingPageData && !currentUser)) {
-    return (
-      <div className="container mx-auto p-4 flex items-center justify-center min-h-[calc(100vh-150px)]">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-   if (!currentUser) {
-     // This should ideally be handled by a higher-level auth guard or redirect in AuthContext
-     return <div className="container mx-auto p-4 text-center"><p className="text-destructive">{t('mustBeLoggedIn')}</p></div>;
-   }
 
   const renderGeneralKnowledge = () => {
      const currentQuestion = gkQuestions[currentGkQuestionIndex];

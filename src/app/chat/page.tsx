@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import AuthGuard from "@/components/auth-guard";
 import { tagMessageIntent, IntentionTaggingOutput } from '@/ai/flows/intention-tagging';
 import { moderateText, ModerationResult } from '@/services/moderation_service';
 import { useAuth } from '@/contexts/AuthContext';
@@ -71,19 +72,16 @@ const manualIntentionTags = [
 ];
 
 export default function ChatPage() {
+  const { currentUser, authLoading } = useAuth();
   const t = useTranslations('Chat');
   const tGlobal = useTranslations('Home');
   const { toast } = useToast();
-  const { currentUser, loading: authLoading } = useAuth();
-  const router = useRouter();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [currentMessages, setCurrentMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
-  const [selectedIntention, setSelectedIntention] = useState<string>('');
 
-  const [loadingConversations, setLoadingConversations] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
 
@@ -94,6 +92,7 @@ export default function ChatPage() {
   const [aiSuggestedTag, setAiSuggestedTag] = useState<IntentionTaggingOutput | null>(null);
   const [isAnalyzingIntent, setIsAnalyzingIntent] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [selectedIntention, setSelectedIntention] = useState<string>('');
 
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
   const [showLegacyCallFeatureInfo, setShowLegacyCallFeatureInfo] = useState(false);
@@ -103,14 +102,14 @@ export default function ChatPage() {
 
 
   // Initialize WebRTC connection state
-  const initRtcState = useCallback((targetUserId?: string): RTCConnection => ({
+  const initRtcState = useCallback((currentUserId: string, targetUserId?: string): RTCConnection => ({
     peerConnection: null,
     localStream: null,
     remoteStream: null,
-    signalingChannelId: currentUser && targetUserId ? getSignalingChannelId(currentUser.uid, targetUserId) : null,
+    signalingChannelId: targetUserId ? getSignalingChannelId(currentUserId, targetUserId) : null,
     callStatus: 'idle',
     isInitiator: false,
-    targetUserId: targetUserId,
+ targetUserId: targetUserId,
     onRemoteStreamReady: (stream) => {
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = stream;
@@ -129,7 +128,7 @@ export default function ChatPage() {
       setRtcConnection(prev => prev ? ({ ...prev, callStatus: 'ended', localStream: null, remoteStream: null, peerConnection: null }) : null);
       toast({ title: t('callEndedTitle'), description: t('callEndedDesc') });
     }
-  }), [currentUser, t, toast]);
+  }), [t, toast]);
 
 
   useEffect(() => {
@@ -137,19 +136,11 @@ export default function ChatPage() {
   }, []);
 
   useEffect(() => {
-    if (!authLoading && !currentUser) {
-      router.push('/login');
-    }
-  }, [authLoading, currentUser, router]);
-
-  useEffect(() => {
-    if (!currentUser || !currentUser.uid) {
-      setLoadingConversations(false);
+    if (!currentUser || !currentUser.uid) {      
       return () => {};
     }
 
-    setLoadingConversations(true);
-    const unsubscribe = getConversationsListener(currentUser.uid, (loadedConversations) => {
+    const unsubscribe = getConversationsListener(currentUser.uid, (loadedConversations) => {      
       setConversations(loadedConversations);
       if (loadedConversations.length > 0 && !selectedConversationId) {
         setSelectedConversationId(loadedConversations[0].id);
@@ -157,7 +148,7 @@ export default function ChatPage() {
         setSelectedConversationId(null);
       }
       setLoadingConversations(false);
-    });
+    }, setLoadingConversations);
 
     return () => unsubscribe();
   }, [currentUser, selectedConversationId]);
@@ -189,7 +180,7 @@ export default function ChatPage() {
     });
 
     return () => unsubscribe();
-  }, [selectedConversationId, currentUser, t, currentMessages.length, tGlobal]);
+  }, [selectedConversationId, currentUser?.uid, t, currentMessages.length, tGlobal]);
 
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
@@ -329,13 +320,13 @@ export default function ChatPage() {
       setRtcConnection({...newRtcState}); // Update state with peerConnection and localStream
 
     } catch (error: any) {
-      console.error("WebRTC: Error starting call:", error);
+ console.error("WebRTC: Error starting call:", error.message, error.name, error);
       toast({ variant: "destructive", title: t('callStartErrorTitle'), description: error.message || t('callStartErrorDesc') });
       if (newRtcState.onCallEnded) newRtcState.onCallEnded();
     }
   }, [currentUser, otherParticipant, rtcConnection, toast, t, initRtcState]);
 
-  const handleHangUp = useCallback(async () => {
+ const handleHangUp = useCallback(async (rtcConnectionToClose?: RTCConnection | null) => {
     if (!rtcConnection || !currentUser?.uid || !otherParticipant?.id) return;
     console.log("WebRTC: Hanging up call.");
     
@@ -343,8 +334,8 @@ export default function ChatPage() {
        const hangupMsg: HangupMessage = { type: 'hangup', senderId: currentUser.uid, timestamp: serverTimestamp()};
        await sendSignalingMessageViaFirestore(rtcConnection.signalingChannelId, currentUser.uid, hangupMsg);
     }
-    await closeWebRTCConnection(rtcConnection); // This will call onCallEnded
-    setRtcConnection(initRtcState(otherParticipant.id)); // Reset state
+ await closeWebRTCConnection(rtcConnectionToClose || rtcConnection); // This will call onCallEnded
+ setRtcConnection(initRtcState(currentUser.uid, otherParticipant.id)); // Reset state
   }, [rtcConnection, currentUser, otherParticipant, initRtcState]);
 
 
@@ -393,7 +384,7 @@ export default function ChatPage() {
       toast({
         variant: 'destructive',
         title: t('moderationBlockTitle'),
-        description: `${t('moderationBlockDesc')} ${moderationResult.issues?.map(issue => t(`moderationCategory_${issue.category}`, {}, {fallback: issue.category})).join(', ')}`,
+        description: `${t('moderationBlockDesc')} ${moderationResult.issues?.map(issue => t(`moderationCategory_${issue.category}`)).join(', ')}`,
         duration: 7000,
       });
       setSendingMessage(false);
@@ -442,27 +433,15 @@ export default function ChatPage() {
 
   const isCallActive = rtcConnection?.callStatus === 'active' || rtcConnection?.callStatus === 'dialing' || rtcConnection?.callStatus === 'receiving';
 
-
-  if (authLoading) {
-    return (
-      <div className="container mx-auto h-[calc(100vh-80px)] flex items-center justify-center p-0 md:p-4">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-  if (!currentUser) {
-    return (
-      <div className="container mx-auto h-[calc(100vh-80px)] flex items-center justify-center p-0 md:p-4">
-          <p>{t('redirectingToLogin')}</p> <Loader2 className="h-8 w-8 animate-spin text-primary ml-2"/>
-      </div>
-    );
-  }
-
   return (
+    <AuthGuard>
     <TooltipProvider>
         <div className="container mx-auto h-[calc(100vh-80px)] flex flex-col p-0 md:p-4">
         <Card className="flex flex-grow overflow-hidden h-full shadow-lg rounded-lg border">
             <div className="w-full md:w-1/3 border-r flex flex-col bg-card">
+            {currentUser && ( // Only render header if currentUser is available
+
+              <>
             <CardHeader className="p-4">
                 <CardTitle className="flex items-center gap-2"><MessagesSquare className="h-6 w-6 text-primary"/>{t('title')}</CardTitle>
                 <CardDescription>{t('conversationListDesc')}</CardDescription>
@@ -471,7 +450,7 @@ export default function ChatPage() {
             <ScrollArea className="flex-grow">
                 <div className="p-2 space-y-1">
                 {loadingConversations ? (
-                    [...Array(5)].map((_, i) => (
+                    [...Array(5)].map((_, i) => ( // Placeholder skeletons
                         <div key={i} className="flex items-center space-x-3 p-3 rounded-md">
                         <Skeleton className="h-10 w-10 rounded-full" />
                         <div className="space-y-1 flex-grow">
@@ -496,12 +475,13 @@ export default function ChatPage() {
                             selectedConversationId === conv.id ? "bg-primary/10 text-primary font-semibold" : "hover:bg-muted/50"
                             )}
                             onClick={() => {
-                                setSelectedConversationId(conv.id);
-                                if(rtcConnection && rtcConnection.callStatus !== 'idle') { // Hang up if switching conv during a call
-                                    handleHangUp();
-                                }
-                                const targetUser = Object.values(conv.participants).find(p => p.id !== currentUser.uid);
-                                setRtcConnection(initRtcState(targetUser?.id));
+                             setSelectedConversationId(conv.id);
+                             // Hang up if switching conv during a call
+                             if (rtcConnection && rtcConnection.callStatus !== 'idle') {
+                                handleHangUp(rtcConnection);
+                             }
+                             const targetUser = Object.values(conv.participants).find(p => p.id !== currentUser.uid);
+                             setRtcConnection(initRtcState(currentUser.uid, targetUser?.id));
                             }}
                             aria-current={selectedConversationId === conv.id ? "page" : undefined}
                         >
@@ -516,8 +496,8 @@ export default function ChatPage() {
                             <div className="ml-auto pl-2 shrink-0 flex flex-col items-end space-y-1">
                                 <span className="text-xs text-muted-foreground">
                                     {conv.lastMessageTimestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || ''}
-                                </span>
-                                {conv.unreadCounts && conv.unreadCounts[currentUser.uid] > 0 && (
+                                </span>                                
+                                {conv.unreadCounts && currentUser && conv.unreadCounts[currentUser.uid] > 0 && (
                                     <Badge variant="destructive" className="h-5 px-1.5 text-xs">{conv.unreadCounts[currentUser.uid]}</Badge>
                                 )}
                             </div>
@@ -528,6 +508,8 @@ export default function ChatPage() {
                     <p className="p-4 text-center text-muted-foreground">{t('noChats')}</p>
                 )}
                 </div>
+            </ScrollArea>
+             </>)} {/* End of currentUser check for left panel content */}
             </ScrollArea>
             </div>
 
@@ -608,82 +590,92 @@ export default function ChatPage() {
                     </div>
                 )}
 
-                <ScrollArea className="flex-grow p-4 space-y-4 bg-muted/20" aria-live="polite">
-                    {loadingMessages ? (
-                         [...Array(8)].map((_, i) => (
-                            <div key={i} className={`flex items-end space-x-2 ${i % 2 === 0 ? 'ml-auto justify-end' : 'mr-auto justify-start'}`}>
-                                {i % 2 !== 0 && <Skeleton className="h-8 w-8 rounded-full" />}
-                                <Skeleton className={`h-10 rounded-lg ${i % 2 === 0 ? 'w-3/5' : 'w-2/5'}`} />
-                                {i % 2 === 0 && <Skeleton className="h-8 w-8 rounded-full" />}
-                            </div>
-                        ))
-                    ) : currentMessages.map((msg) => {
-                    const intentionInfo = getManualIntentionTagInfo(msg.intentionTag);
-                    const isCurrentUserMsg = msg.senderId === currentUser.uid;
-                    return (
-                        <div
-                            key={msg.id}
-                            className={cn(
-                            "flex items-end space-x-2 max-w-[85%]",
-                            isCurrentUserMsg ? "ml-auto justify-end" : "mr-auto justify-start"
-                            )}
-                        >
-                            {!isCurrentUserMsg && (
-                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint={otherParticipant.dataAiHint || "person"}>
-                                <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || tGlobal('unknownUser')} />
-                                <AvatarFallback>{getInitials(otherParticipant.name)}</AvatarFallback>
-                            </Avatar>
-                            )}
-                            <div
-                            className={cn(
-                                "rounded-lg px-3 py-2 shadow-sm relative group",
-                                isCurrentUserMsg
-                                ? "bg-primary text-primary-foreground rounded-br-none"
-                                : "bg-card text-card-foreground border rounded-bl-none",
-                                msg.status === 'moderated' ? "bg-yellow-100 border-yellow-400 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700" : ""
-                            )}
-                            >
-                            {intentionInfo && msg.status !== 'moderated' && (
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <div className="flex items-center text-xs opacity-80 mb-1 cursor-default" >
-                                            {React.cloneElement(intentionInfo.icon, { className: "h-3 w-3 mr-1" })}
-                                            <span>{intentionInfo.label}</span>
-                                        </div>
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top" align={isCurrentUserMsg ? "end" : "start"}>
-                                         <p>{`${t('intentionTagTitle')}: ${intentionInfo.label}`}</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            )}
-                            <p className="text-sm whitespace-pre-wrap">{msg.status === 'moderated' ? t('messageModerated') : msg.text}</p>
-                            <p className="text-xs text-right opacity-70 mt-1">
-                                {msg.timestamp?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || '...'}
-                            </p>
-                            {msg.status === 'error' && (
+                <ScrollArea className="flex-grow p-4 space-y-4 bg-muted/20" aria-live="polite" onScroll={handleScroll}>
+                     {loadingMessages ? (
+                          [...Array(8)].map((_, i) => (
+                             <div key={i} className={`flex items-end space-x-2 ${i % 2 === 0 ? 'ml-auto justify-end' : 'mr-auto justify-start'}`}>
+                                 {i % 2 !== 0 && <Skeleton className="h-8 w-8 rounded-full" />}
+                                 <Skeleton className={`h-10 rounded-lg ${i % 2 === 0 ? 'w-3/5' : 'w-2/5'}`} />
+                                 {i % 2 === 0 && <Skeleton className="h-8 w-8 rounded-full" />}
+                             </div>
+                         ))
+                     ) : currentMessages.map((msg) => {
+                     const intentionInfo = getManualIntentionTagInfo(msg.intentionTag);
+                     const isCurrentUserMsg = msg.senderId === currentUser.uid;
+                     return (
+                         <div
+                             key={msg.id}
+                             className={cn(
+                             "flex items-end space-x-2 max-w-[85%]",
+                             isCurrentUserMsg ? "ml-auto justify-end" : "mr-auto justify-start"
+                             )}
+                         >
+                             {!isCurrentUserMsg && (
+                             <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint={otherParticipant.dataAiHint || "person"}>
+                                 <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || tGlobal('unknownUser')} />
+                                 <AvatarFallback>{getInitials(otherParticipant.name || tGlobal('unknownUser'))}</AvatarFallback>
+                             </Avatar>
+                             )}
+                             <div
+                             className={cn(
+                                 "rounded-lg px-3 py-2 shadow-sm relative group",
+                                 isCurrentUserMsg
+                                 ? "bg-primary text-primary-foreground rounded-br-none"
+                                 : "bg-card text-card-foreground border rounded-bl-none",
+                                 msg.status === 'moderated' ? "bg-yellow-100 border-yellow-400 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700" : ""
+                             )}
+                             >
+                             {intentionInfo && msg.status !== 'moderated' && (
                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <AlertCircle className="absolute -left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive" />
-                                    </TooltipTrigger>
-                                     <TooltipContent side="left">
-                                        <p>{t('messageFailedToSend')}</p>
+                                     <TooltipTrigger asChild>
+                                         <div className="flex items-center text-xs opacity-80 mb-1 cursor-default" >
+                                             {React.cloneElement(intentionInfo.icon, { className: "h-3 w-3 mr-1" })}
+                                             <span>{intentionInfo.label}</span>
+                                         </div>
+                                     </TooltipTrigger>
+                                     <TooltipContent side="top" align={isCurrentUserMsg ? "end" : "start"}>
+                                          <p>{`${t('intentionTagTitle')}: ${intentionInfo.label}`}</p>
                                      </TooltipContent>
-                                </Tooltip>
-                            )}
-                             {msg.status === 'moderated' && (
-                                 <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <ShieldAlert className="absolute -left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-yellow-500" />
-                                    </TooltipTrigger>
-                                     <TooltipContent side="left">
-                                        <p>{t('messageBlockedByModeration')}</p>
-                                     </TooltipContent>
-                                </Tooltip>
-                            )}
+                                 </Tooltip>
+                             )}
+                             <p className="text-sm whitespace-pre-wrap">{msg.status === 'moderated' ? t('messageModerated') : msg.text}</p>
+                             <p className="text-xs text-right opacity-70 mt-1">
+                                 {/* Check if timestamp is a Timestamp before calling toDate() */}
+ {msg.timestamp && typeof (msg.timestamp as any).toDate === 'function'
+ ? (msg.timestamp as Timestamp).toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'})
+ : msg.timestamp ? '...' : ''} {/* Render '...' if timestamp exists but is not Timestamp, or empty string */}
+                             </p>
+
+ {typeof msg.likes === 'number' && msg.likes > 0 && (
+ <Badge variant="secondary" className="absolute -right-3 -bottom-2 h-5 px-1.5 text-xs"> {/* Display likes */}
+ {msg.likes}
+ </Badge> 
+ )}
+
+                             {msg.status === 'error' && (
+ <Tooltip>
+                                     <TooltipTrigger asChild>
+                                         <AlertCircle className="absolute -left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive" />
+                                     </TooltipTrigger>
+                                      <TooltipContent side="left">
+                                         <p>{t('messageFailedToSend')}</p>
+                                      </TooltipContent>
+                                 </Tooltip>
+                             )}
+                              {msg.status === 'moderated' && (
+ <Tooltip>
+                                     <TooltipTrigger asChild>
+                                         <ShieldAlert className="absolute -left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-yellow-500" />
+                                     </TooltipTrigger>
+                                      <TooltipContent side="left">
+                                         <p>{t('messageBlockedByModeration')}</p>
+                                      </TooltipContent>
+                                 </Tooltip>
+                             )}
                             </div>
-                            {isCurrentUserMsg && (
-                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint="user profile">
-                                <AvatarImage src={currentUser?.photoURL || undefined} alt={currentUser?.displayName || 'You'} />
+                            {isCurrentUserMsg && currentUser && (
+                             <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint={currentUser.dataAiHint || "user profile"}>
+                                <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser?.displayName || 'You'} />
                                 <AvatarFallback>{getInitials(currentUser?.displayName || 'You')}</AvatarFallback>
                             </Avatar>
                             )}
@@ -693,8 +685,8 @@ export default function ChatPage() {
                      {isPartnerTyping && (
                          <div className="flex items-center space-x-2 mr-auto justify-start max-w-[85%]">
                             <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint={otherParticipant?.dataAiHint || "person"}>
-                                <AvatarImage src={otherParticipant?.profilePicture} alt={otherParticipant?.name || tGlobal('unknownUser')} />
-                                <AvatarFallback>{getInitials(otherParticipant?.name)}</AvatarFallback>
+                                <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant?.name || tGlobal('unknownUser')} />
+                                <AvatarFallback>{getInitials(otherParticipant.name || tGlobal('unknownUser'))}</AvatarFallback>
                             </Avatar>
                              <div className="rounded-lg px-3 py-2 bg-card text-card-foreground border rounded-bl-none shadow-sm">
                                 <div className="flex space-x-1 items-center">
@@ -765,14 +757,15 @@ export default function ChatPage() {
                 </CardFooter>
                 </>
             ) : (
-                <div className="flex flex-grow items-center justify-center text-muted-foreground p-4 text-center">
-                {loadingConversations || authLoading ? <Loader2 className="h-8 w-8 animate-spin" /> : <p>{t('selectChatPrompt')}</p> }
+                <div className="flex flex-grow items-center justify-center text-muted-foreground p-4 text-center"> {/* Placeholder if no conversation selected */}
+                {loadingConversations ? <Loader2 className="h-8 w-8 animate-spin" /> : <p>{t('selectChatPrompt')}</p> }
                 </div>
             )}
             </div>
         </Card>
         </div>
     </TooltipProvider>
+    </AuthGuard>
   );
 }
 
