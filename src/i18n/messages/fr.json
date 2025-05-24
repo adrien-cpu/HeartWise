@@ -1,0 +1,28 @@
+{
+    "Home": {
+        "welcome": "Bienvenue sur HeartWise",
+        "description": "Votre plateforme de rencontres intelligente et sécurisée",
+        "features": {
+            "matchmaking": {
+                "title": "Analyse Faciale",
+                "description": "Trouvez votre âme sœur grâce à notre technologie d'analyse faciale avancée",
+                "cta": "Commencer l'analyse"
+            },
+            "chat": {
+                "title": "Chat Intelligent",
+                "description": "Discutez avec notre coach IA pour améliorer vos conversations",
+                "cta": "Démarrer le chat"
+            },
+            "speedDating": {
+                "title": "Speed Dating",
+                "description": "Rencontrez plusieurs personnes en un temps record",
+                "cta": "Participer"
+            },
+            "rewards": {
+                "title": "Récompenses",
+                "description": "Gagnez des points et débloquez des badges exclusifs",
+                "cta": "Voir les récompenses"
+            }
+        }
+    }
+}

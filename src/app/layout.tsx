@@ -7,14 +7,16 @@
  *              to a client boundary for client-side provider initialization.
  */
 
-import type { Metadata, Viewport } from 'next';
+import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { ReactNode } from 'react';
 import { getMessages } from 'next-intl/server';
-import { locales, defaultLocale, isValidLocale } from '@/i18n/settings';
+import { defaultLocale, isValidLocale } from '@/i18n/settings';
 import { metadata as appMetadata } from '@/app/metadata';
 import { ClientSideI18n } from '@/components/ClientSideI18n'; // Client boundary for providers
 import './globals.css';
+import Footer from '@/components/Footer';
+import GlobalLanguageSwitcher from '@/components/GlobalLanguageSwitcher';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -91,12 +93,21 @@ export default async function RootLayout({
   return (
     <html lang={effectiveLocale}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/*
-          Pass locale and server-loaded messages to the Client Boundary Component.
-          ClientSideI18n will use these to set up NextIntlClientProvider and AuthProvider.
-        */}
         <ClientSideI18n locale={effectiveLocale} messages={messages}>
-          {children}
+          <div className="flex flex-col min-h-screen bg-background">
+            {/* Header */}
+            <header className="w-full flex items-center justify-end bg-background border-b border-border px-4 py-2">
+              <GlobalLanguageSwitcher />
+            </header>
+            {/* Contenu principal */}
+            <main className="flex-1 flex flex-col items-center justify-center">
+              <div className="max-w-5xl w-full mx-auto">
+                {children}
+              </div>
+            </main>
+            {/* Footer */}
+            <Footer />
+          </div>
         </ClientSideI18n>
       </body>
     </html>

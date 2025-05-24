@@ -1,7 +1,28 @@
 {
   "Home": {
     "tagline": "Find meaningful connections.",
-    "features": "Features",
+    "features": {
+      "matchmaking": {
+        "title": "Matchmaking",
+        "description": "Find compatible people with our smart algorithm.",
+        "cta": "Start matchmaking"
+      },
+      "chat": {
+        "title": "Chat",
+        "description": "Chat safely with your new contacts.",
+        "cta": "Go to chat"
+      },
+      "speedDating": {
+        "title": "Speed Dating",
+        "description": "Join online speed dating sessions.",
+        "cta": "Join speed dating"
+      },
+      "rewards": {
+        "title": "Rewards",
+        "description": "Earn badges and points for your interactions.",
+        "cta": "See my rewards"
+      }
+    },
     "geolocationMeeting": "Geolocation Meeting",
     "facialAnalysisMatching": "Facial Analysis Matching",
     "aiConversationCoach": "AI Conversation Coach",
@@ -22,10 +43,28 @@
     "navigation": "Navigation",
     "dashboard": "Dashboard",
     "mainPageTitle": "Welcome to HeartWise",
-    "mainPageDescription": "The innovative dating app focused on emotional intelligence and genuine connection. Explore our features to find meaningful relationships.",
+    "mainPageDescription": "Discover all the features to make your meetings and exchanges easier.",
     "goToDashboard": "Go to Dashboard",
     "loginButton": "Login",
-    "signupButton": "Sign Up"
+    "signupButton": "Sign Up",
+    "dinnersEventsTitle": "Dinners & Events",
+    "dinnersEventsDesc": "Organize shared meals and invite your friends.",
+    "recipesLibraryTitle": "Recipe Library",
+    "recipesLibraryDesc": "Explore recipes and share your ideas.",
+    "communityMapTitle": "Community Map",
+    "communityMapDesc": "Find meetings near you.",
+    "indoorGardenTitle": "Indoor Garden",
+    "indoorGardenDesc": "Share your gardening tips.",
+    "mealPlanningTitle": "Meal Planning",
+    "mealPlanningDesc": "Easily plan your menus.",
+    "smartPantryTitle": "Smart Pantry",
+    "smartPantryDesc": "Manage your stocks and avoid waste.",
+    "explore": "Explore",
+    "welcome": "Welcome to HeartWise",
+    "description": "Discover all the features to make your meetings and exchanges easier.",
+    "welcomeButton": "Discover",
+    "welcomeButtonLink": "/dashboard",
+    "welcomeButtonLinkText": "Go to Dashboard"
   },
   "Auth": {
     "loginTitle": "Login to Your Account",
@@ -51,7 +90,13 @@
     "signupSuccessDesc": "Welcome to HeartWise! Your account has been created.",
     "signupErrorTitle": "Signup Failed",
     "signupErrorDefault": "An unexpected error occurred. Please try again.",
-    "signupErrorEmailInUse": "This email address is already in use."
+    "signupErrorEmailInUse": "This email address is already in use.",
+    "tokenRefreshErrorTitle": "Token Refresh Error",
+    "tokenRefreshErrorDesc": "Unable to refresh your session. Please log in again.",
+    "logoutSuccessTitle": "Logout Successful",
+    "logoutSuccessDesc": "You have been successfully logged out.",
+    "logoutErrorTitle": "Logout Error",
+    "logoutErrorDesc": "An error occurred while logging out. Please try again."
   },
   "GeolocationMeeting": {
     "title": "Find Nearby Connections",
@@ -434,7 +479,24 @@
     "viewProfileButton": "View Profile",
     "viewAllRewards": "View All Rewards"
   },
-   "Sidebar": {
-      "toggleSidebar": "Toggle Sidebar"
-   }
+  "Sidebar": {
+    "toggleSidebar": "Toggle Sidebar"
+  },
+  "Footer": {
+    "tagline": "Find meaningful connections",
+    "features": "Features",
+    "matchmaking": "Matchmaking",
+    "speedDating": "Speed Dating",
+    "chat": "Chat",
+    "rewards": "Rewards",
+    "resources": "Resources",
+    "about": "About",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "legal": "Legal",
+    "terms": "Terms of Use",
+    "privacy": "Privacy",
+    "cookies": "Cookies",
+    "rights": "All rights reserved."
+  }
 }

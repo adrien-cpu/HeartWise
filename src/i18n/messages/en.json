@@ -1,0 +1,28 @@
+{
+    "Home": {
+        "welcome": "Welcome to HeartWise",
+        "description": "Your smart and secure dating platform",
+        "features": {
+            "matchmaking": {
+                "title": "Facial Analysis",
+                "description": "Find your soulmate with our advanced facial analysis technology",
+                "cta": "Start Analysis"
+            },
+            "chat": {
+                "title": "Smart Chat",
+                "description": "Chat with our AI coach to improve your conversations",
+                "cta": "Start Chat"
+            },
+            "speedDating": {
+                "title": "Speed Dating",
+                "description": "Meet multiple people in a short time",
+                "cta": "Join Now"
+            },
+            "rewards": {
+                "title": "Rewards",
+                "description": "Earn points and unlock exclusive badges",
+                "cta": "View Rewards"
+            }
+        }
+    }
+}

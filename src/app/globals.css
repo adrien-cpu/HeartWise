@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-}
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -27,21 +23,20 @@ body {
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
     --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --radius: 0.75rem;
+
+    /* Palette Rencontres */
+    --color-primary: #FF6F61;
+    --color-secondary: #FFB6B9;
+    --color-accent: #FFD6A5;
+    --color-bg: #F7F7F7;
+    --color-card: #FFFFFF;
+    --color-success: #B5EAD7;
+    --color-info: #C7CEEA;
+    --color-text: #333333;
+    --color-border: #FFB6B9;
   }
+
   .dark {
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
@@ -62,19 +57,17 @@ body {
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Palette Rencontres (mode sombre) */
+    --color-primary: #FF6F61;
+    --color-secondary: #FFB6B9;
+    --color-accent: #FFD6A5;
+    --color-bg: #1A1A1A;
+    --color-card: #2D2D2D;
+    --color-success: #B5EAD7;
+    --color-info: #C7CEEA;
+    --color-text: #F7F7F7;
+    --color-border: #FF6F61;
   }
 }
 
@@ -82,7 +75,142 @@ body {
   * {
     @apply border-border;
   }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+  }
+
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer components {
+  .card-rencontre {
+    @apply bg-card text-card-foreground rounded-2xl border-2 border-border shadow-lg transition-all duration-300;
+    background: var(--color-card);
+    border-color: var(--color-border);
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 380px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-rencontre::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--color-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .card-rencontre:hover {
+    @apply transform -translate-y-2 scale-[1.02];
+    box-shadow: 0 12px 40px rgba(255, 111, 97, 0.15);
+    border-color: var(--color-primary);
+  }
+
+  .card-rencontre:hover::before {
+    transform: scaleX(1);
+  }
+
+  .icon-rencontre {
+    @apply flex items-center justify-center w-16 h-16 rounded-full text-3xl mb-8;
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 8px 16px rgba(255, 111, 97, 0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .card-rencontre:hover .icon-rencontre {
+    transform: scale(1.1);
+    box-shadow: 0 12px 24px rgba(255, 111, 97, 0.3);
+  }
+
+  .card-rencontre h2 {
+    @apply text-2xl font-bold mb-4 text-center;
+    color: var(--color-primary);
+    transition: color 0.3s ease;
+  }
+
+  .card-rencontre p {
+    @apply text-base text-muted-foreground text-center mb-8 flex-1 leading-relaxed;
+  }
+
+  .btn-rencontre {
+    @apply px-8 py-3 rounded-xl font-semibold transition-all duration-300 w-full max-w-[200px];
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 111, 97, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-rencontre::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  .btn-rencontre:hover {
+    @apply transform -translate-y-1;
+    background: var(--color-secondary);
+    color: var(--color-text);
+    box-shadow: 0 6px 16px rgba(255, 111, 97, 0.3);
+  }
+
+  .btn-rencontre:hover::before {
+    transform: translateX(100%);
+  }
+
+  .grid-rencontre {
+    @apply grid gap-8 p-8;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }

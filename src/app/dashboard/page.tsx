@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -61,8 +60,7 @@ export default function DashboardPage() {
   const [profileCompleteness, setProfileCompleteness] = useState(0);
 
   useEffect(() => {
-    const fetchProfileData = async () => {
-      setLoading(true);
+    const fetchProfile = async () => {
       try {
         const userProfile = await get_user(userId);
         setProfile(userProfile);
@@ -74,7 +72,7 @@ export default function DashboardPage() {
         if (userProfile.interests && userProfile.interests.length > 0) completeness += 20;
         if (userProfile.interests && userProfile.interests.length >= 3) completeness += 20; // Bonus for more interests
         setProfileCompleteness(Math.min(100, completeness));
-        
+
         const mockAdvices = [
           t('mockAdvice1'),
           t('mockAdvice2'),
@@ -83,31 +81,30 @@ export default function DashboardPage() {
         setCurrentAdvice(mockAdvices[Math.floor(Math.random() * mockAdvices.length)]);
 
       } catch (error) {
-        console.error("Failed to fetch profile for dashboard:", error);
+        console.error("Error fetching profile:", error);
         toast({
           variant: "destructive",
-          title: tProfile('fetchErrorTitle'),
-          description: tProfile('fetchErrorDescription'),
+          title: t('fetchErrorTitle'),
+          description: t('fetchErrorDescription'),
         });
-      } finally {
-        setLoading(false);
       }
     };
-    fetchProfileData();
-  }, [userId, tProfile, toast, t]);
+
+    fetchProfile();
+  }, [toast, t]);
 
   const getInitials = (name?: string): string => {
     if (!name) return 'U';
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
-   const getBadgeIcon = (type: string): React.ReactNode => {
-     switch (type) {
-       case 'profile_complete': return <UserCheck className="h-4 w-4 text-green-500" />;
-       case 'first_chat': return <MessageSquareText className="h-4 w-4 text-blue-500" />;
-       default: return <Star className="h-4 w-4 text-yellow-500" />;
-     }
-   };
+  const getBadgeIcon = (type: string): React.ReactNode => {
+    switch (type) {
+      case 'profile_complete': return <UserCheck className="h-4 w-4 text-green-500" />;
+      case 'first_chat': return <MessageSquareText className="h-4 w-4 text-blue-500" />;
+      default: return <Star className="h-4 w-4 text-yellow-500" />;
+    }
+  };
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -132,11 +129,11 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : (
-           <h1 className="text-3xl font-bold">{t('welcome', { name: t('userAlt') })}</h1>
+          <h1 className="text-3xl font-bold">{t('welcome', { name: t('userAlt') })}</h1>
         )}
-         <Link href="/profile" passHref>
-            <Button variant="outline">{tProfile('editProfile')}</Button>
-         </Link>
+        <Link href="/profile" passHref>
+          <Button variant="outline">{tProfile('editProfile')}</Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -162,24 +159,24 @@ export default function DashboardPage() {
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-                <UserCheck className="h-6 w-6 text-primary" />
-                {t('profileCompletenessTitle')}
+              <UserCheck className="h-6 w-6 text-primary" />
+              {t('profileCompletenessTitle')}
             </CardTitle>
-             <CardDescription>{t('profileCompletenessDesc')}</CardDescription>
+            <CardDescription>{t('profileCompletenessDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
-               <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
             ) : (
-                <>
-                    <Progress value={profileCompleteness} className="w-full mb-2 h-3" aria-label={`${t('profileCompletenessTitle')} ${profileCompleteness}%`} />
-                    <p className="text-right text-sm font-medium text-primary">{profileCompleteness}%</p>
-                     {profileCompleteness < 100 && (
-                       <Link href="/profile" passHref>
-                         <Button variant="link" size="sm" className="p-0 h-auto mt-1">{t('completeProfileLink')}</Button>
-                       </Link>
-                     )}
-                </>
+              <>
+                <Progress value={profileCompleteness} className="w-full mb-2 h-3" aria-label={`${t('profileCompletenessTitle')} ${profileCompleteness}%`} />
+                <p className="text-right text-sm font-medium text-primary">{profileCompleteness}%</p>
+                {profileCompleteness < 100 && (
+                  <Link href="/profile" passHref>
+                    <Button variant="link" size="sm" className="p-0 h-auto mt-1">{t('completeProfileLink')}</Button>
+                  </Link>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
@@ -216,45 +213,45 @@ export default function DashboardPage() {
             </Link>
           </CardContent>
         </Card>
-        
+
         {/* Mock Match Suggestion Card */}
         <Card className="lg:col-span-2 shadow-sm hover:shadow-md transition-shadow">
-           <CardHeader>
+          <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-6 w-6 text-primary" />
               {t('matchSuggestionTitle')}
             </CardTitle>
             <CardDescription>{t('matchSuggestionDesc')}</CardDescription>
-           </CardHeader>
-           <CardContent>
+          </CardHeader>
+          <CardContent>
             {loading ? (
-                <div className="flex items-center space-x-4">
-                    <Skeleton className="h-16 w-16 rounded-full" />
-                    <div className="space-y-2 flex-grow">
-                        <Skeleton className="h-5 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                        <Skeleton className="h-4 w-2/3" />
-                    </div>
+              <div className="flex items-center space-x-4">
+                <Skeleton className="h-16 w-16 rounded-full" />
+                <div className="space-y-2 flex-grow">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-2/3" />
                 </div>
+              </div>
             ) : (
-                <div className="flex items-center space-x-4 p-3 border rounded-lg bg-muted/50">
-                    <Avatar className="h-16 w-16 border" data-ai-hint={mockMatchSuggestion.dataAiHint || "person"}>
-                        <AvatarImage src={mockMatchSuggestion.profilePicture} alt={mockMatchSuggestion.name}/>
-                        <AvatarFallback>{getInitials(mockMatchSuggestion.name)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-grow">
-                        <h3 className="text-lg font-semibold">{mockMatchSuggestion.name}</h3>
-                        <div className="flex flex-wrap gap-1 my-1">
-                            {mockMatchSuggestion.interests.map(interest => (
-                                <Badge key={interest} variant="secondary" className="text-xs">{interest}</Badge>
-                            ))}
-                        </div>
-                        <p className="text-sm text-green-600 font-medium">{t('compatibility', { score: mockMatchSuggestion.compatibility })}</p>
-                    </div>
-                    <Button variant="default" size="sm">{t('viewProfileButton')}</Button>
+              <div className="flex items-center space-x-4 p-3 border rounded-lg bg-muted/50">
+                <Avatar className="h-16 w-16 border" data-ai-hint={mockMatchSuggestion.dataAiHint || "person"}>
+                  <AvatarImage src={mockMatchSuggestion.profilePicture} alt={mockMatchSuggestion.name} />
+                  <AvatarFallback>{getInitials(mockMatchSuggestion.name)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-grow">
+                  <h3 className="text-lg font-semibold">{mockMatchSuggestion.name}</h3>
+                  <div className="flex flex-wrap gap-1 my-1">
+                    {mockMatchSuggestion.interests.map(interest => (
+                      <Badge key={interest} variant="secondary" className="text-xs">{interest}</Badge>
+                    ))}
+                  </div>
+                  <p className="text-sm text-green-600 font-medium">{t('compatibility', { score: mockMatchSuggestion.compatibility })}</p>
                 </div>
+                <Button variant="default" size="sm">{t('viewProfileButton')}</Button>
+              </div>
             )}
-           </CardContent>
+          </CardContent>
         </Card>
 
 
@@ -273,27 +270,27 @@ export default function DashboardPage() {
             ) : (
               <>
                 <div className="flex items-center justify-between text-sm">
-                   <span className="text-muted-foreground">{t('totalPoints')}</span>
-                   <span className="font-semibold flex items-center gap-1">
-                     <Trophy className="h-4 w-4 text-yellow-500" />
-                     {profile?.points ?? 0}
-                   </span>
-                 </div>
-                 <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t('totalPoints')}</span>
+                  <span className="font-semibold flex items-center gap-1">
+                    <Trophy className="h-4 w-4 text-yellow-500" />
+                    {profile?.points ?? 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t('badgesEarned')}</span>
-                   <span className="font-semibold">{profile?.rewards?.length ?? 0}</span>
-                 </div>
-                 {/* Add more mock stats if relevant, e.g., "Matches Made", "Dates Scheduled" - requires backend */}
+                  <span className="font-semibold">{profile?.rewards?.length ?? 0}</span>
+                </div>
+                {/* Add more mock stats if relevant, e.g., "Matches Made", "Dates Scheduled" - requires backend */}
               </>
             )}
           </CardContent>
         </Card>
 
-         {/* Recent Badges Card */}
+        {/* Recent Badges Card */}
         <Card className="lg:col-span-2 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>{t('recentBadgesTitle')}</CardTitle>
-             <CardDescription>{t('recentBadgesDesc')}</CardDescription>
+            <CardDescription>{t('recentBadgesDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -304,27 +301,32 @@ export default function DashboardPage() {
               </div>
             ) : profile?.rewards && profile.rewards.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                 {profile.rewards.slice(0, 4).map(reward => (
-                   <Badge key={reward.id} variant="secondary" className="flex items-center gap-1.5 p-1.5 pr-2.5 text-xs cursor-help" title={`${tRewards(`badge_${reward.type}_name`, {}, { fallback: reward.name })}: ${tRewards(`badge_${reward.type}_desc`, {}, { fallback: reward.description })}`}>
-                      {getBadgeIcon(reward.type)}
-                      {tRewards(`badge_${reward.type}_name`, {}, { fallback: reward.name })}
-                   </Badge>
-                 ))}
+                {profile.rewards.slice(0, 4).map(reward => (
+                  <Badge
+                    key={reward.id}
+                    variant="secondary"
+                    className="flex items-center gap-1.5 p-1.5 pr-2.5 text-xs cursor-help"
+                    title={`${tRewards(`badge_${reward.type}_name`, { defaultValue: reward.name })}: ${tRewards(`badge_${reward.type}_desc`, { defaultValue: reward.description })}`}
+                  >
+                    {getBadgeIcon(reward.type)}
+                    {tRewards(`badge_${reward.type}_name`, { defaultValue: reward.name })}
+                  </Badge>
+                ))}
                 {profile.rewards.length > 4 && (
-                   <Link href="/rewards" passHref>
-                      <Badge variant="outline" className="text-xs cursor-pointer hover:bg-accent p-1.5 pr-2.5">+{profile.rewards.length - 4} {t('moreBadges')}</Badge>
-                   </Link>
+                  <Link href="/rewards" passHref>
+                    <Badge variant="outline" className="text-xs cursor-pointer hover:bg-accent p-1.5 pr-2.5">+{profile.rewards.length - 4} {t('moreBadges')}</Badge>
+                  </Link>
                 )}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">{tRewards('noBadges')}</p>
             )}
           </CardContent>
-           <CardFooter>
-                <Link href="/rewards" passHref>
-                   <Button variant="link" className="p-0 h-auto text-sm">{t('viewAllRewards')}</Button>
-                </Link>
-            </CardFooter>
+          <CardFooter>
+            <Link href="/rewards" passHref>
+              <Button variant="link" className="p-0 h-auto text-sm">{t('viewAllRewards')}</Button>
+            </Link>
+          </CardFooter>
         </Card>
 
       </div>

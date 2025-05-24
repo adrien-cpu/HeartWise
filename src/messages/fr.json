@@ -1,7 +1,28 @@
 {
   "Home": {
     "tagline": "Trouvez des connexions significatives.",
-    "features": "Fonctionnalités",
+    "features": {
+      "matchmaking": {
+        "title": "Mise en relation",
+        "description": "Trouvez des personnes compatibles grâce à notre algorithme intelligent.",
+        "cta": "Commencer la mise en relation"
+      },
+      "chat": {
+        "title": "Discussion",
+        "description": "Discutez en toute sécurité avec vos nouveaux contacts.",
+        "cta": "Accéder au chat"
+      },
+      "speedDating": {
+        "title": "Speed Dating",
+        "description": "Participez à des sessions de speed dating en ligne.",
+        "cta": "Participer au speed dating"
+      },
+      "rewards": {
+        "title": "Récompenses",
+        "description": "Gagnez des badges et des points pour vos interactions.",
+        "cta": "Voir mes récompenses"
+      }
+    },
     "geolocationMeeting": "Rencontres Géolocalisées",
     "facialAnalysisMatching": "Analyse Faciale et Correspondance",
     "aiConversationCoach": "Coach IA Conversationnel",
@@ -22,10 +43,28 @@
     "navigation": "Navigation",
     "dashboard": "Tableau de Bord",
     "mainPageTitle": "Bienvenue sur HeartWise",
-    "mainPageDescription": "L'application de rencontre innovante axée sur l'intelligence émotionnelle et la connexion authentique. Explorez nos fonctionnalités pour trouver des relations significatives.",
+    "mainPageDescription": "Découvrez toutes les fonctionnalités pour faciliter vos rencontres et échanges.",
+    "dinnersEventsTitle": "Dîners & Événements",
+    "dinnersEventsDesc": "Organisez des repas partagés et invitez vos amis.",
+    "recipesLibraryTitle": "Bibliothèque de recettes",
+    "recipesLibraryDesc": "Explorez des recettes et partagez vos idées.",
+    "communityMapTitle": "Carte de la communauté",
+    "communityMapDesc": "Trouvez des rencontres près de chez vous.",
+    "indoorGardenTitle": "Potager d'intérieur",
+    "indoorGardenDesc": "Partagez vos astuces de jardinage.",
+    "mealPlanningTitle": "Planification des repas",
+    "mealPlanningDesc": "Planifiez vos menus facilement.",
+    "smartPantryTitle": "Garde-manger intelligent",
+    "smartPantryDesc": "Gérez vos stocks et évitez le gaspillage.",
+    "explore": "Découvrir",
     "goToDashboard": "Aller au Tableau de Bord",
     "loginButton": "Connexion",
-    "signupButton": "Inscription"
+    "signupButton": "Inscription",
+    "welcome": "Bienvenue sur HeartWise",
+    "description": "Découvrez toutes les fonctionnalités pour faciliter vos rencontres et échanges.",
+    "welcomeButton": "Découvrir",
+    "welcomeButtonLink": "/dashboard",
+    "welcomeButtonLinkText": "Aller au Tableau de Bord"
   },
   "Auth": {
     "loginTitle": "Connectez-vous à Votre Compte",
@@ -51,7 +90,13 @@
     "signupSuccessDesc": "Bienvenue sur HeartWise ! Votre compte a été créé.",
     "signupErrorTitle": "Échec de l'Inscription",
     "signupErrorDefault": "Une erreur inattendue s'est produite. Veuillez réessayer.",
-    "signupErrorEmailInUse": "Cette adresse e-mail est déjà utilisée."
+    "signupErrorEmailInUse": "Cette adresse e-mail est déjà utilisée.",
+    "tokenRefreshErrorTitle": "Erreur de Rafraîchissement du Token",
+    "tokenRefreshErrorDesc": "Impossible de rafraîchir votre session. Veuillez vous reconnecter.",
+    "logoutSuccessTitle": "Déconnexion Réussie",
+    "logoutSuccessDesc": "Vous avez été déconnecté avec succès.",
+    "logoutErrorTitle": "Erreur de Déconnexion",
+    "logoutErrorDesc": "Une erreur s'est produite lors de la déconnexion. Veuillez réessayer."
   },
   "GeolocationMeeting": {
     "title": "Trouver des Connexions à Proximité",
@@ -434,7 +479,24 @@
     "viewProfileButton": "Voir le Profil",
     "viewAllRewards": "Voir toutes les récompenses"
   },
-   "Sidebar": {
-      "toggleSidebar": "Basculer la barre latérale"
-   }
+  "Sidebar": {
+    "toggleSidebar": "Basculer la barre latérale"
+  },
+  "Footer": {
+    "tagline": "Trouvez des connexions significatives",
+    "features": "Fonctionnalités",
+    "matchmaking": "Mise en relation",
+    "speedDating": "Speed Dating",
+    "chat": "Discussion",
+    "rewards": "Récompenses",
+    "resources": "Ressources",
+    "about": "À propos",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "legal": "Légal",
+    "terms": "Conditions d'utilisation",
+    "privacy": "Confidentialité",
+    "cookies": "Cookies",
+    "rights": "Tous droits réservés."
+  }
 }

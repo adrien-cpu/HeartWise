@@ -1,47 +1,88 @@
-
 import createMiddleware from 'next-intl/middleware';
 import { locales, localePrefix, defaultLocale, pathnames } from '@/i18n/settings';
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+
+// Routes qui nécessitent une authentification
+const protectedRoutes = [
+  '/profile',
+  '/game',
+  '/speed-dating',
+  '/geolocation-meeting',
+  '/facial-analysis-matching',
+  '/ai-conversation-coach',
+  '/blind-exchange-mode',
+  '/chat',
+  '/risky-words-dictionary',
+  '/rewards',
+  '/dashboard',
+];
+
+// Routes publiques
+const publicRoutes = ['/login', '/signup'];
 
 /**
- * @fileOverview Middleware for handling internationalization (i18n) routing.
+ * @fileOverview Middleware pour la gestion de l'internationalisation et de l'authentification.
  * @module Middleware
- * @description This middleware uses `next-intl` to manage locale detection and prefixing in routes.
- * It ensures that requests are correctly routed based on the detected or specified locale.
- * It uses the configuration defined in `i18n/settings.ts`.
- *
- * @see https://next-intl.dev/docs/routing/middleware
+ * @description Ce middleware gère :
+ * 1. La détection et le préfixage des locales dans les routes
+ * 2. La protection des routes authentifiées
+ * 3. La redirection des utilisateurs non authentifiés vers la page de connexion
  */
-export default createMiddleware({
-  // A list of all locales that are supported
+
+// Créer le middleware d'internationalisation
+const intlMiddleware = createMiddleware({
   locales,
-
-  // Used when no locale matches
   defaultLocale,
-
-  // The prefixing strategy
-  localePrefix,
-
-  // Pathnames for internationalized routing (optional but recommended for complex apps)
-  // If you have specific path translations, define them in settings.ts
-  // e.g., pathnames: { '/about': { en: '/about-us', fr: '/a-propos' } }
+  localePrefix: 'always', // Forcer l'utilisation du préfixe de locale
   pathnames,
 });
 
+export default async function middleware(request: NextRequest) {
+  // Vérifier si l'utilisateur est authentifié
+  const authToken = request.cookies.get('auth-token')?.value;
+  const { pathname } = request.nextUrl;
+
+  // Extraire le chemin sans la locale
+  const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, '');
+
+  // Vérifier si la route est protégée
+  const isProtectedRoute = protectedRoutes.some(route =>
+    pathWithoutLocale.startsWith(route)
+  );
+
+  // Vérifier si la route est publique
+  const isPublicRoute = publicRoutes.some(route =>
+    pathWithoutLocale.startsWith(route)
+  );
+
+  // Si la route est protégée et l'utilisateur n'est pas authentifié
+  if (isProtectedRoute && !authToken) {
+    const locale = request.nextUrl.pathname.split('/')[1];
+    const loginUrl = new URL(`/${locale}/login`, request.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // Si l'utilisateur est authentifié et essaie d'accéder aux routes de connexion/inscription
+  if (authToken && isPublicRoute) {
+    const locale = request.nextUrl.pathname.split('/')[1];
+    return NextResponse.redirect(new URL(`/${locale}`, request.url));
+  }
+
+  // Appliquer le middleware d'internationalisation
+  return intlMiddleware(request);
+}
+
 /**
- * Configuration object for the Next.js middleware.
- *
- * @description Defines which paths the middleware should apply to.
- * It includes paths for core application functionality and excludes paths typically used for static assets or API routes.
- *
- * @property {string[]} matcher - An array of path patterns to match.
+ * Configuration du middleware Next.js.
+ * Définit les chemins auxquels le middleware doit s'appliquer.
  */
 export const config = {
   matcher: [
-    // Match all pathnames except for
-    // - … if they start with `/api`, `/_next` or `/_vercel`
-    // - … the ones containing a dot (e.g. `favicon.ico`)
+    // Appliquer à tous les chemins sauf :
+    // - api, _next, _vercel
+    // - fichiers statiques (avec extension)
     '/((?!api|_next|_vercel|.*\\..*).*)',
-    // Optional: Match all pathnames within specific directories if needed, e.g.,
-    // '/(en|fr)/users/:path*'
   ]
 };

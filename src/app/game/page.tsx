@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
@@ -35,21 +34,21 @@ const generalKnowledgeQuestions = [
     answer: "Pacific Ocean",
     category: "geography",
   },
-   {
+  {
     question: "What is H2O?",
     answer: "Water",
     category: "science",
   },
-   {
+  {
     question: "Who painted the Mona Lisa?",
     answer: "Leonardo da Vinci",
     category: "art", // Corrected category
-   },
-    {
-     question: "In which year did the Titanic sink?",
-     answer: "1912",
-     category: "history",
-    },
+  },
+  {
+    question: "In which year did the Titanic sink?",
+    answer: "1912",
+    category: "history",
+  },
 ];
 
 // Mock user ID - replace with actual user identification
@@ -102,10 +101,10 @@ const GamePage = () => {
       }
     };
     loadPreferences();
-  }, [userId, toast, t]);
+  }, [toast, t]);
 
   // Fetch leaderboard data
-   useEffect(() => {
+  useEffect(() => {
     const loadLeaderboard = async () => {
       setLoadingLeaderboard(true);
       try {
@@ -121,15 +120,15 @@ const GamePage = () => {
       }
     };
     loadLeaderboard();
-   }, [toast, t]); // Load once on mount
+  }, [toast, t]); // Load once on mount
 
 
-   // Filter questions based on preferences
-   useEffect(() => {
+  // Filter questions based on preferences
+  useEffect(() => {
     let filteredQuestions = generalKnowledgeQuestions;
     if (gamePreferences.length > 0) {
-        // Filter only if preferences are set and not empty
-        filteredQuestions = generalKnowledgeQuestions.filter(q => gamePreferences.includes(q.category));
+      // Filter only if preferences are set and not empty
+      filteredQuestions = generalKnowledgeQuestions.filter(q => gamePreferences.includes(q.category));
     }
     // If filtering results in no questions, use all questions as fallback
     setGkQuestions(filteredQuestions.length > 0 ? filteredQuestions : generalKnowledgeQuestions);
@@ -148,55 +147,55 @@ const GamePage = () => {
 
   // Timer logic for General Knowledge game
   const handleGkNextQuestion = useCallback(() => {
-     if (currentGkQuestionIndex + 1 < gkQuestions.length) {
-       setCurrentGkQuestionIndex((prevIndex) => prevIndex + 1);
-       setUserGkAnswer("");
-       setIsGkCorrect(null);
-       setGkTimeRemaining(15);
-       setGkGameOver(false); // Reset for the next question
-     } else {
-       setGkIsPlaying(false); // End the game session
-       toast({
-         title: t('gameOverTitle'),
-         description: t('gameOverScore', { score: gkScore }),
-       });
-        // Fetch updated leaderboard data after game ends
-         const loadLeaderboard = async () => {
-            setLoadingLeaderboard(true);
-            try {
-                const users = await get_all_users();
-                const sortedUsers = users.sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
-                setLeaderboardData(sortedUsers);
-            } catch (error) {
-                console.error("Failed to reload leaderboard data:", error);
-            } finally {
-                setLoadingLeaderboard(false);
-            }
-         };
-         loadLeaderboard();
-     }
-   }, [currentGkQuestionIndex, gkQuestions.length, gkScore, toast, t]); // Dependencies for useCallback
+    if (currentGkQuestionIndex + 1 < gkQuestions.length) {
+      setCurrentGkQuestionIndex((prevIndex) => prevIndex + 1);
+      setUserGkAnswer("");
+      setIsGkCorrect(null);
+      setGkTimeRemaining(15);
+      setGkGameOver(false); // Reset for the next question
+    } else {
+      setGkIsPlaying(false); // End the game session
+      toast({
+        title: t('gameOverTitle'),
+        description: t('gameOverScore', { score: gkScore }),
+      });
+      // Fetch updated leaderboard data after game ends
+      const loadLeaderboard = async () => {
+        setLoadingLeaderboard(true);
+        try {
+          const users = await get_all_users();
+          const sortedUsers = users.sort((a, b) => (b.points ?? 0) - (a.points ?? 0));
+          setLeaderboardData(sortedUsers);
+        } catch (error) {
+          console.error("Failed to reload leaderboard data:", error);
+        } finally {
+          setLoadingLeaderboard(false);
+        }
+      };
+      loadLeaderboard();
+    }
+  }, [currentGkQuestionIndex, gkQuestions.length, gkScore, toast, t]); // Dependencies for useCallback
 
-   useEffect(() => {
-     let timer: NodeJS.Timeout | undefined;
-     if (gkIsPlaying && gkTimeRemaining > 0 && !gkGameOver) {
-       timer = setTimeout(() => {
-         setGkTimeRemaining((prevTime) => prevTime - 1);
-       }, 1000);
-     } else if (gkTimeRemaining === 0 && gkIsPlaying && !gkGameOver) {
-       setGkGameOver(true); // End current question state if time runs out
-       toast({
-         title: t('timesUpTitle'),
-         description: t('timesUpDesc'),
-       });
-        // Automatically move to next question after a delay
-        const nextQuestionTimer = setTimeout(() => {
-             handleGkNextQuestion();
-        }, 1500);
-        return () => clearTimeout(nextQuestionTimer);
-     }
-     return () => clearTimeout(timer); // Cleanup the timer
-   }, [gkTimeRemaining, gkIsPlaying, gkGameOver, toast, t, handleGkNextQuestion]); // Added t and handleGkNextQuestion
+  useEffect(() => {
+    let timer: NodeJS.Timeout | undefined;
+    if (gkIsPlaying && gkTimeRemaining > 0 && !gkGameOver) {
+      timer = setTimeout(() => {
+        setGkTimeRemaining((prevTime) => prevTime - 1);
+      }, 1000);
+    } else if (gkTimeRemaining === 0 && gkIsPlaying && !gkGameOver) {
+      setGkGameOver(true); // End current question state if time runs out
+      toast({
+        title: t('timesUpTitle'),
+        description: t('timesUpDesc'),
+      });
+      // Automatically move to next question after a delay
+      const nextQuestionTimer = setTimeout(() => {
+        handleGkNextQuestion();
+      }, 1500);
+      return () => clearTimeout(nextQuestionTimer);
+    }
+    return () => clearTimeout(timer); // Cleanup the timer
+  }, [gkTimeRemaining, gkIsPlaying, gkGameOver, toast, t, handleGkNextQuestion]); // Added t and handleGkNextQuestion
 
   // --- General Knowledge Specific Functions ---
   const handleGkAnswerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -216,8 +215,8 @@ const GamePage = () => {
       setGkGameOver(true); // Mark question as over
 
       if (correct) {
-         const newScore = gkScore + 1;
-         setGkScore(newScore);
+        const newScore = gkScore + 1;
+        setGkScore(newScore);
         const pointsAwarded = 10;
         try {
           await add_user_points(userId, pointsAwarded);
@@ -233,8 +232,8 @@ const GamePage = () => {
               description: t('badgeGameWinnerDesc'),
               type: "game_winner"
             });
-             // Optional: Toast for badge earned
-             toast({ title: t('badgeEarnedTitle'), description: t('badgeEarnedDesc', { badgeName: t('badgeGameWinnerName') }) });
+            // Optional: Toast for badge earned
+            toast({ title: t('badgeEarnedTitle'), description: t('badgeEarnedDesc', { badgeName: t('badgeGameWinnerName') }) });
           }
         } catch (error) {
           console.error("Failed to add points or reward:", error);
@@ -246,7 +245,7 @@ const GamePage = () => {
         }
       } else {
         toast({
-            variant: 'destructive',
+          variant: 'destructive',
           title: t('incorrectAnswer'),
           description: t('correctAnswerWas', { answer: currentQuestion.answer }),
         });
@@ -260,9 +259,9 @@ const GamePage = () => {
 
   const startGkGame = () => {
     if (gkQuestions.length === 0) {
-         // This case should be handled by the fallback in useEffect, but double-check
-         toast({ variant: 'destructive', title: t('error'), description: t('noQuestionsAvailable') });
-         setGkQuestions(generalKnowledgeQuestions); // Ensure there are questions
+      // This case should be handled by the fallback in useEffect, but double-check
+      toast({ variant: 'destructive', title: t('error'), description: t('noQuestionsAvailable') });
+      setGkQuestions(generalKnowledgeQuestions); // Ensure there are questions
     }
     setGkScore(0);
     setGkTimeRemaining(15);
@@ -274,22 +273,21 @@ const GamePage = () => {
   };
 
   // --- Preferences Functions ---
-  const toggleGamePreference = async (category: string) => {
-    const newPreferences = gamePreferences.includes(category)
-      ? gamePreferences.filter((id) => id !== category)
-      : [...gamePreferences, category];
-
-    setGamePreferences(newPreferences); // Optimistic UI update
-
+  const toggleGamePreference = async (category: string, checked: boolean) => {
     try {
+      const newPreferences = checked
+        ? [...gamePreferences, category]
+        : gamePreferences.filter(pref => pref !== category);
+
       await set_user_game_preferences(userId, newPreferences);
-      toast({ title: t('prefsUpdatedTitle'), description: t('prefsUpdatedDesc') });
+      setGamePreferences(newPreferences);
     } catch (error) {
-      console.error("Failed to save game preferences:", error);
-      toast({ variant: 'destructive', title: t('error'), description: t('errorSavingPrefs') });
-      // Revert optimistic update - fetch again or revert state based on previous state
-       const oldPreferences = await get_user_game_preferences(userId); // Re-fetch to be sure
-       setGamePreferences(oldPreferences);
+      console.error("Failed to update game preferences:", error);
+      toast({
+        variant: 'destructive',
+        title: t('error'),
+        description: t('errorUpdatingPrefs'),
+      });
     }
   };
 
@@ -297,59 +295,59 @@ const GamePage = () => {
 
   // Helper function to get initials
   const getInitials = (name?: string): string => {
-      if (!name) return '?';
-      return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
   const renderGeneralKnowledge = () => {
-     const currentQuestion = gkQuestions[currentGkQuestionIndex];
+    const currentQuestion = gkQuestions[currentGkQuestionIndex];
 
     if (!gkIsPlaying) {
       return (
         <div className="text-center space-y-4">
           <p>{t('gkDescription')}</p>
           <Button onClick={startGkGame} size="lg" disabled={loadingPreferences}>
-            {loadingPreferences ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : t('startGameButton')}
+            {loadingPreferences ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('startGameButton')}
           </Button>
-           {gkQuestions.length === 0 && !loadingPreferences && (
-               <p className="text-muted-foreground">{t('noQuestionsAvailable')}</p>
-           )}
+          {gkQuestions.length === 0 && !loadingPreferences && (
+            <p className="text-muted-foreground">{t('noQuestionsAvailable')}</p>
+          )}
         </div>
       );
     }
 
-     if (!currentQuestion) {
-         // This state might occur briefly if questions are filtered out,
-         // handle by showing a message or ending the game.
-          return <p className="text-center text-muted-foreground">{t('noMoreQuestions')}</p>;
-      }
+    if (!currentQuestion) {
+      // This state might occur briefly if questions are filtered out,
+      // handle by showing a message or ending the game.
+      return <p className="text-center text-muted-foreground">{t('noMoreQuestions')}</p>;
+    }
 
     return (
       <Card className="w-full max-w-lg mx-auto">
-         <CardHeader>
-            <div className="flex justify-between items-center mb-4">
-              <CardTitle>{t('question')} {currentGkQuestionIndex + 1} / {gkQuestions.length}</CardTitle>
-              <div className="timer-wrapper">
-                 <CountdownCircleTimer
-                   isPlaying={gkIsPlaying && !gkGameOver}
-                   key={currentGkQuestionIndex} // Reset timer on question change
-                   duration={15}
-                   initialRemainingTime={gkTimeRemaining}
-                   colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
-                   colorsTime={[10, 5, 2, 0]}
-                   size={50}
-                   strokeWidth={4}
-                   trailColor="#d3d3d3" // Light gray trail
-                   onComplete={() => { /* Timeout handled by useEffect */ }}
-                 >
-                   {({ remainingTime }) => <span className="text-lg font-medium">{remainingTime}</span>}
-                 </CountdownCircleTimer>
-               </div>
+        <CardHeader>
+          <div className="flex justify-between items-center mb-4">
+            <CardTitle>{t('question')} {currentGkQuestionIndex + 1} / {gkQuestions.length}</CardTitle>
+            <div className="timer-wrapper">
+              <CountdownCircleTimer
+                isPlaying={gkIsPlaying && !gkGameOver}
+                key={currentGkQuestionIndex} // Reset timer on question change
+                duration={15}
+                initialRemainingTime={gkTimeRemaining}
+                colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
+                colorsTime={[10, 5, 2, 0]}
+                size={50}
+                strokeWidth={4}
+                trailColor="#d3d3d3" // Light gray trail
+                onComplete={() => { /* Timeout handled by useEffect */ }}
+              >
+                {({ remainingTime }) => <span className="text-lg font-medium">{remainingTime}</span>}
+              </CountdownCircleTimer>
             </div>
+          </div>
           <CardDescription className="text-lg text-center min-h-[60px] flex items-center justify-center p-2">
             {currentQuestion.question}
           </CardDescription>
-         </CardHeader>
+        </CardHeader>
         <CardContent className="space-y-4">
           {!gkGameOver ? (
             <>
@@ -364,7 +362,7 @@ const GamePage = () => {
                 disabled={gkGameOver}
                 className="text-center"
                 autoComplete="off"
-                 onKeyPress={(e) => e.key === 'Enter' && !gkGameOver && userGkAnswer.trim() && checkGkAnswer()}
+                onKeyPress={(e) => e.key === 'Enter' && !gkGameOver && userGkAnswer.trim() && checkGkAnswer()}
               />
               <Button onClick={checkGkAnswer} className="w-full" disabled={gkGameOver || !userGkAnswer.trim()}>
                 {t('submitAnswer')}
@@ -388,110 +386,51 @@ const GamePage = () => {
             </div>
           )}
         </CardContent>
-         <CardFooter className="justify-center">
-            <p className="text-lg font-semibold">{t('scoreLabel')}: {gkScore}</p>
-         </CardFooter>
+        <CardFooter className="justify-center">
+          <p className="text-lg font-semibold">{t('scoreLabel')}: {gkScore}</p>
+        </CardFooter>
       </Card>
     );
   };
 
   const renderPreferences = () => (
-     <Card className="w-full max-w-md">
-        <CardHeader>
-            <CardTitle>{t('preferencesTitle')}</CardTitle>
-             <CardDescription>{t('preferencesDesc')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-            {loadingPreferences ? <Skeleton className="h-20 w-full" /> : (
-                 <div className="grid grid-cols-2 gap-4">
-                   {availableCategories.map(category => (
-                     <div key={category} className="flex items-center space-x-2">
-                        <Checkbox
-                            id={`pref-${category}`}
-                            checked={gamePreferences.includes(category)}
-                            onCheckedChange={(checked) => toggleGamePreference(category, !!checked)} // Pass boolean
-                            aria-labelledby={`label-pref-${category}`}
-                        />
-                         <Label htmlFor={`pref-${category}`} id={`label-pref-${category}`} className="text-sm cursor-pointer">
-                             {t(`category${category.charAt(0).toUpperCase() + category.slice(1)}`)}
-                         </Label>
-                     </div>
-                   ))}
-                </div>
-            )}
-        </CardContent>
-     </Card>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>{t('preferencesTitle')}</CardTitle>
+        <CardDescription>{t('preferencesDesc')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {loadingPreferences ? <Skeleton className="h-20 w-full" /> : (
+          <div className="grid grid-cols-2 gap-4">
+            {availableCategories.map(category => (
+              <div key={category} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`pref-${category}`}
+                  checked={gamePreferences.includes(category)}
+                  onCheckedChange={(checked: boolean) => toggleGamePreference(category, checked)}
+                  aria-labelledby={`label-pref-${category}`}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 
-   const renderRankings = () => (
-      <Card className="w-full max-w-md">
-          <CardHeader>
-             <CardTitle className="flex items-center gap-2"><ListOrdered />{t('rankingsTitle')}</CardTitle>
-             <CardDescription>{t('rankingsDesc')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-             {loadingLeaderboard ? (
-                 <div className="space-y-2">
-                     <Skeleton className="h-10 w-full" />
-                     <Skeleton className="h-10 w-full" />
-                     <Skeleton className="h-10 w-full" />
-                 </div>
-             ) : leaderboardData.length > 0 ? (
-                 <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[50px] text-center">{t('rankHeader')}</TableHead>
-                            <TableHead>{t('nameHeader')}</TableHead>
-                            <TableHead className="text-right">{t('scoreHeader')}</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {leaderboardData.map((user, index) => (
-                           <TableRow key={user.id} className={user.id === userId ? 'bg-primary/10' : ''}>
-                              <TableCell className="font-medium text-center">{index + 1}</TableCell>
-                              <TableCell>
-                                  <div className="flex items-center gap-2">
-                                     <Avatar className="h-6 w-6 border">
-                                       <AvatarImage src={user.profilePicture} alt={user.name || 'User'} data-ai-hint={user.dataAiHint || "person"} />
-                                       <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
-                                     </Avatar>
-                                     <span className={user.id === userId ? 'font-semibold' : ''}>{user.name || t('anonymousUser')}</span>
-                                  </div>
-                              </TableCell>
-                              <TableCell className="text-right">{user.points ?? 0}</TableCell>
-                           </TableRow>
-                        ))}
-                    </TableBody>
-                 </Table>
-             ) : (
-                 <p className="text-center text-muted-foreground py-4">{t('noLeaderboardData')}</p>
-             )}
-          </CardContent>
-      </Card>
-   );
-
   return (
-    <div className="container mx-auto p-4 flex flex-col items-center space-y-8">
-      <h1 className="text-3xl font-bold">{t('title')}</h1>
-
-      <Tabs defaultValue="general-knowledge" className="w-full max-w-3xl">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="general-knowledge">{t('tabGeneralKnowledge')}</TabsTrigger>
-          <TabsTrigger value="times-up">{t('tabTimesUp')}</TabsTrigger>
-          <TabsTrigger value="rankings">{t('tabRankings')}</TabsTrigger>
+    <div className="container mx-auto p-4 space-y-4">
+      <h1 className="text-2xl font-bold">{t('title')}</h1>
+      <Tabs defaultValue="item-1" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="item-1">{t('gameTab')}</TabsTrigger>
+          <TabsTrigger value="item-2">{t('leaderboardTab')}</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="general-knowledge" className="mt-6 flex flex-col items-center space-y-6">
-            {renderPreferences()}
-            {renderGeneralKnowledge()}
+        <TabsContent value="item-1">
+          {renderGeneralKnowledge()}
         </TabsContent>
-
-        <TabsContent value="times-up" className="mt-6 flex flex-col items-center space-y-6">
-           <TimesUpGame />
-        </TabsContent>
-
-        <TabsContent value="rankings" className="mt-6 flex flex-col items-center space-y-6">
-           {renderRankings()}
+        <TabsContent value="item-2">
+          {renderPreferences()}
         </TabsContent>
       </Tabs>
     </div>

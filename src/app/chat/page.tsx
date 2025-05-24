@@ -165,7 +165,6 @@ export default function ChatPage() {
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-
   useEffect(() => {
     setLoadingChats(true);
     get_user(CURRENT_USER_ID)
@@ -217,96 +216,118 @@ export default function ChatPage() {
     return () => clearTimeout(timer);
   }, [selectedConversationId, conversations]);
 
+  // Optimize intention analysis with debounce
+  const debouncedAnalyzeIntent = useCallback(
+    (text: string) => {
+      if (!text.trim()) return;
+      setIsAnalyzingIntent(true);
+      try {
+        tagMessageIntent({ message: text }).then(result => {
+          setAiSuggestedTag(result);
+        }).catch(error => {
+          console.error("Failed to analyze intent:", error);
+        }).finally(() => {
+          setIsAnalyzingIntent(false);
+        });
+      } catch (error) {
+        console.error("Failed to analyze intent:", error);
+        setIsAnalyzingIntent(false);
+      }
+    },
+    []
+  );
+
+  // Simulate partner response
+  const simulatePartnerResponse = useCallback(async (convId: string, userMessageText: string) => {
+    const conversation = conversations.find(c => c.id === convId);
+    if (!conversation) return;
+
+    // Set typing indicator
+    setConversations(prev => prev.map(conv =>
+      conv.id === convId ? { ...conv, isTyping: true } : conv
+    ));
+
+    // Simulate typing delay
+    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+
+    // Generate response
+    const response = `Thanks for your message: "${userMessageText}"! I'm a simulated response.`;
+    const newMessage: Message = {
+      id: `msg-${Date.now()}`,
+      senderId: conversation.participant.id,
+      senderName: conversation.participant.name || 'Partner',
+      text: response,
+      timestamp: new Date(),
+      status: 'sent' as const
+    };
+
+    // Update conversation
+    setConversations(prev => prev.map(conv => {
+      if (conv.id === convId) {
+        const updatedMessages = [...conv.messages, newMessage];
+        return {
+          ...conv,
+          isTyping: false,
+          lastMessage: response,
+          lastMessageTimestamp: new Date(),
+          messages: updatedMessages
+        };
+      }
+      return conv;
+    }));
+  }, [conversations]);
+
   // Optimize message sending with debounce
   const debouncedSendMessage = useCallback(
-    debounce(async (message: string, conversationId: string) => {
+    (message: string, conversationId: string) => {
       if (!message.trim()) return;
 
       setSendingMessage(true);
       try {
         // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 500));
+        setTimeout(async () => {
+          const newMessage: Message = {
+            id: `msg-${Date.now()}`,
+            senderId: CURRENT_USER_ID,
+            senderName: CURRENT_USER_NAME,
+            text: message,
+            timestamp: new Date(),
+            status: 'sending' as const,
+            intentionTag: selectedIntention || undefined
+          };
 
-        const newMessage: Message = {
-          id: `msg-${Date.now()}`,
-          senderId: CURRENT_USER_ID,
-          senderName: CURRENT_USER_NAME,
-          text: message,
-          timestamp: new Date(),
-          status: 'sending' as const,
-          intentionTag: selectedIntention || undefined
-        };
-
-        setConversations(prev => prev.map(conv => {
-          if (conv.id === conversationId) {
-            const updatedMessages = [...conv.messages, newMessage];
-            return {
-              ...conv,
-              lastMessage: message,
-              lastMessageTimestamp: new Date(),
-              messages: updatedMessages
-            };
-          }
-          return conv;
-        }));
-
-        // Simulate message delivery
-        setTimeout(() => {
           setConversations(prev => prev.map(conv => {
             if (conv.id === conversationId) {
-              const updatedMessages = conv.messages.map(msg =>
-                msg.id === newMessage.id ? { ...msg, status: 'delivered' as const } : msg
-              );
+              const updatedMessages = [...conv.messages, newMessage];
               return {
                 ...conv,
+                lastMessage: message,
+                lastMessageTimestamp: new Date(),
                 messages: updatedMessages
               };
             }
             return conv;
           }));
-        }, 1000);
 
-        setNewMessage('');
-        setSelectedIntention('');
+          // Simulate partner response
+          await new Promise(resolve => setTimeout(resolve, 700));
+          simulatePartnerResponse(conversationId, message);
+          setSendingMessage(false);
+        }, 300);
       } catch (error) {
         console.error("Failed to send message:", error);
-        const errorMessage = error instanceof Error ? error.message : t('messageSendError');
         toast({
           variant: 'destructive',
-          title: t('errorTitle'),
-          description: errorMessage
+          title: t('errorSendingMessage'),
         });
-      } finally {
         setSendingMessage(false);
       }
-    }, 300),
-    [selectedIntention, t, toast]
-  );
-
-  // Optimize intention analysis with debounce
-  const debouncedAnalyzeIntent = useCallback(
-    debounce(async (text: string) => {
-      if (!text.trim()) {
-        setAiSuggestedTag(null);
-        return;
-      }
-
-      setIsAnalyzingIntent(true);
-      try {
-        const result = await tagMessageIntent({ message: text });
-        setAiSuggestedTag(result);
-      } catch (error) {
-        console.error("Error analyzing message intent:", error);
-        setAiSuggestedTag(null);
-      } finally {
-        setIsAnalyzingIntent(false);
-      }
-    }, 500),
-    []
+    },
+    [selectedIntention, toast, t, simulatePartnerResponse]
   );
 
   // Handle message input changes
-  const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleMessageChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const text = e.target.value;
     setNewMessage(text);
 
@@ -319,17 +340,25 @@ export default function ChatPage() {
     debounceTimeoutRef.current = setTimeout(() => {
       debouncedAnalyzeIntent(text);
     }, 500);
-  };
+  }, [debouncedAnalyzeIntent]);
+
+  // Handle message sending
+  const handleSendMessage = useCallback(() => {
+    if (selectedConversationId && newMessage.trim()) {
+      debouncedSendMessage(newMessage, selectedConversationId);
+      setNewMessage('');
+      setSelectedIntention('');
+      setAiSuggestedTag(null);
+    }
+  }, [selectedConversationId, newMessage, debouncedSendMessage]);
 
   // Handle key press for sending messages
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (selectedConversationId && newMessage.trim()) {
-        debouncedSendMessage(newMessage, selectedConversationId);
-      }
+      handleSendMessage();
     }
-  };
+  }, [handleSendMessage]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -341,111 +370,6 @@ export default function ChatPage() {
   }, []);
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
-
-  // Function to simulate partner's response
-  const simulatePartnerResponse = useCallback(async (convId: string, userMessageText: string) => {
-    // Simulate typing indicator
-    setConversations(prev => prev.map(c => c.id === convId ? { ...c, isTyping: true } : c));
-    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
-    const typingDuration = 1000 + Math.random() * 1500; // Variable typing time
-    await new Promise(resolve => setTimeout(resolve, typingDuration));
-
-    // Generate a mock reply (more sophisticated logic possible)
-    const partnerReplies = [
-      `That's interesting! Tell me more about "${userMessageText.substring(0, 15)}"...`,
-      `I see. What do you think about that?`,
-      `Okay, got it.`,
-      `Hmm, let me think about that. 🤔`,
-      `Totally agree!`,
-      `Really? I didn't know that.`,
-      `😂 That's funny!`,
-    ];
-    const partnerMessage: Message = {
-      id: `msg-partner-${Date.now()}`,
-      senderId: selectedConversation?.participant.id || 'unknown',
-      senderName: selectedConversation?.participant.name || 'Partner',
-      text: partnerReplies[Math.floor(Math.random() * partnerReplies.length)],
-      timestamp: new Date(),
-      status: 'delivered', // Assume delivered
-    };
-
-    // Add partner message and stop typing indicator
-    setConversations(prev => prev.map(conv => {
-      if (conv.id === convId) {
-        return {
-          ...conv,
-          messages: [...conv.messages, partnerMessage],
-          lastMessage: partnerMessage.text,
-          lastMessageTimestamp: partnerMessage.timestamp,
-          isTyping: false, // Stop typing
-        };
-      }
-      return conv;
-    }));
-
-    requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    });
-
-  }, [selectedConversation]);
-
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversationId || !selectedConversation) return;
-
-    const tempId = `msg-${Date.now()}`;
-    setSendingMessage(true);
-    const messageToSend: Message = {
-      id: tempId,
-      senderId: CURRENT_USER_ID,
-      senderName: CURRENT_USER_NAME,
-      text: newMessage.trim(),
-      timestamp: new Date(),
-      intentionTag: selectedIntention || aiSuggestedTag?.detectedIntention || undefined,
-      status: 'sent' as const,
-    };
-
-    const originalMessageText = newMessage.trim();
-
-    setConversations(prev =>
-      prev.map(conv =>
-        conv.id === selectedConversationId
-          ? {
-            ...conv,
-            messages: [...conv.messages, messageToSend],
-            lastMessage: messageToSend.text,
-            lastMessageTimestamp: messageToSend.timestamp,
-          }
-          : conv
-      ).sort((a, b) => b.lastMessageTimestamp.getTime() - a.lastMessageTimestamp.getTime())
-    );
-    setNewMessage('');
-    setSelectedIntention('');
-    setAiSuggestedTag(null);
-
-    try {
-      await new Promise(resolve => setTimeout(resolve, 700));
-      simulatePartnerResponse(selectedConversationId, originalMessageText);
-    } catch (error) {
-      console.error("Failed to send message:", error);
-      toast({
-        variant: 'destructive',
-        title: t('errorSendingMessage'),
-      });
-      setConversations(prev => prev.map(conv => {
-        if (conv.id === selectedConversationId) {
-          const msgs = conv.messages.map(msg =>
-            msg.id === tempId ? { ...msg, status: 'error' as const } : msg
-          );
-          return { ...conv, messages: msgs };
-        }
-        return conv;
-      }));
-    } finally {
-      setSendingMessage(false);
-    }
-  };
 
   const getInitials = (name?: string): string => {
     if (!name) return '';
@@ -744,7 +668,14 @@ export default function ChatPage() {
                         </Tooltip>
                       )}
                     </div>
-                    <Button aria-label={t('sendButton')} title={t('sendButton')} type="button" size="icon" onClick={handleSendMessage} disabled={sendingMessage || !newMessage.trim()}>
+                    <Button
+                      aria-label={t('sendButton')}
+                      title={t('sendButton')}
+                      type="button"
+                      size="icon"
+                      onClick={() => handleSendMessage()}
+                      disabled={sendingMessage || !newMessage.trim()}
+                    >
                       {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                     </Button>
                   </div>

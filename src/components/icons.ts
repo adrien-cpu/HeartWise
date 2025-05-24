@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Exports a set of icons from the `lucide-react` library.
  *
@@ -9,11 +8,11 @@
  */
 
 import {
-    ArrowRight, Award, Book, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, EyeOff, File, Gamepad2,
-    Gamepad, HelpCircle, Home, Lightbulb, Loader2, LogOut, Mail, MapPin, MessageCircle, MessageSquare, MessageSquareText, Moon, PanelLeft, Plus,
-    PlusCircle, ScanFace, Search, Server, Settings, Share2, Shield, Smile, Star, Sun, Trash, Trophy, User, UserCheck, Users, Workflow, X, Zap,
-    Filter, TrendingUp // Added Filter and TrendingUp
-} from 'lucide-react'; // Added Lightbulb, UserCheck, MessageSquareText, Trophy, Filter, TrendingUp
+  ArrowRight, Award, Book, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, EyeOff, File, Gamepad2,
+  Gamepad, HelpCircle, Home, Lightbulb, Loader2, LogOut, Mail, MapPin, MessageCircle, MessageSquare, MessageSquareText, Moon, PanelLeft, Plus,
+  PlusCircle, ScanFace, Search, Server, Settings, Share2, Shield, Smile, Star, Sun, Trash, Trophy, User, UserCheck, Users, Workflow, X, Zap,
+  Filter, TrendingUp, Instagram, Twitter, Facebook, FileText, Cookie
+} from 'lucide-react';
 
 /**
  * @typedef {object} Icons
@@ -64,11 +63,16 @@ import {
  * @property {LucideIcon} users - Users icon.
  * @property {LucideIcon} panelLeft - Panel left icon.
  * @property {LucideIcon} zap - Zap icon (for Speed Dating).
+ * @property {LucideIcon} instagram - Instagram icon.
+ * @property {LucideIcon} twitter - Twitter icon.
+ * @property {LucideIcon} facebook - Facebook icon.
+ * @property {LucideIcon} fileText - File text icon.
+ * @property {LucideIcon} cookie - Cookie icon.
  */
 const Icons = {
   arrowRight: ArrowRight,
-  award: Award, // Added award icon
-  book: Book, // Added book icon
+  award: Award,
+  book: Book,
   check: Check,
   chevronDown: ChevronsUpDown,
   circle: Circle,
@@ -78,14 +82,15 @@ const Icons = {
   dark: Moon,
   edit: Edit,
   externalLink: ExternalLink,
-  eyeOff: EyeOff, // Added eyeOff icon
+  eyeOff: EyeOff,
   file: File,
-  filter: Filter, // Added Filter icon
+  filter: Filter,
   gamepad: Gamepad,
   gamepad2: Gamepad2,
   help: HelpCircle,
+  helpCircle: HelpCircle,
   home: Home,
-  lightbulb: Lightbulb, // Added lightbulb
+  lightbulb: Lightbulb,
   light: Sun,
   loader: Loader2,
   logOut: LogOut,
@@ -93,10 +98,10 @@ const Icons = {
   mapPin: MapPin,
   messageCircle: MessageCircle,
   messageSquare: MessageSquare,
-  messageSquareText: MessageSquareText, // Added messageSquareText
+  messageSquareText: MessageSquareText,
   plus: Plus,
   plusCircle: PlusCircle,
-  scanFace: ScanFace, // Added scanFace icon
+  scanFace: ScanFace,
   search: Search,
   server: Server,
   settings: Settings,
@@ -106,13 +111,18 @@ const Icons = {
   spinner: Loader2,
   star: Star,
   trash: Trash,
-  trendingUp: TrendingUp, // Added TrendingUp icon
-  trophy: Trophy, // Added trophy
+  trendingUp: TrendingUp,
+  trophy: Trophy,
   user: User,
-  userCheck: UserCheck, // Added userCheck
+  userCheck: UserCheck,
   users: Users,
   panelLeft: PanelLeft,
   zap: Zap,
+  instagram: Instagram,
+  twitter: Twitter,
+  facebook: Facebook,
+  fileText: FileText,
+  cookie: Cookie,
 };
 
-export {Icons};
+export { Icons };
