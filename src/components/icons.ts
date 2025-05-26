@@ -8,121 +8,102 @@
  */
 
 import {
-  ArrowRight, Award, Book, Check, ChevronsUpDown, Circle, Copy, Edit, ExternalLink, EyeOff, File, Gamepad2,
-  Gamepad, HelpCircle, Home, Lightbulb, Loader2, LogOut, Mail, MapPin, MessageCircle, MessageSquare, MessageSquareText, Moon, PanelLeft, Plus,
-  PlusCircle, ScanFace, Search, Server, Settings, Share2, Shield, Smile, Star, Sun, Trash, Trophy, User, UserCheck, Users, Workflow, X, Zap,
-  Filter, TrendingUp, Instagram, Twitter, Facebook, FileText, Cookie
-} from 'lucide-react';
+  ArrowRight,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Command,
+  CreditCard,
+  File,
+  FileText,
+  HelpCircle,
+  Image,
+  Laptop,
+  Loader2,
+  Moon,
+  MoreVertical,
+  Pizza,
+  Plus,
+  Settings,
+  SunMedium,
+  Trash,
+  Twitter,
+  User,
+  X,
+  type LucideIcon,
+  Gamepad,
+  Heart,
+  MapPin,
+  ScanFace,
+  Eye,
+  MessageSquare,
+  Zap,
+  MessageCircle,
+  Home,
+  Award,
+  Book,
+  EyeOff,
+  LogOut,
+  ChevronDown,
+  User as UserIcon,
+  Settings as SettingsIcon,
+  Instagram,
+  Facebook,
+  Cookie,
+  Users,
+  Mail,
+  Shield,
+} from "lucide-react";
 
-/**
- * @typedef {object} Icons
- * @property {LucideIcon} arrowRight - Arrow right icon.
- * @property {LucideIcon} award - Award icon.
- * @property {LucideIcon} book - Book icon.
- * @property {LucideIcon} check - Check icon.
- * @property {LucideIcon} chevronDown - Chevron down icon.
- * @property {LucideIcon} circle - Circle icon.
- * @property {LucideIcon} workflow - Workflow icon.
- * @property {LucideIcon} close - Close icon.
- * @property {LucideIcon} copy - Copy icon.
- * @property {LucideIcon} dark - Dark mode icon.
- * @property {LucideIcon} edit - Edit icon.
- * @property {LucideIcon} externalLink - External link icon.
- * @property {LucideIcon} eyeOff - Eye off icon (for Blind Exchange).
- * @property {LucideIcon} file - File icon.
- * @property {LucideIcon} filter - Filter icon.
- * @property {LucideIcon} gamepad - Gamepad icon.
- * @property {LucideIcon} gamepad2 - Gamepad2 icon.
- * @property {LucideIcon} help - Help icon.
- * @property {LucideIcon} home - Home icon.
- * @property {LucideIcon} lightbulb - Lightbulb icon.
- * @property {LucideIcon} light - Light mode icon.
- * @property {LucideIcon} loader - Loader icon.
- * @property {LucideIcon} logOut - Log out icon.
- * @property {LucideIcon} mail - Mail icon.
- * @property {LucideIcon} mapPin - Map pin icon.
- * @property {LucideIcon} messageCircle - Message circle icon (for Chat).
- * @property {LucideIcon} messageSquare - Message square icon.
- * @property {LucideIcon} messageSquareText - Message square text icon.
- * @property {LucideIcon} plus - Plus icon.
- * @property {LucideIcon} plusCircle - Plus circle icon.
- * @property {LucideIcon} scanFace - Scan face icon (for Facial Analysis).
- * @property {LucideIcon} search - Search icon.
- * @property {LucideIcon} server - Server icon.
- * @property {LucideIcon} settings - Settings icon.
- * @property {LucideIcon} share - Share icon.
- * @property {LucideIcon} shield - Shield icon.
- * @property {LucideIcon} smile - Smile icon.
- * @property {LucideIcon} spinner - Spinner icon.
- * @property {LucideIcon} star - Star icon.
- * @property {LucideIcon} trash - Trash icon.
- * @property {LucideIcon} trendingUp - Trending up icon.
- * @property {LucideIcon} trophy - Trophy icon.
- * @property {LucideIcon} user - User icon.
- * @property {LucideIcon} userCheck - User check icon.
- * @property {LucideIcon} users - Users icon.
- * @property {LucideIcon} panelLeft - Panel left icon.
- * @property {LucideIcon} zap - Zap icon (for Speed Dating).
- * @property {LucideIcon} instagram - Instagram icon.
- * @property {LucideIcon} twitter - Twitter icon.
- * @property {LucideIcon} facebook - Facebook icon.
- * @property {LucideIcon} fileText - File text icon.
- * @property {LucideIcon} cookie - Cookie icon.
- */
-const Icons = {
+export type Icon = LucideIcon;
+
+export const Icons = {
+  logo: Command,
+  close: X,
+  spinner: Loader2,
+  chevronLeft: ChevronLeft,
+  chevronRight: ChevronRight,
+  trash: Trash,
+  post: FileText,
+  page: File,
+  media: Image,
+  settings: Settings,
+  billing: CreditCard,
+  ellipsis: MoreVertical,
+  add: Plus,
+  warning: HelpCircle,
+  user: User,
   arrowRight: ArrowRight,
+  help: HelpCircle,
+  pizza: Pizza,
+  sun: SunMedium,
+  moon: Moon,
+  laptop: Laptop,
+  gitHub: Command,
+  twitter: Twitter,
+  check: Check,
+  gamepad: Gamepad,
+  heart: Heart,
+  mapPin: MapPin,
+  scanFace: ScanFace,
+  eye: Eye,
+  messageSquare: MessageSquare,
+  zap: Zap,
+  messageCircle: MessageCircle,
+  home: Home,
   award: Award,
   book: Book,
-  check: Check,
-  chevronDown: ChevronsUpDown,
-  circle: Circle,
-  workflow: Workflow,
-  close: X,
-  copy: Copy,
-  dark: Moon,
-  edit: Edit,
-  externalLink: ExternalLink,
   eyeOff: EyeOff,
-  file: File,
-  filter: Filter,
-  gamepad: Gamepad,
-  gamepad2: Gamepad2,
-  help: HelpCircle,
-  helpCircle: HelpCircle,
-  home: Home,
-  lightbulb: Lightbulb,
-  light: Sun,
-  loader: Loader2,
   logOut: LogOut,
-  mail: Mail,
-  mapPin: MapPin,
-  messageCircle: MessageCircle,
-  messageSquare: MessageSquare,
-  messageSquareText: MessageSquareText,
-  plus: Plus,
-  plusCircle: PlusCircle,
-  scanFace: ScanFace,
-  search: Search,
-  server: Server,
-  settings: Settings,
-  share: Share2,
-  shield: Shield,
-  smile: Smile,
-  spinner: Loader2,
-  star: Star,
-  trash: Trash,
-  trendingUp: TrendingUp,
-  trophy: Trophy,
-  user: User,
-  userCheck: UserCheck,
-  users: Users,
-  panelLeft: PanelLeft,
-  zap: Zap,
+  chevronDown: ChevronDown,
+  userIcon: UserIcon,
+  settingsIcon: SettingsIcon,
   instagram: Instagram,
-  twitter: Twitter,
   facebook: Facebook,
-  fileText: FileText,
   cookie: Cookie,
-};
-
-export { Icons };
+  users: Users,
+  helpCircle: HelpCircle,
+  mail: Mail,
+  fileText: FileText,
+  shield: Shield,
+} as const;

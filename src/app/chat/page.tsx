@@ -8,16 +8,58 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Send, User, HeartHandshake, Smile, Info, Heart, Video, Phone, AlertCircle, Bot, MessagesSquare } from 'lucide-react'; // Added MessagesSquare
+import { Loader2, Send, HeartHandshake, Smile, Info, Heart, Video, Phone, AlertCircle, Bot, MessagesSquare, ShieldAlert, PhoneOff, Mic, MicOff } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useToast } from '@/hooks/use-toast';
-import { Skeleton } from '@/components/ui/skeleton';
-import { UserProfile, get_user } from '@/services/user_profile'; // Import user profile service
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { tagMessageIntent, IntentionTaggingOutput } from '@/ai/flows/intention-tagging'; // Import Genkit flow
+import AuthGuard from "@/components/auth-guard";
+import { tagMessageIntent, IntentionTaggingOutput } from '@/ai/flows/intention-tagging';
+import { moderateText, ModerationResult } from '@/services/moderation_service';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import {
+  sendMessage as sendChatMessage,
+  getConversationsListener,
+  getMessagesListener,
+  markMessagesAsRead,
+} from '@/services/chat_service';
+import type { Message as ChatMessage, Conversation as ChatConversation, ConversationParticipant as ChatParticipant } from '@/services/chat_service';
+import { Timestamp, serverTimestamp } from 'firebase/firestore';
+import { showNotification, requestNotificationPermission } from '@/lib/notifications';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  RTCConnection,
+  initializePeerConnection,
+  getLocalStream,
+  addLocalStreamToPeerConnection,
+  createOfferSdp,
+  createAnswerSdp,
+  setRemoteSdp,
+  addIceCandidate,
+  sendSignalingMessageViaFirestore,
+  listenForSignalingMessagesFromFirestore,
+  closeWebRTCConnection,
+  getSignalingChannelId,
+  initializeSignalingChannel,
+  OfferMessage,
+  AnswerMessage,
+  IceCandidateMessage,
+  HangupMessage,
+  SignalingMessage,
+} from '@/services/webrtc_service';
 import { debounce } from 'lodash';
 
 /**
@@ -26,31 +68,40 @@ import { debounce } from 'lodash';
  * @description Displays the chat interface, allowing users to select conversations and send/receive messages. Includes mock compatibility display, manual intention tag selection, and AI-suggested intention tagging. Simulates video/audio call initiation and typing indicator.
  */
 
-// Mock data structures
-interface Message {
+interface UserProfile {
   id: string;
-  senderId: string;
-  senderName: string;
-  text: string;
-  timestamp: Date;
-  status?: 'sent' | 'delivered' | 'read' | 'error' | 'sending';
-  intentionTag?: string;
+  name: string;
+  profilePicture?: string;
+  dataAiHint?: string;
+  bio?: string;
+  interests?: string[];
 }
 
 interface ConversationParticipant extends UserProfile {
-  // Inherits UserProfile fields like id, name, profilePicture, bio, interests etc.
-  compatibilityScore?: number; // Mock compatibility score (0-100)
-  isOnline?: boolean; // Mock online status
+  compatibilityScore?: number;
+  isOnline?: boolean;
 }
 
-interface Conversation {
+type CallStatus = "idle" | "dialing" | "receiving" | "active" | "ended" | "error";
+
+interface LocalMessage {
   id: string;
-  participant: ConversationParticipant; // Use the extended participant type
-  lastMessage: string;
-  lastMessageTimestamp: Date;
-  unreadCount?: number; // Mock unread message count
-  messages: Message[];
-  isTyping?: boolean; // Partner typing status
+  content: string;
+  senderId: string;
+  timestamp: Timestamp | Date;
+  intentionTag?: string;
+  status?: 'sent' | 'delivered' | 'read' | 'error' | 'moderated';
+  text?: string;
+  likes?: number;
+}
+
+interface LocalConversation {
+  id: string;
+  participant: ConversationParticipant;
+  lastMessage?: LocalMessage;
+  unreadCount: number;
+  updatedAt: Date;
+  lastMessageTimestamp?: Date;
 }
 
 // Mock current user ID
@@ -93,41 +144,49 @@ const mockParticipants: { [key: string]: ConversationParticipant } = {
 
 
 // Mock conversations data using participants
-const initialConversations: Conversation[] = [
+const initialConversations: LocalConversation[] = [
   {
     id: 'conv1',
     participant: mockParticipants['user2'],
-    lastMessage: 'Hey, how are you?',
-    lastMessageTimestamp: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
+    lastMessage: {
+      id: 'm1',
+      content: 'Hey, how are you?',
+      senderId: 'user2',
+      timestamp: new Date(Date.now() - 5 * 60 * 1000),
+      status: 'read'
+    },
+    lastMessageTimestamp: new Date(Date.now() - 5 * 60 * 1000),
     unreadCount: 2,
-    messages: [
-      { id: 'm1', senderId: 'user2', senderName: mockParticipants['user2'].name || 'Bob', text: 'Hey, how are you?', timestamp: new Date(Date.now() - 5 * 60 * 1000), status: 'read' },
-      { id: 'm2', senderId: 'user1', senderName: CURRENT_USER_NAME, text: "Hi Bob! I'm good, thanks. You?", timestamp: new Date(Date.now() - 4 * 60 * 1000), intentionTag: 'friendly', status: 'delivered' },
-      { id: 'm6', senderId: 'user2', senderName: mockParticipants['user2'].name || 'Bob', text: 'Doing great! Just finished a cooking class.', timestamp: new Date(Date.now() - 3 * 60 * 1000), status: 'delivered' },
-      { id: 'm7', senderId: 'user2', senderName: mockParticipants['user2'].name || 'Bob', text: 'What about you?', timestamp: new Date(Date.now() - 2 * 60 * 1000), status: 'delivered' },
-    ],
+    updatedAt: new Date()
   },
   {
     id: 'conv2',
     participant: mockParticipants['user3'],
-    lastMessage: 'Did you see that movie?',
-    lastMessageTimestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    lastMessage: {
+      id: 'm3',
+      content: 'Did you see that movie?',
+      senderId: 'user3',
+      timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      status: 'read'
+    },
+    lastMessageTimestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
     unreadCount: 0,
-    messages: [
-      { id: 'm3', senderId: 'user3', senderName: mockParticipants['user3'].name || 'Charlie', text: 'Did you see that movie?', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), status: 'read' },
-    ],
+    updatedAt: new Date()
   },
   {
     id: 'conv3',
     participant: mockParticipants['user4'],
-    lastMessage: 'Planning anything fun this weekend?',
-    lastMessageTimestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+    lastMessage: {
+      id: 'm5',
+      content: 'Planning anything fun this weekend?',
+      senderId: 'user4',
+      timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      status: 'delivered'
+    },
+    lastMessageTimestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
     unreadCount: 1,
-    messages: [
-      { id: 'm4', senderId: 'user1', senderName: CURRENT_USER_NAME, text: 'Hey Diana!', timestamp: new Date(Date.now() - 1.1 * 24 * 60 * 60 * 1000), status: 'read' },
-      { id: 'm5', senderId: 'user4', senderName: mockParticipants['user4'].name || 'Diana', text: 'Planning anything fun this weekend?', timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), status: 'delivered' },
-    ],
-  },
+    updatedAt: new Date()
+  }
 ];
 
 // Available intention tags for manual selection
@@ -139,574 +198,613 @@ const manualIntentionTags = [
   { value: 'tender', label: 'Tender', icon: <HeartHandshake className="h-4 w-4 mr-2" /> },
 ];
 
-/**
- * ChatPage component.
- *
- * @component
- * @description Displays the chat interface, allowing users to select conversations, send/receive messages, manually select intention tags, and view AI-suggested intentions. Simulates video/audio calls and partner typing indicator.
- *              **Requires Backend:** Real-time messaging (WebSockets), persistent message storage (Database), actual call functionality (WebRTC - e.g., Twilio, Agora), typing indicator propagation.
- * @returns {JSX.Element} The rendered Chat page.
- */
-export default function ChatPage() {
-  const t = useTranslations('Chat');
+const ChatPage = (): JSX.Element => {
+  const t = useTranslations("Chat");
   const { toast } = useToast();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const { user: currentUser, loading: authLoading } = useAuthContext();
+  const router = useRouter();
+
+  // State
+  const [conversations, setConversations] = useState<LocalConversation[]>([]);
+  const [selectedConversation, setSelectedConversation] = useState<LocalConversation | null>(null);
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-  const [newMessage, setNewMessage] = useState('');
-  const [selectedIntention, setSelectedIntention] = useState<string>('');
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
   const [loadingChats, setLoadingChats] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [loadingConversations, setLoadingConversations] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
-  const [currentUserProfile, setCurrentUserProfile] = useState<UserProfile | null>(null);
-
-  // AI Intention Tagging State
-  const [aiSuggestedTag, setAiSuggestedTag] = useState<IntentionTaggingOutput | null>(null);
   const [isAnalyzingIntent, setIsAnalyzingIntent] = useState(false);
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [selectedIntention, setSelectedIntention] = useState<string>("");
+  const [aiSuggestedTag, setAiSuggestedTag] = useState<IntentionTaggingOutput | null>(null);
+  const [isPartnerTyping, setIsPartnerTyping] = useState(false);
+  const [isCallActive, setIsCallActive] = useState(false);
+  const [currentMessages, setCurrentMessages] = useState<LocalMessage[]>([]);
+  const [otherParticipant, setOtherParticipant] = useState<ConversationParticipant | null>(null);
+  const [rtcConnection, setRtcConnection] = useState<RTCConnection | null>(null);
+  const [callStatus, setCallStatus] = useState<CallStatus>("idle");
+  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isVideoOff, setIsVideoOff] = useState(false);
 
-  useEffect(() => {
-    setLoadingChats(true);
-    get_user(CURRENT_USER_ID)
-      .then(profile => {
-        if (!profile) {
-          throw new Error(t('profileNotFound'));
-        }
-        setCurrentUserProfile(profile);
-      })
-      .catch(err => {
-        console.error("Failed to fetch current user profile:", err);
-        const errorMessage = err instanceof Error ? err.message : t('errorLoadingProfile');
-        toast({
-          variant: 'destructive',
-          title: t('errorTitle'),
-          description: errorMessage
-        });
-      })
-      .finally(() => setLoadingChats(false));
-  }, [t, toast]);
+  // Refs
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
 
+  // Handlers
+  const handleMessageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessage(e.target.value);
+  };
 
-  useEffect(() => {
-    const loadChats = async () => {
-      setLoadingChats(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      try {
-        const sortedConversations = [...initialConversations].sort((a, b) => b.lastMessageTimestamp.getTime() - a.lastMessageTimestamp.getTime());
-        setConversations(sortedConversations);
-        if (sortedConversations.length > 0 && !selectedConversationId) {
-          setSelectedConversationId(sortedConversations[0].id);
-        }
-      } catch (error) {
-        console.error("Failed to load chats:", error);
-        toast({ variant: 'destructive', title: t('errorLoadingChats') });
-      } finally {
-        setLoadingChats(false);
-      }
-    };
-    loadChats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast]);
-
-  // Smooth scroll to bottom of messages
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [selectedConversationId, conversations]);
-
-  // Optimize intention analysis with debounce
-  const debouncedAnalyzeIntent = useCallback(
-    (text: string) => {
-      if (!text.trim()) return;
-      setIsAnalyzingIntent(true);
-      try {
-        tagMessageIntent({ message: text }).then(result => {
-          setAiSuggestedTag(result);
-        }).catch(error => {
-          console.error("Failed to analyze intent:", error);
-        }).finally(() => {
-          setIsAnalyzingIntent(false);
-        });
-      } catch (error) {
-        console.error("Failed to analyze intent:", error);
-        setIsAnalyzingIntent(false);
-      }
-    },
-    []
-  );
-
-  // Simulate partner response
-  const simulatePartnerResponse = useCallback(async (convId: string, userMessageText: string) => {
-    const conversation = conversations.find(c => c.id === convId);
-    if (!conversation) return;
-
-    // Set typing indicator
-    setConversations(prev => prev.map(conv =>
-      conv.id === convId ? { ...conv, isTyping: true } : conv
-    ));
-
-    // Simulate typing delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-
-    // Generate response
-    const response = `Thanks for your message: "${userMessageText}"! I'm a simulated response.`;
-    const newMessage: Message = {
-      id: `msg-${Date.now()}`,
-      senderId: conversation.participant.id,
-      senderName: conversation.participant.name || 'Partner',
-      text: response,
-      timestamp: new Date(),
-      status: 'sent' as const
-    };
-
-    // Update conversation
-    setConversations(prev => prev.map(conv => {
-      if (conv.id === convId) {
-        const updatedMessages = [...conv.messages, newMessage];
-        return {
-          ...conv,
-          isTyping: false,
-          lastMessage: response,
-          lastMessageTimestamp: new Date(),
-          messages: updatedMessages
-        };
-      }
-      return conv;
-    }));
-  }, [conversations]);
-
-  // Optimize message sending with debounce
-  const debouncedSendMessage = useCallback(
-    (message: string, conversationId: string) => {
-      if (!message.trim()) return;
-
-      setSendingMessage(true);
-      try {
-        // Simulate API call
-        setTimeout(async () => {
-          const newMessage: Message = {
-            id: `msg-${Date.now()}`,
-            senderId: CURRENT_USER_ID,
-            senderName: CURRENT_USER_NAME,
-            text: message,
-            timestamp: new Date(),
-            status: 'sending' as const,
-            intentionTag: selectedIntention || undefined
-          };
-
-          setConversations(prev => prev.map(conv => {
-            if (conv.id === conversationId) {
-              const updatedMessages = [...conv.messages, newMessage];
-              return {
-                ...conv,
-                lastMessage: message,
-                lastMessageTimestamp: new Date(),
-                messages: updatedMessages
-              };
-            }
-            return conv;
-          }));
-
-          // Simulate partner response
-          await new Promise(resolve => setTimeout(resolve, 700));
-          simulatePartnerResponse(conversationId, message);
-          setSendingMessage(false);
-        }, 300);
-      } catch (error) {
-        console.error("Failed to send message:", error);
-        toast({
-          variant: 'destructive',
-          title: t('errorSendingMessage'),
-        });
-        setSendingMessage(false);
-      }
-    },
-    [selectedIntention, toast, t, simulatePartnerResponse]
-  );
-
-  // Handle message input changes
-  const handleMessageChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const text = e.target.value;
-    setNewMessage(text);
-
-    // Clear existing timeout
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    // Set new timeout for intention analysis
-    debounceTimeoutRef.current = setTimeout(() => {
-      debouncedAnalyzeIntent(text);
-    }, 500);
-  }, [debouncedAnalyzeIntent]);
-
-  // Handle message sending
-  const handleSendMessage = useCallback(() => {
-    if (selectedConversationId && newMessage.trim()) {
-      debouncedSendMessage(newMessage, selectedConversationId);
-      setNewMessage('');
-      setSelectedIntention('');
-      setAiSuggestedTag(null);
-    }
-  }, [selectedConversationId, newMessage, debouncedSendMessage]);
-
-  // Handle key press for sending messages
-  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
-  }, [handleSendMessage]);
+  };
 
-  // Cleanup timeouts on unmount
+  const handleSendMessage = async () => {
+    if (!message.trim() || !selectedConversation || !currentUser) return;
+    setSendingMessage(true);
+    try {
+      // Implementation here
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      toast({
+        variant: "destructive",
+        title: t('error'),
+        description: t('errorSendingMessage')
+      });
+    } finally {
+      setSendingMessage(false);
+    }
+  };
+
+  const handleStartCall = async (withVideo: boolean) => {
+    if (!selectedConversation || !currentUser) return;
+    setIsCallActive(true);
+    setCallStatus('dialing');
+    try {
+      const stream = await getLocalStream({ video: withVideo, audio: true });
+      setLocalStream(stream);
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = stream;
+      }
+      const connection: RTCConnection = {
+        peerConnection: null,
+        localStream: stream,
+        remoteStream: null,
+        signalingChannelId: null,
+        callStatus: 'dialing',
+        isInitiator: true,
+        onRemoteStreamReady: (stream: MediaStream) => {
+          setRemoteStream(stream);
+          if (remoteVideoRef.current) {
+            remoteVideoRef.current.srcObject = stream;
+          }
+        },
+        onCallEnded: () => {
+          setCallStatus('idle');
+          setLocalStream(null);
+          setRemoteStream(null);
+          if (localVideoRef.current) localVideoRef.current.srcObject = null;
+          if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+        }
+      };
+      setRtcConnection(connection);
+    } catch (error) {
+      console.error("Failed to start call:", error);
+      toast({
+        variant: "destructive",
+        title: t('error'),
+        description: t('errorStartingCall')
+      });
+      setIsCallActive(false);
+      setCallStatus('idle');
+    }
+  };
+
+  const handleHangUp = async () => {
+    setIsCallActive(false);
+    // Implementation here
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    // Implementation here
+  };
+
+  // Initialize RTC connection
   useEffect(() => {
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
+    if (!currentUser) return;
+
+    const initRTC = async () => {
+      try {
+        const connection: RTCConnection = {
+          peerConnection: null,
+          localStream: null,
+          remoteStream: null,
+          signalingChannelId: null,
+          callStatus: "idle",
+          isInitiator: false,
+          onRemoteStreamReady: (stream) => {
+            setRemoteStream(stream);
+            if (remoteVideoRef.current) {
+              remoteVideoRef.current.srcObject = stream;
+            }
+          },
+          onCallEnded: () => {
+            setCallStatus("idle");
+            setLocalStream(null);
+            setRemoteStream(null);
+            if (localVideoRef.current) localVideoRef.current.srcObject = null;
+            if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+          }
+        };
+
+        setRtcConnection(connection);
+      } catch (error) {
+        console.error("Failed to initialize RTC connection:", error);
+        toast({
+          variant: "destructive",
+          title: t('error'),
+          description: t('errorInitializingRTC')
+        });
       }
     };
-  }, []);
 
-  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
+    initRTC();
+  }, [currentUser, toast, t]);
 
-  const getInitials = (name?: string): string => {
-    if (!name) return '';
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase();
-  };
+  // Handle signaling messages
+  useEffect(() => {
+    if (!rtcConnection || !currentUser) return;
 
-  const getManualIntentionTagInfo = (tagValue?: string) => {
-    return manualIntentionTags.find(tag => tag.value === tagValue);
-  };
+    const handleMessage = async (message: SignalingMessage) => {
+      try {
+        if (!rtcConnection.peerConnection) {
+          console.warn("WebRTC: PeerConnection not initialized, cannot process message:", message);
+          return;
+        }
 
-  const getAiIntentionTagIcon = (tagValue?: string) => {
-    const manualTag = manualIntentionTags.find(tag => tag.value === tagValue);
-    return manualTag ? manualTag.icon : <Bot className="h-3 w-3 mr-1" />;
-  };
+        switch (message.type) {
+          case 'offer':
+            if (rtcConnection.callStatus === 'idle' || rtcConnection.callStatus === 'receiving') {
+              setCallStatus('receiving');
+              if (!rtcConnection.localStream) {
+                const stream = await getLocalStream({ video: false, audio: true });
+                setLocalStream(stream);
+                if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+                addLocalStreamToPeerConnection(rtcConnection.peerConnection, stream);
+              }
+              const answer = await createAnswerSdp(rtcConnection.peerConnection, message.sdp);
+              await sendSignalingMessageViaFirestore(
+                rtcConnection.signalingChannelId!,
+                currentUser.uid,
+                {
+                  type: 'answer',
+                  sdp: answer,
+                  senderId: currentUser.uid,
+                  timestamp: serverTimestamp()
+                }
+              );
+              setCallStatus('active');
+            }
+            break;
+          case 'answer':
+            if (rtcConnection.callStatus === 'dialing') {
+              await setRemoteSdp(rtcConnection.peerConnection, message.sdp);
+              setCallStatus('active');
+            }
+            break;
+          case 'candidate':
+            if (message.candidate) {
+              await addIceCandidate(rtcConnection.peerConnection, message.candidate);
+            }
+            break;
+          case 'hangup':
+            if (rtcConnection.onCallEnded) rtcConnection.onCallEnded();
+            break;
+        }
+      } catch (error) {
+        console.error("Failed to handle signaling message:", error);
+        toast({
+          variant: "destructive",
+          title: t('error'),
+          description: t('errorHandlingSignal')
+        });
+      }
+    };
 
+    // Subscribe to signaling channel
+    const unsubscribe = listenForSignalingMessagesFromFirestore(
+      rtcConnection.signalingChannelId!,
+      currentUser.uid,
+      handleMessage
+    );
 
-  const handleStartVideoCall = () => {
-    if (!selectedConversation) return;
-    const participantName = selectedConversation.participant.name || t('unknownUser');
-    console.log(`Initiating video call with ${participantName}`);
-    toast({
-      title: t('videoCallTitle'),
-      description: t('videoCallDesc', { name: participantName })
-    });
-  };
+    return () => unsubscribe();
+  }, [rtcConnection, currentUser, toast, t]);
 
-  const handleStartAudioCall = async () => {
-    if (!selectedConversation) return;
-    const participantName = selectedConversation.participant.name || t('unknownUser');
-
-    try {
-      // Simulate API call to initiate call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      toast({
-        title: t('audioCallTitle'),
-        description: t('audioCallDesc', { name: participantName })
-      });
-    } catch (error) {
-      console.error("Failed to start audio call:", error);
-      const errorMessage = error instanceof Error ? error.message : t('callStartError');
-      toast({
-        variant: 'destructive',
-        title: t('errorTitle'),
-        description: errorMessage
-      });
-    }
-  };
-
-  const formatTimestamp = (date: Date | string | number | undefined): string => {
-    if (!date) return '';
-    const messageDate = new Date(date);
-    const now = new Date();
-    const diff = now.getTime() - messageDate.getTime();
-    const oneDay = 24 * 60 * 60 * 1000;
-
-    if (diff < oneDay) {
-      return messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } else if (diff < 7 * oneDay) {
-      return messageDate.toLocaleDateString([], { weekday: 'short' });
-    } else {
-      return messageDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
-    }
+  const handleCallStatusChange = (status: CallStatus) => {
+    setCallStatus(status);
   };
 
   return (
-    <TooltipProvider>
-      <div className="container mx-auto h-[calc(100vh-80px)] flex flex-col p-0 md:p-4">
-        <Card className="flex flex-grow overflow-hidden h-full shadow-lg rounded-lg border">
-          {/* Conversation List Sidebar */}
-          <div className="w-full md:w-1/3 border-r flex flex-col bg-card">
-            <CardHeader className="p-4">
-              <CardTitle className="flex items-center gap-2"><MessagesSquare className="h-6 w-6 text-primary" />{t('title')}</CardTitle>
-              <CardDescription>{t('conversationListDesc')}</CardDescription>
-            </CardHeader>
-            <Separator />
-            <ScrollArea className="flex-grow">
-              <div className="p-2 space-y-1">
-                {loadingChats ? (
-                  [...Array(5)].map((_, i) => (
-                    <div key={i} className="flex items-center space-x-3 p-3 rounded-md">
-                      <Skeleton className="h-10 w-10 rounded-full" />
-                      <div className="space-y-1 flex-grow">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-3 w-1/2" />
+    <AuthGuard>
+      <TooltipProvider>
+        <div className="container mx-auto h-[calc(100vh-80px)] flex flex-col p-0 md:p-4">
+          <Card className="flex flex-grow overflow-hidden h-full shadow-lg rounded-lg border">
+            <div className="w-full md:w-1/3 border-r flex flex-col bg-card">
+              <CardHeader className="p-4">
+                <CardTitle className="flex items-center gap-2"><MessagesSquare className="h-6 w-6 text-primary" />{t('title')}</CardTitle>
+                <CardDescription>{t('conversationListDesc')}</CardDescription>
+              </CardHeader>
+              <Separator />
+              <ScrollArea className="flex-grow">
+                <div className="p-2 space-y-1">
+                  {loadingChats ? (
+                    [...Array(5)].map((_, i) => (
+                      <div key={i} className="flex items-center space-x-3 p-3 rounded-md">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="space-y-1 flex-grow">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-3 w-1/2" />
+                        </div>
                       </div>
-                    </div>
-                  ))
-                ) : conversations.length > 0 ? (
-                  conversations.map(conv => (
-                    <Button
-                      key={conv.id}
-                      variant="ghost"
-                      className={cn(
-                        "w-full justify-start h-auto py-3 px-3 text-left rounded-md transition-colors relative",
-                        selectedConversationId === conv.id ? "bg-primary/10 text-primary font-semibold" : "hover:bg-muted/50"
-                      )}
-                      onClick={() => setSelectedConversationId(conv.id)}
-                      aria-current={selectedConversationId === conv.id ? "page" : undefined}
-                    >
-                      <Avatar className="h-10 w-10 mr-3 border">
-                        <AvatarImage src={conv.participant.profilePicture} alt={conv.participant.name || 'User'} data-ai-hint={conv.participant.dataAiHint || "person"} />
-                        <AvatarFallback>{getInitials(conv.participant.name)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-grow overflow-hidden">
-                        <p className="font-medium truncate">{conv.participant.name || t('unknownUser')}</p>
-                        <p className="text-xs text-muted-foreground truncate">{conv.lastMessage}</p>
-                      </div>
-                      <div className="ml-auto pl-2 shrink-0 flex flex-col items-end space-y-1">
-                        <span className="text-xs text-muted-foreground">
-                          {formatTimestamp(conv.lastMessageTimestamp)}
-                        </span>
-                        {conv.unreadCount && conv.unreadCount > 0 && (
-                          <Badge variant="destructive" className="h-5 px-1.5 text-xs">{conv.unreadCount}</Badge>
-                        )}
-                      </div>
-                    </Button>
-                  ))
-                ) : (
-                  <p className="p-4 text-center text-muted-foreground">{t('noChats')}</p>
-                )}
-              </div>
-            </ScrollArea>
-          </div>
+                    ))
+                  ) : conversations.length > 0 ? (
+                    conversations.map(conv => {
+                      const participantDetail = conv.participant;
+                      const displayName = participantDetail?.name || t('unknownUser');
+                      const displayPicture = participantDetail?.profilePicture;
+                      const dataAiHint = participantDetail?.dataAiHint || "person";
 
-          {/* Chat Area */}
-          <div className="w-full md:w-2/3 flex flex-col bg-muted/10">
-            {selectedConversation ? (
-              <>
-                {/* Chat Header */}
-                <CardHeader className="p-4 border-b flex flex-row items-center justify-between space-x-3 bg-card">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-10 w-10 border">
-                      <AvatarImage src={selectedConversation.participant.profilePicture} alt={selectedConversation.participant.name || t('unknownUser')} data-ai-hint={selectedConversation.participant.dataAiHint || "person"} />
-                      <AvatarFallback>{getInitials(selectedConversation.participant.name)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className="text-lg">{selectedConversation.participant.name || t('unknownUser')}</CardTitle>
-                      <CardDescription className={cn("text-xs", selectedConversation.participant.isOnline ? "text-green-600" : "text-muted-foreground")}>
-                        {selectedConversation.participant.isOnline ? t('statusOnline') : t('statusOffline')}
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {selectedConversation.participant.compatibilityScore !== undefined && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Badge variant="secondary" className="flex items-center space-x-1 text-sm font-medium cursor-default">
-                            <HeartHandshake className="h-4 w-4 text-primary" />
-                            <span>{selectedConversation.participant.compatibilityScore}%</span>
-                          </Badge>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{t('compatibilityScoreTitle')}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" onClick={handleStartAudioCall} aria-label={t('startAudioCall')}>
-                          <Phone className="h-5 w-5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{t('startAudioCall')}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="icon" onClick={handleStartVideoCall} aria-label={t('startVideoCall')}>
-                          <Video className="h-5 w-5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{t('startVideoCall')}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-                </CardHeader>
-
-                {/* Messages Area */}
-                <ScrollArea className="flex-grow p-4 space-y-4 bg-muted/20" aria-live="polite">
-                  {selectedConversation.messages.map((msg) => {
-                    const intentionInfo = getManualIntentionTagInfo(msg.intentionTag);
-                    const isCurrentUser = msg.senderId === CURRENT_USER_ID;
-                    return (
-                      <div
-                        key={msg.id}
-                        className={cn(
-                          "flex items-end space-x-2 max-w-[85%]",
-                          isCurrentUser ? "ml-auto justify-end" : "mr-auto justify-start"
-                        )}
-                      >
-                        {!isCurrentUser && (
-                          <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0">
-                            <AvatarImage src={selectedConversation.participant.profilePicture} alt={selectedConversation.participant.name || t('unknownUser')} data-ai-hint={selectedConversation.participant.dataAiHint || "person"} />
-                            <AvatarFallback>{getInitials(selectedConversation.participant.name)}</AvatarFallback>
-                          </Avatar>
-                        )}
-                        <div
+                      return (
+                        <Button
+                          key={conv.id}
+                          variant="ghost"
                           className={cn(
-                            "rounded-lg px-3 py-2 shadow-sm relative group",
-                            isCurrentUser
-                              ? "bg-primary text-primary-foreground rounded-br-none"
-                              : "bg-card text-card-foreground border rounded-bl-none"
+                            "w-full justify-start h-auto py-3 px-3 text-left rounded-md transition-colors relative",
+                            selectedConversationId === conv.id ? "bg-primary/10 text-primary font-semibold" : "hover:bg-muted/50"
                           )}
+                          onClick={() => {
+                            setSelectedConversationId(conv.id);
+                            if (rtcConnection && rtcConnection.callStatus !== 'idle') {
+                              handleHangUp();
+                            }
+                            const targetUser = conv.participant;
+                            const connection: RTCConnection = {
+                              peerConnection: null,
+                              localStream: null,
+                              remoteStream: null,
+                              signalingChannelId: null,
+                              callStatus: 'idle',
+                              isInitiator: false,
+                              onRemoteStreamReady: (stream: MediaStream) => {
+                                setRemoteStream(stream);
+                                if (remoteVideoRef.current) {
+                                  remoteVideoRef.current.srcObject = stream;
+                                }
+                              },
+                              onCallEnded: () => {
+                                setCallStatus('idle');
+                                setLocalStream(null);
+                                setRemoteStream(null);
+                                if (localVideoRef.current) localVideoRef.current.srcObject = null;
+                                if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+                              }
+                            };
+                            setRtcConnection(connection);
+                          }}
+                          aria-current={selectedConversationId === conv.id ? "page" : undefined}
                         >
-                          {intentionInfo && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="flex items-center text-xs opacity-80 mb-1 cursor-default" >
-                                  {React.cloneElement(intentionInfo.icon, { className: "h-3 w-3 mr-1" })}
-                                  <span>{intentionInfo.label}</span>
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent side="top" align={isCurrentUser ? "end" : "start"}>
-                                <p>{`${t('intentionTagTitle')}: ${intentionInfo.label}`}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                          <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
-                          <p className="text-xs text-right opacity-70 mt-1">
-                            {formatTimestamp(msg.timestamp)}
-                          </p>
-                          {msg.status === 'error' && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <AlertCircle className="absolute -left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive" />
-                              </TooltipTrigger>
-                              <TooltipContent side="left">
-                                <p>{t('messageFailedToSend')}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          )}
-                        </div>
-                        {isCurrentUser && (
-                          <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0">
-                            <AvatarImage src={currentUserProfile?.profilePicture || undefined} alt={CURRENT_USER_NAME} data-ai-hint={currentUserProfile?.dataAiHint || "person"} />
-                            <AvatarFallback>{getInitials(CURRENT_USER_NAME)}</AvatarFallback>
+                          <Avatar className="h-10 w-10 mr-3 border" data-ai-hint={dataAiHint}>
+                            <AvatarImage src={displayPicture} alt={displayName} />
+                            <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
                           </Avatar>
-                        )}
-                      </div>
-                    );
-                  })}
-                  {/* Typing Indicator */}
-                  {selectedConversation.isTyping && (
-                    <div className="flex items-center space-x-2 mr-auto justify-start max-w-[85%]">
-                      <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0 opacity-0"> {/* Placeholder for alignment */}
-                        <AvatarFallback>?</AvatarFallback>
+                          <div className="flex-grow overflow-hidden">
+                            <p className="font-medium truncate">{displayName}</p>
+                            <p className="text-xs text-muted-foreground truncate">{conv.lastMessage?.content}</p>
+                          </div>
+                          <div className="ml-auto pl-2 shrink-0 flex flex-col items-end space-y-1">
+                            <span className="text-xs text-muted-foreground">
+                              {formatTimestamp(conv.lastMessageTimestamp || conv.updatedAt)}
+                            </span>
+                            {conv.unreadCount > 0 && (
+                              <Badge variant="destructive" className="h-5 px-1.5 text-xs">{conv.unreadCount}</Badge>
+                            )}
+                          </div>
+                        </Button>
+                      );
+                    })
+                  ) : (
+                    <p className="p-4 text-center text-muted-foreground">{t('noChats')}</p>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+
+            <div className="w-full md:w-2/3 flex flex-col bg-muted/10">
+              {selectedConversation && otherParticipant ? (
+                <>
+                  <CardHeader className="p-4 border-b flex flex-row items-center justify-between space-x-3 bg-card">
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-10 w-10 border" data-ai-hint={otherParticipant.dataAiHint || "person"}>
+                        <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || t('unknownUser')} />
+                        <AvatarFallback>{getInitials(otherParticipant.name)}</AvatarFallback>
                       </Avatar>
-                      <div className="rounded-lg px-3 py-2 bg-card text-card-foreground border rounded-bl-none shadow-sm">
-                        <div className="flex space-x-1 animate-pulse">
-                          <span className="h-2 w-2 bg-muted-foreground rounded-full"></span>
-                          <span className="h-2 w-2 bg-muted-foreground rounded-full animation-delay-150"></span>
-                          <span className="h-2 w-2 bg-muted-foreground rounded-full animation-delay-300"></span>
-                        </div>
+                      <div>
+                        <CardTitle className="text-lg">{otherParticipant.name || t('unknownUser')}</CardTitle>
+                        <CardDescription className={cn("text-xs", otherParticipant.isOnline ? "text-green-600" : "text-muted-foreground")}>
+                          {otherParticipant.isOnline ? t('statusOnline') : t('statusOffline')}
+                        </CardDescription>
                       </div>
                     </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </ScrollArea>
-
-                {/* Message Input Area */}
-                <CardFooter className="p-4 border-t bg-card space-y-2 flex-col items-start">
-                  <div className="flex w-full items-center space-x-2">
-                    <div className="flex-grow relative">
-                      <Input
-                        type="text"
-                        placeholder={t('sendMessagePlaceholder')}
-                        value={newMessage}
-                        onChange={handleMessageChange}
-                        onKeyPress={handleKeyPress}
-                        disabled={sendingMessage}
-                        className="flex-grow pr-20" // Add padding for AI tag
-                        aria-label={t('sendMessagePlaceholder')}
-                        aria-busy={sendingMessage}
-                      />
-                      {isAnalyzingIntent && (
-                        <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
-                      )}
-                      {!isAnalyzingIntent && aiSuggestedTag && aiSuggestedTag.detectedIntention && (
+                    <div className="flex items-center space-x-2">
+                      {otherParticipant.compatibilityScore !== undefined && (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Badge variant="outline" className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center cursor-pointer text-xs" onClick={() => setSelectedIntention(aiSuggestedTag.detectedIntention)}>
-                              {getAiIntentionTagIcon(aiSuggestedTag.detectedIntention)}
-                              {aiSuggestedTag.detectedIntention} ({(aiSuggestedTag.confidenceScore * 100).toFixed(0)}%)
+                            <Badge variant="secondary" className="flex items-center space-x-1 text-sm font-medium cursor-default">
+                              <HeartHandshake className="h-4 w-4 text-primary" />
+                              <span>{otherParticipant.compatibilityScore}%</span>
                             </Badge>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{t('aiSuggestedTagTooltip')}: {aiSuggestedTag.explanation || aiSuggestedTag.detectedIntention}</p>
+                            <p>{t('compatibilityScoreTitle')}</p>
                           </TooltipContent>
                         </Tooltip>
                       )}
+                      {isCallActive ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="destructive" size="icon" onClick={handleHangUp} aria-label={t('hangUpButton')}>
+                              <PhoneOff className="h-5 w-5" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent><p>{t('hangUpButton')}</p></TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" onClick={() => handleStartCall(false)} aria-label={t('startAudioCall')}>
+                                <Phone className="h-5 w-5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent><p>{t('startAudioCall')}</p></TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" onClick={() => handleStartCall(true)} aria-label={t('startVideoCall')}>
+                                <Video className="h-5 w-5" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent><p>{t('startVideoCall')}</p></TooltipContent>
+                          </Tooltip>
+                        </>
+                      )}
                     </div>
-                    <Button
-                      aria-label={t('sendButton')}
-                      title={t('sendButton')}
-                      type="button"
-                      size="icon"
-                      onClick={() => handleSendMessage()}
-                      disabled={sendingMessage || !newMessage.trim()}
-                    >
-                      {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  <div className="flex items-center space-x-2 w-full">
-                    <Label htmlFor="intention-select" className="text-xs text-muted-foreground whitespace-nowrap">{t('intentionTagLabel')}:</Label>
-                    <Select value={selectedIntention} onValueChange={setSelectedIntention} disabled={sendingMessage}>
-                      <SelectTrigger id="intention-select" className="h-8 text-xs flex-grow" aria-label={t('selectIntentionPlaceholder')}>
-                        <SelectValue placeholder={t('selectIntentionPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="" className="text-xs">{t('noTagOption')}</SelectItem>
-                        {manualIntentionTags.map(tag => (
-                          <SelectItem key={tag.value} value={tag.value} className="text-xs">
-                            <div className="flex items-center">
-                              {tag.icon} {tag.label}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardFooter>
-              </>
-            ) : (
-              <div className="flex flex-grow items-center justify-center text-muted-foreground p-4 text-center">
-                {loadingChats ? <Loader2 className="h-8 w-8 animate-spin" /> : <p>{t('selectChatPrompt')}</p>}
-              </div>
-            )}
-          </div>
-        </Card>
-      </div>
-    </TooltipProvider>
+                  </CardHeader>
+
+                  <ScrollArea className="flex-grow p-4 space-y-4 bg-muted/20" aria-live="polite" onScroll={handleScroll}>
+                    {loadingMessages ? (
+                      <div className="flex items-center space-x-2 mr-auto justify-start max-w-[85%]">
+                        <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0 opacity-0">
+                          <AvatarFallback>?</AvatarFallback>
+                        </Avatar>
+                        <div className="rounded-lg px-3 py-2 bg-card text-card-foreground border rounded-bl-none shadow-sm">
+                          <div className="flex space-x-1 animate-pulse">
+                            <span className="h-2 w-2 bg-muted-foreground rounded-full"></span>
+                            <span className="h-2 w-2 bg-muted-foreground rounded-full animation-delay-150"></span>
+                            <span className="h-2 w-2 bg-muted-foreground rounded-full animation-delay-300"></span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : currentMessages.map((msg) => {
+                      const intentionInfo = getManualIntentionTagInfo(msg.intentionTag);
+                      const isCurrentUserMsg = msg.senderId === currentUser.uid;
+                      return (
+                        <div
+                          key={msg.id}
+                          className={cn(
+                            "flex items-end space-x-2 max-w-[85%]",
+                            isCurrentUserMsg ? "ml-auto justify-end" : "mr-auto justify-start"
+                          )}
+                        >
+                          {!isCurrentUserMsg && (
+                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint={otherParticipant.dataAiHint || "person"}>
+                              <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant.name || t('unknownUser')} />
+                              <AvatarFallback>{getInitials(otherParticipant.name || t('unknownUser'))}</AvatarFallback>
+                            </Avatar>
+                          )}
+                          <div
+                            className={cn(
+                              "rounded-lg px-3 py-2 shadow-sm relative group",
+                              isCurrentUserMsg
+                                ? "bg-primary text-primary-foreground rounded-br-none"
+                                : "bg-card text-card-foreground border rounded-bl-none",
+                              msg.status === 'moderated' ? "bg-yellow-100 border-yellow-400 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-700" : ""
+                            )}
+                          >
+                            {intentionInfo && msg.status !== 'moderated' && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center text-xs opacity-80 mb-1 cursor-default" >
+                                    {React.cloneElement(intentionInfo.icon, { className: "h-3 w-3 mr-1" })}
+                                    <span>{intentionInfo.label}</span>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" align={isCurrentUserMsg ? "end" : "start"}>
+                                  <p>{`${t('intentionTagTitle')}: ${intentionInfo.label}`}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                            <p className="text-sm whitespace-pre-wrap">{msg.status === 'moderated' ? t('messageModerated') : msg.text}</p>
+                            <p className="text-xs text-right opacity-70 mt-1">
+                              {msg.timestamp && typeof (msg.timestamp as any).toDate === 'function'
+                                ? (msg.timestamp as Timestamp).toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                : msg.timestamp instanceof Date
+                                  ? msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                  : msg.timestamp
+                                    ? (msg.timestamp as Timestamp).toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                    : ''}
+                            </p>
+
+                            {typeof msg.likes === 'number' && msg.likes > 0 && (
+                              <Badge variant="secondary" className="absolute -right-3 -bottom-2 h-5 px-1.5 text-xs">
+                                {msg.likes}
+                              </Badge>
+                            )}
+
+                            {msg.status === 'error' && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <AlertCircle className="absolute -left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-destructive" />
+                                </TooltipTrigger>
+                                <TooltipContent side="left">
+                                  <p>{t('messageFailedToSend')}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                            {msg.status === 'moderated' && (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <ShieldAlert className="absolute -left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-yellow-500" />
+                                </TooltipTrigger>
+                                <TooltipContent side="left">
+                                  <p>{t('messageBlockedByModeration')}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            )}
+                          </div>
+                          {isCurrentUserMsg && currentUser && (
+                            <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint={currentUser.dataAiHint || "user profile"}>
+                              <AvatarImage src={currentUser.photoURL || undefined} alt={currentUser?.displayName || 'You'} />
+                              <AvatarFallback>{getInitials(currentUser?.displayName || 'You')}</AvatarFallback>
+                            </Avatar>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {isPartnerTyping && (
+                      <div className="flex items-center space-x-2 mr-auto justify-start max-w-[85%]">
+                        <Avatar className="h-8 w-8 border self-start mt-1 flex-shrink-0" data-ai-hint={otherParticipant?.dataAiHint || "person"}>
+                          <AvatarImage src={otherParticipant.profilePicture} alt={otherParticipant?.name || t('unknownUser')} />
+                          <AvatarFallback>{getInitials(otherParticipant.name || t('unknownUser'))}</AvatarFallback>
+                        </Avatar>
+                        <div className="rounded-lg px-3 py-2 bg-card text-card-foreground border rounded-bl-none shadow-sm">
+                          <div className="flex space-x-1 items-center">
+                            <span className="h-2 w-2 bg-muted-foreground rounded-full animate-pulse"></span>
+                            <span className="h-2 w-2 bg-muted-foreground rounded-full animate-pulse animation-delay-150"></span>
+                            <span className="h-2 w-2 bg-muted-foreground rounded-full animate-pulse animation-delay-300"></span>
+                            <span className="text-xs text-muted-foreground ml-1">{t('typingIndicator')}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </ScrollArea>
+
+                  <CardFooter className="p-4 border-t bg-card space-y-2 flex-col items-start">
+                    <div className="flex w-full items-center space-x-2">
+                      <div className="flex-grow relative">
+                        <Input
+                          type="text"
+                          placeholder={t('sendMessagePlaceholder')}
+                          value={message}
+                          onChange={handleMessageChange}
+                          onKeyPress={handleKeyPress}
+                          disabled={sendingMessage}
+                          className="flex-grow pr-20"
+                          aria-label={t('sendMessagePlaceholder')}
+                          aria-busy={sendingMessage}
+                        />
+                        {isAnalyzingIntent && (
+                          <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+                        )}
+                        {!isAnalyzingIntent && aiSuggestedTag && aiSuggestedTag.detectedIntention && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="outline" className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center cursor-pointer text-xs" onClick={() => setSelectedIntention(aiSuggestedTag.detectedIntention)}>
+                                {getAiIntentionTagIcon(aiSuggestedTag.detectedIntention)}
+                                {aiSuggestedTag.detectedIntention} ({(aiSuggestedTag.confidenceScore * 100).toFixed(0)}%)
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{t('aiSuggestedTagTooltip')}: {aiSuggestedTag.explanation || aiSuggestedTag.detectedIntention}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                      </div>
+                      <Button
+                        aria-label={t('sendButton')}
+                        title={t('sendButton')}
+                        type="button"
+                        size="icon"
+                        onClick={handleSendMessage}
+                        disabled={sendingMessage || !message.trim()}
+                      >
+                        {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                    <div className="flex items-center space-x-2 w-full">
+                      <Label htmlFor="intention-select" className="text-xs text-muted-foreground whitespace-nowrap">{t('intentionTagLabel')}:</Label>
+                      <Select value={selectedIntention} onValueChange={setSelectedIntention} disabled={sendingMessage || isCallActive}>
+                        <SelectTrigger id="intention-select" className="h-8 text-xs flex-grow" aria-label={t('selectIntentionPlaceholder')}>
+                          <SelectValue placeholder={t('selectIntentionPlaceholder')} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="" className="text-xs">{t('noTagOption')}</SelectItem>
+                          {manualIntentionTags.map(tag => (
+                            <SelectItem key={tag.value} value={tag.value} className="text-xs">
+                              <div className="flex items-center">
+                                {tag.icon} {tag.label}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardFooter>
+                </>
+              ) : (
+                <div className="flex flex-grow items-center justify-center text-muted-foreground p-4 text-center">
+                  {loadingConversations ? <Loader2 className="h-8 w-8 animate-spin" /> : <p>{t('selectChatPrompt')}</p>}
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
+      </TooltipProvider>
+    </AuthGuard>
   );
 }
+
+// Ajout des fonctions manquantes
+const getInitials = (name?: string): string => {
+  if (!name) return '?';
+  return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+};
+
+const formatTimestamp = (timestamp: Date): string => {
+  const now = new Date();
+  const diff = now.getTime() - timestamp.getTime();
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (minutes < 60) return `${minutes}m`;
+  if (hours < 24) return `${hours}h`;
+  return `${days}d`;
+};
+
+const getManualIntentionTagInfo = (tag?: string) => {
+  if (!tag) return null;
+  return manualIntentionTags.find(t => t.value === tag);
+};
+
+const getAiIntentionTagIcon = (tag: string) => {
+  const tagInfo = manualIntentionTags.find(t => t.value === tag);
+  return tagInfo?.icon || <Smile className="h-4 w-4 mr-2" />;
+};
+

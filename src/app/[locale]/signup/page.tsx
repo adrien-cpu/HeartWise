@@ -16,14 +16,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UserPlus } from 'lucide-react';
+import { Loader2, UserPlus, Eye, EyeOff, AlertTriangle } from 'lucide-react'; 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { update_user_profile } from '@/services/user_profile'; // For creating user profile in mock DB
+import { update_user_profile } from '@/services/user_profile';
+import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
 
 /**
  * @fileOverview Signup page component.
  * @module SignupPage
- * @description Allows new users to register with their name, email, and password.
+ * @description Allows new users to register with their name, email, and password. Includes password visibility toggle.
  */
 
 const signupSchema = z.object({
@@ -39,11 +40,14 @@ type SignupFormInputs = z.infer<typeof signupSchema>;
  * @returns {JSX.Element} The rendered signup page.
  */
 export default function SignupPage(): JSX.Element {
-  const t = useTranslations('Auth'); // Assuming an 'Auth' namespace in your translation files
+  const t = useTranslations('Auth');
   const { toast } = useToast();
   const router = useRouter();
+  const { isFirebaseConfigured } = useAuth(); 
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false); 
 
   const {
     register,
@@ -54,19 +58,28 @@ export default function SignupPage(): JSX.Element {
   });
 
   const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
+    if (!isFirebaseConfigured) {
+        setError(t('firebaseConfigError'));
+        toast({
+            variant: 'destructive',
+            title: t('signupErrorTitle'),
+            description: t('firebaseConfigErrorUserFriendly'),
+        });
+        return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      // Update Firebase user profile (optional, but good for display name)
       await updateProfile(userCredential.user, { displayName: data.name });
 
-      // Create a profile in your mock user_profile service
+      // Create a basic profile in Firestore
       await update_user_profile(userCredential.user.uid, {
         id: userCredential.user.uid,
         name: data.name,
-        email: data.email, // Store email if needed, though Firebase Auth handles it
-        profilePicture: `https://picsum.photos/seed/${userCredential.user.uid}/200`, // Placeholder image
+        email: data.email,
+        profilePicture: `https://picsum.photos/seed/${userCredential.user.uid}/200`,
         dataAiHint: "person placeholder",
         bio: "",
         interests: [],
@@ -75,17 +88,24 @@ export default function SignupPage(): JSX.Element {
         privacySettings: { showLocation: true, showOnlineStatus: true },
       });
 
-
       toast({
         title: t('signupSuccessTitle'),
         description: t('signupSuccessDesc'),
       });
-      router.push('/'); // Redirect to home or dashboard after signup
+      router.push('/'); 
     } catch (err: any) {
-      console.error('Signup error:', err);
+      console.error('Signup error:', err.code, err.message);
       let errorMessage = t('signupErrorDefault');
       if (err.code === 'auth/email-already-in-use') {
         errorMessage = t('signupErrorEmailInUse');
+      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.' || err.message?.includes('API key not valid')) {
+        errorMessage = t('firebaseApiKeyErrorDetailed');
+      } else if (err.code === 'auth/network-request-failed') {
+        errorMessage = t('networkError');
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = t('signupErrorInvalidEmail');
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = t('signupErrorWeakPassword');
       }
       setError(errorMessage);
       toast({
@@ -96,6 +116,13 @@ export default function SignupPage(): JSX.Element {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  /**
+   * Toggles the visibility of the password input field.
+   */
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -109,8 +136,16 @@ export default function SignupPage(): JSX.Element {
           <CardDescription>{t('signupDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
+           {!isFirebaseConfigured && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>{t('configErrorTitle')}</AlertTitle>
+              <AlertDescription>{t('firebaseConfigErrorUserFriendly')}</AlertDescription>
+            </Alert>
+          )}
           {error && (
             <Alert variant="destructive" className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
               <AlertTitle>{t('signupErrorTitle')}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -123,7 +158,7 @@ export default function SignupPage(): JSX.Element {
                 type="text"
                 {...register('name')}
                 placeholder={t('namePlaceholder')}
-                disabled={isLoading}
+                disabled={isLoading || !isFirebaseConfigured}
                 aria-invalid={errors.name ? "true" : "false"}
               />
               {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
@@ -135,24 +170,38 @@ export default function SignupPage(): JSX.Element {
                 type="email"
                 {...register('email')}
                 placeholder="name@example.com"
-                disabled={isLoading}
+                disabled={isLoading || !isFirebaseConfigured}
                 aria-invalid={errors.email ? "true" : "false"}
               />
               {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-1">
               <Label htmlFor="password">{t('passwordLabel')}</Label>
-              <Input
-                id="password"
-                type="password"
-                {...register('password')}
-                placeholder="••••••••"
-                disabled={isLoading}
-                aria-invalid={errors.password ? "true" : "false"}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  {...register('password')}
+                  placeholder="••••••••"
+                  disabled={isLoading || !isFirebaseConfigured}
+                  aria-invalid={errors.password ? "true" : "false"}
+                  className="pr-10" 
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
+                  onClick={togglePasswordVisibility}
+                  aria-label={showPassword ? t('hidePassword') : t('showPassword')}
+                  disabled={!isFirebaseConfigured}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading || !isFirebaseConfigured}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('signupButton')}
             </Button>

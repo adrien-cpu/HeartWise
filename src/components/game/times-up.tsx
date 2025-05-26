@@ -7,11 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import { useToast } from '@/hooks/use-toast';
-import { add_user_points } from '@/services/user_profile'; // Import points service
-import { Loader2, Play, Check, X, RotateCcw, ChevronsRight, Trophy } from 'lucide-react'; // Icons, Added Trophy
-
-// Mock user ID - replace with actual user identification
-const userId = 'user1';
+import { add_user_points, add_user_reward } from '@/services/user_profile';
+import { Loader2, Play, Check, X, RotateCcw, Trophy } from 'lucide-react';
 
 // Mock words for Time's Up
 const timesUpWords = [
@@ -34,30 +31,36 @@ type GameState = 'ready' | 'playing' | 'roundOver' | 'gameOver';
 
 /**
  * @fileOverview Implements the Time's Up game component.
+ * @module TimesUpGame
  */
+
+interface TimesUpGameProps {
+  userId: string; // User ID for attributing points and rewards
+  onGameComplete?: () => void; // Optional callback when a game round finishes
+}
 
 /**
  * @function TimesUpGame
  * @description A component handling the logic and UI for the Time's Up game mode.
+ * @param {TimesUpGameProps} props - Props for the TimesUpGame component.
  * @returns {JSX.Element} The rendered TimesUpGame component.
  */
-export default function TimesUpGame() {
-  const t = useTranslations('Game'); // Use Game namespace for translations
+export default function TimesUpGame({ userId, onGameComplete }: TimesUpGameProps) {
+  const t = useTranslations('Game');
   const { toast } = useToast();
 
   const [gameState, setGameState] = useState<GameState>('ready');
   const [words, setWords] = useState<string[]>([]);
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [round, setRound] = useState(1); // Could have multiple rounds later
-  const [timeRemaining, setTimeRemaining] = useState(60); // 60 seconds per round
-  const [isPlaying, setIsPlaying] = useState(false); // For timer control
-  const [isLoading, setIsLoading] = useState(false); // For async operations
+  const [round, setRound] = useState(1);
+  const [timeRemaining, setTimeRemaining] = useState(60);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const roundDuration = 60; // Base duration
-  const pointsPerWord = 5; // Points awarded per correctly guessed word
+  const roundDuration = 60;
+  const pointsPerWord = 5;
 
-  // Initialize or reset game
   const setupGame = useCallback(() => {
     setWords(shuffleArray([...timesUpWords]));
     setCurrentWordIndex(0);
@@ -66,13 +69,12 @@ export default function TimesUpGame() {
     setTimeRemaining(roundDuration);
     setIsPlaying(false);
     setGameState('ready');
-  }, []); // No dependencies needed if timesUpWords is constant
+  }, []);
 
   useEffect(() => {
-    setupGame(); // Setup game on initial mount
+    setupGame();
   }, [setupGame]);
 
-  // Function to end the round and award points
   const endRound = useCallback(async (finalScore: number) => {
     setIsPlaying(false);
     setGameState('roundOver');
@@ -80,8 +82,9 @@ export default function TimesUpGame() {
       title: t('tuRoundOver'),
       description: t('tuWordsGuessed', { count: finalScore }),
     });
-    if (finalScore > 0) {
-      setIsLoading(true); // Show loading state while awarding points
+
+    if (finalScore > 0 && userId) {
+      setIsLoading(true);
       try {
         const pointsAwarded = finalScore * pointsPerWord;
         await add_user_points(userId, pointsAwarded);
@@ -89,16 +92,26 @@ export default function TimesUpGame() {
             title: t('pointsAwardedTitle'),
             description: t('pointsEarnedDesc', { count: pointsAwarded }),
         });
+
+        // Example: Award a badge if score is above a certain threshold
+        if (finalScore >= 5) { // Arbitrary threshold for a badge
+          await add_user_reward(userId, {
+            name: t('badgeGameWinnerName'), // Assuming a generic game winner badge
+            description: t('badgeGameWinnerDesc'),
+            type: "game_winner"
+          });
+          toast({ title: t('badgeEarnedTitle'), description: t('badgeEarnedDesc', { badgeName: t('badgeGameWinnerName') }) });
+        }
       } catch (err) {
-        console.error("Failed to add points:", err);
+        console.error("Failed to add points/reward:", err);
         toast({ variant: 'destructive', title: t('error'), description: t('errorUpdatingScore') });
       } finally {
         setIsLoading(false);
       }
     }
-  }, [toast, t, pointsPerWord]);
+    onGameComplete?.(); // Call the callback if provided
+  }, [toast, t, pointsPerWord, userId, onGameComplete]); // Added userId and onGameComplete
 
-  // Timer logic
   useEffect(() => {
     let timer: NodeJS.Timeout | undefined;
     if (isPlaying && timeRemaining > 0) {
@@ -106,19 +119,16 @@ export default function TimesUpGame() {
         setTimeRemaining((prevTime) => prevTime - 1);
       }, 1000);
     } else if (timeRemaining === 0 && isPlaying) {
-      // Round Over due to time
       endRound(score);
     }
     return () => clearTimeout(timer);
   }, [timeRemaining, isPlaying, score, endRound]);
 
   const startRound = () => {
-    // Ensure game state is reset before starting
     setupGame();
-    // Immediately transition to playing state after setup
-     setTimeRemaining(roundDuration);
-     setIsPlaying(true);
-     setGameState('playing');
+    setTimeRemaining(roundDuration);
+    setIsPlaying(true);
+    setGameState('playing');
   };
 
   const handleNextWord = (guessed: boolean) => {
@@ -132,7 +142,6 @@ export default function TimesUpGame() {
         setScore(newScore);
       }
     } else {
-      // No more words, end round early
       endRound(newScore);
     }
   };
@@ -155,21 +164,21 @@ export default function TimesUpGame() {
           </>
         )}
 
-        {gameState === 'playing' && ( // Only show word and timer when actively playing
+        {gameState === 'playing' && (
           <>
             <div className="timer-wrapper mb-4">
               <CountdownCircleTimer
                 isPlaying={isPlaying}
-                key={round} // Reset timer visually when round changes
+                key={round}
                 duration={roundDuration}
                 initialRemainingTime={timeRemaining}
                 colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
-                colorsTime={[45, 25, 10, 0]} // Adjusted timings
+                colorsTime={[45, 25, 10, 0]}
                 size={80}
                 strokeWidth={6}
                 onComplete={() => { /* Timer end handled by useEffect */ }}
               >
-                {({ remainingTime }) => <span className="text-2xl font-bold">{remainingTime}</span>}
+                {({ remainingTime: rt }) => <span className="text-2xl font-bold">{rt}</span>}
               </CountdownCircleTimer>
             </div>
             <p className="text-sm text-muted-foreground">{t('tuDescribe')}</p>

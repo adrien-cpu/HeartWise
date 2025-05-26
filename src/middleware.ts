@@ -1,5 +1,5 @@
 import createMiddleware from 'next-intl/middleware';
-import { locales, localePrefix, defaultLocale, pathnames } from '@/i18n/settings';
+import { locales, defaultLocale, pathnames } from '@/i18n/settings';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -21,20 +21,11 @@ const protectedRoutes = [
 // Routes publiques
 const publicRoutes = ['/login', '/signup'];
 
-/**
- * @fileOverview Middleware pour la gestion de l'internationalisation et de l'authentification.
- * @module Middleware
- * @description Ce middleware gère :
- * 1. La détection et le préfixage des locales dans les routes
- * 2. La protection des routes authentifiées
- * 3. La redirection des utilisateurs non authentifiés vers la page de connexion
- */
-
 // Créer le middleware d'internationalisation
 const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
-  localePrefix: 'always', // Forcer l'utilisation du préfixe de locale
+  localePrefix: 'always',
   pathnames,
 });
 

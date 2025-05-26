@@ -1,34 +1,28 @@
 /**
  * @fileOverview Configuration settings for internationalization (i18n) using next-intl.
  * @module i18nSettings
- * @description This file primarily defines constants used by both the middleware and the main i18n config (`i18n.ts`).
- *              It should not contain any client-side specific code or directives.
+ * @description This file defines constants used by the middleware and the main i18n config.
+ *              It also provides the getRequestConfig function for next-intl.
+ *              This file is intended to be the single source of truth for i18n setup when used with next-intl/plugin.
  */
 
-// Define the supported locales
+import { getRequestConfig } from 'next-intl/server';
+import type { AbstractIntlMessages } from 'next-intl';
+
+// Static imports for message files
+// The path is relative to this file (src/i18n/settings.ts).
+import enMessages from '../messages/en.json';
+import frMessages from '../messages/fr.json';
+
 export const locales = ['en', 'fr'] as const;
-export type Locale = typeof locales[number];
+export type Locale = (typeof locales)[number];
 
-// Define the default locale
-export const defaultLocale: Locale = 'en';
+export const defaultLocale = 'en' as const;
 
-// Define the prefixing strategy for locales in the URL
-export const localePrefix = 'as-needed'; // Options: 'always', 'never', 'as-needed'
+export const localePrefix = 'as-needed';
 
-// Define pathnames for internationalized routing (optional)
-// Make sure these paths align with your actual application routes
-// If you have localized pathnames, you would define them here, e.g.:
-// export const pathnames = {
-//   '/': '/',
-//   '/about': {
-//     en: '/about-us',
-//     fr: '/a-propos'
-//   }
-// } satisfies Pathnames<typeof locales>;
-// For now, keeping simple pathnames.
 export const pathnames = {
   '/': '/',
-  '/profile': '/profile',
   '/game': '/game',
   '/speed-dating': '/speed-dating',
   '/geolocation-meeting': '/geolocation-meeting',
@@ -36,21 +30,67 @@ export const pathnames = {
   '/ai-conversation-coach': '/ai-conversation-coach',
   '/blind-exchange-mode': '/blind-exchange-mode',
   '/chat': '/chat',
-  '/risky-words-dictionary': '/risky-words-dictionary',
-  '/rewards': '/rewards',
-  '/dashboard': '/dashboard',
   '/login': '/login',
   '/signup': '/signup',
-} as const; // Using simple string paths for now, not localized path objects.
+  '/profile': '/profile',
+  '/dashboard': '/dashboard',
+} as const;
 
 /**
  * Checks if the provided locale string is a valid and supported locale.
  * @param {string} locale - The locale string to validate.
  * @returns {locale is Locale} True if the locale is valid, false otherwise.
  */
-export function isValidLocale(locale: string): locale is Locale {
-  return locales.includes(locale as Locale);
+export function isValidLocale(locale: string | undefined): locale is Locale {
+  return typeof locale === 'string' && locales.includes(locale as Locale);
 }
 
-// The `getRequestConfig` function for next-intl should be in `i18n.ts` at the root, not here.
-// This file is for settings shared between middleware and the main config.
+// Main configuration logic for next-intl
+export default getRequestConfig(async ({ locale: rawLocale }) => {
+  let determinedLocale: Locale;
+
+  if (isValidLocale(rawLocale)) {
+    determinedLocale = rawLocale;
+  } else {
+    console.warn(`[i18n-config] Invalid or undefined rawLocale "${rawLocale ?? 'undefined'}" received by getRequestConfig. Using default locale "${defaultLocale}". This might indicate an issue with middleware or URL structure.`);
+    determinedLocale = defaultLocale;
+  }
+
+  let messages: AbstractIntlMessages;
+  try {
+    switch (determinedLocale) {
+      case 'en':
+        messages = enMessages;
+        break;
+      case 'fr':
+        messages = frMessages;
+        break;
+      default:
+        console.error(`[i18n-config] CRITICAL: Reached default case in message loading for locale: "${determinedLocale}". This should not happen. Loading English messages as a last resort.`);
+        messages = enMessages;
+        determinedLocale = 'en';
+        break;
+    }
+
+    // Validate messages structure
+    if (!messages || typeof messages !== 'object' || Object.keys(messages).length === 0) {
+      throw new Error(`Messages for locale "${determinedLocale}" are empty or invalid`);
+    }
+
+    // Ensure Auth section exists
+    if (!messages.Auth) {
+      throw new Error(`Auth section missing in messages for locale "${determinedLocale}"`);
+    }
+
+    return {
+      locale: determinedLocale,
+      messages,
+    };
+  } catch (error) {
+    console.error(`[i18n-config] Error loading messages for locale "${determinedLocale}":`, error);
+    return {
+      locale: determinedLocale,
+      messages: {},
+    };
+  }
+});

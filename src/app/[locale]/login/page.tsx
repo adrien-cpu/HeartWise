@@ -1,194 +1,64 @@
 "use client";
 
-import type { SubmitHandler } from 'react-hook-form';
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, LogIn } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from '@/hooks/useAuth';
 
-/**
- * @fileOverview Login page component.
- * @module LoginPage
- * @description Allows users to log in using their email and password.
- */
-
-const loginSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters long' }),
-});
-
-type LoginFormInputs = z.infer<typeof loginSchema>;
-
-/**
- * LoginPage component.
- * @returns {JSX.Element} The rendered login page.
- */
-export default function LoginPage(): JSX.Element {
-  const t = useTranslations('Auth'); // Assuming an 'Auth' namespace in your translation files
-  const { toast } = useToast();
+export default function LoginPage() {
+  const { login, user } = useAuth();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormInputs>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const onSubmit: SubmitHandler<LoginFormInputs> = async (data) => {
-    setIsLoading(true);
-    setError(null);
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.email)) {
-      setError(t('invalidEmailFormat'));
-      toast({
-        variant: 'destructive',
-        title: t('loginErrorTitle'),
-        description: t('invalidEmailFormat'),
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    // Validate password length
-    if (data.password.length < 6) {
-      setError(t('passwordTooShort'));
-      toast({
-        variant: 'destructive',
-        title: t('loginErrorTitle'),
-        description: t('passwordTooShort'),
-      });
-      setIsLoading(false);
-      return;
-    }
-
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-
-      if (!userCredential.user) {
-        throw new Error(t('loginErrorDefault'));
-      }
-
-      // Verify email if required
-      if (!userCredential.user.emailVerified) {
-        await sendEmailVerification(userCredential.user);
-        toast({
-          title: t('verificationEmailSent'),
-          description: t('pleaseVerifyEmail'),
-        });
-      }
-
-      toast({
-        title: t('loginSuccessTitle'),
-        description: t('loginSuccessDesc'),
-      });
+      await login(email, password);
       router.push('/');
     } catch (err: any) {
-      console.error('Login error:', err);
-      let errorMessage = t('loginErrorDefault');
-
-      switch (err.code) {
-        case 'auth/user-not-found':
-        case 'auth/wrong-password':
-        case 'auth/invalid-credential':
-          errorMessage = t('loginErrorInvalidCredentials');
-          break;
-        case 'auth/too-many-requests':
-          errorMessage = t('loginErrorTooManyAttempts');
-          break;
-        case 'auth/network-request-failed':
-          errorMessage = t('loginErrorNetwork');
-          break;
-        case 'auth/user-disabled':
-          errorMessage = t('loginErrorAccountDisabled');
-          break;
-      }
-
-      setError(errorMessage);
-      toast({
-        variant: 'destructive',
-        title: t('loginErrorTitle'),
-        description: errorMessage,
-      });
+      setError(err.message || 'Erreur de connexion');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
+  if (user) {
+    router.push('/');
+    return null;
+  }
+
   return (
-    <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
-            <LogIn className="h-6 w-6 text-primary" />
-            {t('loginTitle')}
-          </CardTitle>
-          <CardDescription>{t('loginDescription')}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertTitle>{t('loginErrorTitle')}</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-1">
-              <Label htmlFor="email">{t('emailLabel')}</Label>
-              <Input
-                id="email"
-                type="email"
-                {...register('email')}
-                placeholder="name@example.com"
-                disabled={isLoading}
-                aria-invalid={errors.email ? "true" : "false"}
-              />
-              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="password">{t('passwordLabel')}</Label>
-              <Input
-                id="password"
-                type="password"
-                {...register('password')}
-                placeholder="••••••••"
-                disabled={isLoading}
-                aria-invalid={errors.password ? "true" : "false"}
-              />
-              {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('loginButton')}
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter className="flex flex-col items-center space-y-2">
-          <p className="text-sm text-muted-foreground">
-            {t('noAccountPrompt')}{' '}
-            <Link href="/signup" className="font-medium text-primary hover:underline">
-              {t('signupLink')}
-            </Link>
-          </p>
-        </CardFooter>
-      </Card>
+    <div className="max-w-md mx-auto mt-16 p-8 bg-card rounded-xl shadow-lg">
+      <h1 className="text-2xl font-bold mb-6">Connexion</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
+        />
+        <input
+          type="password"
+          placeholder="Mot de passe"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          className="w-full p-2 border rounded"
+          required
+        />
+        {error && <div className="text-red-500 text-sm">{error}</div>}
+        <button type="submit" className="w-full bg-primary text-white py-2 rounded hover:bg-primary/90" disabled={loading}>
+          {loading ? 'Connexion...' : 'Se connecter'}
+        </button>
+      </form>
+      <div className="mt-4 text-center">
+        <a href="/signup" className="text-primary underline">Créer un compte</a>
+      </div>
     </div>
   );
 }

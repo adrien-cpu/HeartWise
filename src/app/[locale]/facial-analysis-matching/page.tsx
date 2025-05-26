@@ -1,261 +1,282 @@
 
 "use client";
 
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, ChangeEvent, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { getPsychologicalTraits, compareFaces } from '@/services/face-analysis';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2, ScanFace, Users, Percent, AlertCircle } from 'lucide-react';
+import { Loader2, ScanFace, AlertCircle, UserSearch, Upload, Video } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { suggestFacialMatches, FacialMatchSuggestion } from '@/ai/flows/facial-match-suggestions';
+import { useAuth } from '@/contexts/AuthContext'; // For getting currentUserId
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 /**
- * @typedef {object} AnalysisResult
- * @property {number} [extroversion] - Estimated extroversion score.
- * @property {number} [agreeableness] - Estimated agreeableness score.
+ * @fileOverview Implements the AI-Powered Facial Analysis and Matching page.
+ * @module FacialAnalysisMatchingPage
+ * @description Allows users to upload/capture their photo. The AI then suggests potential matches
+ *              based on simulated facial and psychological compatibility with a mock user database.
  */
-interface AnalysisResult {
-  extroversion?: number;
-  agreeableness?: number;
-}
-
-/**
- * @fileOverview Implements the Facial Analysis and Matching page.
- * @module FacialAnalysisMatching
- * @description A component for the Facial Analysis and Matching page, allowing users to upload or provide URLs for two images,
- *              analyzes them (simulated), and displays mock psychological traits and a compatibility score.
- *              **Requires Backend:** Real face analysis API integration.
- */
-export default function FacialAnalysisMatching() {
+export default function FacialAnalysisMatchingPage() {
   const t = useTranslations('FacialAnalysisMatching');
   const { toast } = useToast();
+  const { currentUser } = useAuth();
 
-  const [image1Url, setImage1Url] = useState('');
-  const [image2Url, setImage2Url] = useState('');
-  const [analysis1, setAnalysis1] = useState<AnalysisResult | null>(null);
-  const [analysis2, setAnalysis2] = useState<AnalysisResult | null>(null);
-  const [compatibility, setCompatibility] = useState<number | null>(null);
+  const [userImageFile, setUserImageFile] = useState<File | null>(null);
+  const [userImageDataUri, setUserImageDataUri] = useState<string | null>(null);
+  const [suggestedMatches, setSuggestedMatches] = useState<FacialMatchSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /**
-   * Handles the input change event for image URLs.
-   * @param {ChangeEvent<HTMLInputElement>} event - The change event.
-   * @param {1 | 2} imageNumber - Indicates which image URL is being changed.
-   */
-  const handleImageUrlChange = (event: ChangeEvent<HTMLInputElement>, imageNumber: 1 | 2) => {
-    const value = event.target.value;
-    if (imageNumber === 1) {
-      setImage1Url(value);
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [showCamera, setShowCamera] = useState(false);
+
+
+  useEffect(() => {
+    // Clean up stream when component unmounts or camera is hidden
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        const stream = videoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
+
+  const enableCamera = async () => {
+    setShowCamera(true);
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setHasCameraPermission(true);
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+        setHasCameraPermission(false);
+        setError(t('cameraAccessDeniedError'));
+        toast({ variant: 'destructive', title: t('errorTitle'), description: t('cameraAccessDeniedError') });
+        setShowCamera(false);
+      }
     } else {
-      setImage2Url(value);
+      setHasCameraPermission(false);
+      setError(t('cameraNotSupportedError'));
+      toast({ variant: 'destructive', title: t('errorTitle'), description: t('cameraNotSupportedError') });
+      setShowCamera(false);
     }
-    // Clear results when URL changes
-    setAnalysis1(null);
-    setAnalysis2(null);
-    setCompatibility(null);
-    setError(null);
   };
 
-  /**
-   * Handles the analysis and comparison of the faces.
-   * @async
-   */
-  const handleAnalysis = async () => {
-    setError(null);
-    setAnalysis1(null);
-    setAnalysis2(null);
-    setCompatibility(null);
-    setIsLoading(true);
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const video = videoRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const dataUri = canvas.toDataURL('image/jpeg');
+        setUserImageDataUri(dataUri);
+        // Convert data URI to File object for consistency, though flow uses data URI
+        fetch(dataUri).then(res => res.blob()).then(blob => {
+            setUserImageFile(new File([blob], "capture.jpg", { type: "image/jpeg" }));
+        });
 
-    if (!image1Url || !image2Url) {
-      setError(t('errorMissingImageUrl'));
-      toast({ variant: "destructive", title: t('errorTitle'), description: t('errorMissingImageUrl') });
-      setIsLoading(false);
+        // Stop camera stream
+        if (video.srcObject) {
+            (video.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+        }
+        setShowCamera(false);
+        setHasCameraPermission(null); // Reset camera permission state for next time
+      }
+    }
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+       if (file.size > 5 * 1024 * 1024) { 
+        toast({ variant: 'destructive', title: t('fileTooLargeTitle'), description: t('fileTooLargeDesc') });
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast({ variant: 'destructive', title: t('invalidFileTypeTitle'), description: t('invalidFileTypeDesc') });
+        return;
+      }
+      setUserImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setUserImageDataUri(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      setShowCamera(false); // Hide camera if file is chosen
+    }
+  };
+
+  const handleFindMatches = async () => {
+    if (!userImageDataUri) {
+      setError(t('errorMissingImage'));
+      toast({ variant: "destructive", title: t('errorTitle'), description: t('errorMissingImage') });
+      return;
+    }
+    if (!currentUser?.uid) {
+      setError(t('errorAuthRequired'));
+      toast({ variant: "destructive", title: t('errorTitle'), description: t('errorAuthRequired') });
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+    setSuggestedMatches([]);
+
     try {
-      // --- Simulate API calls ---
-      // In a real app, replace these with actual API calls to a face analysis service.
-      // These promises simulate the asynchronous nature of API requests.
-
-      const [result1, result2] = await Promise.all([
-        getPsychologicalTraits({ imageUrl: image1Url }), // Analyze face 1
-        getPsychologicalTraits({ imageUrl: image2Url })  // Analyze face 2
-      ]);
-
-      setAnalysis1(result1);
-      setAnalysis2(result2);
-
-      // Compare faces only if both analyses were successful
-      if (result1 && result2) {
-        const compatibilityScore = await compareFaces({ imageUrl: image1Url }, { imageUrl: image2Url });
-        setCompatibility(compatibilityScore);
-        toast({ title: t('analysisSuccessTitle'), description: t('analysisSuccessDesc') });
+      const result = await suggestFacialMatches({ 
+        currentUserPhotoDataUri: userImageDataUri,
+        currentUserId: currentUser.uid 
+      });
+      setSuggestedMatches(result.suggestions);
+      if (result.suggestions.length > 0) {
+        toast({ title: t('matchesFoundTitle'), description: t('matchesFoundDesc', { count: result.suggestions.length }) });
       } else {
-        // Handle cases where one or both analyses might fail partially in a real API
-         throw new Error(t('partialFailureError'));
+        toast({ title: t('noMatchesFoundTitle'), description: t('noMatchesFoundDesc') });
       }
-
     } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : t('unknownError');
-      console.error("Analysis failed:", err);
+      const errorMessage = err instanceof Error ? err.message : t('unknownError');
+      console.error("Facial match suggestion failed:", err);
       setError(t('errorAnalysisFailed', { message: errorMessage }));
       toast({ variant: "destructive", title: t('errorTitle'), description: t('errorAnalysisFailed', { message: errorMessage }) });
     } finally {
       setIsLoading(false);
     }
   };
+  
+  const getInitials = (name?: string): string => {
+    if (!name) return '?'; return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <Card className="max-w-4xl mx-auto shadow-lg border">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold flex items-center justify-center gap-2">
-                <ScanFace className="h-8 w-8 text-primary" />
-                {t('title')}
-            </CardTitle>
-            <CardDescription>{t('description')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-             {error && (
-                 <Alert variant="destructive">
-                   <AlertCircle className="h-4 w-4" />
-                   <AlertTitle>{t('errorTitle')}</AlertTitle>
-                   <AlertDescription>{error}</AlertDescription>
-                 </Alert>
+      <Card className="max-w-2xl mx-auto shadow-lg border">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold flex items-center justify-center gap-2">
+            <ScanFace className="h-8 w-8 text-primary" />
+            {t('titleAiPowered')}
+          </CardTitle>
+          <CardDescription>{t('descriptionAiPowered')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>{t('errorTitle')}</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <Card className="border-dashed border-2 p-4 flex flex-col items-center space-y-3 min-h-[250px] justify-center">
+            {userImageDataUri && !showCamera && (
+              <Image
+                src={userImageDataUri}
+                alt={t('yourPhotoAlt')}
+                width={150}
+                height={150}
+                className="rounded-md object-cover aspect-square shadow-md"
+                data-ai-hint="person"
+              />
             )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                {/* Image 1 Input & Display */}
-                <Card className="border-dashed border-2 p-4 flex flex-col items-center space-y-3 min-h-[300px] justify-center">
-                    <Input
-                    type="url" // Use type="url" for better semantics
-                    placeholder={t('image1UrlPlaceholder')}
-                    value={image1Url}
-                    onChange={(e) => handleImageUrlChange(e, 1)}
-                    disabled={isLoading}
-                    aria-label={t('image1UrlPlaceholder')}
-                    className="w-full"
-                    />
-                    {image1Url && (
-                        <Image
-                        src={image1Url}
-                        alt={t('imageAlt', { number: 1 })}
-                        width={200}
-                        height={200}
-                        className="rounded-md object-cover aspect-square"
-                        data-ai-hint="person portrait" // Generic hint
-                        onError={() => setError(t('imageLoadError', { number: 1 }))} // Basic error handling
-                        />
-                    )}
-                    {!image1Url && <div className="text-muted-foreground text-sm">{t('enterUrlPrompt')}</div>}
-                </Card>
-
-                 {/* Image 2 Input & Display */}
-                <Card className="border-dashed border-2 p-4 flex flex-col items-center space-y-3 min-h-[300px] justify-center">
-                    <Input
-                    type="url"
-                    placeholder={t('image2UrlPlaceholder')}
-                    value={image2Url}
-                    onChange={(e) => handleImageUrlChange(e, 2)}
-                    disabled={isLoading}
-                    aria-label={t('image2UrlPlaceholder')}
-                    className="w-full"
-                    />
-                     {image2Url && (
-                        <Image
-                        src={image2Url}
-                        alt={t('imageAlt', { number: 2 })}
-                        width={200}
-                        height={200}
-                        className="rounded-md object-cover aspect-square"
-                         data-ai-hint="person smiling" // Generic hint
-                        onError={() => setError(t('imageLoadError', { number: 2 }))}
-                        />
-                    )}
-                    {!image2Url && <div className="text-muted-foreground text-sm">{t('enterUrlPrompt')}</div>}
-                </Card>
-            </div>
-
-             <div className="text-center mt-6">
-                <Button onClick={handleAnalysis} disabled={isLoading || !image1Url || !image2Url} size="lg">
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Users className="mr-2 h-4 w-4" />}
-                  {isLoading ? t('analyzingButton') : t('analyzeAndCompareButton')}
+            
+            {showCamera && (
+              <div className="w-full flex flex-col items-center">
+                <video ref={videoRef} className="w-full max-w-xs aspect-video rounded-md bg-muted mb-2" autoPlay playsInline muted />
+                {hasCameraPermission === false && (
+                     <Alert variant="destructive" className="w-full max-w-xs">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>{t('cameraAccessDeniedError')}</AlertTitle>
+                     </Alert>
+                )}
+                <Button onClick={capturePhoto} disabled={!hasCameraPermission} className="mt-2">
+                  {t('capturePhotoButton')}
                 </Button>
-             </div>
-
-            {/* Results Section */}
-            {(isLoading || analysis1 || analysis2 || compatibility !== null) && (
-            <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Analysis 1 Card */}
-                <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg">{t('analysisResult1')}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                    {isLoading && !analysis1 ? (
-                    <>
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                    </>
-                    ) : analysis1 ? (
-                    <>
-                        <p className="text-sm">{t('extroversion')}: <span className="font-medium">{(analysis1.extroversion ?? 0 * 100).toFixed(0)}%</span></p>
-                        <p className="text-sm">{t('agreeableness')}: <span className="font-medium">{(analysis1.agreeableness ?? 0 * 100).toFixed(0)}%</span></p>
-                    </>
-                    ) : (
-                         <p className="text-sm text-muted-foreground">{t('noResults')}</p>
-                    )}
-                </CardContent>
-                </Card>
-
-                 {/* Analysis 2 Card */}
-                <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg">{t('analysisResult2')}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                     {isLoading && !analysis2 ? (
-                    <>
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                    </>
-                    ) : analysis2 ? (
-                    <>
-                        <p className="text-sm">{t('extroversion')}: <span className="font-medium">{(analysis2.extroversion ?? 0 * 100).toFixed(0)}%</span></p>
-                        <p className="text-sm">{t('agreeableness')}: <span className="font-medium">{(analysis2.agreeableness ?? 0 * 100).toFixed(0)}%</span></p>
-                    </>
-                     ) : (
-                         <p className="text-sm text-muted-foreground">{t('noResults')}</p>
-                    )}
-                </CardContent>
-                </Card>
-
-                 {/* Compatibility Card */}
-                <Card>
-                <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2"><Percent className="h-5 w-5 text-primary"/>{t('compatibilityScore')}</CardTitle>
-                </CardHeader>
-                <CardContent className="text-center">
-                    {isLoading && compatibility === null ? (
-                         <Skeleton className="h-10 w-1/2 mx-auto" />
-                    ) : compatibility !== null ? (
-                         <p className="text-4xl font-bold">{compatibility.toFixed(0)}<span className="text-xl">%</span></p>
-                    ) : (
-                        <p className="text-sm text-muted-foreground">{t('noResults')}</p>
-                    )}
-                </CardContent>
-                </Card>
-            </div>
+                <canvas ref={canvasRef} className="hidden"></canvas>
+              </div>
             )}
 
-          </CardContent>
+            {!userImageDataUri && !showCamera && (
+              <div className="text-muted-foreground text-sm text-center">{t('uploadOrCapturePrompt')}</div>
+            )}
+
+            <div className="flex gap-2 mt-2">
+                <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isLoading || showCamera}>
+                    <Upload className="mr-2 h-4 w-4" /> {t('uploadPhotoButton')}
+                </Button>
+                <Button variant="outline" onClick={enableCamera} disabled={isLoading || showCamera}>
+                    <Video className="mr-2 h-4 w-4" /> {t('useCameraButton')}
+                </Button>
+            </div>
+            <Input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              disabled={isLoading}
+              aria-label={t('uploadPhotoButton')}
+            />
+             {userImageDataUri && (
+                 <Button variant="link" size="sm" onClick={() => { setUserImageDataUri(null); setUserImageFile(null); setShowCamera(false); if(videoRef.current?.srcObject){(videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());} }} className="text-xs">
+                     {t('clearImageButton')}
+                 </Button>
+             )}
+          </Card>
+
+          <div className="text-center mt-6">
+            <Button onClick={handleFindMatches} disabled={isLoading || !userImageDataUri || !currentUser?.uid} size="lg">
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserSearch className="mr-2 h-4 w-4" />}
+              {isLoading ? t('findingMatchesButton') : t('findMatchesButton')}
+            </Button>
+          </div>
+        </CardContent>
       </Card>
+
+      {/* Suggested Matches Section */}
+      {(!isLoading && suggestedMatches.length > 0) && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold text-center mb-6">{t('suggestedMatchesTitle')}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {suggestedMatches.map((match) => (
+              <Card key={match.userId} className="shadow-md hover:shadow-lg transition-shadow flex flex-col">
+                <CardHeader className="items-center">
+                  <Avatar className="h-24 w-24 border-2" data-ai-hint={match.dataAiHint || 'person'}>
+                    <AvatarImage src={match.profilePicture} alt={match.name || 'Match'} />
+                    <AvatarFallback>{getInitials(match.name)}</AvatarFallback>
+                  </Avatar>
+                </CardHeader>
+                <CardContent className="text-center flex-grow">
+                  <CardTitle className="text-lg mb-1">{match.name || t('unknownUser')}</CardTitle>
+                  <Badge variant="secondary" className="mb-2">{t('overallCompatibility', { score: match.overallCompatibilityScore })}</Badge>
+                  <CardDescription className="text-xs text-muted-foreground italic leading-relaxed">
+                    &quot;{match.reasoning}&quot;
+                  </CardDescription>
+                </CardContent>
+                <CardFooter className="justify-center">
+                    <Button variant="outline" size="sm">{t('viewProfileButton')}</Button> 
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+       {(!isLoading && suggestedMatches.length === 0 && userImageDataUri && !error) && (
+           <p className="mt-6 text-center text-muted-foreground">{t('noMatchesFoundAfterSearch')}</p>
+       )}
     </div>
   );
 }
