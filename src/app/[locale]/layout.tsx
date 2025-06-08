@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Locale-specific layout for the application.
  * @module LocaleLayout
@@ -34,11 +33,14 @@ export function generateStaticParams() {
  */
 export default async function LocaleLayout({
   children,
-  params: { locale: rawUrlLocale },
+  params,
 }: {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
+  // Await params before accessing its properties
+  const { locale: rawUrlLocale } = await params;
+  
   let effectiveLocale: Locale;
 
   if (isValidLocale(rawUrlLocale)) {
