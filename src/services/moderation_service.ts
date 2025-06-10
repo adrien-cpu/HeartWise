@@ -164,7 +164,7 @@ export async function moderateImage(imageUrlOrDataUri: string): Promise<Moderati
       };
     }
   }
-   if (lowerImageIdentifier.includes('violence_keyword_simulated')) {
+  if (lowerImageIdentifier.includes('violence_keyword_simulated')) {
     return {
       isSafe: false,
       issues: [{

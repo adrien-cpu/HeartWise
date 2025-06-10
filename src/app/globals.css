@@ -116,6 +116,24 @@
       transform: translateY(0);
     }
   }
+
+  @keyframes highlight {
+    0% {
+      background-color: transparent;
+    }
+
+    50% {
+      background-color: hsl(var(--primary) / 0.2);
+    }
+
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  .highlight-message {
+    animation: highlight 2s ease-in-out;
+  }
 }
 
 @layer components {

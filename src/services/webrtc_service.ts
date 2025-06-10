@@ -1,4 +1,3 @@
-
 // "use server"; // WebRTC logic is primarily client-side, but signaling might involve server.
 
 /**
@@ -11,7 +10,7 @@
  */
 
 import { firestore, criticalConfigError } from '@/lib/firebase';
-import { doc, setDoc, onSnapshot, serverTimestamp, Unsubscribe, deleteDoc, updateDoc, arrayUnion, getDoc,FieldValue } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot, serverTimestamp, Unsubscribe, deleteDoc, updateDoc, arrayUnion, getDoc, FieldValue } from 'firebase/firestore';
 
 export interface RTCConnection {
   peerConnection: RTCPeerConnection | null;
@@ -98,8 +97,8 @@ export function initializePeerConnection(
     console.log("WebRTCService: Remote track received:", event.track, "Streams:", event.streams);
     onRemoteTrackReceived(event);
     if (event.streams && event.streams[0] && rtcConnection.onRemoteStreamReady) {
-        rtcConnection.remoteStream = event.streams[0];
-        rtcConnection.onRemoteStreamReady(event.streams[0]);
+      rtcConnection.remoteStream = event.streams[0];
+      rtcConnection.onRemoteStreamReady(event.streams[0]);
     }
   };
 
@@ -112,17 +111,17 @@ export function initializePeerConnection(
     console.log(`WebRTCService: ICE connection state changed to: ${peerConnection.iceConnectionState}`);
     onConnectionStateChange(peerConnection.connectionState);
     if (['failed', 'disconnected', 'closed'].includes(peerConnection.iceConnectionState)) {
-        // Handle connection failure, possibly by calling onCallEnded
-        if(rtcConnection.onCallEnded) rtcConnection.onCallEnded();
+      // Handle connection failure, possibly by calling onCallEnded
+      if (rtcConnection.onCallEnded) rtcConnection.onCallEnded();
     }
   };
-  
+
   peerConnection.onconnectionstatechange = () => {
     console.log(`WebRTCService: Connection state changed to: ${peerConnection.connectionState}`);
     onConnectionStateChange(peerConnection.connectionState);
-     if (['failed', 'disconnected', 'closed'].includes(peerConnection.connectionState)) {
-        // Handle connection failure
-        if(rtcConnection.onCallEnded) rtcConnection.onCallEnded();
+    if (['failed', 'disconnected', 'closed'].includes(peerConnection.connectionState)) {
+      // Handle connection failure
+      if (rtcConnection.onCallEnded) rtcConnection.onCallEnded();
     }
   };
 
@@ -144,9 +143,9 @@ export async function getLocalStream(constraints = { video: true, audio: true })
   } catch (error: any) {
     console.error("WebRTCService: Error accessing media devices:", error);
     if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-        throw new Error("Camera/Microphone access denied. Please enable permissions in your browser settings.");
+      throw new Error("Camera/Microphone access denied. Please enable permissions in your browser settings.");
     } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-        throw new Error("No camera/microphone found on this device.");
+      throw new Error("No camera/microphone found on this device.");
     }
     throw new Error("Failed to get local media stream. Check permissions and device availability.");
   }
@@ -274,7 +273,7 @@ export function listenForSignalingMessagesFromFirestore(
 ): Unsubscribe {
   if (criticalConfigError) {
     console.error("Firebase is not configured. Cannot listen for signaling messages.");
-    return () => {};
+    return () => { };
   }
   console.log(`WebRTCService: Listening for signaling messages on Firestore channel ${channelId}`);
   const signalingDocRef = doc(firestore, signalingCollectionName, channelId);
@@ -303,15 +302,15 @@ export function listenForSignalingMessagesFromFirestore(
           if (data.candidates[senderId] && Array.isArray(data.candidates[senderId])) {
             const candidates = data.candidates[senderId] as RTCIceCandidateInit[];
             for (const candidate of candidates) {
-                 // Create a unique ID for each candidate to prevent re-processing, or clear after processing.
-                 // For simplicity, we assume onMessageReceived can handle potentially duplicated candidates if not cleared.
-                 console.log(`WebRTCService: Processing candidate from ${senderId}`);
-                 onMessageReceived({
-                     type: 'candidate',
-                     candidate: candidate,
-                     senderId: senderId,
-                     timestamp: serverTimestamp() // Or get from candidate message if stored
-                 });
+              // Create a unique ID for each candidate to prevent re-processing, or clear after processing.
+              // For simplicity, we assume onMessageReceived can handle potentially duplicated candidates if not cleared.
+              console.log(`WebRTCService: Processing candidate from ${senderId}`);
+              onMessageReceived({
+                type: 'candidate',
+                candidate: candidate,
+                senderId: senderId,
+                timestamp: serverTimestamp() // Or get from candidate message if stored
+              });
             }
             // Conceptually, clear processed candidates
             // await updateDoc(signalingDocRef, { [`candidates.${senderId}`]: [] });
@@ -358,15 +357,15 @@ export async function closeWebRTCConnection(rtcConnection: RTCConnection | null)
   // Send hangup signal if we are the one initiating the close and channel exists
   if (rtcConnection.signalingChannelId && rtcConnection.callStatus !== 'ended' && rtcConnection.targetUserId) {
     try {
-        const hangupMessage: HangupMessage = {
-            type: 'hangup',
-            senderId: '', // Will be filled by the caller with currentUserId
-            timestamp: serverTimestamp()
-        };
-        // The actual senderId will be provided by the calling component (e.g., chat page)
-        // This sendSignalingMessageViaFirestore is now more generic.
-        // await sendSignalingMessageViaFirestore(rtcConnection.signalingChannelId, "CURRENT_USER_ID_HERE", hangupMessage);
-        console.log("WebRTCService: Sent hangup signal for channel:", rtcConnection.signalingChannelId);
+      const hangupMessage: HangupMessage = {
+        type: 'hangup',
+        senderId: '', // Will be filled by the caller with currentUserId
+        timestamp: serverTimestamp()
+      };
+      // The actual senderId will be provided by the calling component (e.g., chat page)
+      // This sendSignalingMessageViaFirestore is now more generic.
+      // await sendSignalingMessageViaFirestore(rtcConnection.signalingChannelId, "CURRENT_USER_ID_HERE", hangupMessage);
+      console.log("WebRTCService: Sent hangup signal for channel:", rtcConnection.signalingChannelId);
 
       // Optionally delete the signaling document after a short delay or by a cleanup function
       // For now, we leave it for simplicity, or the other party might delete it upon receiving hangup.
@@ -376,12 +375,12 @@ export async function closeWebRTCConnection(rtcConnection: RTCConnection | null)
       // }, 5000); // Delete after 5s
 
     } catch (error) {
-        console.error("WebRTCService: Error sending hangup or deleting signaling document:", error);
+      console.error("WebRTCService: Error sending hangup or deleting signaling document:", error);
     }
   }
-  
+
   rtcConnection.callStatus = 'ended';
-  if(rtcConnection.onCallEnded) rtcConnection.onCallEnded();
+  if (rtcConnection.onCallEnded) rtcConnection.onCallEnded();
   rtcConnection.signalingChannelId = null;
   rtcConnection.targetUserId = undefined;
 }
@@ -397,7 +396,7 @@ export async function initializeSignalingChannel(channelId: string): Promise<voi
   try {
     const docSnap = await getDoc(signalingDocRef);
     if (!docSnap.exists()) {
-      await setDoc(signalingDocRef, { 
+      await setDoc(signalingDocRef, {
         createdAt: serverTimestamp(),
         status: 'initiating', // Initial status
         candidates: {}, // To store candidates from each user

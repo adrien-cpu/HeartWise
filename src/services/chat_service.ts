@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Provides services for managing chat conversations and messages using Firestore.
@@ -7,7 +6,7 @@
  */
 
 import {
-  firestore,
+  db,
   criticalConfigError
 } from '@/lib/firebase';
 import {
@@ -22,10 +21,10 @@ import {
   doc,
   setDoc,
   getDocs,
-  getDoc, 
+  getDoc,
   limit,
   Unsubscribe,
-  updateDoc, 
+  updateDoc,
   increment,
   FieldValue // Import FieldValue
 } from 'firebase/firestore';
@@ -37,9 +36,22 @@ export interface Message {
   senderId: string;
   senderName: string;
   text: string;
-  timestamp: Timestamp | FieldValue; // Allow FieldValue for serverTimestamp
+  timestamp: Timestamp | FieldValue;
   intentionTag?: string;
   status?: 'sent' | 'delivered' | 'read' | 'error' | 'moderated';
+  attachments?: Array<{
+    type: 'image' | 'file' | 'audio' | 'video';
+    url: string;
+    name: string;
+    size?: number;
+  }>;
+  replyTo?: {
+    id: string;
+    text: string;
+    senderName: string;
+  };
+  isEphemeral?: boolean;
+  expiresAt?: Date;
 }
 
 export interface ConversationParticipant extends Pick<UserProfile, 'id' | 'name' | 'profilePicture' | 'dataAiHint' | 'interests'> {
@@ -59,7 +71,7 @@ export interface Conversation {
   updatedAt: Timestamp | FieldValue; // Allow FieldValue
 }
 
-const conversationsCollection = collection(firestore, 'conversations');
+const conversationsCollection = collection(db, 'conversations');
 
 const getConversationDocId = (userId1: string, userId2: string): string => {
   return [userId1, userId2].sort().join('_');
@@ -137,7 +149,7 @@ export async function sendMessage(
   }
 
   try {
-    const messagesCollectionRef = collection(firestore, `conversations/${conversationId}/messages`);
+    const messagesCollectionRef = collection(db, `conversations/${conversationId}/messages`);
     const nowServer = serverTimestamp();
 
     const docRef = await addDoc(messagesCollectionRef, {
@@ -164,9 +176,9 @@ export async function sendMessage(
             updatePayload.unreadCounts[participantId] = increment(1);
           }
         } else {
-           if (updatePayload.unreadCounts) {
-             updatePayload.unreadCounts[participantId] = 0;
-           }
+          if (updatePayload.unreadCounts) {
+            updatePayload.unreadCounts[participantId] = 0;
+          }
         }
       });
       await updateDoc(conversationDocRef, updatePayload);
@@ -207,7 +219,7 @@ export function getConversationsListener(
 ): Unsubscribe {
   if (criticalConfigError) {
     console.error("Firebase is not configured. Cannot listen for conversations.");
-    return () => {};
+    return () => { };
   }
 
   const q = query(
@@ -244,7 +256,7 @@ export function getMessagesListener(
 ): Unsubscribe {
   if (criticalConfigError) {
     console.error("Firebase is not configured. Cannot listen for messages.");
-    return () => {};
+    return () => { };
   }
 
   markMessagesAsRead(conversationId, currentUserId).catch(err => {
