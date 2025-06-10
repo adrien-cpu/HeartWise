@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Client-side internationalization setup.
  * @module ClientSideI18n

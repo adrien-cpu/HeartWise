@@ -1,4 +1,3 @@
-
 import type {NextConfig} from 'next';
 import nextIntl from 'next-intl/plugin'; // Import the plugin
 
