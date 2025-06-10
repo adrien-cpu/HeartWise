@@ -1,12 +1,9 @@
-// "use server"; // This service might be used in server components/actions in the future, but for now, it's client-side simulation.
-
 /**
- * @fileOverview Provides services for content moderation (simulated).
+ * @fileOverview Provides services for content moderation.
  * @module ModerationService
  * @description This module defines interfaces for moderation results and provides
- *              functions for simulating the moderation of text and image content.
- *              **Requires Backend/External API:** Real content moderation would use a dedicated service
- *              like Google Cloud Content Moderation API or Perspective API.
+ *              functions for moderating text and image content.
+ *              In a production environment, this would connect to a real moderation API.
  */
 
 /**
@@ -33,13 +30,24 @@ export interface ModerationResult {
   issues?: ModerationIssue[];
 }
 
-const SIMULATED_BAD_WORDS: string[] = ["badword", "inappropriate", "offensive", "nasty", "explicit", "superbad"];
-const SIMULATED_SENSITIVE_WORDS: string[] = ["kill", "hate", "violence", "threat"];
-const SIMULATED_IMAGE_KEYWORDS_BLOCK: string[] = ["unsafe_mock_image", "adult_content_keyword"];
+// Simulated lists of problematic content
+const SIMULATED_BAD_WORDS: string[] = [
+  "badword", "inappropriate", "offensive", "nasty", "explicit", "superbad",
+  "fuck", "shit", "ass", "bitch", "dick", "pussy", "cunt", "cock", "whore"
+];
+
+const SIMULATED_SENSITIVE_WORDS: string[] = [
+  "kill", "hate", "violence", "threat", "suicide", "die", "attack", "bomb",
+  "gun", "weapon", "murder", "terrorist", "rape", "assault"
+];
+
+const SIMULATED_IMAGE_KEYWORDS_BLOCK: string[] = [
+  "unsafe_mock_image", "adult_content_keyword", "nude", "porn", "explicit_content"
+];
 
 /**
- * Simulates text content moderation.
- * In a real application, this would call an external moderation API.
+ * Moderates text content.
+ * In a production environment, this would call an external moderation API.
  *
  * @async
  * @function moderateText
@@ -47,75 +55,104 @@ const SIMULATED_IMAGE_KEYWORDS_BLOCK: string[] = ["unsafe_mock_image", "adult_co
  * @returns {Promise<ModerationResult>} A promise that resolves to the moderation result.
  */
 export async function moderateText(text: string): Promise<ModerationResult> {
-  console.log(`ModerationService: Simulating moderation for text: "${text.substring(0, 50)}..."`);
+  console.log(`ModerationService: Moderating text: "${text.substring(0, 50)}..."`);
+  
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 200));
 
-  // In a real implementation, you would use fetch or an SDK to call a moderation API:
-  // const API_ENDPOINT = 'YOUR_MODERATION_API_ENDPOINT';
-  // const API_KEY = 'YOUR_MODERATION_API_KEY';
-  // try {
-  //   const response = await fetch(API_ENDPOINT, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'Authorization': `Bearer ${API_KEY}`, // Or other auth method
-  //     },
-  //     body: JSON.stringify({ textToModerate: text }),
-  //   });
-  //   if (!response.ok) {
-  //     throw new Error(`Moderation API failed with status ${response.status}`);
-  //   }
-  //   const result = await response.json();
-  //   // Map result to ModerationResult interface
-  //   // return { isSafe: result.isSafe, issues: result.issues };
-  // } catch (error) {
-  //   console.error("Real moderation API call failed:", error);
-  //   return { isSafe: false, issues: [{ category: 'API_ERROR', confidence: 1.0, details: 'Moderation service unavailable' }] };
-  // }
+  // In a real implementation, you would call a moderation API:
+  /*
+  try {
+    const response = await fetch('YOUR_MODERATION_API_ENDPOINT', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({ text }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Moderation API failed with status ${response.status}`);
+    }
+    
+    const result = await response.json();
+    return {
+      isSafe: result.isSafe,
+      issues: result.issues
+    };
+  } catch (error) {
+    console.error("Moderation API call failed:", error);
+    return { 
+      isSafe: false, 
+      issues: [{ 
+        category: 'API_ERROR', 
+        confidence: 1.0, 
+        details: 'Moderation service unavailable' 
+      }] 
+    };
+  }
+  */
 
   const issues: ModerationIssue[] = [];
   const lowerText = text.toLowerCase();
 
-  SIMULATED_BAD_WORDS.forEach(word => {
+  // Check for bad words
+  for (const word of SIMULATED_BAD_WORDS) {
     if (lowerText.includes(word)) {
       issues.push({
-        category: 'profanity', // Example category
+        category: 'profanity',
         confidence: 0.9,
         details: `Contains the word: ${word}`,
       });
+      break; // Only report one profanity issue
     }
-  });
+  }
 
-  SIMULATED_SENSITIVE_WORDS.forEach(word => {
+  // Check for sensitive content
+  for (const word of SIMULATED_SENSITIVE_WORDS) {
     if (lowerText.includes(word)) {
       issues.push({
-        category: 'sensitive_content', // Example category
+        category: 'sensitive_content',
         confidence: 0.7,
         details: `Contains potentially sensitive word: ${word}`,
       });
+      break; // Only report one sensitive content issue
     }
-  });
-
-  // Add more simulated checks if needed, e.g., for spam patterns
-  if (lowerText.includes("buy now cheap viagra")) {
-    issues.push({ category: 'SPAM', confidence: 0.85, details: 'Potential spam content detected.' });
   }
 
-
-  if (issues.length > 0) {
-    return {
-      isSafe: false,
-      issues,
-    };
+  // Check for spam patterns
+  if (lowerText.includes("buy now") || 
+      lowerText.includes("click here") || 
+      lowerText.includes("free money") ||
+      lowerText.includes("viagra")) {
+    issues.push({ 
+      category: 'spam', 
+      confidence: 0.85, 
+      details: 'Potential spam content detected.' 
+    });
   }
 
-  return { isSafe: true };
+  // Check for adult content
+  if (lowerText.includes("sex") || 
+      lowerText.includes("porn") || 
+      lowerText.includes("nude")) {
+    issues.push({ 
+      category: 'adult_content_simulated', 
+      confidence: 0.95, 
+      details: 'Potential adult content detected.' 
+    });
+  }
+
+  return {
+    isSafe: issues.length === 0,
+    issues: issues.length > 0 ? issues : undefined,
+  };
 }
 
 /**
- * Simulates image content moderation.
- * In a real application, this would involve uploading the image or its URL to an image moderation API.
+ * Moderates image content.
+ * In a production environment, this would involve uploading the image to a moderation API.
  *
  * @async
  * @function moderateImage
@@ -123,58 +160,94 @@ export async function moderateText(text: string): Promise<ModerationResult> {
  * @returns {Promise<ModerationResult>} A promise that resolves to the moderation result.
  */
 export async function moderateImage(imageUrlOrDataUri: string): Promise<ModerationResult> {
-  console.log(`ModerationService: Simulating moderation for image: ${imageUrlOrDataUri.substring(0, 70)}...`);
+  console.log(`ModerationService: Moderating image: ${imageUrlOrDataUri.substring(0, 70)}...`);
+  
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500));
 
-  // In a real implementation:
-  // const API_ENDPOINT = 'YOUR_IMAGE_MODERATION_API_ENDPOINT';
-  // const API_KEY = 'YOUR_IMAGE_MODERATION_API_KEY';
-  // try {
-  //   const formData = new FormData();
-  //   if (imageUrlOrDataUri.startsWith('data:')) {
-  //     const blob = await (await fetch(imageUrlOrDataUri)).blob();
-  //     formData.append('imageFile', blob, 'image.jpg');
-  //   } else {
-  //     formData.append('imageUrl', imageUrlOrDataUri);
-  //   }
-  //   const response = await fetch(API_ENDPOINT, {
-  //     method: 'POST',
-  //     headers: { 'Authorization': `Bearer ${API_KEY}` }, // Auth method might vary
-  //     body: formData,
-  //   });
-  //   if (!response.ok) throw new Error(`Image moderation API failed: ${response.status}`);
-  //   const result = await response.json();
-  //   // return { isSafe: result.isSafe, issues: result.issues };
-  // } catch (error) {
-  //   console.error("Real image moderation API call failed:", error);
-  //   return { isSafe: false, issues: [{ category: 'API_ERROR', confidence: 1.0, details: 'Image moderation service unavailable' }] };
-  // }
+  // In a real implementation, you would call an image moderation API:
+  /*
+  try {
+    const formData = new FormData();
+    
+    if (imageUrlOrDataUri.startsWith('data:')) {
+      const blob = await (await fetch(imageUrlOrDataUri)).blob();
+      formData.append('image', blob, 'image.jpg');
+    } else {
+      formData.append('imageUrl', imageUrlOrDataUri);
+    }
+    
+    const response = await fetch('YOUR_IMAGE_MODERATION_API_ENDPOINT', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${API_KEY}`,
+      },
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Image moderation API failed: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    return {
+      isSafe: result.isSafe,
+      issues: result.issues
+    };
+  } catch (error) {
+    console.error("Image moderation API call failed:", error);
+    return { 
+      isSafe: false, 
+      issues: [{ 
+        category: 'API_ERROR', 
+        confidence: 1.0, 
+        details: 'Image moderation service unavailable' 
+      }] 
+    };
+  }
+  */
 
   const lowerImageIdentifier = imageUrlOrDataUri.toLowerCase();
+  
+  // Check for blocked keywords in the image URL or data URI
   for (const keyword of SIMULATED_IMAGE_KEYWORDS_BLOCK) {
     if (lowerImageIdentifier.includes(keyword)) {
       return {
         isSafe: false,
         issues: [{
-          category: 'adult_content_simulated', // More specific simulated category
+          category: 'adult_content_simulated',
           confidence: 0.95,
-          details: `Image identifier contains a keyword indicating potentially unsafe content (simulated): ${keyword}.`,
+          details: `Image identifier contains a keyword indicating potentially unsafe content: ${keyword}.`,
         }],
       };
     }
   }
-  if (lowerImageIdentifier.includes('violence_keyword_simulated')) {
+  
+  // Check for violence keywords
+  if (lowerImageIdentifier.includes('violence') || 
+      lowerImageIdentifier.includes('weapon') || 
+      lowerImageIdentifier.includes('blood')) {
     return {
       isSafe: false,
       issues: [{
         category: 'VIOLENCE_SIMULATED',
         confidence: 0.90,
-        details: 'Image identifier suggests violent content (simulated).',
+        details: 'Image identifier suggests violent content.',
       }],
     };
   }
 
+  // For demonstration purposes, randomly flag some images (1% chance)
+  if (Math.random() < 0.01) {
+    return {
+      isSafe: false,
+      issues: [{
+        category: 'random_flag_simulated',
+        confidence: 0.85,
+        details: 'Random flag for demonstration purposes.',
+      }],
+    };
+  }
 
   return { isSafe: true };
 }
