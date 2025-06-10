@@ -10,7 +10,7 @@
 
 import type { ReactNode } from 'react';
 import type { AbstractIntlMessages } from 'next-intl';
-import { getMessages, setRequestLocale } from 'next-intl/server';
+import { getMessages } from 'next-intl/server';
 import { locales, defaultLocale, isValidLocale, type Locale } from '@/i18n/settings';
 import { ClientSideI18n } from '@/components/ClientSideI18n';
 // Global CSS and fonts are handled in the root src/app/layout.tsx
@@ -52,31 +52,13 @@ export default async function LocaleLayout({
     effectiveLocale = defaultLocale;
   }
 
-  // Ensures that server functions like `getLocale` (from next-intl/server) know about the current locale.
-  // This is critical for Server Components that use `useTranslations` or `getTranslations`.
-  setRequestLocale(effectiveLocale);
-
-  let messagesForClient: AbstractIntlMessages;
-  try {
-    // `getMessages` will automatically use the locale from `setRequestLocale`.
-    // It should resolve to the messages loaded by `getRequestConfig` in `i18n/settings.ts`.
-    const loadedMessages = await getMessages(); 
-    
-    if (loadedMessages && typeof loadedMessages === 'object' && Object.keys(loadedMessages).length > 0) {
-      messagesForClient = loadedMessages;
-    } else {
-      console.error(`[LocaleLayout] Messages object from getMessages for locale "${effectiveLocale}" is missing, empty, or not an object. Check i18n/settings.ts and message files. Using empty messages for client.`);
-      messagesForClient = {}; 
-    }
-  } catch (error: any) {
-    console.error(`[LocaleLayout] Critical failure in getMessages for locale "${effectiveLocale}". Error: ${error.message}. This usually means the i18n setup in settings.ts or middleware has an issue. Falling back to empty messages.`);
-    messagesForClient = {}; 
-  }
+  // Load messages for the current locale
+  const messages = await getMessages(effectiveLocale);
 
   // This layout does not render <html> or <body>.
   // It provides the ClientSideI18n wrapper which includes NextIntlClientProvider.
   return (
-    <ClientSideI18n locale={effectiveLocale} messages={messagesForClient}>
+    <ClientSideI18n locale={effectiveLocale} messages={messages}>
       {children}
     </ClientSideI18n>
   );

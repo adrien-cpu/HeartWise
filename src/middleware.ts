@@ -1,30 +1,55 @@
 import createMiddleware from 'next-intl/middleware';
-import { locales, defaultLocale, pathnames } from '@/i18n/settings';
+import { locales, defaultLocale } from '@/i18n/settings';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+
+// Routes that require authentication
+const protectedRoutes = [
+  '/profile',
+  '/game',
+  '/speed-dating',
+  '/geolocation-meeting',
+  '/facial-analysis-matching',
+  '/ai-conversation-coach',
+  '/blind-exchange-mode',
+  '/chat',
+  '/risky-words-dictionary',
+  '/rewards',
+  '/dashboard',
+];
+
+// Public routes
+const publicRoutes = ['/login', '/signup', '/forgot-password'];
 
 // Create the internationalization middleware
 const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
-  localePrefix: 'always',
-  pathnames,
+  localePrefix: 'as-needed',
 });
 
-export default async function middleware(request: NextRequest) {
+export default function middleware(request: NextRequest) {
+  // Get the pathname
+  const { pathname } = request.nextUrl;
+  
+  // Check if the path is for static files or API routes
+  if (
+    pathname.startsWith('/_next') || 
+    pathname.startsWith('/api') ||
+    pathname.includes('.')
+  ) {
+    return NextResponse.next();
+  }
+
   // Apply the internationalization middleware
   return intlMiddleware(request);
 }
 
-/**
- * Configuration for the middleware Next.js.
- * Defines the paths to which the middleware should be applied.
- */
 export const config = {
-  matcher: [
-    // Apply to all paths except:
-    // - api, _next, _vercel
-    // - static files (with extension)
-    '/((?!api|_next|_vercel|.*\\..*).*)',
-  ]
+  // Match all paths except for:
+  // - API routes
+  // - /_next (Next.js internals)
+  // - /static (static files)
+  // - Files with extensions (e.g. favicon.ico)
+  matcher: ['/((?!api|_next|static|.*\\..*).*)'],
 };
