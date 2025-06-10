@@ -36,10 +36,10 @@ export default async function LocaleLayout({
   params,
 }: {
   children: ReactNode;
-  params: { locale: string };
+  params: Promise<{ locale: string }>;
 }) {
-  // Access params directly since generateStaticParams provides it as an object
-  const { locale: rawUrlLocale } = params;
+  // Await params before accessing its properties
+  const { locale: rawUrlLocale } = await params;
   
   let effectiveLocale: Locale;
 
