@@ -39,7 +39,7 @@ export default async function LocaleLayout({
   params: { locale: string };
 }) {
   // Access params directly since generateStaticParams provides it as an object
-  const rawUrlLocale = params.locale;
+  const rawUrlLocale = (await params).locale;
   
   let effectiveLocale: Locale;
 
