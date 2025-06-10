@@ -5,7 +5,7 @@
  *              It reads Firebase configuration from environment variables.
  */
 
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
@@ -26,11 +26,6 @@ const measurementId = process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID; // Option
 console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_API_KEY: ${apiKey ? 'FOUND (value starts with: ' + String(apiKey).substring(0, 5) + '...)' : 'NOT FOUND or EMPTY'}`);
 console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${authDomain ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
 console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${projectId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-// console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${storageBucket ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-// console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${messagingSenderId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-// console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_APP_ID: ${appId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-// console.log(`[Firebase Init] Read NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${measurementId ? 'FOUND' : 'NOT FOUND or EMPTY'}`);
-
 
 let criticalConfigError = false;
 const missingVars: string[] = [];
@@ -38,11 +33,6 @@ const missingVars: string[] = [];
 if (!apiKey) missingVars.push("NEXT_PUBLIC_FIREBASE_API_KEY");
 if (!authDomain) missingVars.push("NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN");
 if (!projectId) missingVars.push("NEXT_PUBLIC_FIREBASE_PROJECT_ID");
-// Optional vars are not checked as critical, but good to have for full functionality
-// if (!storageBucket) missingVars.push("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET"); // Usually needed for storage
-// if (!messagingSenderId) missingVars.push("NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID"); // For FCM
-// if (!appId) missingVars.push("NEXT_PUBLIC_FIREBASE_APP_ID"); // Often required
-
 
 if (missingVars.length > 0) {
   console.error(`[Firebase Init] CRITICAL_FIREBASE_CONFIG_ERROR: The following Firebase environment variables are missing or empty: ${missingVars.join(', ')}. 
@@ -65,18 +55,18 @@ const firebaseConfig = {
   measurementId: measurementId, // Optional
 };
 
-if (!criticalConfigError) {
-  // Avoid logging the full config object which includes the API key
-  console.log("[Firebase Init] Firebase Config Object (excluding API key for security):", {
-    authDomain: firebaseConfig.authDomain,
-    projectId: firebaseConfig.projectId,
-    // Add other non-sensitive keys if needed for debugging
-  });
+// Initialize app only if not already initialized
+let app: FirebaseApp;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApps()[0];
 }
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+// Initialize services
+export const firestore = getFirestore(app);
 export const storage = getStorage(app);
 export const auth = getAuth(app);
 
-export { criticalConfigError };
+// Export the app and critical config error flag
+export { app, criticalConfigError };

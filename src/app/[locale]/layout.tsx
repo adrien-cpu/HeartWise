@@ -36,10 +36,10 @@ export default async function LocaleLayout({
   params,
 }: {
   children: ReactNode;
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 }) {
-  // Await params before accessing its properties
-  const { locale: rawUrlLocale } = await params;
+  // Access params directly since generateStaticParams provides it as an object
+  const { locale: rawUrlLocale } = params;
   
   let effectiveLocale: Locale;
 
@@ -52,13 +52,24 @@ export default async function LocaleLayout({
     effectiveLocale = defaultLocale;
   }
 
-  // Load messages for the current locale
-  const messages = await getMessages(effectiveLocale);
+  let messagesForClient: AbstractIntlMessages = {};
+  try {
+    // Get messages for the determined locale
+    const loadedMessages = await getMessages({ locale: effectiveLocale });
+    
+    if (loadedMessages && typeof loadedMessages === 'object' && Object.keys(loadedMessages).length > 0) {
+      messagesForClient = loadedMessages;
+    } else {
+      console.error(`[LocaleLayout] Messages object for locale "${effectiveLocale}" is missing, empty, or not an object. Check i18n/settings.ts and message files. Using empty messages for client.`);
+    }
+  } catch (error: any) {
+    console.error(`[LocaleLayout] Critical failure in getMessages for locale "${effectiveLocale}". Error: ${error.message}. This usually means the i18n setup in settings.ts or middleware has an issue. Falling back to empty messages.`);
+  }
 
   // This layout does not render <html> or <body>.
   // It provides the ClientSideI18n wrapper which includes NextIntlClientProvider.
   return (
-    <ClientSideI18n locale={effectiveLocale} messages={messages}>
+    <ClientSideI18n locale={effectiveLocale} messages={messagesForClient}>
       {children}
     </ClientSideI18n>
   );

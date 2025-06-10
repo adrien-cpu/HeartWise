@@ -77,20 +77,17 @@ export default getRequestConfig(async ({ locale: rawLocale }) => {
       throw new Error(`Messages for locale "${determinedLocale}" are empty or invalid`);
     }
 
-    // Ensure Auth section exists
-    if (!messages.Auth) {
-      throw new Error(`Auth section missing in messages for locale "${determinedLocale}"`);
-    }
-
     return {
       locale: determinedLocale,
       messages,
+      timeZone: 'Europe/Paris',
     };
   } catch (error) {
     console.error(`[i18n-config] Error loading messages for locale "${determinedLocale}":`, error);
     return {
       locale: determinedLocale,
       messages: {},
+      timeZone: 'Europe/Paris',
     };
   }
 });
