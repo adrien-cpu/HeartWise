@@ -7,11 +7,5 @@ export const viewport: Viewport = {
 };
 
 export default function FrLayout({ children }: { children: ReactNode }) {
-  return (
-    <html lang="fr">
-      <body>
-        {children}
-      </body>
-    </html>
-  );
+  return children;
 }
