@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Provides services for managing user profile data, including rewards and points, using Firestore.
  * @module user_profile
@@ -22,7 +21,8 @@ import {
   query,
   orderBy,
   limit,
-  arrayRemove
+  arrayRemove,
+  serverTimestamp
 } from 'firebase/firestore';
 import { showNotification } from '@/lib/notifications'; // Import notification utility
 
@@ -114,14 +114,14 @@ const mapDocumentToUserProfile = (docSnap: DocumentSnapshot<DocumentData>): User
 export async function get_user(userId: string): Promise<UserProfile> {
   if (criticalConfigError) {
     console.error("Firebase is not configured. Cannot get user profile.");
-     const defaultProfile: UserProfile = {
-        id: userId, name: "User", email: "", bio: "", interests: [],
-        profilePicture: `https://placehold.co/200x200.png`, dataAiHint: "person placeholder",
-        privacySettings: { showLocation: true, showOnlineStatus: true },
-        rewards: [], points: 0, speedDatingSchedule: [], gamePreferences: [],
-        premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
-        fcmTokens: [],
-        createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
+    const defaultProfile: UserProfile = {
+      id: userId, name: "User", email: "", bio: "", interests: [],
+      profilePicture: `https://placehold.co/200x200.png`, dataAiHint: "person placeholder",
+      privacySettings: { showLocation: true, showOnlineStatus: true },
+      rewards: [], points: 0, speedDatingSchedule: [], gamePreferences: [],
+      premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+      fcmTokens: [],
+      createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
     };
     return defaultProfile;
   }
@@ -131,22 +131,22 @@ export async function get_user(userId: string): Promise<UserProfile> {
   if (!userDocSnap.exists()) {
     console.warn(`User with ID ${userId} not found in Firestore. Returning a default structure.`);
     const defaultProfile: UserProfile = {
-        id: userId,
-        name: "New User",
-        email: "",
-        bio: "",
-        interests: [],
-        profilePicture: `https://placehold.co/200x200.png`,
-        dataAiHint: "person placeholder",
-        privacySettings: { showLocation: true, showOnlineStatus: true },
-        rewards: [],
-        points: 0,
-        speedDatingSchedule: [],
-        gamePreferences: [],
-        premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
-        fcmTokens: [],
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
+      id: userId,
+      name: "New User",
+      email: "",
+      bio: "",
+      interests: [],
+      profilePicture: `https://placehold.co/200x200.png`,
+      dataAiHint: "person placeholder",
+      privacySettings: { showLocation: true, showOnlineStatus: true },
+      rewards: [],
+      points: 0,
+      speedDatingSchedule: [],
+      gamePreferences: [],
+      premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+      fcmTokens: [],
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
     };
     return defaultProfile;
   }
@@ -154,17 +154,17 @@ export async function get_user(userId: string): Promise<UserProfile> {
   let userProfile = mapDocumentToUserProfile(userDocSnap);
 
   if (!userProfile) {
-      // This case should ideally not be hit if userDocSnap.exists() is true.
-      // However, to satisfy TypeScript and as a fallback:
-      console.error(`Failed to map document for user ID ${userId}. Data might be malformed. Returning default.`);
-      return {
-        id: userId, name: "Error User", email: "", bio: "", interests: [],
-        profilePicture: `https://placehold.co/200x200.png`, dataAiHint: "person placeholder",
-        privacySettings: { showLocation: true, showOnlineStatus: true },
-        rewards: [], points: 0, speedDatingSchedule: [], gamePreferences: [],
-        premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
-        fcmTokens: [],
-        createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
+    // This case should ideally not be hit if userDocSnap.exists() is true.
+    // However, to satisfy TypeScript and as a fallback:
+    console.error(`Failed to map document for user ID ${userId}. Data might be malformed. Returning default.`);
+    return {
+      id: userId, name: "Error User", email: "", bio: "", interests: [],
+      profilePicture: `https://placehold.co/200x200.png`, dataAiHint: "person placeholder",
+      privacySettings: { showLocation: true, showOnlineStatus: true },
+      rewards: [], points: 0, speedDatingSchedule: [], gamePreferences: [],
+      premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+      fcmTokens: [],
+      createdAt: Timestamp.now(), updatedAt: Timestamp.now(),
     };
   }
 
@@ -218,11 +218,11 @@ export async function update_user_profile(userId: string, profileData: Partial<U
     dataToUpdate.speedDatingSchedule = profileData.speedDatingSchedule ?? [];
     dataToUpdate.fcmTokens = profileData.fcmTokens ?? [];
     if (!profileData.profilePicture) { // Set default placeholder if not provided
-        dataToUpdate.profilePicture = `https://placehold.co/200x200.png`;
-        dataToUpdate.dataAiHint = "person placeholder";
+      dataToUpdate.profilePicture = `https://placehold.co/200x200.png`;
+      dataToUpdate.dataAiHint = "person placeholder";
     }
   }
-  
+
   if (!dataToUpdate.dataAiHint && dataToUpdate.name) {
     dataToUpdate.dataAiHint = `${dataToUpdate.name.split(' ')[0].toLowerCase()} person`;
   }
@@ -259,51 +259,51 @@ export async function get_user_rewards(userId: string): Promise<UserReward[]> {
  * @returns {Promise<void>}
  */
 async function checkAndUnlockPremiumFeatures(userId: string, currentUserProfile: UserProfile): Promise<void> {
-    if (criticalConfigError) return;
-    const userDocRef = doc(firestore, 'users', userId);
-    const currentFeatures = currentUserProfile.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
-    const newFeatures: PremiumFeatures = { ...currentFeatures };
-    let changed = false;
-    let unlockedFeatureName: string | null = null;
+  if (criticalConfigError) return;
+  const userDocRef = doc(firestore, 'users', userId);
+  const currentFeatures = currentUserProfile.premiumFeatures || { advancedFilters: false, profileBoost: false, exclusiveModes: false };
+  const newFeatures: PremiumFeatures = { ...currentFeatures };
+  let changed = false;
+  let unlockedFeatureName: string | null = null;
 
-    // Define thresholds and badge types for unlocking features
-    const ADVANCED_FILTERS_POINTS_THRESHOLD = 500;
-    const PROFILE_BOOST_BADGE_TYPE = 'top_contributor'; // Example badge type needed for profile boost
-    const EXCLUSIVE_MODES_BADGE_TYPE = 'game_master';   // Example badge type needed for exclusive modes
+  // Define thresholds and badge types for unlocking features
+  const ADVANCED_FILTERS_POINTS_THRESHOLD = 500;
+  const PROFILE_BOOST_BADGE_TYPE = 'top_contributor'; // Example badge type needed for profile boost
+  const EXCLUSIVE_MODES_BADGE_TYPE = 'game_master';   // Example badge type needed for exclusive modes
 
-    const userPoints = currentUserProfile.points || 0;
-    const userRewards = currentUserProfile.rewards || [];
+  const userPoints = currentUserProfile.points || 0;
+  const userRewards = currentUserProfile.rewards || [];
 
-    // Check for Advanced Filters unlock
-    if (!newFeatures.advancedFilters && userPoints >= ADVANCED_FILTERS_POINTS_THRESHOLD) {
-        newFeatures.advancedFilters = true;
-        changed = true;
-        unlockedFeatureName = "Advanced Filters";
+  // Check for Advanced Filters unlock
+  if (!newFeatures.advancedFilters && userPoints >= ADVANCED_FILTERS_POINTS_THRESHOLD) {
+    newFeatures.advancedFilters = true;
+    changed = true;
+    unlockedFeatureName = "Advanced Filters";
+  }
+
+  // Check for Profile Boost unlock
+  if (!newFeatures.profileBoost && userRewards.some(r => r.type === PROFILE_BOOST_BADGE_TYPE)) {
+    newFeatures.profileBoost = true;
+    changed = true;
+    unlockedFeatureName = unlockedFeatureName ? `${unlockedFeatureName} & Profile Boost` : "Profile Boost";
+  }
+
+  // Check for Exclusive Modes unlock
+  if (!newFeatures.exclusiveModes && userRewards.some(r => r.type === EXCLUSIVE_MODES_BADGE_TYPE)) {
+    newFeatures.exclusiveModes = true;
+    changed = true;
+    unlockedFeatureName = unlockedFeatureName ? `${unlockedFeatureName} & Exclusive Modes` : "Exclusive Modes";
+  }
+
+  if (changed) {
+    await updateDoc(userDocRef, { premiumFeatures: newFeatures, updatedAt: serverTimestamp() });
+    console.log(`User ${userId} premium features updated:`, newFeatures);
+    if (unlockedFeatureName) {
+      showNotification("Premium Feature Unlocked!", { body: `You've unlocked: ${unlockedFeatureName}!` });
+      // Conceptual: Trigger backend to send push notification for feature unlock
+      // await triggerPushNotification(userId, "Premium Feature Unlocked!", `You've unlocked: ${unlockedFeatureName}!`);
     }
-
-    // Check for Profile Boost unlock
-    if (!newFeatures.profileBoost && userRewards.some(r => r.type === PROFILE_BOOST_BADGE_TYPE)) {
-        newFeatures.profileBoost = true;
-        changed = true;
-        unlockedFeatureName = unlockedFeatureName ? `${unlockedFeatureName} & Profile Boost` : "Profile Boost";
-    }
-
-    // Check for Exclusive Modes unlock
-    if (!newFeatures.exclusiveModes && userRewards.some(r => r.type === EXCLUSIVE_MODES_BADGE_TYPE)) {
-        newFeatures.exclusiveModes = true;
-        changed = true;
-        unlockedFeatureName = unlockedFeatureName ? `${unlockedFeatureName} & Exclusive Modes` : "Exclusive Modes";
-    }
-
-    if (changed) {
-       await updateDoc(userDocRef, { premiumFeatures: newFeatures, updatedAt: serverTimestamp() });
-       console.log(`User ${userId} premium features updated:`, newFeatures);
-       if (unlockedFeatureName) {
-           showNotification("Premium Feature Unlocked!", { body: `You've unlocked: ${unlockedFeatureName}!`});
-           // Conceptual: Trigger backend to send push notification for feature unlock
-           // await triggerPushNotification(userId, "Premium Feature Unlocked!", `You've unlocked: ${unlockedFeatureName}!`);
-       }
-    }
+  }
 }
 
 /**
@@ -341,7 +341,7 @@ export async function add_user_reward(userId: string, rewardData: Omit<UserRewar
       updatedAt: serverTimestamp(),
     });
     console.log(`Reward ${rewardData.type} added for user ${userId}. Points added: ${pointsToAward}.`);
-    
+
     showNotification("Badge Earned!", { body: `You've earned the "${rewardData.name}" badge!` });
     // Conceptual: Trigger backend to send push notification for new badge
     // await triggerPushNotification(userId, "Badge Earned!", `You've earned the "${rewardData.name}" badge!`);
@@ -441,7 +441,7 @@ export async function add_user_points(userId: string, pointsToAdd: number): Prom
     return 0; // Or throw error
   }
   const userDocRef = doc(firestore, 'users', userId);
-  
+
   // Ensure the user document exists before trying to increment points.
   // If it doesn't, create it with the initial points.
   const userProfileSnapshot = await getDoc(userDocRef);
@@ -484,10 +484,10 @@ function getPointsForReward(rewardType: string): number {
 
 // Mock user data for AI matching simulation
 const mockUsersForMatching: UserProfile[] = [
-    { id: 'mockUser1', name: 'Alex Doe', email: 'alex@example.com', bio: 'Loves hiking and reading.', interests: ['Hiking', 'Reading', 'Photography'], profilePicture: 'https://placehold.co/200x200.png?text=Alex', dataAiHint: 'man smiling', points: 120, fcmTokens: [] },
-    { id: 'mockUser2', name: 'Brenda Smith', email: 'brenda@example.com', bio: 'Passionate about art and music.', interests: ['Art', 'Music', 'Travel'], profilePicture: 'https://placehold.co/200x200.png?text=Brenda', dataAiHint: 'woman nature', points: 250, fcmTokens: [] },
-    { id: 'mockUser3', name: 'Charlie Brown', email: 'charlie@example.com', bio: 'Enjoys cooking and movies.', interests: ['Cooking', 'Movies', 'Gaming'], profilePicture: 'https://placehold.co/200x200.png?text=Charlie', dataAiHint: 'person thinking', points: 80, fcmTokens: [] },
-    { id: 'mockUser4', name: 'Diana Prince', email: 'diana@example.com', bio: 'Tech enthusiast and avid gamer.', interests: ['Technology', 'Gaming', 'Science'], profilePicture: 'https://placehold.co/200x200.png?text=Diana', dataAiHint: 'woman glasses', points: 300, fcmTokens: [] },
+  { id: 'mockUser1', name: 'Alex Doe', email: 'alex@example.com', bio: 'Loves hiking and reading.', interests: ['Hiking', 'Reading', 'Photography'], profilePicture: 'https://placehold.co/200x200.png?text=Alex', dataAiHint: 'man smiling', points: 120, fcmTokens: [] },
+  { id: 'mockUser2', name: 'Brenda Smith', email: 'brenda@example.com', bio: 'Passionate about art and music.', interests: ['Art', 'Music', 'Travel'], profilePicture: 'https://placehold.co/200x200.png?text=Brenda', dataAiHint: 'woman nature', points: 250, fcmTokens: [] },
+  { id: 'mockUser3', name: 'Charlie Brown', email: 'charlie@example.com', bio: 'Enjoys cooking and movies.', interests: ['Cooking', 'Movies', 'Gaming'], profilePicture: 'https://placehold.co/200x200.png?text=Charlie', dataAiHint: 'person thinking', points: 80, fcmTokens: [] },
+  { id: 'mockUser4', name: 'Diana Prince', email: 'diana@example.com', bio: 'Tech enthusiast and avid gamer.', interests: ['Technology', 'Gaming', 'Science'], profilePicture: 'https://placehold.co/200x200.png?text=Diana', dataAiHint: 'woman glasses', points: 300, fcmTokens: [] },
 ];
 
 
@@ -508,22 +508,22 @@ export async function get_all_users(options?: { forMatching?: boolean }): Promis
   if (options?.forMatching) {
     // Ensure mock users have all UserProfile fields, especially profilePicture and dataAiHint
     return mockUsersForMatching.map(user => ({
-        ...{ // Default values for any potentially missing fields in mock data
-            bio: "",
-            interests: [],
-            profilePicture: `https://placehold.co/200x200.png`,
-            dataAiHint: "person placeholder",
-            privacySettings: { showLocation: true, showOnlineStatus: true },
-            rewards: [],
-            points: 0,
-            speedDatingSchedule: [],
-            gamePreferences: [],
-            premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
-            fcmTokens: [],
-            createdAt: Timestamp.now(),
-            updatedAt: Timestamp.now(),
-        },
-        ...user // Spread the mock user data, overriding defaults
+      ...{ // Default values for any potentially missing fields in mock data
+        bio: "",
+        interests: [],
+        profilePicture: `https://placehold.co/200x200.png`,
+        dataAiHint: "person placeholder",
+        privacySettings: { showLocation: true, showOnlineStatus: true },
+        rewards: [],
+        points: 0,
+        speedDatingSchedule: [],
+        gamePreferences: [],
+        premiumFeatures: { advancedFilters: false, profileBoost: false, exclusiveModes: false },
+        fcmTokens: [],
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      },
+      ...user // Spread the mock user data, overriding defaults
     }));
   }
 
@@ -595,7 +595,7 @@ export async function removeFcmTokenFromUserProfile(userId: string, token: strin
     console.error("Firebase is not configured. Cannot remove FCM token.");
     return;
   }
-   if (!userId || !token) {
+  if (!userId || !token) {
     console.error("User ID and token are required to remove FCM token.");
     return;
   }

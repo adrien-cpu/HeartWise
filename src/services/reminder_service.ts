@@ -68,10 +68,11 @@ class ReminderService {
 
                     const docRef = await addDoc(collection(db, this.REMINDERS_COLLECTION), reminderData);
                     reminders.push({
-                        id: docRef.id,
                         ...reminderData,
+                        id: docRef.id,
                         createdAt: reminderData.createdAt.toDate(),
                         updatedAt: reminderData.updatedAt.toDate(),
+                        status: reminderData.status as 'pending' | 'cancelled' | 'sent',
                     });
                 }
             }
@@ -162,15 +163,17 @@ class ReminderService {
                 } as Reminder;
 
                 // Envoyer la notification
-                await notificationService.sendNotification({
-                    userId: reminder.userId,
-                    title: reminder.title,
-                    body: reminder.message,
-                    data: {
-                        type: 'reminder',
-                        bookingId: reminder.bookingId,
-                    },
-                });
+                await notificationService.sendNotification(
+                    reminder.userId,
+                    {
+                        title: reminder.title,
+                        body: reminder.message,
+                        data: {
+                            type: 'reminder',
+                            bookingId: reminder.bookingId,
+                        },
+                    }
+                );
 
                 // Mettre à jour le statut
                 await this.updateReminderStatus(reminder.id, 'sent');

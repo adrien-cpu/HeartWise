@@ -12,21 +12,21 @@ interface AuthGuardProps {
 }
 
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
-  const { currentUser, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const t = useTranslations('AuthGuard');
 
   useEffect(() => {
-    if (!authLoading && !currentUser) {
- router.push('/login');
+    if (!authLoading && !user) {
+      router.push('/login');
     }
-  }, [authLoading, currentUser, router]);
+  }, [authLoading, user, router]);
 
   if (authLoading) {
     return (
       <div className={cn(
-          "container mx-auto flex flex-col items-center justify-center",
-          "min-h-[calc(100vh-80px)] md:min-h-[calc(100vh-150px)] p-4"
+        "container mx-auto flex flex-col items-center justify-center",
+        "min-h-[calc(100vh-80px)] md:min-h-[calc(100vh-150px)] p-4"
       )}>
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <p className="mt-4 text-muted-foreground">{t('loading')}</p>
@@ -34,17 +34,17 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   }
 
-  if (!currentUser) {
+  if (!user) {
     // This state should ideally be caught by the useEffect redirect, but as a fallback:
-     return (
-        <div className={cn(
- "container mx-auto flex flex-col items-center justify-center",
- "min-h-[calc(100vh-80px)] md:min-h-[calc(100vh-150px)] p-4"
-        )}>
- <p className="mr-2">{t('redirectingToLogin')}</p>
- <Loader2 className="h-8 w-8 animate-spin text-primary ml-2" />
-        </div>
-     );
+    return (
+      <div className={cn(
+        "container mx-auto flex flex-col items-center justify-center",
+        "min-h-[calc(100vh-80px)] md:min-h-[calc(100vh-150px)] p-4"
+      )}>
+        <p className="mr-2">{t('redirectingToLogin')}</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary ml-2" />
+      </div>
+    );
   }
 
   // User is authenticated, render children

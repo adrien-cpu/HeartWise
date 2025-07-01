@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,14 +20,7 @@ export function ReminderList({ userId }: ReminderListProps) {
     const [reminders, setReminders] = useState<Reminder[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadReminders();
-        // Rafraîchir les rappels toutes les minutes
-        const interval = setInterval(loadReminders, 60000);
-        return () => clearInterval(interval);
-    }, [userId]);
-
-    const loadReminders = async () => {
+    const loadReminders = useCallback(async () => {
         try {
             const userReminders = await reminderService.getUserReminders(userId);
             setReminders(userReminders);
@@ -40,7 +33,14 @@ export function ReminderList({ userId }: ReminderListProps) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId, toast, t]);
+
+    useEffect(() => {
+        loadReminders();
+        // Rafraîchir les rappels toutes les minutes
+        const interval = setInterval(loadReminders, 60000);
+        return () => clearInterval(interval);
+    }, [loadReminders]);
 
     const getStatusBadge = (status: Reminder['status']) => {
         const statusConfig = {

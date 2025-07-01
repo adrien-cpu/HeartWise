@@ -24,7 +24,7 @@ export default function GlobalLanguageSwitcher() {
             </SelectTrigger>
             <SelectContent>
                 {locales.map((loc) => (
-                    <SelectItem key={loc} value={loc}>{loc.toUpperCase()}</SelectItem>
+                    <SelectItem key={loc} value={loc}>{loc.toUpperCase() as React.ReactNode}</SelectItem>
                 ))}
             </SelectContent>
         </Select>

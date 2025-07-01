@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -62,6 +62,17 @@ const FlashQuestionGame: React.FC<FlashQuestionGameProps> = ({
         }
     ];
 
+    const handleNextQuestion = useCallback(() => {
+        if (currentQuestionIndex < questions.length - 1) {
+            setCurrentQuestionIndex((prev) => prev + 1);
+            setSelectedAnswer(null);
+            setIsAnswered(false);
+            setTimeLeft(30);
+        } else {
+            onGameComplete(score);
+        }
+    }, [currentQuestionIndex, questions.length, onGameComplete, score]);
+
     useEffect(() => {
         if (timeLeft > 0 && !isAnswered) {
             const timer = setInterval(() => {
@@ -71,7 +82,7 @@ const FlashQuestionGame: React.FC<FlashQuestionGameProps> = ({
         } else if (timeLeft === 0 && !isAnswered) {
             handleNextQuestion();
         }
-    }, [timeLeft, isAnswered]);
+    }, [timeLeft, isAnswered, handleNextQuestion]);
 
     const handleAnswer = (answer: string) => {
         setSelectedAnswer(answer);
@@ -87,16 +98,7 @@ const FlashQuestionGame: React.FC<FlashQuestionGameProps> = ({
         }, 1500);
     };
 
-    const handleNextQuestion = () => {
-        if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex((prev) => prev + 1);
-            setSelectedAnswer(null);
-            setIsAnswered(false);
-            setTimeLeft(30);
-        } else {
-            onGameComplete(score);
-        }
-    };
+
 
     const currentQuestion = questions[currentQuestionIndex];
 

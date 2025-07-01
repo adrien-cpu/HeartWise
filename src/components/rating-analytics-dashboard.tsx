@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,11 +22,7 @@ export function RatingAnalyticsDashboard({ userId }: Props) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadData();
-    }, [userId, period]);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -46,14 +42,20 @@ export function RatingAnalyticsDashboard({ userId }: Props) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId, period, t]);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
+
+
 
     const handleCreateGoal = async () => {
         if (!user) return;
 
         try {
             const newGoal = await ratingAnalyticsService.createGoal({
-                userId: user.id,
+                userId: user.uid,
                 type: 'rating',
                 target: 4.5,
                 current: 0,

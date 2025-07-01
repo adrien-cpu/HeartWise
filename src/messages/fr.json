@@ -185,7 +185,24 @@
   },
   "FacialAnalysis": {
     "title": "Analyse Faciale",
-    "description": "Analysez votre visage pour des insights psychologiques"
+    "description": "Analysez votre visage pour des insights psychologiques",
+    "consent": {
+      "title": "Consentement à la Collecte de Données",
+      "description": "Avant de pouvoir analyser vos traits faciaux, nous avons besoin de votre consentement pour collecter et traiter vos données.",
+      "dataCollection": "Nous collecterons les points de données suivants :",
+      "dataPoints": {
+        "facialFeatures": "Traits faciaux et points de repère",
+        "emotions": "Expressions émotionnelles et micro-expressions",
+        "attributes": "Attributs démographiques (âge, genre, etc.)"
+      },
+      "dataUsage": "Vos données seront utilisées pour :",
+      "usagePoints": {
+        "matching": "Trouver des matchs compatibles",
+        "recommendations": "Fournir des recommandations personnalisées",
+        "improvements": "Améliorer notre algorithme de matching"
+      },
+      "accept": "Je consens à la collecte et au traitement des données"
+    }
   },
   "AIConversationCoachPage": {
     "pageTitle": "Coach IA Conversationnel",
@@ -551,6 +568,15 @@
     "activateProfileBoost": "Activer Boost",
     "playExclusiveGames": "Jouer aux Modes Exclusifs"
   },
+  "AuthGuard": {
+    "title": "Authentification Requise",
+    "description": "Veuillez vous connecter pour accéder à cette page",
+    "loginButton": "Se connecter",
+    "signupButton": "S'inscrire",
+    "redirectingToLogin": "Redirection vers la connexion...",
+    "authRequired": "L'authentification est requise pour voir cette page.",
+    "loading": "Chargement..."
+  },
   "DashboardPage": {
     "welcome": "Bienvenue, {name} !",
     "userAlt": "Utilisateur",
@@ -583,6 +609,43 @@
     "noAdviceAvailable": "Aucun conseil disponible pour le moment.",
     "profileDataUnavailable": "Les données de profil sont actuellement indisponibles.",
     "authenticating": "Authentification en cours..."
+  },
+  "Chat": {
+    "title": "Chat",
+    "description": "Connectez-vous avec vos matchs via la messagerie en temps réel",
+    "conversationListDesc": "Vos conversations avec vos matchs",
+    "sendMessagePlaceholder": "Tapez votre message...",
+    "sendButton": "Envoyer",
+    "intentionTagLabel": "Intention",
+    "selectIntentionPlaceholder": "Sélectionner un tag d'intention",
+    "noTagOption": "Aucun tag",
+    "selectChatPrompt": "Sélectionnez une conversation pour commencer à discuter",
+    "typingIndicator": "Tape...",
+    "typeMessage": "Tapez votre message",
+    "send": "Envoyer",
+    "unknownUser": "Utilisateur inconnu",
+    "aiSuggestedTagTooltip": "Suggestion IA (cliquez pour utiliser)",
+    "moderationBlockTitle": "Modération de contenu",
+    "moderationBlockDesc": "Votre message n'a pas pu être envoyé en raison de : ",
+    "moderationCategory_profanity": "langage grossier",
+    "moderationCategory_sensitive_content": "contenu sensible",
+    "moderationCategory_adult_content_simulated": "contenu potentiellement adulte (simulé)",
+    "moderationCategory_VIOLENCE_SIMULATED": "violence simulée",
+    "messageModerated": "[Ce message n'a pas été envoyé en raison de la politique de contenu]",
+    "messageBlockedByModeration": "Message bloqué par la modération de contenu.",
+    "noMessagesYet": "Aucun message pour le moment. Dites bonjour !",
+    "redirectingToLogin": "Redirection vers la connexion...",
+    "newNotificationMessageTitle": "Nouveau message de {name}",
+    "videoAudioCallInfoTitle": "Fonctionnalité d'appel",
+    "videoAudioCallInfoDesc": "Les fonctionnalités d'appel vidéo et audio sont prévues pour une future mise à jour et nécessiteront une intégration WebRTC. Merci de votre compréhension !",
+    "gotItButton": "Compris !",
+    "callStartErrorTitle": "Erreur d'appel",
+    "callStartErrorDesc": "Impossible de démarrer l'appel. Veuillez vérifier les permissions et réessayer.",
+    "callEndedTitle": "Appel terminé",
+    "callEndedDesc": "L'appel a été terminé.",
+    "localVideoLabel": "Vous",
+    "remoteVideoLabel": "{name}",
+    "hangUpButton": "Raccrocher"
   },
   "Sidebar": {
     "toggleSidebar": "Basculer la Barre Latérale"

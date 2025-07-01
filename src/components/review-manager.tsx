@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,11 +33,7 @@ export function ReviewManager({ placeId, userId }: ReviewManagerProps) {
     });
     const [tagInput, setTagInput] = useState('');
 
-    useEffect(() => {
-        loadReviews();
-    }, [placeId]);
-
-    const loadReviews = async () => {
+    const loadReviews = useCallback(async () => {
         try {
             const [placeReviews, reviewStats] = await Promise.all([
                 reviewService.getPlaceReviews(placeId),
@@ -54,7 +50,11 @@ export function ReviewManager({ placeId, userId }: ReviewManagerProps) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [placeId, toast, t]);
+
+    useEffect(() => {
+        loadReviews();
+    }, [loadReviews]);
 
     const handleRatingChange = (rating: number) => {
         setNewReview(prev => ({ ...prev, rating }));

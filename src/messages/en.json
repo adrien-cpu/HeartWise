@@ -173,7 +173,24 @@
   },
   "FacialAnalysis": {
     "title": "Facial Analysis",
-    "description": "Analyze your face for psychological insights"
+    "description": "Analyze your face for psychological insights",
+    "consent": {
+      "title": "Data Collection Consent",
+      "description": "Before we can analyze your facial features, we need your consent to collect and process your data.",
+      "dataCollection": "We will collect the following data points:",
+      "dataPoints": {
+        "facialFeatures": "Facial features and landmarks",
+        "emotions": "Emotional expressions and micro-expressions",
+        "attributes": "Demographic attributes (age, gender, etc.)"
+      },
+      "dataUsage": "Your data will be used for:",
+      "usagePoints": {
+        "matching": "Finding compatible matches",
+        "recommendations": "Providing personalized recommendations",
+        "improvements": "Improving our matching algorithm"
+      },
+      "accept": "I consent to data collection and processing"
+    }
   },
   "AIConversationCoachPage": {
     "pageTitle": "AI Conversation Coach",
@@ -615,6 +632,15 @@
     "activateProfileBoost": "Activate Boost",
     "playExclusiveGames": "Play Exclusive Games"
   },
+  "AuthGuard": {
+    "title": "Authentication Required",
+    "description": "Please log in to access this page",
+    "loginButton": "Login",
+    "signupButton": "Sign Up",
+    "redirectingToLogin": "Redirecting to login...",
+    "authRequired": "Authentication is required to view this page.",
+    "loading": "Loading..."
+  },
   "DashboardPage": {
     "welcome": "Welcome, {name}!",
     "userAlt": "User",
@@ -647,6 +673,43 @@
     "noAdviceAvailable": "No advice available at the moment.",
     "profileDataUnavailable": "Profile data is currently unavailable.",
     "authenticating": "Authenticating..."
+  },
+  "Chat": {
+    "title": "Chat",
+    "description": "Connect with your matches through real-time messaging",
+    "conversationListDesc": "Your conversations with matches",
+    "sendMessagePlaceholder": "Type your message...",
+    "sendButton": "Send",
+    "intentionTagLabel": "Intention",
+    "selectIntentionPlaceholder": "Select intention tag",
+    "noTagOption": "No tag",
+    "selectChatPrompt": "Select a conversation to start chatting",
+    "typingIndicator": "Typing...",
+    "typeMessage": "Type your message",
+    "send": "Send",
+    "unknownUser": "Unknown User",
+    "aiSuggestedTagTooltip": "AI Suggestion (click to use)",
+    "moderationBlockTitle": "Content Moderation",
+    "moderationBlockDesc": "Your message could not be sent due to: ",
+    "moderationCategory_profanity": "profanity",
+    "moderationCategory_sensitive_content": "sensitive content",
+    "moderationCategory_adult_content_simulated": "potentially adult content (simulated)",
+    "moderationCategory_VIOLENCE_SIMULATED": "simulated violence",
+    "messageModerated": "[This message was not sent due to content policy]",
+    "messageBlockedByModeration": "Message blocked by content moderation.",
+    "noMessagesYet": "No messages yet. Say hello!",
+    "redirectingToLogin": "Redirecting to login...",
+    "newNotificationMessageTitle": "New message from {name}",
+    "videoAudioCallInfoTitle": "Calling Feature",
+    "videoAudioCallInfoDesc": "Video and audio call functionalities are planned for a future update and will require WebRTC integration. Thank you for your understanding!",
+    "gotItButton": "Got it!",
+    "callStartErrorTitle": "Call Error",
+    "callStartErrorDesc": "Could not start the call. Please check permissions and try again.",
+    "callEndedTitle": "Call Ended",
+    "callEndedDesc": "The call has been ended.",
+    "localVideoLabel": "You",
+    "remoteVideoLabel": "{name}",
+    "hangUpButton": "Hang Up"
   },
   "Sidebar": {
     "toggleSidebar": "Toggle Sidebar"

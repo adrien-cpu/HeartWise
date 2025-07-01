@@ -221,7 +221,13 @@ class FacialAnalysisService {
             image.src = imageData;
             await new Promise((resolve) => (image.onload = resolve));
 
-            const results = await this.faceMesh!.send({ image });
+            const results = await new Promise<any>((resolve, reject) => {
+                this.faceMesh!.onResults((results) => {
+                    resolve(results);
+                });
+                this.faceMesh!.send({ image });
+            });
+
             const landmarks = results.multiFaceLandmarks?.[0] as Point[];
 
             if (!landmarks) {

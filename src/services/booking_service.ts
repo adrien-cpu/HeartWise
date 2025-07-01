@@ -40,6 +40,7 @@ class BookingService {
                 ...bookingData,
                 createdAt: bookingData.createdAt.toDate(),
                 updatedAt: bookingData.updatedAt.toDate(),
+                status: bookingData.status as 'pending' | 'confirmed' | 'cancelled',
             };
         } catch (error) {
             console.error('Erreur lors de la création de la réservation:', error);
@@ -64,6 +65,7 @@ class BookingService {
                 endTime: data.endTime.toDate(),
                 createdAt: data.createdAt.toDate(),
                 updatedAt: data.updatedAt.toDate(),
+                status: data.status as 'pending' | 'confirmed' | 'cancelled',
             } as Booking;
         } catch (error) {
             console.error('Erreur lors de la récupération de la réservation:', error);
@@ -86,6 +88,7 @@ class BookingService {
                 endTime: doc.data().endTime.toDate(),
                 createdAt: doc.data().createdAt.toDate(),
                 updatedAt: doc.data().updatedAt.toDate(),
+                status: doc.data().status as 'pending' | 'confirmed' | 'cancelled',
             })) as Booking[];
         } catch (error) {
             console.error('Erreur lors de la récupération des réservations:', error);

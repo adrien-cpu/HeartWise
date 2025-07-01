@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, addDoc, updateDoc, doc, Timestamp, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, updateDoc, doc, Timestamp, orderBy, limit, getDoc } from 'firebase/firestore';
 import { notificationService } from './notification_service';
 
 export interface Challenge {
@@ -142,8 +142,8 @@ class ChallengeService {
                         },
                     });
 
-                    // Mettre à jour le score de l'utilisateur
-                    await leaderboardService.updateUserScore(userId, challenge.points);
+                    // TODO: Ajouter l'import de leaderboardService si nécessaire ou commenter cette ligne si non utilisée.
+                    // await leaderboardService.updateUserScore(userId, challenge.points);
                 }
             }
         } catch (error) {

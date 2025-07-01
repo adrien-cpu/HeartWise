@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, ChangeEvent, useRef, useEffect } from 'react';
@@ -25,7 +24,7 @@ import { Badge } from '@/components/ui/badge';
 export default function FacialAnalysisMatchingPage() {
   const t = useTranslations('FacialAnalysisMatching');
   const { toast } = useToast();
-  const { currentUser } = useAuth();
+  const { user } = useAuth();
 
   const [userImageFile, setUserImageFile] = useState<File | null>(null);
   const [userImageDataUri, setUserImageDataUri] = useState<string | null>(null);
@@ -42,9 +41,10 @@ export default function FacialAnalysisMatchingPage() {
 
   useEffect(() => {
     // Clean up stream when component unmounts or camera is hidden
+    const videoElement = videoRef.current;
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
+      if (videoElement && videoElement.srcObject) {
+        const stream = videoElement.srcObject as MediaStream;
         stream.getTracks().forEach(track => track.stop());
       }
     };
@@ -87,12 +87,12 @@ export default function FacialAnalysisMatchingPage() {
         setUserImageDataUri(dataUri);
         // Convert data URI to File object for consistency, though flow uses data URI
         fetch(dataUri).then(res => res.blob()).then(blob => {
-            setUserImageFile(new File([blob], "capture.jpg", { type: "image/jpeg" }));
+          setUserImageFile(new File([blob], "capture.jpg", { type: "image/jpeg" }));
         });
 
         // Stop camera stream
         if (video.srcObject) {
-            (video.srcObject as MediaStream).getTracks().forEach(track => track.stop());
+          (video.srcObject as MediaStream).getTracks().forEach(track => track.stop());
         }
         setShowCamera(false);
         setHasCameraPermission(null); // Reset camera permission state for next time
@@ -103,7 +103,7 @@ export default function FacialAnalysisMatchingPage() {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
-       if (file.size > 5 * 1024 * 1024) { 
+      if (file.size > 5 * 1024 * 1024) {
         toast({ variant: 'destructive', title: t('fileTooLargeTitle'), description: t('fileTooLargeDesc') });
         return;
       }
@@ -127,7 +127,7 @@ export default function FacialAnalysisMatchingPage() {
       toast({ variant: "destructive", title: t('errorTitle'), description: t('errorMissingImage') });
       return;
     }
-    if (!currentUser?.uid) {
+    if (!user?.uid) {
       setError(t('errorAuthRequired'));
       toast({ variant: "destructive", title: t('errorTitle'), description: t('errorAuthRequired') });
       return;
@@ -138,9 +138,9 @@ export default function FacialAnalysisMatchingPage() {
     setSuggestedMatches([]);
 
     try {
-      const result = await suggestFacialMatches({ 
+      const result = await suggestFacialMatches({
         currentUserPhotoDataUri: userImageDataUri,
-        currentUserId: currentUser.uid 
+        currentUserId: user.uid
       });
       setSuggestedMatches(result.suggestions);
       if (result.suggestions.length > 0) {
@@ -157,7 +157,7 @@ export default function FacialAnalysisMatchingPage() {
       setIsLoading(false);
     }
   };
-  
+
   const getInitials = (name?: string): string => {
     if (!name) return '?'; return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
@@ -192,15 +192,15 @@ export default function FacialAnalysisMatchingPage() {
                 data-ai-hint="person"
               />
             )}
-            
+
             {showCamera && (
               <div className="w-full flex flex-col items-center">
                 <video ref={videoRef} className="w-full max-w-xs aspect-video rounded-md bg-muted mb-2" autoPlay playsInline muted />
                 {hasCameraPermission === false && (
-                     <Alert variant="destructive" className="w-full max-w-xs">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>{t('cameraAccessDeniedError')}</AlertTitle>
-                     </Alert>
+                  <Alert variant="destructive" className="w-full max-w-xs">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>{t('cameraAccessDeniedError')}</AlertTitle>
+                  </Alert>
                 )}
                 <Button onClick={capturePhoto} disabled={!hasCameraPermission} className="mt-2">
                   {t('capturePhotoButton')}
@@ -214,12 +214,12 @@ export default function FacialAnalysisMatchingPage() {
             )}
 
             <div className="flex gap-2 mt-2">
-                <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isLoading || showCamera}>
-                    <Upload className="mr-2 h-4 w-4" /> {t('uploadPhotoButton')}
-                </Button>
-                <Button variant="outline" onClick={enableCamera} disabled={isLoading || showCamera}>
-                    <Video className="mr-2 h-4 w-4" /> {t('useCameraButton')}
-                </Button>
+              <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isLoading || showCamera}>
+                <Upload className="mr-2 h-4 w-4" /> {t('uploadPhotoButton')}
+              </Button>
+              <Button variant="outline" onClick={enableCamera} disabled={isLoading || showCamera}>
+                <Video className="mr-2 h-4 w-4" /> {t('useCameraButton')}
+              </Button>
             </div>
             <Input
               ref={fileInputRef}
@@ -230,15 +230,15 @@ export default function FacialAnalysisMatchingPage() {
               disabled={isLoading}
               aria-label={t('uploadPhotoButton')}
             />
-             {userImageDataUri && (
-                 <Button variant="link" size="sm" onClick={() => { setUserImageDataUri(null); setUserImageFile(null); setShowCamera(false); if(videoRef.current?.srcObject){(videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());} }} className="text-xs">
-                     {t('clearImageButton')}
-                 </Button>
-             )}
+            {userImageDataUri && (
+              <Button variant="link" size="sm" onClick={() => { setUserImageDataUri(null); setUserImageFile(null); setShowCamera(false); if (videoRef.current?.srcObject) { (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop()); } }} className="text-xs">
+                {t('clearImageButton')}
+              </Button>
+            )}
           </Card>
 
           <div className="text-center mt-6">
-            <Button onClick={handleFindMatches} disabled={isLoading || !userImageDataUri || !currentUser?.uid} size="lg">
+            <Button onClick={handleFindMatches} disabled={isLoading || !userImageDataUri || !user?.uid} size="lg">
               {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserSearch className="mr-2 h-4 w-4" />}
               {isLoading ? t('findingMatchesButton') : t('findMatchesButton')}
             </Button>
@@ -267,16 +267,16 @@ export default function FacialAnalysisMatchingPage() {
                   </CardDescription>
                 </CardContent>
                 <CardFooter className="justify-center">
-                    <Button variant="outline" size="sm">{t('viewProfileButton')}</Button> 
+                  <Button variant="outline" size="sm">{t('viewProfileButton')}</Button>
                 </CardFooter>
               </Card>
             ))}
           </div>
         </div>
       )}
-       {(!isLoading && suggestedMatches.length === 0 && userImageDataUri && !error) && (
-           <p className="mt-6 text-center text-muted-foreground">{t('noMatchesFoundAfterSearch')}</p>
-       )}
+      {(!isLoading && suggestedMatches.length === 0 && userImageDataUri && !error) && (
+        <p className="mt-6 text-center text-muted-foreground">{t('noMatchesFoundAfterSearch')}</p>
+      )}
     </div>
   );
 }

@@ -3,7 +3,6 @@ import { locales, defaultLocale, pathnames } from '@/i18n/settings';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Routes qui nécessitent une authentification
 const protectedRoutes = [
   '/profile',
   '/game',
@@ -18,10 +17,10 @@ const protectedRoutes = [
   '/dashboard',
 ];
 
-// Routes publiques
 const publicRoutes = ['/login', '/signup'];
 
-// Créer le middleware d'internationalisation
+const testRoutes = ['/test-css', '/test-simple', '/debug', '/tailwind-test'];
+
 const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
@@ -30,50 +29,66 @@ const intlMiddleware = createMiddleware({
 });
 
 export default async function middleware(request: NextRequest) {
-  // Vérifier si l'utilisateur est authentifié
-  const authToken = request.cookies.get('auth-token')?.value;
   const { pathname } = request.nextUrl;
 
-  // Extraire le chemin sans la locale
+  // 🚫 Autorise les routes de test sans locale
+  if (testRoutes.some(route => pathname.startsWith(route))) {
+    return NextResponse.next();
+  }
+
+  // ✅ Autorise l'accès à la page racine sans locale
+  if (pathname === '/') {
+    return NextResponse.next();
+  }
+
+  // 🔁 Si aucune locale détectée dans l’URL, redirige vers /[defaultLocale]/...
+  const pathHasLocale = locales.some(locale =>
+    pathname.startsWith(`/${locale}`)
+  );
+
+  if (!pathHasLocale) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${defaultLocale}${pathname}`;
+    return NextResponse.redirect(url);
+  }
+
+  // 🍪 Authentification
+  const authToken = request.cookies.get('auth-token')?.value;
+
+  // 🧹 Extrait le chemin sans locale
   const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, '');
 
-  // Vérifier si la route est protégée
-  const isProtectedRoute = protectedRoutes.some(route =>
+  const isProtected = protectedRoutes.some(route =>
     pathWithoutLocale.startsWith(route)
   );
 
-  // Vérifier si la route est publique
-  const isPublicRoute = publicRoutes.some(route =>
+  const isPublic = publicRoutes.some(route =>
     pathWithoutLocale.startsWith(route)
   );
 
-  // Si la route est protégée et l'utilisateur n'est pas authentifié
-  if (isProtectedRoute && !authToken) {
-    const locale = request.nextUrl.pathname.split('/')[1];
+  const locale = pathname.split('/')[1]; // Sûr car vérifié plus haut
+
+  // 🔒 Redirige vers login si route protégée et pas connecté
+  if (isProtected && !authToken) {
     const loginUrl = new URL(`/${locale}/login`, request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Si l'utilisateur est authentifié et essaie d'accéder aux routes de connexion/inscription
-  if (authToken && isPublicRoute) {
-    const locale = request.nextUrl.pathname.split('/')[1];
+  // 🔄 Redirige utilisateur connecté hors de login/signup
+  if (authToken && isPublic) {
     return NextResponse.redirect(new URL(`/${locale}`, request.url));
   }
 
-  // Appliquer le middleware d'internationalisation
+  // 🌍 Applique l’internationalisation
   return intlMiddleware(request);
 }
 
 /**
- * Configuration du middleware Next.js.
- * Définit les chemins auxquels le middleware doit s'appliquer.
+ * ⚙️ Configuration des routes traitées par le middleware
  */
 export const config = {
   matcher: [
-    // Appliquer à tous les chemins sauf :
-    // - api, _next, _vercel
-    // - fichiers statiques (avec extension)
-    '/((?!api|_next|_vercel|.*\\..*).*)',
-  ]
+    '/((?!_next|.*\\.css$|.*\\.js$|.*\\.png$|.*\\.svg$|.*\\.ico$|.*\\.json$|.*\\.txt$).*)',
+  ],
 };

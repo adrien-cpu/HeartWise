@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ratingModerationService, RatingReport, ModerationAction } from '@/services/rating_moderation_service';
-import { userRatingService, UserRating } from '@/services/user_rating_service';
+import { userRatingService, UserRating as UserRatingType } from '@/services/user_rating_service';
 import { ShieldCheckIcon, ShieldExclamationIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 interface RatingModerationProps {
@@ -20,13 +20,9 @@ export const RatingModeration: React.FC<RatingModerationProps> = ({ moderatorId 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedReport, setSelectedReport] = useState<RatingReport | null>(null);
-    const [ratingDetails, setRatingDetails] = useState<UserRating | null>(null);
+    const [ratingDetails, setRatingDetails] = useState<UserRatingType | null>(null);
 
-    useEffect(() => {
-        loadReports();
-    }, []);
-
-    const loadReports = async () => {
+    const loadReports = useCallback(async () => {
         try {
             setLoading(true);
             const [pendingReports, reportStats] = await Promise.all([
@@ -40,7 +36,11 @@ export const RatingModeration: React.FC<RatingModerationProps> = ({ moderatorId 
         } finally {
             setLoading(false);
         }
-    };
+    }, [t]);
+
+    useEffect(() => {
+        loadReports();
+    }, [loadReports]);
 
     const handleReportSelect = async (report: RatingReport) => {
         setSelectedReport(report);

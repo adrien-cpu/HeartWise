@@ -439,7 +439,7 @@ const GamePage = (): JSX.Element => {
         </TabsContent>
         <TabsContent value="times-up" className="mt-6 flex flex-col items-center space-y-6">
           <Suspense fallback={<div className="flex justify-center items-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
-            <TimesUpGame userId={currentUser?.uid} onGameComplete={refreshLeaderboard} />
+            <TimesUpGame userId={currentUser?.uid || ''} onGameComplete={refreshLeaderboard} />
           </Suspense>
         </TabsContent>
         <TabsContent value="rankings" className="mt-6 flex flex-col items-center space-y-6">

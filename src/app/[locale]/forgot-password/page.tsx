@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { SubmitHandler } from 'react-hook-form';
@@ -15,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, KeyRound, AlertTriangle } from 'lucide-react'; 
+import { Loader2, Mail, KeyRound, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
 
@@ -38,7 +37,6 @@ type ForgotPasswordFormInputs = z.infer<typeof forgotPasswordSchema>;
 export default function ForgotPasswordPage(): JSX.Element {
   const t = useTranslations('Auth');
   const { toast } = useToast();
-  const { isFirebaseConfigured } = useAuth(); 
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,16 +51,6 @@ export default function ForgotPasswordPage(): JSX.Element {
   });
 
   const onSubmit: SubmitHandler<ForgotPasswordFormInputs> = async (data) => {
-    if (!isFirebaseConfigured) {
-        setError(t('firebaseConfigError'));
-        toast({
-            variant: 'destructive',
-            title: t('passwordResetErrorTitle'),
-            description: t('firebaseConfigErrorUserFriendly'),
-        });
-        return;
-    }
-
     setIsLoading(true);
     setError(null);
     setSuccessMessage(null);
@@ -107,16 +95,9 @@ export default function ForgotPasswordPage(): JSX.Element {
           <CardDescription>{t('forgotPasswordDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
-           {!isFirebaseConfigured && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>{t('configErrorTitle')}</AlertTitle>
-              <AlertDescription>{t('firebaseConfigErrorUserFriendly')}</AlertDescription>
-            </Alert>
-          )}
           {error && (
             <Alert variant="destructive" className="mb-4">
-               <AlertTriangle className="h-4 w-4" />
+              <AlertTriangle className="h-4 w-4" />
               <AlertTitle>{t('passwordResetErrorTitle')}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -137,12 +118,12 @@ export default function ForgotPasswordPage(): JSX.Element {
                   type="email"
                   {...register('email')}
                   placeholder="name@example.com"
-                  disabled={isLoading || !isFirebaseConfigured}
+                  disabled={isLoading}
                   aria-invalid={errors.email ? "true" : "false"}
                 />
                 {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading || !isFirebaseConfigured}>
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {t('sendResetEmailButton')}
               </Button>

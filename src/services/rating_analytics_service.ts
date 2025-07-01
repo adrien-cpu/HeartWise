@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, Timestamp, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp, orderBy, limit, addDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { UserRating } from './user_rating_service';
 
 export interface RatingTrend {
@@ -15,7 +15,7 @@ export interface UserGoal {
     target: number;
     current: number;
     deadline: Date;
-    status: 'active' | 'completed' | 'failed';
+    status: 'completed' | 'active' | 'failed';
     createdAt: Date;
     updatedAt: Date;
 }
@@ -132,6 +132,7 @@ class RatingAnalyticsService {
                 ...goalData,
                 createdAt: goalData.createdAt.toDate(),
                 updatedAt: goalData.updatedAt.toDate(),
+                status: goalData.status as 'completed' | 'active' | 'failed',
             };
         } catch (error) {
             console.error('Erreur lors de la création de l\'objectif:', error);

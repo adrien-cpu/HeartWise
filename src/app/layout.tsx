@@ -3,59 +3,25 @@
  * @module RootLayout
  * @description This file defines the main HTML shell for the application,
  *              including <html> and <body> tags, global CSS, and font setup.
- *              Locale-specific providers and message loading are handled by the nested `src/app/[locale]/layout.tsx`.
  */
 
-import { GeistSans } from 'geist/font/sans';
-import { Inter } from 'next/font/google';
-import { Toaster } from '@/components/ui/toaster';
-import { Toaster as Sonner } from '@/components/ui/sonner';
-import { ThemeProvider } from '@/components/theme-provider';
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from '@/i18n';
-import { AuthProvider } from '@/contexts/AuthContext';
 import './globals.css'
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-});
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 
 export const metadata = {
   title: 'HeartWise - Trouvez des connexions significatives',
   description: 'Une application de rencontres intelligente qui vous aide à trouver des connexions significatives.',
 };
 
-export function generateStaticParams() {
-  return [{ locale: 'en' }, { locale: 'fr' }];
-}
-
-export default async function RootLayout({
-  children,
-  params: { locale },
-}: {
-  children: React.ReactNode;
-  params: { locale: string };
-}) {
-  const messages = await getMessages(locale);
-
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const messages = await getMessages();
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head />
-      <body className={`${GeistSans.className} ${inter.className} min-h-screen bg-background font-sans antialiased`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <AuthProvider>
-              {children}
-              <Toaster />
-              <Sonner />
-            </AuthProvider>
-          </ThemeProvider>
+      <body className="min-h-screen bg-background text-foreground antialiased">
+        <NextIntlClientProvider locale="en" messages={messages}>
+          {children}
         </NextIntlClientProvider>
       </body>
     </html>

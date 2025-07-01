@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { userRatingService, UserRating, UserRatingStats } from '@/services/user_rating_service';
+import { userRatingService, type UserRating as UserRatingType, type UserRatingStats } from '@/services/user_rating_service';
 import { StarIcon, CheckBadgeIcon } from '@heroicons/react/24/solid';
 import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline';
 
@@ -12,7 +12,7 @@ interface UserRatingProps {
 
 export const UserRating: React.FC<UserRatingProps> = ({ userId, currentUserId, onRatingSubmit }) => {
     const { t } = useTranslation();
-    const [ratings, setRatings] = useState<UserRating[]>([]);
+    const [ratings, setRatings] = useState<UserRatingType[]>([]);
     const [stats, setStats] = useState<UserRatingStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -34,11 +34,7 @@ export const UserRating: React.FC<UserRatingProps> = ({ userId, currentUserId, o
         'Professionnel',
     ];
 
-    useEffect(() => {
-        loadRatings();
-    }, [userId]);
-
-    const loadRatings = async () => {
+    const loadRatings = useCallback(async () => {
         try {
             setLoading(true);
             const [userRatings, userStats] = await Promise.all([
@@ -52,7 +48,11 @@ export const UserRating: React.FC<UserRatingProps> = ({ userId, currentUserId, o
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId, t]);
+
+    useEffect(() => {
+        loadRatings();
+    }, [loadRatings]);
 
     const handleRatingSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

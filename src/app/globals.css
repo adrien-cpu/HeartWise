@@ -266,3 +266,12 @@
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   }
 }
+
+/* Test simple pour vérifier si le CSS fonctionne */
+.test-css {
+  background-color: red !important;
+  color: white !important;
+  padding: 20px !important;
+  margin: 20px !important;
+  border-radius: 8px !important;
+}

@@ -52,7 +52,7 @@ interface TimeSlot {
 export default function GeolocationMeeting() {
   const t = useTranslations('GeolocationMeeting');
   const { toast } = useToast();
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [meetingPlaces, setMeetingPlaces] = useState<MeetingPlace[]>([]);
   const [nearbyUsers, setNearbyUsers] = useState<NearbyUser[]>([]);
   const [loadingLocation, setLoadingLocation] = useState(true);
@@ -79,7 +79,7 @@ export default function GeolocationMeeting() {
     const initializeLocation = async () => {
       try {
         const location = await getUserLocation();
-        setUserLocation(location);
+        setUserLocation({ lat: location.lat, lng: location.lng });
         setError(null);
         setLoadingLocation(false);
 
@@ -119,7 +119,10 @@ export default function GeolocationMeeting() {
 
   const filteredPlaces = meetingPlaces.filter(place => {
     if (!userLocation) return false;
-    const distance = calculateDistance(userLocation, place.location);
+    const distance = calculateDistance(
+      userLocation,
+      { lat: place.location.lat, lng: place.location.lng }
+    );
     return distance <= filters.maxDistance;
   });
 
@@ -181,9 +184,9 @@ export default function GeolocationMeeting() {
   const handleSearch = async () => {
     setIsLoading(true);
     try {
-      const location = await getUserLocation(searchQuery);
-      setUserLocation(location);
-      setMeetingPlace(location);
+      const location = await getUserLocation();
+      setUserLocation({ lat: location.lat, lng: location.lng });
+      setMeetingPlace([location.lat, location.lng]);
       setMapCenter([location.lat, location.lng]);
       setError(null);
     } catch (error: any) {
@@ -202,8 +205,8 @@ export default function GeolocationMeeting() {
     setIsLoading(true);
     try {
       const location = await getUserLocation();
-      setUserLocation(location);
-      setMeetingPlace(location);
+      setUserLocation({ lat: location.lat, lng: location.lng });
+      setMeetingPlace([location.lat, location.lng]);
       setMapCenter([location.lat, location.lng]);
       setError(null);
     } catch (error: any) {
@@ -272,7 +275,7 @@ export default function GeolocationMeeting() {
                 <Label>Lieu de rencontre</Label>
                 <div className="text-sm text-gray-500">
                   {meetingPlace ? (
-                    `${meetingPlace.lat.toFixed(6)}, ${meetingPlace.lng.toFixed(6)}`
+                    `${meetingPlace[0].toFixed(6)}, ${meetingPlace[1].toFixed(6)}`
                   ) : (
                     'Aucun lieu sélectionné'
                   )}
@@ -304,14 +307,14 @@ export default function GeolocationMeeting() {
               style={{ height: '100%', width: '100%' }}
             >
               {userLocation && (
-                <DynamicMarker position={[userLocation.lat, userLocation.lng]}>
+                <DynamicMarker position={userLocation}>
                   <DynamicPopup>
                     Votre position
                   </DynamicPopup>
                 </DynamicMarker>
               )}
               {meetingPlace && (
-                <DynamicMarker position={[meetingPlace.lat, meetingPlace.lng]}>
+                <DynamicMarker position={meetingPlace}>
                   <DynamicPopup>
                     Lieu de rencontre
                   </DynamicPopup>

@@ -24,9 +24,7 @@ export function LanguageSwitcher() {
             </SelectTrigger>
             <SelectContent>
                 {locales.map((locale) => (
-                    <SelectItem key={locale} value={locale}>
-                        {t(`locale${locale.charAt(0).toUpperCase() + locale.slice(1)}`)}
-                    </SelectItem>
+                    <SelectItem key={locale} value={locale}>{locale.toUpperCase() as React.ReactNode}</SelectItem>
                 ))}
             </SelectContent>
         </Select>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -40,12 +39,12 @@ export default function ProfilePage() {
   const t = useTranslations('ProfilePage');
   const tChat = useTranslations('Chat'); // For moderation messages
   const { toast } = useToast();
-  const { currentUser, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [initialProfileData, setInitialProfileData] = useState<UserProfile | null>(null); 
-  const [loadingData, setLoadingData] = useState(true); 
+  const [initialProfileData, setInitialProfileData] = useState<UserProfile | null>(null);
+  const [loadingData, setLoadingData] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -53,16 +52,16 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!currentUser) {
+    if (!user) {
       return;
     }
 
     const fetchProfile = async () => {
       setLoadingData(true);
       try {
-        const userProfile = await get_user(currentUser.uid);
+        const userProfile = await get_user(user.uid);
         setProfile(userProfile);
-        setInitialProfileData(userProfile); 
+        setInitialProfileData(userProfile);
         setPreviewUrl(userProfile.profilePicture || null);
       } catch (error) {
         console.error("Failed to fetch profile:", error);
@@ -71,14 +70,14 @@ export default function ProfilePage() {
           title: t('fetchErrorTitle'),
           description: t('fetchErrorDescription'),
         });
-        setProfile(null); 
+        setProfile(null);
         setInitialProfileData(null);
       } finally {
         setLoadingData(false);
       }
     };
     fetchProfile();
-  }, [currentUser, t, toast]);
+  }, [user, t, toast]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -97,7 +96,7 @@ export default function ProfilePage() {
   };
 
   const handlePrivacyChange = (setting: keyof NonNullable<UserProfile['privacySettings']>, value: boolean) => {
-     setProfile(prev => {
+    setProfile(prev => {
       if (!prev) return null;
       const currentSettings = prev.privacySettings || { showLocation: true, showOnlineStatus: true };
       return {
@@ -113,7 +112,7 @@ export default function ProfilePage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) { 
+      if (file.size > 5 * 1024 * 1024) {
         toast({ variant: 'destructive', title: t('fileTooLargeTitle'), description: t('fileTooLargeDesc') });
         return;
       }
@@ -138,63 +137,63 @@ export default function ProfilePage() {
 
   const mockUploadProfilePicture = async (file: File, userId: string): Promise<string> => {
     console.log(`Simulating upload of ${file.name} for user ${userId}...`);
-    await new Promise(resolve => setTimeout(resolve, 1500)); 
-    
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
     // Simulate image moderation during upload
     const tempUrl = URL.createObjectURL(file); // Create a temporary URL for moderation simulation
     const imageModerationResult: ModerationResult = await moderateImage(tempUrl);
     // URL.revokeObjectURL(tempUrl); // Clean up temporary URL if not needed further by actual upload
 
     if (!imageModerationResult.isSafe) {
-        toast({
-            variant: 'destructive',
-            title: tChat('moderationBlockTitle'),
-            description: `${t('imageModerationFailed')} ${imageModerationResult.issues?.map(issue => issue.category).join(', ')}`,
-            duration: 7000,
-        });
-        throw new Error("Image moderation failed"); // Stop the upload process
+      toast({
+        variant: 'destructive',
+        title: tChat('moderationBlockTitle'),
+        description: `${t('imageModerationFailed')} ${imageModerationResult.issues?.map(issue => issue.category).join(', ')}`,
+        duration: 7000,
+      });
+      throw new Error("Image moderation failed"); // Stop the upload process
     }
-    
+
     return URL.createObjectURL(file); // Return new object URL for preview if safe
   };
 
   const handleUpdateProfile = async () => {
-    if (!profile || !currentUser) return;
+    if (!profile || !user) return;
     setIsSaving(true);
-    
+
     // Moderate bio text
     if (profile.bio) {
-        const bioModerationResult: ModerationResult = await moderateText(profile.bio);
-        if (!bioModerationResult.isSafe) {
-            toast({
-                variant: "destructive",
-                title: tChat('moderationBlockTitle'),
-                description: `${t('bioModerationFailed')} ${bioModerationResult.issues?.map(issue => issue.category).join(', ')}`,
-                duration: 7000,
-            });
-            setIsSaving(false);
-            return;
-        }
+      const bioModerationResult: ModerationResult = await moderateText(profile.bio);
+      if (!bioModerationResult.isSafe) {
+        toast({
+          variant: "destructive",
+          title: tChat('moderationBlockTitle'),
+          description: `${t('bioModerationFailed')} ${bioModerationResult.issues?.map(issue => issue.category).join(', ')}`,
+          duration: 7000,
+        });
+        setIsSaving(false);
+        return;
+      }
     }
 
-    let uploadedImageUrl = profile.profilePicture; 
+    let uploadedImageUrl = profile.profilePicture;
 
     try {
-       if (profilePictureFile) {
-         uploadedImageUrl = await mockUploadProfilePicture(profilePictureFile, currentUser.uid);
-       }
+      if (profilePictureFile) {
+        uploadedImageUrl = await mockUploadProfilePicture(profilePictureFile, user.uid);
+      }
 
       const updatedProfileData: UserProfile = {
         ...profile,
-        id: currentUser.uid,
+        id: user.uid,
         profilePicture: uploadedImageUrl,
-        dataAiHint: profile.name ? `${profile.name.split(' ')[0].toLowerCase()} person` : 'person', 
+        dataAiHint: profile.name ? `${profile.name.split(' ')[0].toLowerCase()} person` : 'person',
       };
 
-      const newSavedProfile = await update_user_profile(currentUser.uid, updatedProfileData);
-      setProfile(newSavedProfile); 
-      setInitialProfileData(newSavedProfile); 
-      if (newSavedProfile.profilePicture) { 
+      const newSavedProfile = await update_user_profile(user.uid, updatedProfileData);
+      setProfile(newSavedProfile);
+      setInitialProfileData(newSavedProfile);
+      if (newSavedProfile.profilePicture) {
         setPreviewUrl(newSavedProfile.profilePicture);
       }
 
@@ -203,7 +202,7 @@ export default function ProfilePage() {
         description: t('updateSuccessDescription'),
       });
       setIsEditing(false);
-      setProfilePictureFile(null); 
+      setProfilePictureFile(null);
     } catch (error: any) { // Catch specific error from moderation
       console.error("Failed to update profile:", error);
       if (error.message !== "Image moderation failed") { // Don't double-toast if it's already handled
@@ -219,9 +218,9 @@ export default function ProfilePage() {
   };
 
   const handleCancelEdit = () => {
-    setProfile(initialProfileData); 
-    setPreviewUrl(initialProfileData?.profilePicture || null); 
-    setProfilePictureFile(null); 
+    setProfile(initialProfileData);
+    setPreviewUrl(initialProfileData?.profilePicture || null);
+    setProfilePictureFile(null);
     setIsEditing(false);
   };
 
@@ -238,7 +237,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!currentUser) {
+  if (!user) {
     return (
       <div className="container mx-auto p-4 flex items-center justify-center min-h-screen">
         <p className="mr-2">{t('redirectingToLogin')}</p>
@@ -255,47 +254,46 @@ export default function ProfilePage() {
       </div>
     );
   }
-  
+
   return (
     <div className="container mx-auto py-8 px-4">
       <Card className="w-full max-w-2xl mx-auto shadow-lg border">
         <CardHeader className="flex flex-col items-center space-y-4 sm:flex-row sm:justify-between sm:space-y-0">
           <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <div className="relative group">
-                  <Avatar
-                      className={`h-24 w-24 sm:h-32 sm:w-32 border-4 border-muted group-hover:border-primary transition-colors ${isEditing ? 'cursor-pointer' : ''}`}
-                      onClick={handleAvatarClick}
-                      data-ai-hint={profile.dataAiHint || "person placeholder"}
-                    >
-                    <AvatarImage src={previewUrl || undefined} alt={profile.name || currentUser.displayName || 'User'} priority={true} />
-                    <AvatarFallback className="text-3xl sm:text-4xl">{getInitials(profile.name || currentUser.displayName)}</AvatarFallback>
-                  </Avatar>
-                  {isEditing && (
-                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick} aria-label={t('uploadPicture')}>
-                          <Upload className="h-8 w-8 text-white" />
-                      </div>
-                  )}
-                  {isSaving && profilePictureFile && ( 
-                      <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-full">
-                          <Loader2 className="h-10 w-10 text-white animate-spin" />
-                      </div>
-                  )}
-              </div>
+            <div className="relative group">
+              <Avatar
+                className={`h-24 w-24 sm:h-32 sm:w-32 border-4 border-muted group-hover:border-primary transition-colors ${isEditing ? 'cursor-pointer' : ''}`}
+                onClick={handleAvatarClick}
+                data-ai-hint={profile.dataAiHint || "person placeholder"}
+              >
+                <AvatarImage src={previewUrl || undefined} alt={profile.name || user.displayName || 'User'} />
+                {isEditing && (
+                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick} aria-label={t('uploadPicture')}>
+                    <Upload className="h-8 w-8 text-white" />
+                  </div>
+                )}
+                {isSaving && profilePictureFile && (
+                  <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-full">
+                    <Loader2 className="h-10 w-10 text-white animate-spin" />
+                  </div>
+                )}
+              </Avatar>
 
               <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  className="hidden"
-                  disabled={isSaving || !isEditing}
-                  aria-label={t('uploadPictureInputLabel')}
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+                disabled={isSaving || !isEditing}
+                aria-label={t('uploadPictureInputLabel')}
               />
 
               <div className="text-center sm:text-left">
-                <CardTitle className="text-2xl sm:text-3xl">{profile.name || currentUser.displayName || t('anonymousUser')}</CardTitle>
+                <CardTitle className="text-2xl sm:text-3xl">{profile.name || user.displayName || t('anonymousUser')}</CardTitle>
                 <CardDescription>{t('description')}</CardDescription>
               </div>
+            </div>
           </div>
           {!isEditing && (
             <Button variant="outline" size="sm" onClick={() => setIsEditing(true)} disabled={isSaving || loadingData}>
@@ -328,7 +326,7 @@ export default function ProfilePage() {
                   disabled={isSaving}
                   rows={4}
                 />
-                 <p className="text-xs text-muted-foreground">{t('bioModerationNote')}</p>
+                <p className="text-xs text-muted-foreground">{t('bioModerationNote')}</p>
               </div>
               <div className="space-y-2">
                 <Label>{t('interestsLabel')}</Label>
@@ -351,33 +349,33 @@ export default function ProfilePage() {
                   ))}
                 </div>
               </div>
-               <div className="space-y-4">
+              <div className="space-y-4">
                 <Label className="text-base font-semibold">{t('privacySettingsLabel')}</Label>
-                 <div className="flex items-center justify-between p-3 border rounded-md">
+                <div className="flex items-center justify-between p-3 border rounded-md">
                   <Label htmlFor="showLocation" className="cursor-pointer flex-grow">{t('showLocationLabel')}</Label>
                   <Switch
                     id="showLocation"
                     checked={profile.privacySettings?.showLocation ?? true}
                     onCheckedChange={(checked) => handlePrivacyChange('showLocation', checked)}
                     disabled={isSaving}
-                   />
-                 </div>
-                 <div className="flex items-center justify-between p-3 border rounded-md">
-                   <Label htmlFor="showOnlineStatus" className="cursor-pointer flex-grow">{t('showOnlineStatusLabel')}</Label>
+                  />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-md">
+                  <Label htmlFor="showOnlineStatus" className="cursor-pointer flex-grow">{t('showOnlineStatusLabel')}</Label>
                   <Switch
                     id="showOnlineStatus"
                     checked={profile.privacySettings?.showOnlineStatus ?? true}
                     onCheckedChange={(checked) => handlePrivacyChange('showOnlineStatus', checked)}
                     disabled={isSaving}
                   />
-                 </div>
-               </div>
+                </div>
+              </div>
             </>
           ) : (
-             <>
+            <>
               <div className="space-y-1">
                 <Label className="font-semibold text-sm">{t('emailLabel')}</Label>
-                <p className="text-muted-foreground">{currentUser.email || t('notSet')}</p>
+                <p className="text-muted-foreground">{user.email || t('notSet')}</p>
               </div>
               <div className="space-y-1">
                 <Label className="font-semibold text-sm">{t('bioLabel')}</Label>
@@ -396,9 +394,9 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="space-y-2">
-                  <Label className="font-semibold text-sm">{t('privacySettingsLabel')}</Label>
-                  <p className="text-sm">{t('showLocationLabel')}: <span className="font-medium text-muted-foreground">{profile.privacySettings?.showLocation ? t('yes') : t('no')}</span></p>
-                  <p className="text-sm">{t('showOnlineStatusLabel')}: <span className="font-medium text-muted-foreground">{profile.privacySettings?.showOnlineStatus ? t('yes') : t('no')}</span></p>
+                <Label className="font-semibold text-sm">{t('privacySettingsLabel')}</Label>
+                <p className="text-sm">{t('showLocationLabel')}: <span className="font-medium text-muted-foreground">{profile.privacySettings?.showLocation ? t('yes') : t('no')}</span></p>
+                <p className="text-sm">{t('showOnlineStatusLabel')}: <span className="font-medium text-muted-foreground">{profile.privacySettings?.showOnlineStatus ? t('yes') : t('no')}</span></p>
               </div>
             </>
           )}
@@ -406,10 +404,10 @@ export default function ProfilePage() {
         {isEditing && (
           <CardFooter className="flex justify-end space-x-3">
             <Button variant="outline" onClick={handleCancelEdit} disabled={isSaving}>
-                {t('cancel')}
+              {t('cancel')}
             </Button>
             <Button onClick={handleUpdateProfile} disabled={isSaving}>
-              { isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" /> }
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isSaving ? t('saving') : t('saveChanges')}
             </Button>
           </CardFooter>

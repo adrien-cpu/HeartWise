@@ -124,8 +124,8 @@ class LeaderboardService {
 
             const entry: Omit<LeaderboardEntry, 'id'> = {
                 userId,
-                username: userData.username,
-                avatarUrl: userData.avatarUrl,
+                username: userData?.username ?? '',
+                avatarUrl: userData?.avatarUrl ?? '',
                 score: points,
                 rank: 0, // Sera mis à jour lors de la récupération
                 streak: await this.getUserStreak(userId),
@@ -161,7 +161,6 @@ class LeaderboardService {
             // Créer les défis spéciaux
             for (const challengeId of event.challenges) {
                 await challengeService.createChallenge({
-                    id: challengeId,
                     title: `Défi spécial: ${event.title}`,
                     description: `Défi spécial pour l'événement ${event.title}`,
                     type: 'special',
@@ -212,8 +211,8 @@ class LeaderboardService {
             const entry: LeaderboardEntry = {
                 id: '',
                 userId,
-                username: userData.username,
-                avatarUrl: userData.avatarUrl,
+                username: userData?.username ?? '',
+                avatarUrl: userData?.avatarUrl ?? '',
                 score: 0,
                 rank: event.participants.length + 1,
                 streak: 0,

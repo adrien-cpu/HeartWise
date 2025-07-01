@@ -48,7 +48,7 @@ export class NotificationService {
 
     private setupMessageListener() {
         onMessage(this.messaging, (payload) => {
-            this.notificationCallbacks.forEach(callback => callback(payload));
+            this.notificationCallbacks.forEach(callback => callback(payload as unknown as NotificationPayload));
         });
     }
 

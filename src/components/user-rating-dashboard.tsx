@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { userRatingService, UserRating, UserRatingStats } from '@/services/user_rating_service';
+import { userRatingService, UserRating as UserRatingType, UserRatingStats } from '@/services/user_rating_service';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -43,7 +43,7 @@ interface AIRecommendation {
 export const UserRatingDashboard: React.FC<UserRatingDashboardProps> = ({ userId }) => {
     const { t } = useTranslation();
     const [stats, setStats] = useState<UserRatingStats | null>(null);
-    const [recentRatings, setRecentRatings] = useState<UserRating[]>([]);
+    const [recentRatings, setRecentRatings] = useState<UserRatingType[]>([]);
     const [sentimentAnalysis, setSentimentAnalysis] = useState<SentimentAnalysis>({
         positive: 0,
         neutral: 0,
@@ -53,59 +53,10 @@ export const UserRatingDashboard: React.FC<UserRatingDashboardProps> = ({ userId
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        loadDashboardData();
-    }, [userId]);
-
-    const loadDashboardData = async () => {
-        try {
-            setLoading(true);
-            const [userStats, ratings] = await Promise.all([
-                userRatingService.getUserRatingStats(userId),
-                userRatingService.getUserRatings(userId, { limit: 50 }),
-            ]);
-            setStats(userStats);
-            setRecentRatings(ratings);
-
-            // Analyser le sentiment des commentaires
-            const sentiment = analyzeSentiment(ratings);
-            setSentimentAnalysis(sentiment);
-
-            // Générer des recommandations
-            const aiRecommendations = generateRecommendations(userStats, sentiment, ratings);
-            setRecommendations(aiRecommendations);
-        } catch (error) {
-            setError(t('UserRatingDashboard.errorLoading'));
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const analyzeSentiment = (ratings: UserRating[]): SentimentAnalysis => {
-        // Logique simple d'analyse de sentiment basée sur les notes et les tags
-        const sentiment = {
-            positive: 0,
-            neutral: 0,
-            negative: 0,
-        };
-
-        ratings.forEach(rating => {
-            if (rating.rating >= 4) {
-                sentiment.positive++;
-            } else if (rating.rating <= 2) {
-                sentiment.negative++;
-            } else {
-                sentiment.neutral++;
-            }
-        });
-
-        return sentiment;
-    };
-
-    const generateRecommendations = (
+    const generateRecommendations = useCallback((
         stats: UserRatingStats,
         sentiment: SentimentAnalysis,
-        ratings: UserRating[]
+        ratings: UserRatingType[]
     ): AIRecommendation[] => {
         const recommendations: AIRecommendation[] = [];
 
@@ -148,6 +99,51 @@ export const UserRatingDashboard: React.FC<UserRatingDashboardProps> = ({ userId
         }
 
         return recommendations;
+    }, [t]);
+
+    const loadDashboardData = useCallback(async () => {
+        try {
+            setLoading(true);
+            const [userStats, ratings] = await Promise.all([
+                userRatingService.getUserRatingStats(userId),
+                userRatingService.getUserRatings(userId, { limit: 50 }),
+            ]);
+            setStats(userStats);
+            setRecentRatings(ratings);
+            const sentiment = analyzeSentiment(ratings);
+            setSentimentAnalysis(sentiment);
+            const aiRecommendations = generateRecommendations(userStats, sentiment, ratings);
+            setRecommendations(aiRecommendations);
+        } catch (error) {
+            setError(t('UserRatingDashboard.errorLoading'));
+        } finally {
+            setLoading(false);
+        }
+    }, [userId, t, generateRecommendations]);
+
+    useEffect(() => {
+        loadDashboardData();
+    }, [loadDashboardData]);
+
+    const analyzeSentiment = (ratings: UserRatingType[]): SentimentAnalysis => {
+        // Logique simple d'analyse de sentiment basée sur les notes et les tags
+        const sentiment = {
+            positive: 0,
+            neutral: 0,
+            negative: 0,
+        };
+
+        ratings.forEach(rating => {
+            if (rating.rating >= 4) {
+                sentiment.positive++;
+            } else if (rating.rating <= 2) {
+                sentiment.negative++;
+            } else {
+                sentiment.neutral++;
+            }
+        });
+
+        return sentiment;
     };
 
     const ratingDistributionData = {
@@ -288,10 +284,10 @@ export const UserRatingDashboard: React.FC<UserRatingDashboardProps> = ({ userId
                         <div
                             key={index}
                             className={`p-4 rounded-lg ${recommendation.impact === 'high'
-                                    ? 'bg-red-50 border border-red-200'
-                                    : recommendation.impact === 'medium'
-                                        ? 'bg-yellow-50 border border-yellow-200'
-                                        : 'bg-blue-50 border border-blue-200'
+                                ? 'bg-red-50 border border-red-200'
+                                : recommendation.impact === 'medium'
+                                    ? 'bg-yellow-50 border border-yellow-200'
+                                    : 'bg-blue-50 border border-blue-200'
                                 }`}
                         >
                             <div className="flex items-start">
@@ -301,10 +297,10 @@ export const UserRatingDashboard: React.FC<UserRatingDashboardProps> = ({ userId
                                 </div>
                                 <span
                                     className={`px-2 py-1 text-sm rounded-full ${recommendation.impact === 'high'
-                                            ? 'bg-red-100 text-red-800'
-                                            : recommendation.impact === 'medium'
-                                                ? 'bg-yellow-100 text-yellow-800'
-                                                : 'bg-blue-100 text-blue-800'
+                                        ? 'bg-red-100 text-red-800'
+                                        : recommendation.impact === 'medium'
+                                            ? 'bg-yellow-100 text-yellow-800'
+                                            : 'bg-blue-100 text-blue-800'
                                         }`}
                                 >
                                     {t(`UserRatingDashboard.impact.${recommendation.impact}`)}

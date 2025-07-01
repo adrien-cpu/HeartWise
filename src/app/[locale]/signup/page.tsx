@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { SubmitHandler } from 'react-hook-form';
@@ -16,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, UserPlus, Eye, EyeOff, AlertTriangle } from 'lucide-react'; 
+import { Loader2, UserPlus, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { update_user_profile } from '@/services/user_profile';
 import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
@@ -43,11 +42,10 @@ export default function SignupPage(): JSX.Element {
   const t = useTranslations('Auth');
   const { toast } = useToast();
   const router = useRouter();
-  const { isFirebaseConfigured } = useAuth(); 
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false); 
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -58,16 +56,6 @@ export default function SignupPage(): JSX.Element {
   });
 
   const onSubmit: SubmitHandler<SignupFormInputs> = async (data) => {
-    if (!isFirebaseConfigured) {
-        setError(t('firebaseConfigError'));
-        toast({
-            variant: 'destructive',
-            title: t('signupErrorTitle'),
-            description: t('firebaseConfigErrorUserFriendly'),
-        });
-        return;
-    }
-
     setIsLoading(true);
     setError(null);
     try {
@@ -92,7 +80,7 @@ export default function SignupPage(): JSX.Element {
         title: t('signupSuccessTitle'),
         description: t('signupSuccessDesc'),
       });
-      router.push('/'); 
+      router.push('/');
     } catch (err: any) {
       console.error('Signup error:', err.code, err.message);
       let errorMessage = t('signupErrorDefault');
@@ -136,13 +124,6 @@ export default function SignupPage(): JSX.Element {
           <CardDescription>{t('signupDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
-           {!isFirebaseConfigured && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>{t('configErrorTitle')}</AlertTitle>
-              <AlertDescription>{t('firebaseConfigErrorUserFriendly')}</AlertDescription>
-            </Alert>
-          )}
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertTriangle className="h-4 w-4" />
@@ -158,7 +139,7 @@ export default function SignupPage(): JSX.Element {
                 type="text"
                 {...register('name')}
                 placeholder={t('namePlaceholder')}
-                disabled={isLoading || !isFirebaseConfigured}
+                disabled={isLoading}
                 aria-invalid={errors.name ? "true" : "false"}
               />
               {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
@@ -170,7 +151,7 @@ export default function SignupPage(): JSX.Element {
                 type="email"
                 {...register('email')}
                 placeholder="name@example.com"
-                disabled={isLoading || !isFirebaseConfigured}
+                disabled={isLoading}
                 aria-invalid={errors.email ? "true" : "false"}
               />
               {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
@@ -183,9 +164,9 @@ export default function SignupPage(): JSX.Element {
                   type={showPassword ? 'text' : 'password'}
                   {...register('password')}
                   placeholder="••••••••"
-                  disabled={isLoading || !isFirebaseConfigured}
+                  disabled={isLoading}
                   aria-invalid={errors.password ? "true" : "false"}
-                  className="pr-10" 
+                  className="pr-10"
                 />
                 <Button
                   type="button"
@@ -194,14 +175,13 @@ export default function SignupPage(): JSX.Element {
                   className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground hover:text-foreground"
                   onClick={togglePasswordVisibility}
                   aria-label={showPassword ? t('hidePassword') : t('showPassword')}
-                  disabled={!isFirebaseConfigured}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading || !isFirebaseConfigured}>
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('signupButton')}
             </Button>

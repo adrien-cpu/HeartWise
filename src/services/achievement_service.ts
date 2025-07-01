@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, addDoc, updateDoc, doc, Timestamp, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, updateDoc, doc, Timestamp, orderBy, getDoc, limit } from 'firebase/firestore';
 import { UserRating } from './user_rating_service';
 import { notificationService } from './notification_service';
 
@@ -196,7 +196,7 @@ class AchievementService {
             if (averageRating >= 4.5) {
                 achievements.push({
                     userId,
-                    type: 'rating_milestone',
+                    type: 'challenge',
                     title: 'Expert en Relations',
                     description: 'Atteint une note moyenne de 4.5/5',
                     icon: 'star',
@@ -211,7 +211,7 @@ class AchievementService {
             if (userRatings.length >= 50) {
                 achievements.push({
                     userId,
-                    type: 'rating_count',
+                    type: 'challenge',
                     title: 'Populaire',
                     description: 'Reçu 50 notes ou plus',
                     icon: 'users',
@@ -226,7 +226,7 @@ class AchievementService {
             if (userActivity.consecutiveDays >= 30) {
                 achievements.push({
                     userId,
-                    type: 'active_user',
+                    type: 'special_event',
                     title: 'Fidèle',
                     description: 'Connecté pendant 30 jours consécutifs',
                     icon: 'calendar',

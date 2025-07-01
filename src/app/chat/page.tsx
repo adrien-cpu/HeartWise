@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -67,7 +67,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { VideoCall } from '@/components/video-call';
-import { videoCallService } from '../../services/videoCall';
+import { videoCallService } from '@/services/videoCall';
 import Image from 'next/image';
 
 /**
@@ -226,7 +226,7 @@ const manualIntentionTags = [
 
 const REACTION_EMOJIS = ['❤️', '👍', '😂', '😮', '😢', '🙏'];
 
-const ChatPage = (): JSX.Element => {
+export default function ChatPage(): JSX.Element {
   const t = useTranslations("Chat");
   const { toast } = useToast();
   const { user: currentUser, loading: authLoading } = useAuthContext();
@@ -518,7 +518,7 @@ const ChatPage = (): JSX.Element => {
       // Remove reaction if already exists
       newReactions = {
         ...currentReactions,
-        [currentUser.uid]: userReactions.filter(r => r !== emoji)
+        [currentUser.uid]: userReactions.filter((r: string) => r !== emoji)
       };
     } else {
       // Add new reaction
@@ -686,7 +686,7 @@ const ChatPage = (): JSX.Element => {
           {isCurrentUser && (
             <Avatar className="h-8 w-8">
               <AvatarImage src={currentUser?.photoURL || undefined} />
-              <AvatarFallback>{getInitials(currentUser?.displayName)}</AvatarFallback>
+              <AvatarFallback>{getInitials(currentUser?.displayName || undefined)}</AvatarFallback>
             </Avatar>
           )}
         </div>
@@ -710,29 +710,28 @@ const ChatPage = (): JSX.Element => {
     );
   };
 
-  const handleSearch = useCallback(
-    debounce((query: string) => {
-      if (!query.trim() || !currentMessages) {
-        setSearchResults([]);
-        setIsSearching(false);
-        return;
-      }
-
-      setIsSearching(true);
-      const results = currentMessages.filter((message) => {
-        const text = message.text.toLowerCase();
-        const searchLower = query.toLowerCase();
-        return text.includes(searchLower);
-      });
-      setSearchResults(results);
+  const handleSearch = useCallback((query: string) => {
+    if (!query.trim() || !currentMessages) {
+      setSearchResults([]);
       setIsSearching(false);
-    }, 300),
-    [currentMessages]
-  );
+      return;
+    }
+
+    setIsSearching(true);
+    const results = currentMessages.filter((message) => {
+      const text = message.text.toLowerCase();
+      const searchLower = query.toLowerCase();
+      return text.includes(searchLower);
+    });
+    setSearchResults(results);
+    setIsSearching(false);
+  }, [currentMessages]);
+
+  const debouncedSearch = useMemo(() => debounce(handleSearch, 300), [handleSearch]);
 
   useEffect(() => {
-    handleSearch(searchQuery);
-  }, [searchQuery, handleSearch]);
+    debouncedSearch(searchQuery);
+  }, [searchQuery, debouncedSearch]);
 
   const renderSearchResults = () => {
     if (!searchQuery.trim()) return null;
@@ -1045,13 +1044,9 @@ const ChatPage = (): JSX.Element => {
                           <SelectValue placeholder={t('selectIntentionPlaceholder')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="" className="text-xs">{t('noTagOption')}</SelectItem>
+                          <SelectItem value="" className="text-xs">{t('noTagOption') as React.ReactNode}</SelectItem>
                           {manualIntentionTags.map(tag => (
-                            <SelectItem key={tag.value} value={tag.value} className="text-xs">
-                              <div className="flex items-center">
-                                {tag.icon} {tag.label}
-                              </div>
-                            </SelectItem>
+                            <SelectItem key={tag.value} value={tag.value} className="text-xs">{tag.label as React.ReactNode}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -1124,11 +1119,11 @@ const ChatPage = (): JSX.Element => {
                   <SelectValue placeholder="Durée" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">Normal</SelectItem>
-                  <SelectItem value="30">30 secondes</SelectItem>
-                  <SelectItem value="60">1 minute</SelectItem>
-                  <SelectItem value="300">5 minutes</SelectItem>
-                  <SelectItem value="3600">1 heure</SelectItem>
+                  <SelectItem value="0">{"Normal" as React.ReactNode}</SelectItem>
+                  <SelectItem value="30">{"30 secondes" as React.ReactNode}</SelectItem>
+                  <SelectItem value="60">{"1 minute" as React.ReactNode}</SelectItem>
+                  <SelectItem value="300">{"5 minutes" as React.ReactNode}</SelectItem>
+                  <SelectItem value="3600">{"1 heure" as React.ReactNode}</SelectItem>
                 </SelectContent>
               </Select>
               <Input
@@ -1155,7 +1150,7 @@ const ChatPage = (): JSX.Element => {
       </TooltipProvider>
       {isInCall && callTarget && (
         <VideoCall
-          userId={currentUser?.id || ''}
+          userId={currentUser?.uid || ''}
           targetUserId={callTarget}
           onCallEnd={handleEndCall}
         />

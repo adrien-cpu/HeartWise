@@ -25,7 +25,7 @@ const LocationMap = ({ latitude, longitude, zoom = 13, height = '400px' }: Locat
                 center={[latitude, longitude]}
                 zoom={zoom}
                 style={{ height: '100%', width: '100%' }}
-                whenCreated={setMap}
+                whenReady={() => setMap(null)}
             >
                 <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

@@ -249,7 +249,7 @@ export async function sendSignalingMessageViaFirestore(
       await updateDoc(signalingDocRef, {
         [`candidates.${senderId}`]: arrayUnion(payload.candidate), // Store candidate directly
         [`lastActivity.${senderId}`]: serverTimestamp()
-      }, { merge: true }); // Create doc if it doesn't exist
+      }); // Firestore update, pas de FieldPath ici
     } else {
       // For offer, answer, hangup, set/overwrite the specific field
       if (message.type === 'offer') {

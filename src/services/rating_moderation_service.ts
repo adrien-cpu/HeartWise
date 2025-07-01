@@ -46,6 +46,7 @@ class RatingModerationService {
                 ...reportData,
                 createdAt: reportData.createdAt.toDate(),
                 updatedAt: reportData.updatedAt.toDate(),
+                status: reportData.status as 'pending' | 'reviewed' | 'resolved',
             };
         } catch (error) {
             console.error('Erreur lors de la création du signalement:', error);
