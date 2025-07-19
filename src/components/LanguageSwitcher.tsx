@@ -1,32 +1,49 @@
 "use client";
 
-import { useTranslations, useLocale } from 'next-intl';
-import { useRouter, usePathname } from 'next/navigation';
+import { useLocale } from 'next-intl';
+import { useRouter, usePathname } from 'next-intl/client';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { locales } from '@/i18n/settings';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Globe } from 'lucide-react';
 
 export function LanguageSwitcher() {
-    const t = useTranslations('Home');
     const currentLocale = useLocale();
     const router = useRouter();
     const pathname = usePathname();
 
     const onSelectChange = (nextLocale: string) => {
-        const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?(?=\/|$)/, '');
-        const newPathname = `/${nextLocale}${pathWithoutLocale === '' ? '' : pathWithoutLocale}`;
-        router.replace(newPathname);
+        router.replace(pathname, { locale: nextLocale });
     };
 
     return (
-        <Select value={currentLocale} onValueChange={onSelectChange}>
-            <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('selectLanguage')} />
-            </SelectTrigger>
-            <SelectContent>
-                {locales.map((locale) => (
-                    <SelectItem key={locale} value={locale}>{locale.toUpperCase() as React.ReactNode}</SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Select value={currentLocale} onValueChange={onSelectChange}>
+                        <SelectTrigger className="w-auto bg-transparent border-0 text-white hover:text-gray-300 focus:ring-0">
+                            <div className="flex items-center gap-2">
+                                <Globe size={20} />
+                                <SelectValue />
+                            </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-gray-800 text-white border-gray-700">
+                            {locales.map((locale) => (
+                                <SelectItem 
+                                    key={locale} 
+                                    value={locale} 
+                                    className="hover:bg-gray-700 focus:bg-gray-700"
+                                >
+                                    {locale.toUpperCase()}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </TooltipTrigger>
+                <TooltipContent className="bg-gray-800 text-white border-gray-700">
+                    <p>Changer la langue</p>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
     );
-} 
+}

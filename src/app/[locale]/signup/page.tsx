@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from 'next-intl'; // Corrected import
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -18,13 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, UserPlus, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { update_user_profile } from '@/services/user_profile';
-import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
-
-/**
- * @fileOverview Signup page component.
- * @module SignupPage
- * @description Allows new users to register with their name, email, and password. Includes password visibility toggle.
- */
+import AuthLayout from '@/components/layouts/AuthLayout';
 
 const signupSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters long' }),
@@ -34,10 +28,6 @@ const signupSchema = z.object({
 
 type SignupFormInputs = z.infer<typeof signupSchema>;
 
-/**
- * SignupPage component.
- * @returns {JSX.Element} The rendered signup page.
- */
 export default function SignupPage(): JSX.Element {
   const t = useTranslations('Auth');
   const { toast } = useToast();
@@ -106,16 +96,13 @@ export default function SignupPage(): JSX.Element {
     }
   };
 
-  /**
-   * Toggles the visibility of the password input field.
-   */
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
   return (
-    <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl">
+    <AuthLayout>
+      <Card className="shadow-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
             <UserPlus className="h-6 w-6 text-primary" />
@@ -196,6 +183,6 @@ export default function SignupPage(): JSX.Element {
           </p>
         </CardFooter>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

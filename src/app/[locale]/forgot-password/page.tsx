@@ -6,23 +6,16 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { Link } from 'next-intl'; // Corrected import
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, KeyRound, AlertTriangle } from 'lucide-react';
+import { Loader2, Mail, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
-
-/**
- * @fileOverview Forgot Password page component.
- * @module ForgotPasswordPage
- * @description Allows users to request a password reset email.
- */
+import AuthLayout from '@/components/layouts/AuthLayout';
 
 const forgotPasswordSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -30,17 +23,14 @@ const forgotPasswordSchema = z.object({
 
 type ForgotPasswordFormInputs = z.infer<typeof forgotPasswordSchema>;
 
-/**
- * ForgotPasswordPage component.
- * @returns {JSX.Element} The rendered forgot password page.
- */
 export default function ForgotPasswordPage(): JSX.Element {
   const t = useTranslations('Auth');
   const { toast } = useToast();
+  const { sendPasswordReset } = useAuth();
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const {
     register,
@@ -49,47 +39,44 @@ export default function ForgotPasswordPage(): JSX.Element {
   } = useForm<ForgotPasswordFormInputs>({
     resolver: zodResolver(forgotPasswordSchema),
   });
-
+  
   const onSubmit: SubmitHandler<ForgotPasswordFormInputs> = async (data) => {
     setIsLoading(true);
     setError(null);
-    setSuccessMessage(null);
+    setIsSuccess(false);
     try {
-      await sendPasswordResetEmail(auth, data.email);
-      setSuccessMessage(t('passwordResetEmailSentDesc'));
+      await sendPasswordReset(data.email);
+      setIsSuccess(true);
       toast({
-        title: t('passwordResetEmailSentTitle'),
-        description: t('passwordResetEmailSentDesc'),
+        title: t('passwordResetSuccessTitle'),
+        description: t('passwordResetSuccessDesc'),
       });
     } catch (err: any) {
-      console.error('Password reset error:', err.code, err.message);
       let errorMessage = t('passwordResetErrorDefault');
-      if (err.code === 'auth/user-not-found') {
-        errorMessage = t('passwordResetErrorUserNotFound');
-      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid.' || err.message?.includes('API key not valid')) {
-        errorMessage = t('firebaseApiKeyErrorDetailed');
-      } else if (err.code === 'auth/network-request-failed') {
-        errorMessage = t('networkError');
-      } else if (err.code === 'auth/invalid-email') {
-        errorMessage = t('passwordResetErrorInvalidEmail');
+       if (err.code === 'auth/user-not-found') {
+        // To prevent user enumeration, we can show a generic success message.
+        // Or a specific error, depending on security policy.
+        // For this case, we'll show a generic success message.
+        setIsSuccess(true); 
+      } else {
+        setError(errorMessage);
+        toast({
+          variant: 'destructive',
+          title: t('passwordResetErrorTitle'),
+          description: errorMessage,
+        });
       }
-      setError(errorMessage);
-      toast({
-        variant: 'destructive',
-        title: t('passwordResetErrorTitle'),
-        description: errorMessage,
-      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl">
+    <AuthLayout>
+      <Card className="shadow-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold flex items-center justify-center gap-2">
-            <KeyRound className="h-6 w-6 text-primary" />
+            <Mail className="h-6 w-6 text-primary" />
             {t('forgotPasswordTitle')}
           </CardTitle>
           <CardDescription>{t('forgotPasswordDescription')}</CardDescription>
@@ -98,18 +85,17 @@ export default function ForgotPasswordPage(): JSX.Element {
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>{t('passwordResetErrorTitle')}</AlertTitle>
+              <AlertTitle>{t('errorTitle')}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          {successMessage && (
-            <Alert variant="default" className="mb-4 border-green-500 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 dark:border-green-500/50 [&>svg]:text-green-500">
+          {isSuccess ? (
+             <Alert variant="default" className="mb-4 bg-green-100 border-green-400 text-green-700">
               <Mail className="h-4 w-4" />
-              <AlertTitle>{t('passwordResetEmailSentTitle')}</AlertTitle>
-              <AlertDescription>{successMessage}</AlertDescription>
+              <AlertTitle>{t('passwordResetSuccessTitle')}</AlertTitle>
+              <AlertDescription>{t('passwordResetSuccessDesc')}</AlertDescription>
             </Alert>
-          )}
-          {!successMessage && (
+          ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-1">
                 <Label htmlFor="email">{t('emailLabel')}</Label>
@@ -132,13 +118,12 @@ export default function ForgotPasswordPage(): JSX.Element {
         </CardContent>
         <CardFooter className="flex flex-col items-center space-y-2">
           <p className="text-sm text-muted-foreground">
-            {t('rememberPasswordPrompt')}{' '}
             <Link href="/login" className="font-medium text-primary hover:underline">
-              {t('loginLink')}
+              {t('backToLoginLink')}
             </Link>
           </p>
         </CardFooter>
       </Card>
-    </div>
+    </AuthLayout>
   );
 }

@@ -1,11 +1,16 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { User } from 'firebase/auth';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { 
+  User, 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  signOut,
+  sendPasswordResetEmail,
+  // Note: We'll keep signup logic in the signup page itself for now
+  // as it involves creating a user profile record in addition to auth.
+} from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 
 /**
  * @interface AuthContextType
@@ -15,57 +20,54 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
-  signup: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
+  sendPasswordReset: (email: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  loading: true,
-  login: async () => { },
-  signup: async () => { },
-  logout: async () => { },
-});
+// Create the context with a default value.
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
  * @function AuthProvider
- * @description Provider component for authentication context
+ * @description Provider component for authentication context. It centralizes all Firebase auth logic.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-  const t = useTranslations('Auth');
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
     });
 
+    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    // Implementation of login using Firebase
-    // This is a placeholder and should be replaced with the actual implementation
-    throw new Error('Login functionality not implemented');
+  const login = (email: string, password: string) => {
+    return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const signup = async (email: string, password: string) => {
-    // Implementation of signup using Firebase
-    // This is a placeholder and should be replaced with the actual implementation
-    throw new Error('Signup functionality not implemented');
+  const logout = () => {
+    return signOut(auth);
+  };
+  
+  const sendPasswordReset = (email: string) => {
+    return sendPasswordResetEmail(auth, email);
+  };
+  
+  const value = {
+    user,
+    loading,
+    login,
+    logout,
+    sendPasswordReset,
   };
 
-  const logout = async () => {
-    // Implementation of logout using Firebase
-    // This is a placeholder and should be replaced with the actual implementation
-    throw new Error('Logout functionality not implemented');
-  };
-
+  // Render children only when not loading, or handle loading state in components
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
@@ -73,16 +75,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 /**
  * @function useAuth
- * @description Custom hook to use the authentication context
+ * @description Custom hook to use the authentication context.
+ *              Ensures the hook is used within an AuthProvider.
  */
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) throw new Error('useAuth must be used within an AuthProvider');
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   return context;
 }
-
-/**
- * @function useAuthContext
- * @description Alias for useAuth to maintain compatibility
- */
-export const useAuthContext = useAuth;
