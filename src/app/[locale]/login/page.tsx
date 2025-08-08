@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useTranslations } from 'next-intl';
-import { Link } from 'next-intl'; // Corrected import
+import { Link } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -162,14 +162,15 @@ export default function LoginPage(): JSX.Element | null {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col items-center space-y-2">
+        {/* Commented out CardFooter for debugging */}
+        {/* <CardFooter className="flex flex-col items-center space-y-2">
           <p className="text-sm text-muted-foreground">
             {t('noAccountPrompt')}{' '}
             <Link href="/signup" className="font-medium text-primary hover:underline">
               {t('signupLink')}
             </Link>
           </p>
-        </CardFooter>
+        </CardFooter> */}
       </Card>
     </AuthLayout>
   );

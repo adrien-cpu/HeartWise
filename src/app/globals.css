@@ -4,40 +4,40 @@
 
 @layer base {
   :root {
-    --background: 0 0% 97%; /* #F8F8F8 */
-    --foreground: 0 0% 20%; /* #333333 */
+    --background: 0 0% 100%; /* Blanc */
+    --foreground: 240 10% 3.9%; /* Noir très sombre */
 
-    --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 0 0% 20%; /* #333333 */
+    --card: 0 0% 100%; /* Blanc */
+    --card-foreground: 240 10% 3.9%; /* Noir très sombre */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 20%;
+    --popover-foreground: 240 10% 3.9%;
 
-    --primary: 0 100% 71%; /* #FF6B6B */
-    --primary-foreground: 0 0% 100%; /* White */
+    --primary: 330 60% 50%; /* Un rose-rouge un peu plus profond */
+    --primary-foreground: 0 0% 98%; /* Blanc cassé */
 
-    --secondary: 175 59% 54%; /* #4ECDC4 */
-    --secondary-foreground: 0 0% 20%;
+    --secondary: 210 40% 96.1%; /* Gris très clair bleuâtre */
+    --secondary-foreground: 240 5.9% 10%; /* Gris sombre */
 
-    --muted: 0 0% 90%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 210 40% 96.1%; /* Gris très clair bleuâtre */
+    --muted-foreground: 240 3.8% 46.1%; /* Gris moyen */
 
-    --accent: 16 100% 73%; /* #FFA07A */
-    --accent-foreground: 0 0% 20%;
+    --accent: 39 100% 50%; /* Orange vif */
+    --accent-foreground: 240 10% 3.9%; /* Noir très sombre */
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 88%; /* #E0E0E0 */
-    --input: 0 0% 88%;
-    --ring: 0 100% 71%;
+    --border: 214.3 31.8% 91.4%; /* Gris clair */
+    --input: 214.3 31.8% 91.4%; /* Gris clair */
+    --ring: 330 60% 50%; /* Rose-rouge */
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 20 14.3% 4.1%; /* Noir très sombre */
+    --foreground: 0 0% 95%; /* Blanc cassé */
 
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
@@ -45,7 +45,7 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 100% 71%;
+    --primary: 330 60% 50%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 3.7% 15.9%;
@@ -71,6 +71,26 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans; /* Ajout de font-sans */
   }
+}
+
+/* Ajout d'une animation de léger flottement pour les cartes */
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Effet d'ombre plus moderne */
+.shadow-modern {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.hover:shadow-modern-lg:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
