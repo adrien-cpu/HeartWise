@@ -12,6 +12,7 @@ import { getMessages } from 'next-intl/server';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/contexts/AuthContext'; // Import AuthProvider
+import { MainLayout } from '@/components/layouts/MainLayout';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -35,7 +36,9 @@ export default async function LocaleLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider locale={locale} messages={messages}> {/* Use locale here as well */}
             <AuthProvider> {/* Wrap children with AuthProvider */}
-              {children}
+              <MainLayout>
+                {children}
+              </MainLayout>
             </AuthProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
