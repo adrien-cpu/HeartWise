@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { 
   Heart, 
   User, 
@@ -28,7 +27,6 @@ import {
   Zap
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Badge } from '@/components/ui/badge';
 
 const getInitials = (name?: string | null): string => {
   if (!name) return 'U';
@@ -51,23 +49,14 @@ export function Header() {
     }
   };
 
-  const navigationItems = [
-    { href: "/dashboard", label: t('dashboard'), icon: <Home className="w-4 h-4" /> },
-    { href: "/chat", label: t('chat'), icon: <MessageCircle className="w-4 h-4" />, badge: 3 },
-    { href: "/game", label: t('games'), icon: <Gamepad2 className="w-4 h-4" /> },
-    { href: "/speed-dating", label: t('speedDating'), icon: <Zap className="w-4 h-4" /> }
-  ];
-
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200/50">
         <div className="container mx-auto flex h-20 items-center justify-between px-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative">
-              <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Heart className="w-7 h-7 text-white" />
-              </div>
+          <Link href="/" className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <Heart className="w-7 h-7 text-white" />
             </div>
             <span className="text-2xl font-black bg-gradient-to-r from-rose-600 to-purple-600 bg-clip-text text-transparent">
               HeartWise
@@ -78,49 +67,49 @@ export function Header() {
           <nav className="hidden lg:flex items-center space-x-8">
             {user ? (
               <>
-                {navigationItems.map((item) => (
-                  <Link key={item.href} href={item.href}>
-                    <Button 
-                      variant="ghost" 
-                      className="text-base font-medium hover:text-rose-600 hover:bg-rose-50 transition-all duration-300 rounded-full px-6"
-                    >
-                      {item.icon}
-                      <span className="ml-2">{item.label}</span>
-                      {item.badge && (
-                        <Badge variant="destructive" className="ml-2 h-5 text-xs px-2">
-                          {item.badge}
-                        </Badge>
-                      )}
-                    </Button>
-                  </Link>
-                ))}
+                <Link href="/dashboard">
+                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors">
+                    Dashboard
+                  </Button>
+                </Link>
+                <Link href="/chat">
+                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors">
+                    Chat
+                  </Button>
+                </Link>
+                <Link href="/speed-dating">
+                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors">
+                    Speed Dating
+                  </Button>
+                </Link>
+                <Link href="/game">
+                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors">
+                    Games
+                  </Button>
+                </Link>
               </>
             ) : (
               <>
                 <Link href="/about">
-                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors rounded-full px-6">
-                    {t('about')}
+                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors">
+                    About
                   </Button>
                 </Link>
                 <Link href="/features">
-                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors rounded-full px-6">
-                    {t('features')}
+                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors">
+                    Features
                   </Button>
                 </Link>
               </>
             )}
           </nav>
 
-          {/* Actions utilisateur */}
+          {/* Actions */}
           <div className="flex items-center space-x-4">
-            <div className="hidden sm:block">
-              <LanguageSwitcher />
-            </div>
-            
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-12 w-12 rounded-full ring-2 ring-rose-200 hover:ring-rose-400 transition-all">
+                  <Button variant="ghost" className="relative h-12 w-12 rounded-full">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
                       <AvatarFallback className="bg-gradient-to-br from-rose-500 to-purple-600 text-white font-bold">
@@ -129,8 +118,8 @@ export function Header() {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 p-2" align="end" forceMount>
-                  <div className="flex items-center gap-3 p-3 mb-2 rounded-xl bg-gradient-to-br from-rose-50 to-purple-50">
+                <DropdownMenuContent className="w-64" align="end">
+                  <div className="flex items-center gap-3 p-3 mb-2">
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
                       <AvatarFallback className="bg-gradient-to-br from-rose-500 to-purple-600 text-white">
@@ -138,7 +127,7 @@ export function Header() {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <p className="font-semibold text-gray-800">{user.displayName || 'Utilisateur'}</p>
+                      <p className="font-semibold text-gray-800">{user.displayName || 'User'}</p>
                       <p className="text-sm text-gray-600 truncate max-w-[180px]">
                         {user.email}
                       </p>
@@ -146,43 +135,43 @@ export function Header() {
                   </div>
                   <DropdownMenuSeparator />
                   <Link href="/profile">
-                    <DropdownMenuItem className="rounded-lg">
+                    <DropdownMenuItem>
                       <User className="mr-3 h-4 w-4" />
-                      <span>{t('profile')}</span>
+                      Profile
                     </DropdownMenuItem>
                   </Link>
                   <Link href="/rewards">
-                    <DropdownMenuItem className="rounded-lg">
+                    <DropdownMenuItem>
                       <Trophy className="mr-3 h-4 w-4" />
-                      <span>{t('rewards')}</span>
+                      Rewards
                     </DropdownMenuItem>
                   </Link>
                   <Link href="/settings">
-                    <DropdownMenuItem className="rounded-lg">
+                    <DropdownMenuItem>
                       <Settings className="mr-3 h-4 w-4" />
-                      <span>{t('settings')}</span>
+                      Settings
                     </DropdownMenuItem>
                   </Link>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="cursor-pointer text-red-600 focus:text-red-600 rounded-lg"
+                    className="cursor-pointer text-red-600 focus:text-red-600"
                     onSelect={handleLogout}
                   >
                     <LogOut className="mr-3 h-4 w-4" />
-                    <span>{tAuth('logout')}</span>
+                    Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <div className="flex items-center space-x-3">
                 <Link href="/login">
-                  <Button variant="ghost" className="rounded-full px-6 hover:bg-rose-50 hover:text-rose-600 transition-all">
-                    {tAuth('loginButton')}
+                  <Button variant="ghost" className="text-base">
+                    Login
                   </Button>
                 </Link>
                 <Link href="/signup">
-                  <Button className="rounded-full px-6 bg-gradient-to-r from-rose-500 to-purple-600 hover:from-purple-600 hover:to-rose-500 transition-all duration-500 shadow-lg">
-                    {tAuth('signupButton')}
+                  <Button className="text-base">
+                    Sign Up
                   </Button>
                 </Link>
               </div>
@@ -192,7 +181,7 @@ export function Header() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="lg:hidden rounded-full"
+              className="lg:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -204,81 +193,82 @@ export function Header() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-          <div className="absolute right-0 top-0 h-full w-80 bg-white/95 backdrop-blur-xl border-l shadow-2xl">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
+          <div className="absolute right-0 top-0 h-full w-80 bg-white border-l shadow-2xl">
             <div className="flex flex-col h-full p-6 pt-24">
               {user ? (
                 <div className="space-y-4">
-                  {navigationItems.map((item) => (
-                    <Link 
-                      key={item.href} 
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start text-lg p-4 rounded-2xl hover:bg-rose-50 hover:text-rose-600 transition-all"
-                      >
-                        {item.icon}
-                        <span className="ml-3">{item.label}</span>
-                        {item.badge && (
-                          <Badge variant="destructive" className="ml-auto h-5 text-xs px-2">
-                            {item.badge}
-                          </Badge>
-                        )}
-                      </Button>
-                    </Link>
-                  ))}
+                  <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg p-4">
+                      <Home className="mr-3 h-5 w-5" />
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Link href="/chat" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg p-4">
+                      <MessageCircle className="mr-3 h-5 w-5" />
+                      Chat
+                    </Button>
+                  </Link>
+                  <Link href="/speed-dating" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg p-4">
+                      <Zap className="mr-3 h-5 w-5" />
+                      Speed Dating
+                    </Button>
+                  </Link>
+                  <Link href="/game" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg p-4">
+                      <Gamepad2 className="mr-3 h-5 w-5" />
+                      Games
+                    </Button>
+                  </Link>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <Link href="/about" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start text-lg p-4 rounded-2xl">
-                      {t('about')}
+                    <Button variant="ghost" className="w-full justify-start text-lg p-4">
+                      About
                     </Button>
                   </Link>
                   <Link href="/features" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start text-lg p-4 rounded-2xl">
-                      {t('features')}
+                    <Button variant="ghost" className="w-full justify-start text-lg p-4">
+                      Features
                     </Button>
                   </Link>
                 </div>
               )}
               
               <div className="mt-auto pt-6 border-t">
-                <div className="sm:hidden mb-4">
-                  <LanguageSwitcher />
-                </div>
                 {user ? (
                   <div className="space-y-3">
                     <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full rounded-2xl">
+                      <Button variant="outline" className="w-full">
                         <User className="mr-2 w-4 h-4" />
-                        {t('profile')}
+                        Profile
                       </Button>
                     </Link>
                     <Button 
                       variant="destructive" 
-                      className="w-full rounded-2xl"
+                      className="w-full"
                       onClick={() => {
                         handleLogout();
                         setMobileMenuOpen(false);
                       }}
                     >
                       <LogOut className="mr-2 w-4 h-4" />
-                      {tAuth('logout')}
+                      Logout
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full rounded-2xl">
-                        {tAuth('loginButton')}
+                      <Button variant="outline" className="w-full">
+                        Login
                       </Button>
                     </Link>
                     <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full rounded-2xl bg-gradient-to-r from-rose-500 to-purple-600">
-                        {tAuth('signupButton')}
+                      <Button className="w-full">
+                        Sign Up
                       </Button>
                     </Link>
                   </div>
