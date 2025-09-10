@@ -2,15 +2,6 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-/**
- * @fileOverview Provides UI components for creating cards.
- *
- * @module Card
- *
- * @description This module exports the Card, CardHeader, CardFooter, CardTitle, CardDescription, and CardContent components,
- * which are styled components for creating accessible and customizable cards.
- */
-
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
@@ -18,7 +9,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-3xl border bg-card/50 text-card-foreground shadow-soft backdrop-blur-sm border-border/50",
+      "rounded-2xl border bg-white text-gray-900 shadow-lg border-gray-200",
       className
     )}
     {...props}
@@ -32,7 +23,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-2 p-8", className)}
+    className={cn("flex flex-col space-y-2 p-6", className)}
     {...props}
   />
 ))
@@ -45,7 +36,7 @@ const CardTitle = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "text-2xl font-bold leading-tight tracking-tight",
+      "text-2xl font-bold leading-tight tracking-tight text-gray-900",
       className
     )}
     {...props}
@@ -59,7 +50,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("text-base text-muted-foreground leading-relaxed", className)}
+    className={cn("text-base text-gray-600 leading-relaxed", className)}
     {...props}
   />
 ))
@@ -69,7 +60,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-8 pt-0", className)} {...props} />
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
 ))
 CardContent.displayName = "CardContent"
 
@@ -79,7 +70,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-8 pt-0", className)}
+    className={cn("flex items-center p-6 pt-0", className)}
     {...props}
   />
 ))

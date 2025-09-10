@@ -1,33 +1,24 @@
 import * as React from "react"
-import { Slot, SlotProps } from "@radix-ui/react-slot"
+import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 import { ReactNode } from 'react'
 
 import { cn } from "@/lib/utils"
 
-/**
- * @fileOverview Provides a UI component for creating buttons.
- *
- * @module Button
- *
- * @description This module exports the Button component and the buttonVariants function,
- * which are used to create styled buttons with different variants and sizes.
- */
-
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:shadow-soft",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-semibold ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-gradient-to-r from-primary to-accent text-primary-foreground hover:shadow-glow hover:scale-105 border-0",
+        default: "bg-gradient-to-r from-rose-500 to-purple-600 text-white hover:from-purple-600 hover:to-rose-500 hover:shadow-lg hover:scale-105",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:scale-105",
+          "bg-red-500 text-white hover:bg-red-600 hover:scale-105",
         outline:
-          "border-2 border-primary/20 bg-background/50 hover:bg-primary/10 hover:text-primary hover:border-primary/40 backdrop-blur-sm",
+          "border-2 border-gray-200 bg-white hover:bg-gray-50 hover:border-rose-300",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:scale-105",
-        ghost: "hover:bg-primary/10 hover:text-primary",
-        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80",
+          "bg-gray-100 text-gray-900 hover:bg-gray-200 hover:scale-105",
+        ghost: "hover:bg-rose-50 hover:text-rose-600",
+        link: "text-rose-600 underline-offset-4 hover:underline hover:text-rose-700",
       },
       size: {
         default: "h-12 px-6 py-3",

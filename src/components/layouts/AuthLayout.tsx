@@ -5,7 +5,6 @@ import { Link } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Heart, ArrowLeft, Sparkles } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { motion } from 'framer-motion';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -16,63 +15,42 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
-      {/* Background avec gradients et effets */}
-      <div className="absolute inset-0 gradient-hero">
-        <div className="absolute top-20 right-20 w-72 h-72 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 blur-3xl animate-float"></div>
-        <div className="absolute bottom-20 left-20 w-96 h-96 rounded-full bg-gradient-to-tr from-accent/20 to-primary/20 blur-3xl animate-pulse-slow"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-primary/10 to-accent/10 blur-3xl"></div>
+      {/* Background avec gradients simples */}
+      <div className="absolute inset-0 bg-gradient-to-br from-rose-50 via-purple-50 to-pink-50">
+        <div className="absolute top-20 right-20 w-72 h-72 rounded-full bg-gradient-to-br from-purple-400/30 to-rose-400/30 blur-3xl"></div>
+        <div className="absolute bottom-20 left-20 w-96 h-96 rounded-full bg-gradient-to-tr from-rose-400/20 to-purple-400/20 blur-3xl"></div>
       </div>
 
       <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-md"
-        >
+        <div className="w-full max-w-md">
           {/* Back button */}
           <Link href="/" className="absolute -top-16 left-0">
-            <Button variant="ghost" className="text-foreground/70 hover:text-primary rounded-full px-6 py-3 glass">
+            <Button variant="ghost" className="text-gray-700 hover:text-rose-600 rounded-full px-6 py-3 bg-white/80 backdrop-blur-sm">
               <ArrowLeft className="h-4 w-4 mr-2" />
               {t('backToHome')}
             </Button>
           </Link>
           
           {/* Logo */}
-          <motion.div 
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-center mb-12"
-          >
+          <div className="text-center mb-12">
             <Link href="/" className="inline-flex items-center gap-3 group">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 10 }}
-                className="relative"
-              >
-                <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-3xl flex items-center justify-center shadow-glow">
+              <div className="relative">
+                <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-purple-600 rounded-3xl flex items-center justify-center shadow-lg">
                   <Heart className="h-9 w-9 text-white" />
                 </div>
-                <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-accent animate-pulse" />
-              </motion.div>
-              <span className="text-3xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-purple-600" />
+              </div>
+              <span className="text-3xl font-black bg-gradient-to-r from-rose-600 to-purple-600 bg-clip-text text-transparent">
                 HeartWise
               </span>
             </Link>
-          </motion.div>
+          </div>
           
-          {/* Auth card with glass effect */}
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="glass rounded-3xl p-1 shadow-card-hover"
-          >
-            <div className="bg-background/80 backdrop-blur-xl rounded-3xl">
-              {children}
-            </div>
-          </motion.div>
-        </motion.div>
+          {/* Auth card */}
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200/50">
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

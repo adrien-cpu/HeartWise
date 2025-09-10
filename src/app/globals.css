@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Système de couleurs moderne inspiré des apps de dating premium */
+    /* Design system moderne et cohérent */
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     
@@ -14,16 +14,16 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
     
-    /* Couleurs primaires - Rose/Coral moderne */
-    --primary: 345 82% 65%; /* Rose coral vibrant */
+    /* Couleurs primaires - Rose moderne */
+    --primary: 346 77% 49%;
     --primary-foreground: 0 0% 98%;
     
-    /* Couleurs secondaires - Lavande doux */
-    --secondary: 270 20% 96%;
+    /* Couleurs secondaires - Gris doux */
+    --secondary: 210 40% 95%;
     --secondary-foreground: 240 10% 10%;
     
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 210 40% 98%;
+    --muted-foreground: 215 13.8% 44.1%;
     
     /* Couleur d'accent - Violet moderne */
     --accent: 262 52% 47%; 
@@ -32,15 +32,11 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 345 82% 65%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 346 77% 49%;
     
-    --radius: 12px;
-    
-    /* Variables custom pour les gradients */
-    --gradient-start: 345 82% 65%;
-    --gradient-end: 262 52% 47%;
+    --radius: 16px;
   }
 
   .dark {
@@ -53,7 +49,7 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
     
-    --primary: 345 82% 65%;
+    --primary: 346 77% 49%;
     --primary-foreground: 0 0% 98%;
     
     --secondary: 240 3.7% 15.9%;
@@ -70,7 +66,7 @@
     
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 345 82% 65%;
+    --ring: 346 77% 49%;
   }
 }
 
@@ -88,7 +84,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
-  /* Typographie améliorée */
+  /* Typographie moderne */
   h1, h2, h3, h4, h5, h6 {
     @apply font-bold tracking-tight;
     line-height: 1.2;
@@ -107,40 +103,6 @@
 }
 
 @layer components {
-  /* Gradients personnalisés */
-  .gradient-primary {
-    background: linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)));
-  }
-  
-  .gradient-card {
-    background: linear-gradient(135deg, 
-      hsl(var(--background)) 0%, 
-      hsl(var(--muted)) 50%, 
-      hsl(var(--secondary)) 100%);
-  }
-  
-  .gradient-hero {
-    background: linear-gradient(135deg, 
-      hsl(345 82% 98%) 0%, 
-      hsl(270 20% 98%) 25%,
-      hsl(262 52% 97%) 50%,
-      hsl(345 82% 96%) 75%,
-      hsl(270 20% 95%) 100%);
-  }
-  
-  /* Ombres modernes */
-  .shadow-soft {
-    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.1), 0 4px 16px -4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .shadow-glow {
-    box-shadow: 0 0 20px rgba(345, 82%, 65%, 0.3);
-  }
-  
-  .shadow-card-hover {
-    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.12), 0 12px 48px -12px rgba(0, 0, 0, 0.1);
-  }
-  
   /* Animations personnalisées */
   .animate-float {
     animation: float 6s ease-in-out infinite;
@@ -170,50 +132,26 @@
     }
   }
   
-  /* États hover améliorés */
+  /* États hover modernes */
   .card-hover {
-    @apply transition-all duration-300 ease-out hover:shadow-card-hover hover:-translate-y-1;
+    @apply transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1;
   }
   
-  .button-glow {
-    @apply relative overflow-hidden;
-  }
-  
-  .button-glow::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0 transition-opacity duration-300;
-  }
-  
-  .button-glow:hover::before {
-    @apply opacity-10;
-  }
-  
-  /* Glass morphism effect */
+  /* Glass morphism simplifié */
   .glass {
     backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .glass-dark {
-    backdrop-filter: blur(12px);
-    background: rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
   }
 }
 
 @layer utilities {
-  /* Utilitaires personnalisés */
   .text-balance {
     text-wrap: balance;
   }
-  
-  .mask-gradient {
-    mask: linear-gradient(to bottom, black 0%, transparent 100%);
-  }
 }
 
-/* Scrollbar personnalisé */
+/* Scrollbar moderne */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -231,22 +169,10 @@
   background: hsl(var(--accent));
 }
 
-/* Focus states améliorés */
+/* Focus states */
 *:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
-}
-
-/* Animation pour les éléments qui apparaissent */
-.fade-in {
-  animation: fadeIn 0.6s ease-out forwards;
-  opacity: 0;
-}
-
-@keyframes fadeIn {
-  to {
-    opacity: 1;
-  }
 }
 
 /* Responsive utilities */

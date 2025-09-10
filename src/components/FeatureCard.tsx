@@ -4,7 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { motion } from "framer-motion";
 import { ArrowRight } from 'lucide-react';
 
 interface FeatureCardProps {
@@ -23,39 +22,30 @@ export const FeatureCard: React.FC<FeatureCardProps> = ({
   description, 
   link, 
   linkText, 
-  gradient = "from-primary to-accent",
-  bgGradient = "from-primary/5 to-accent/5"
+  gradient = "from-rose-500 to-purple-600",
+  bgGradient = "from-rose-50 to-purple-50"
 }) => (
-  <motion.div
-    whileHover={{ y: -8, scale: 1.02 }}
-    whileTap={{ scale: 0.98 }}
-    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-    className="group h-full"
-  >
+  <div className="group h-full">
     <Link href={link}>
-      <Card className={`h-full overflow-hidden border-2 border-transparent hover:border-primary/20 bg-gradient-to-br ${bgGradient} transition-all duration-500 shadow-soft hover:shadow-card-hover cursor-pointer`}>
+      <Card className="h-full overflow-hidden border-2 border-transparent hover:border-rose-200 bg-gradient-to-br from-white to-gray-50 shadow-lg hover:shadow-xl transition-all duration-500 cursor-pointer transform hover:-translate-y-2">
         <CardHeader className="p-8">
-          <motion.div 
-            className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white mb-6 shadow-lg`}
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            transition={{ duration: 0.3 }}
-          >
+          <div className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
             {icon}
-          </motion.div>
-          <CardTitle className="text-2xl font-bold group-hover:text-primary transition-colors duration-300 mb-3">
+          </div>
+          <CardTitle className="text-2xl font-bold group-hover:text-rose-600 transition-colors duration-300 mb-3">
             {title}
           </CardTitle>
-          <CardDescription className="text-base leading-relaxed text-muted-foreground group-hover:text-foreground/70 transition-colors duration-300">
+          <CardDescription className="text-base leading-relaxed text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
             {description}
           </CardDescription>
         </CardHeader>
         <CardContent className="p-8 pt-0">
-          <div className="flex items-center text-primary group-hover:translate-x-2 transition-transform duration-300">
+          <div className="flex items-center text-rose-600 group-hover:translate-x-2 transition-transform duration-300">
             <span className="font-semibold">{linkText}</span>
             <ArrowRight className="ml-2 w-5 h-5" />
           </div>
         </CardContent>
       </Card>
     </Link>
-  </motion.div>
+  </div>
 );

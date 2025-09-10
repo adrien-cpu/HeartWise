@@ -29,8 +29,6 @@ import {
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/badge';
-import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
 
 const getInitials = (name?: string | null): string => {
   if (!name) return 'U';
@@ -62,25 +60,16 @@ export function Header() {
 
   return (
     <>
-      <motion.header 
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10 backdrop-blur-xl"
-      >
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200/50">
         <div className="container mx-auto flex h-20 items-center justify-between px-6">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <motion.div 
-              className="relative"
-              whileHover={{ scale: 1.1, rotate: 5 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-glow">
+            <div className="relative">
+              <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
                 <Heart className="w-7 h-7 text-white" />
               </div>
-            </motion.div>
-            <span className="text-2xl font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            </div>
+            <span className="text-2xl font-black bg-gradient-to-r from-rose-600 to-purple-600 bg-clip-text text-transparent">
               HeartWise
             </span>
           </Link>
@@ -93,12 +82,12 @@ export function Header() {
                   <Link key={item.href} href={item.href}>
                     <Button 
                       variant="ghost" 
-                      className="text-base font-medium hover:text-primary hover:bg-primary/10 transition-all duration-300 rounded-full px-6"
+                      className="text-base font-medium hover:text-rose-600 hover:bg-rose-50 transition-all duration-300 rounded-full px-6"
                     >
                       {item.icon}
                       <span className="ml-2">{item.label}</span>
                       {item.badge && (
-                        <Badge variant="destructive" className="ml-2 h-5 text-xs px-2 animate-pulse">
+                        <Badge variant="destructive" className="ml-2 h-5 text-xs px-2">
                           {item.badge}
                         </Badge>
                       )}
@@ -109,12 +98,12 @@ export function Header() {
             ) : (
               <>
                 <Link href="/about">
-                  <Button variant="ghost" className="text-base font-medium hover:text-primary transition-colors rounded-full px-6">
+                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors rounded-full px-6">
                     {t('about')}
                   </Button>
                 </Link>
                 <Link href="/features">
-                  <Button variant="ghost" className="text-base font-medium hover:text-primary transition-colors rounded-full px-6">
+                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors rounded-full px-6">
                     {t('features')}
                   </Button>
                 </Link>
@@ -131,26 +120,26 @@ export function Header() {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-12 w-12 rounded-full ring-2 ring-primary/20 hover:ring-primary/40 transition-all">
+                  <Button variant="ghost" className="relative h-12 w-12 rounded-full ring-2 ring-rose-200 hover:ring-rose-400 transition-all">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white font-bold">
+                      <AvatarFallback className="bg-gradient-to-br from-rose-500 to-purple-600 text-white font-bold">
                         {getInitials(user.displayName)}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-64 p-2" align="end" forceMount>
-                  <div className="flex items-center gap-3 p-3 mb-2 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10">
+                  <div className="flex items-center gap-3 p-3 mb-2 rounded-xl bg-gradient-to-br from-rose-50 to-purple-50">
                     <Avatar className="h-12 w-12">
                       <AvatarImage src={user.photoURL || undefined} alt={user.displayName || 'User'} />
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white">
+                      <AvatarFallback className="bg-gradient-to-br from-rose-500 to-purple-600 text-white">
                         {getInitials(user.displayName)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <p className="font-semibold text-foreground">{user.displayName || 'Utilisateur'}</p>
-                      <p className="text-sm text-muted-foreground truncate max-w-[180px]">
+                      <p className="font-semibold text-gray-800">{user.displayName || 'Utilisateur'}</p>
+                      <p className="text-sm text-gray-600 truncate max-w-[180px]">
                         {user.email}
                       </p>
                     </div>
@@ -176,7 +165,7 @@ export function Header() {
                   </Link>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="cursor-pointer text-destructive focus:text-destructive rounded-lg"
+                    className="cursor-pointer text-red-600 focus:text-red-600 rounded-lg"
                     onSelect={handleLogout}
                   >
                     <LogOut className="mr-3 h-4 w-4" />
@@ -187,12 +176,12 @@ export function Header() {
             ) : (
               <div className="flex items-center space-x-3">
                 <Link href="/login">
-                  <Button variant="ghost" className="rounded-full px-6 hover:bg-primary/10 hover:text-primary transition-all">
+                  <Button variant="ghost" className="rounded-full px-6 hover:bg-rose-50 hover:text-rose-600 transition-all">
                     {tAuth('loginButton')}
                   </Button>
                 </Link>
                 <Link href="/signup">
-                  <Button className="rounded-full px-6 bg-gradient-to-r from-primary to-accent hover:from-accent hover:to-primary transition-all duration-500 shadow-glow">
+                  <Button className="rounded-full px-6 bg-gradient-to-r from-rose-500 to-purple-600 hover:from-purple-600 hover:to-rose-500 transition-all duration-500 shadow-lg">
                     {tAuth('signupButton')}
                   </Button>
                 </Link>
@@ -210,109 +199,95 @@ export function Header() {
             </Button>
           </div>
         </div>
-      </motion.header>
+      </header>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 lg:hidden"
-          >
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute right-0 top-0 h-full w-80 bg-background/95 backdrop-blur-xl border-l shadow-2xl"
-            >
-              <div className="flex flex-col h-full p-6 pt-24">
-                {user ? (
-                  <div className="space-y-4">
-                    {navigationItems.map((item) => (
-                      <Link 
-                        key={item.href} 
-                        href={item.href}
-                        onClick={() => setMobileMenuOpen(false)}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+          <div className="absolute right-0 top-0 h-full w-80 bg-white/95 backdrop-blur-xl border-l shadow-2xl">
+            <div className="flex flex-col h-full p-6 pt-24">
+              {user ? (
+                <div className="space-y-4">
+                  {navigationItems.map((item) => (
+                    <Link 
+                      key={item.href} 
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start text-lg p-4 rounded-2xl hover:bg-rose-50 hover:text-rose-600 transition-all"
                       >
-                        <Button 
-                          variant="ghost" 
-                          className="w-full justify-start text-lg p-4 rounded-2xl hover:bg-primary/10 hover:text-primary transition-all"
-                        >
-                          {item.icon}
-                          <span className="ml-3">{item.label}</span>
-                          {item.badge && (
-                            <Badge variant="destructive" className="ml-auto h-5 text-xs px-2">
-                              {item.badge}
-                            </Badge>
-                          )}
-                        </Button>
-                      </Link>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <Link href="/about" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start text-lg p-4 rounded-2xl">
-                        {t('about')}
+                        {item.icon}
+                        <span className="ml-3">{item.label}</span>
+                        {item.badge && (
+                          <Badge variant="destructive" className="ml-auto h-5 text-xs px-2">
+                            {item.badge}
+                          </Badge>
+                        )}
                       </Button>
                     </Link>
-                    <Link href="/features" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="ghost" className="w-full justify-start text-lg p-4 rounded-2xl">
-                        {t('features')}
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Link href="/about" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg p-4 rounded-2xl">
+                      {t('about')}
+                    </Button>
+                  </Link>
+                  <Link href="/features" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg p-4 rounded-2xl">
+                      {t('features')}
+                    </Button>
+                  </Link>
+                </div>
+              )}
+              
+              <div className="mt-auto pt-6 border-t">
+                <div className="sm:hidden mb-4">
+                  <LanguageSwitcher />
+                </div>
+                {user ? (
+                  <div className="space-y-3">
+                    <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full rounded-2xl">
+                        <User className="mr-2 w-4 h-4" />
+                        {t('profile')}
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="destructive" 
+                      className="w-full rounded-2xl"
+                      onClick={() => {
+                        handleLogout();
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="mr-2 w-4 h-4" />
+                      {tAuth('logout')}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full rounded-2xl">
+                        {tAuth('loginButton')}
+                      </Button>
+                    </Link>
+                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
+                      <Button className="w-full rounded-2xl bg-gradient-to-r from-rose-500 to-purple-600">
+                        {tAuth('signupButton')}
                       </Button>
                     </Link>
                   </div>
                 )}
-                
-                <div className="mt-auto pt-6 border-t">
-                  <div className="sm:hidden mb-4">
-                    <LanguageSwitcher />
-                  </div>
-                  {user ? (
-                    <div className="space-y-3">
-                      <Link href="/profile" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="outline" className="w-full rounded-2xl">
-                          <User className="mr-2 w-4 h-4" />
-                          {t('profile')}
-                        </Button>
-                      </Link>
-                      <Button 
-                        variant="destructive" 
-                        className="w-full rounded-2xl"
-                        onClick={() => {
-                          handleLogout();
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        <LogOut className="mr-2 w-4 h-4" />
-                        {tAuth('logout')}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="outline" className="w-full rounded-2xl">
-                          {tAuth('loginButton')}
-                        </Button>
-                      </Link>
-                      <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
-                        <Button className="w-full rounded-2xl bg-gradient-to-r from-primary to-accent">
-                          {tAuth('signupButton')}
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
