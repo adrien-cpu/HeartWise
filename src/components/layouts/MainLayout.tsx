@@ -1,8 +1,9 @@
 "use client";
 
 import React from 'react';
-import { Header } from '@/components/navigation/Header';
-import { MobileNav } from '@/components/navigation/MobileNav';
+import { NavigationSystem } from '@/components/navigation/NavigationSystem';
+import { BreadcrumbNavigation } from '@/components/navigation/Breadcrumbs';
+import { ContextualNavigation } from '@/components/navigation/ContextualNav';
 import { Toaster } from '@/components/ui/toaster';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
@@ -27,10 +28,12 @@ export function MainLayout({ children }: MainLayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <NavigationSystem />
+      <BreadcrumbNavigation />
       <main className="flex-1">
         {children}
       </main>
+      <ContextualNavigation />
       <Toaster />
     </div>
   );
