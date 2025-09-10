@@ -3,8 +3,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { motion } from "framer-motion"; // Importation de framer-motion
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { motion } from "framer-motion";
+import { ArrowRight } from 'lucide-react';
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -12,34 +13,49 @@ interface FeatureCardProps {
   description: string;
   link: string;
   linkText: string;
-  color: string; // Cette prop sera utilisée pour la couleur de la bordure et de l'arrière-plan de l'icône
+  gradient?: string;
+  bgGradient?: string;
 }
 
-export const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, link, linkText, color }) => (
+export const FeatureCard: React.FC<FeatureCardProps> = ({ 
+  icon, 
+  title, 
+  description, 
+  link, 
+  linkText, 
+  gradient = "from-primary to-accent",
+  bgGradient = "from-primary/5 to-accent/5"
+}) => (
   <motion.div
-    className={`flex flex-col items-center text-center p-6 bg-card rounded-xl shadow-modern hover:shadow-modern-lg transition-all duration-300 hover:-translate-y-2 border-2 ${color} animate-float`} // Utilisation des nouvelles classes d'ombre et de l'animation
-    whileHover={{ scale: 1.03 }} // Animation au survol
-    initial={{ opacity: 0, scale: 0.9 }}
-    animate={{ opacity: 1, scale: 1 }}
-    transition={{ duration: 0.3 }}
+    whileHover={{ y: -8, scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+    className="group h-full"
   >
-    <Card className="flex flex-col items-center text-center p-0 border-none shadow-none"> {/* Suppression des styles de Card pour utiliser ceux du motion.div */}
-      <CardHeader className="p-0 mb-4">
-        <div className={`p-4 rounded-full ${color.replace('border', 'bg').replace(/-d+/, '-100')} mb-4 flex items-center justify-center`}> {/* Ajustement du padding et centrage de l'icône */}
-          {icon}
-        </div>
-        <CardTitle className="text-2xl font-bold text-foreground">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0 mb-6 flex-grow flex items-center justify-center"> {/* Centrage vertical du contenu */}
-        <CardDescription className="text-muted-foreground">{description}</CardDescription> {/* Utilisation de muted-foreground pour la description */}
-      </CardContent>
-      <CardFooter className="p-0">
-        <Link href={link} passHref>
-          <Button variant="outline" className={`text-primary border-primary hover:bg-primary hover:text-primary-foreground transition-colors`}>
-            {linkText}
-          </Button>
-        </Link>
-      </CardFooter>
-    </Card>
+    <Link href={link}>
+      <Card className={`h-full overflow-hidden border-2 border-transparent hover:border-primary/20 bg-gradient-to-br ${bgGradient} transition-all duration-500 shadow-soft hover:shadow-card-hover cursor-pointer`}>
+        <CardHeader className="p-8">
+          <motion.div 
+            className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white mb-6 shadow-lg`}
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ duration: 0.3 }}
+          >
+            {icon}
+          </motion.div>
+          <CardTitle className="text-2xl font-bold group-hover:text-primary transition-colors duration-300 mb-3">
+            {title}
+          </CardTitle>
+          <CardDescription className="text-base leading-relaxed text-muted-foreground group-hover:text-foreground/70 transition-colors duration-300">
+            {description}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-8 pt-0">
+          <div className="flex items-center text-primary group-hover:translate-x-2 transition-transform duration-300">
+            <span className="font-semibold">{linkText}</span>
+            <ArrowRight className="ml-2 w-5 h-5" />
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   </motion.div>
 );
