@@ -918,6 +918,35 @@
         "answer": "Our AI analyzes your messages and suggests improvements to help you communicate better. It can detect potential misunderstandings and suggest clearer ways to express yourself."
       }
     },
+    "Calendar": {
+        "title": "Activity Calendar",
+        "subtitle": "Discover and join HeartWise events",
+        "eventsToday": "Events today",
+        "noEventsToday": "No events today",
+        "upcomingEvents": "Upcoming events",
+        "joinEvent": "Join event",
+        "eventFull": "Event full",
+        "eventDetails": "Event details",
+        "participants": "Participants",
+        "duration": "Duration",
+        "difficulty": "Difficulty",
+        "interests": "Interests",
+        "viewMore": "View more",
+        "monthView": "Month",
+        "weekView": "Week",
+        "dayView": "Day",
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "thisWeek": "This week",
+        "nextWeek": "Next week",
+        "eventTypes": {
+            "speed-dating": "Speed Dating",
+            "game-session": "Game Session",
+            "local-meetup": "Local Meetup",
+            "ai-feature": "AI Feature",
+            "special-event": "Special Event"
+        }
+    },
     "guides": {
       "profileSetup": {
         "title": "Complete Your Profile",

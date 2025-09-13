@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
-import { ContextualHelp } from '@/components/help/ContextualHelp';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,7 +24,9 @@ import {
   X,
   Home,
   Gamepad2,
-  Zap
+  Zap,
+  Calendar,
+  HelpCircle
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -228,10 +229,16 @@ export function Header() {
                       Games
                     </Button>
                   </Link>
+                  <Link href="/calendar" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg p-4">
+                      <Calendar className="mr-3 h-5 w-5" />
+                      Calendrier
+                    </Button>
+                  </Link>
                   <Link href="/help" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="ghost" className="w-full justify-start text-lg p-4">
                       <HelpCircle className="mr-3 h-5 w-5" />
-                      Help
+                      Aide
                     </Button>
                   </Link>
                 </div>
@@ -275,12 +282,12 @@ export function Header() {
                   <div className="space-y-3">
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                       <Button variant="outline" className="w-full">
-                        Login
+                        Se connecter
                       </Button>
                     </Link>
                     <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
                       <Button className="w-full">
-                        Sign Up
+                        S'inscrire
                       </Button>
                     </Link>
                   </div>
