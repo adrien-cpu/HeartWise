@@ -6,6 +6,7 @@ import { Link } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { motion } from 'framer-motion';
 import { 
   ScanFace, 
   MessageSquare, 
@@ -17,12 +18,12 @@ import {
   Trophy,
   ShieldAlert,
   LayoutDashboard,
-  User
+  User,
+  ArrowRight
 } from 'lucide-react';
 
 export default function FeaturesPage() {
   const t = useTranslations('Features');
-  const tHome = useTranslations('Home');
 
   const features = [
     {
@@ -146,27 +147,15 @@ export default function FeaturesPage() {
   };
 
   return (
-    <div className="container mx-auto py-12 px-4">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('title')}</h1>
-        <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          {t('subtitle')}
-        </p>
-      </div>
-
-      {/* Categories Legend */}
-      <div className="flex flex-wrap justify-center gap-3 mb-12">
-        {categories.map(category => (
-          <Badge key={category.key} variant="outline" className={`${category.color} border-0`}>
-            {category.label}
-          </Badge>
-        ))}
-      </div>
-
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="gradient-hero py-24">
-        <div className="container mx-auto px-6">
+      <section className="relative gradient-hero py-24 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-32 w-80 h-80 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 blur-3xl animate-float"></div>
+          <div className="absolute -bottom-40 -left-32 w-96 h-96 rounded-full bg-gradient-to-tr from-accent/20 to-primary/20 blur-3xl animate-pulse-slow"></div>
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div
             className="text-center max-w-4xl mx-auto"
             initial="hidden"
@@ -312,21 +301,12 @@ export default function FeaturesPage() {
                       {t('exploreNowButton')}
                     </Button>
                   </Link>
-                  </div>
                 </div>
-                <div className="flex flex-col gap-2">
-                  {getStatusBadge(feature.status)}
-                  {getCategoryBadge(feature.category)}
-                </div>
-              </div>
-              <CardDescription className="text-sm leading-relaxed">
-                {feature.description}
-              </CardDescription>
-            </CardHeader>
-            <CardFooter>
-              <Link href={feature.href} className="w-full">
-                <Button 
-                  className="w-full" 
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, Users, Brain, Shield, Sparkles, Target } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function AboutPage() {
   const t = useTranslations('About');
@@ -219,29 +220,6 @@ export default function AboutPage() {
           </motion.div>
         </div>
       </section>
-    </div>
-  );
-}
-
-              </div>
-              <h3 className="text-lg font-semibold mb-3">{value.title}</h3>
-              <p className="text-muted-foreground">{value.description}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Mission Section */}
-      <Card className="bg-primary/5 border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">{t('missionTitle')}</CardTitle>
-        </CardHeader>
-        <CardContent className="text-center">
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            {t('missionStatement')}
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }

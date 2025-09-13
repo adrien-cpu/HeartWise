@@ -99,6 +99,11 @@
     "loginErrorTitle": "Échec de la connexion",
     "loginErrorDefault": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "loginErrorInvalidCredentials": "Email ou mot de passe invalide. Veuillez réessayer.",
+    "loginErrorTooManyRequests": "Trop de tentatives de connexion. Veuillez réessayer plus tard.",
+    "networkError": "Erreur de connexion réseau. Veuillez vérifier votre connexion internet et réessayer.",
+    "signupErrorInvalidEmail": "Le format de l'adresse email n'est pas valide.",
+    "signupErrorWeakPassword": "Le mot de passe est trop faible. Veuillez choisir un mot de passe plus fort.",
+    "firebaseApiKeyErrorDetailed": "Erreur de configuration de la clé API Firebase. Veuillez contacter le support si cela persiste.",
     "signupTitle": "Créer un compte",
     "signupDescription": "Rejoignez HeartWise et commencez à vous connecter.",
     "nameLabel": "Nom",
@@ -117,6 +122,11 @@
     "forgotPasswordTitle": "Mot de passe oublié",
     "forgotPasswordDescription": "Entrez votre adresse email pour recevoir un lien de réinitialisation.",
     "sendResetEmailButton": "Envoyer l'email de réinitialisation"
+    "passwordResetSuccessTitle": "Email de réinitialisation envoyé",
+    "passwordResetSuccessDesc": "Si un compte avec cet email existe, vous recevrez bientôt un lien de réinitialisation.",
+    "passwordResetErrorTitle": "Échec de la réinitialisation",
+    "passwordResetErrorDefault": "Impossible d'envoyer l'email de réinitialisation. Veuillez réessayer.",
+    "backToLoginLink": "Retour à la connexion",
   },
   "About": {
     "heroDescription": "Nous révolutionnons la façon dont les gens se connectent grâce à l'intelligence émotionnelle et aux relations authentiques.",

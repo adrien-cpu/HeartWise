@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword, 
   signOut,
   sendPasswordResetEmail,
+  AuthErrorCodes,
   // Note: We'll keep signup logic in the signup page itself for now
   // as it involves creating a user profile record in addition to auth.
 } from 'firebase/auth';
@@ -56,6 +57,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const sendPasswordReset = (email: string) => {
     return sendPasswordResetEmail(auth, email);
   };
+
+  // Enhanced error handling for auth operations
+  const handleAuthError = (error: any): string => {
+    console.error('Auth error:', error);
+    
+    switch (error.code) {
+      case AuthErrorCodes.USER_DISABLED:
+        return 'This account has been disabled. Please contact support.';
+      case AuthErrorCodes.USER_DELETED:
+        return 'This account no longer exists.';
+      case AuthErrorCodes.INVALID_EMAIL:
+        return 'The email address is not valid.';
+      case AuthErrorCodes.WEAK_PASSWORD:
+        return 'Password is too weak. Please choose a stronger password.';
+      case AuthErrorCodes.EMAIL_EXISTS:
+        return 'An account with this email already exists.';
+      case AuthErrorCodes.TOO_MANY_ATTEMPTS_TRY_LATER:
+        return 'Too many failed attempts. Please try again later.';
+      case AuthErrorCodes.NETWORK_REQUEST_FAILED:
+        return 'Network error. Please check your connection and try again.';
+      default:
+        return 'An unexpected error occurred. Please try again.';
+    }
+  };
   
   const value = {
     user,
@@ -63,6 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
     sendPasswordReset,
+    handleAuthError,
   };
 
   // Render children only when not loading, or handle loading state in components

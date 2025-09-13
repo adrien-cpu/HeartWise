@@ -102,6 +102,25 @@
   }
 }
 
+/* Utility classes for enhanced design */
+@layer utilities {
+  .shadow-soft {
+    box-shadow: 0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04);
+  }
+  
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(346, 77%, 49%, 0.3);
+  }
+  
+  .shadow-card-hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 20px 40px -12px rgba(0, 0, 0, 0.05);
+  }
+  
+  .gradient-hero {
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
+  }
+}
+
 @layer components {
   /* Animations personnalisées */
   .animate-float {
@@ -173,6 +192,26 @@
 *:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
+}
+
+/* Message highlighting animation */
+.highlight-message {
+  background-color: hsl(var(--accent) / 0.3);
+  animation: highlightFade 2s ease-out;
+}
+
+@keyframes highlightFade {
+  0% { background-color: hsl(var(--accent) / 0.6); }
+  100% { background-color: transparent; }
+}
+
+/* Animation delays for typing indicators */
+.animation-delay-150 {
+  animation-delay: 150ms;
+}
+
+.animation-delay-300 {
+  animation-delay: 300ms;
 }
 
 /* Responsive utilities */
