@@ -1,17 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  User, 
-  onAuthStateChanged, 
-  signInWithEmailAndPassword, 
-  signOut,
-  sendPasswordResetEmail,
-  AuthErrorCodes,
-  // Note: We'll keep signup logic in the signup page itself for now
-  // as it involves creating a user profile record in addition to auth.
-} from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
+import { User, Session } from '@supabase/supabase-js';
 
 /**
  * @interface AuthContextType
@@ -19,10 +10,12 @@ import { auth } from '@/lib/firebase';
  */
 interface AuthContextType {
   user: User | null;
+  session: Session | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<any>;
-  logout: () => Promise<void>;
-  sendPasswordReset: (email: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<any>;
+  signUp: (email: string, password: string, name?: string) => Promise<any>;
+  signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 // Create the context with a default value.
@@ -30,68 +23,78 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
  * @function AuthProvider
- * @description Provider component for authentication context. It centralizes all Firebase auth logic.
+ * @description Provider component for authentication context using Supabase Auth.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = (email: string, password: string) => {
-    return signInWithEmailAndPassword(auth, email, password);
-  };
-
-  const logout = () => {
-    return signOut(auth);
-  };
-  
-  const sendPasswordReset = (email: string) => {
-    return sendPasswordResetEmail(auth, email);
-  };
-
-  // Enhanced error handling for auth operations
-  const handleAuthError = (error: any): string => {
-    console.error('Auth error:', error);
+  const signIn = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     
-    switch (error.code) {
-      case AuthErrorCodes.USER_DISABLED:
-        return 'This account has been disabled. Please contact support.';
-      case AuthErrorCodes.USER_DELETED:
-        return 'This account no longer exists.';
-      case AuthErrorCodes.INVALID_EMAIL:
-        return 'The email address is not valid.';
-      case AuthErrorCodes.WEAK_PASSWORD:
-        return 'Password is too weak. Please choose a stronger password.';
-      case AuthErrorCodes.EMAIL_EXISTS:
-        return 'An account with this email already exists.';
-      case AuthErrorCodes.TOO_MANY_ATTEMPTS_TRY_LATER:
-        return 'Too many failed attempts. Please try again later.';
-      case AuthErrorCodes.NETWORK_REQUEST_FAILED:
-        return 'Network error. Please check your connection and try again.';
-      default:
-        return 'An unexpected error occurred. Please try again.';
-    }
+    if (error) throw error;
+    return data;
   };
-  
+
+  const signUp = async (email: string, password: string, name?: string) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: name || email.split('@')[0],
+        }
+      }
+    });
+    
+    if (error) throw error;
+    return data;
+  };
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
+
+  const resetPassword = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) throw error;
+  };
+
   const value = {
     user,
+    session,
     loading,
-    login,
-    logout,
-    sendPasswordReset,
-    handleAuthError,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword,
   };
 
-  // Render children only when not loading, or handle loading state in components
   return (
     <AuthContext.Provider value={value}>
       {children}
@@ -102,7 +105,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 /**
  * @function useAuth
  * @description Custom hook to use the authentication context.
- *              Ensures the hook is used within an AuthProvider.
  */
 export function useAuth() {
   const context = useContext(AuthContext);
