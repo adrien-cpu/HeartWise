@@ -139,6 +139,21 @@ class ContextHelpService {
     }
   ];
 
+  async getAllHelpContent(): Promise<HelpContent[]> {
+    if (criticalConfigError) {
+      return this.defaultHelpContent;
+    }
+
+    try {
+      // In a real implementation, this would fetch from Firestore
+      // For now, return the default content
+      return this.defaultHelpContent;
+    } catch (error) {
+      console.error('Error fetching all help content:', error);
+      return this.defaultHelpContent;
+    }
+  }
+
   async getHelpContent(contentId: string): Promise<HelpContent | null> {
     if (criticalConfigError) {
       // Return default content if Firebase is not available

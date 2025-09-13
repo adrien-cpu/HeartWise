@@ -1,23 +1,49 @@
+import React, { useState, useEffect } from 'react';
 import { Search, HelpCircle, Book, MessageCircle, Users, Zap, Bot, Shield } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { contextHelpService, HelpContent } from '@/services/context_help_service';
-import { useAuth } from '@/contexts/AuthContext';
 import AuthGuard from '@/components/auth-guard';
 
+function getCategoryIcon(category: string) {
+  switch (category) {
+    case 'getting-started':
+      return <Zap className="h-4 w-4" />;
+    case 'features':
+      return <Bot className="h-4 w-4" />;
+    case 'account':
+      return <Users className="h-4 w-4" />;
+    case 'security':
+      return <Shield className="h-4 w-4" />;
+    case 'support':
+      return <MessageCircle className="h-4 w-4" />;
+    default:
+      return <Book className="h-4 w-4" />;
+  }
+}
+
 export default function HelpPage() {
-  const { t } = useTranslation('help');
+  const t = useTranslations('Help');
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredContent, setFilteredContent] = useState<HelpContent[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   useEffect(() => {
-    const content = contextHelpService.getHelpContent();
-    const filtered = content.filter(item => {
-      const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          item.content.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    });
-    setFilteredContent(filtered);
+    const loadContent = async () => {
+      const content = await contextHelpService.getAllHelpContent();
+      const filtered = content.filter(item => {
+        const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            item.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+        return matchesSearch && matchesCategory;
+      });
+      setFilteredContent(filtered);
+    };
+    
+    loadContent();
   }, [searchTerm, selectedCategory]);
 
   const categories = [
@@ -90,7 +116,7 @@ export default function HelpPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="prose prose-sm max-w-none">
-                    {item.content.split('\n').map((paragraph, index) => (
+                    {item.description.split('\n').map((paragraph, index) => (
                       <p key={index} className="mb-2 last:mb-0">
                         {paragraph}
                       </p>
