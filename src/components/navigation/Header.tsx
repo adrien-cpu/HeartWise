@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from 'next-intl';
 import { useAuth } from '@/contexts/AuthContext';
+import { ContextualHelp } from '@/components/help/ContextualHelp';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -85,6 +86,11 @@ export function Header() {
                 <Link href="/game">
                   <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors">
                     Games
+                  </Button>
+                </Link>
+                <Link href="/help">
+                  <Button variant="ghost" className="text-base font-medium hover:text-rose-600 transition-colors">
+                    Help
                   </Button>
                 </Link>
               </>
@@ -220,6 +226,12 @@ export function Header() {
                     <Button variant="ghost" className="w-full justify-start text-lg p-4">
                       <Gamepad2 className="mr-3 h-5 w-5" />
                       Games
+                    </Button>
+                  </Link>
+                  <Link href="/help" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="ghost" className="w-full justify-start text-lg p-4">
+                      <HelpCircle className="mr-3 h-5 w-5" />
+                      Help
                     </Button>
                   </Link>
                 </div>

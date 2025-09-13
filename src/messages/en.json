@@ -874,6 +874,90 @@
     "profileDataUnavailable": "Profile data is currently unavailable.",
     "authenticating": "Authenticating..."
   },
+  "Help": {
+    "title": "Help & Support",
+    "subtitle": "Find answers and learn how to make the most of HeartWise",
+    "searchPlaceholder": "Search for help topics...",
+    "allCategories": "All Categories",
+    "gettingStarted": "Getting Started",
+    "features": "Features",
+    "troubleshooting": "Troubleshooting",
+    "tips": "Tips & Tricks",
+    "highPriority": "Essential",
+    "mediumPriority": "Helpful",
+    "lowPriority": "Optional",
+    "noResultsTitle": "No Help Articles Found",
+    "noResultsDescription": "Try adjusting your search terms or browse by category",
+    "faqTitle": "Frequently Asked Questions",
+    "faqDescription": "Quick answers to common questions",
+    "needMoreHelp": "Still Need Help?",
+    "contactDescription": "Our support team is here to assist you with any questions or issues.",
+    "contactSupport": "Contact Support",
+    "helpFor": "Help for {feature}",
+    "viewFullGuide": "View Full Guide",
+    "noHelpAvailable": "No help content available for this feature yet.",
+    "faq": {
+      "howToMatch": {
+        "question": "How does HeartWise matching work?",
+        "answer": "HeartWise uses AI to analyze facial features, psychological traits, and shared interests to suggest compatible matches. Our algorithm considers both similarities and complementary differences."
+      },
+      "facialAnalysis": {
+        "question": "Is facial analysis safe and private?",
+        "answer": "Yes! Facial analysis requires your explicit consent and is only used for matching purposes. We don't store facial data permanently and you can disable this feature anytime in your privacy settings."
+      },
+      "privacySafety": {
+        "question": "How does HeartWise protect my privacy?",
+        "answer": "We use end-to-end encryption for messages, content moderation for safety, and give you full control over what information you share. Your data is never sold to third parties."
+      },
+      "speedDating": {
+        "question": "How do speed dating sessions work?",
+        "answer": "Join interest-based virtual sessions where you meet multiple people in short conversations. Sessions are organized by shared interests and include built-in feedback systems."
+      },
+      "aiCoach": {
+        "question": "What is the AI Conversation Coach?",
+        "answer": "Our AI analyzes your messages and suggests improvements to help you communicate better. It can detect potential misunderstandings and suggest clearer ways to express yourself."
+      }
+    },
+    "guides": {
+      "profileSetup": {
+        "title": "Complete Your Profile",
+        "description": "Learn how to create an attractive and authentic profile",
+        "steps": {
+          "photo": {
+            "title": "Add Your Best Photo",
+            "description": "Upload a clear, recent photo that shows your personality"
+          },
+          "bio": {
+            "title": "Write Your Bio",
+            "description": "Share what makes you unique in a few compelling sentences"
+          }
+        }
+      },
+      "messaging": {
+        "title": "Effective Messaging",
+        "description": "Tips for starting and maintaining great conversations",
+        "steps": {
+          "send": {
+            "title": "Send Your First Message",
+            "description": "Start with something personal based on their profile"
+          },
+          "tags": {
+            "title": "Use Intention Tags",
+            "description": "Help your match understand the tone of your message"
+          }
+        }
+      }
+    }
+  },
+  "Onboarding": {
+    "stepOf": "Step {current} of {total}",
+    "previous": "Previous",
+    "next": "Next",
+    "skip": "Skip",
+    "complete": "Complete",
+    "welcomeTitle": "Welcome to HeartWise!",
+    "welcomeDescription": "Let's get you set up for success in finding meaningful connections."
+  },
   "Sidebar": {
     "toggleSidebar": "Toggle Sidebar"
   },

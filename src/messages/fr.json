@@ -273,4 +273,58 @@
     "profileDataUnavailable": "Les données du profil sont actuellement indisponibles.",
     "authenticating": "Authentification..."
   }
+  "Help": {
+    "title": "Aide et Support",
+    "subtitle": "Trouvez des réponses et apprenez à tirer le meilleur parti de HeartWise",
+    "searchPlaceholder": "Rechercher des sujets d'aide...",
+    "allCategories": "Toutes les catégories",
+    "gettingStarted": "Premiers pas",
+    "features": "Fonctionnalités",
+    "troubleshooting": "Dépannage",
+    "tips": "Conseils et astuces",
+    "highPriority": "Essentiel",
+    "mediumPriority": "Utile",
+    "lowPriority": "Optionnel",
+    "noResultsTitle": "Aucun article d'aide trouvé",
+    "noResultsDescription": "Essayez d'ajuster vos termes de recherche ou parcourez par catégorie",
+    "faqTitle": "Questions fréquemment posées",
+    "faqDescription": "Réponses rapides aux questions courantes",
+    "needMoreHelp": "Besoin d'aide supplémentaire ?",
+    "contactDescription": "Notre équipe de support est là pour vous aider avec toutes vos questions.",
+    "contactSupport": "Contacter le support",
+    "helpFor": "Aide pour {feature}",
+    "viewFullGuide": "Voir le guide complet",
+    "noHelpAvailable": "Aucun contenu d'aide disponible pour cette fonctionnalité pour le moment.",
+    "faq": {
+      "howToMatch": {
+        "question": "Comment fonctionne le matching HeartWise ?",
+        "answer": "HeartWise utilise l'IA pour analyser les traits faciaux, psychologiques et les intérêts partagés pour suggérer des matchs compatibles. Notre algorithme considère à la fois les similitudes et les différences complémentaires."
+      },
+      "facialAnalysis": {
+        "question": "L'analyse faciale est-elle sûre et privée ?",
+        "answer": "Oui ! L'analyse faciale nécessite votre consentement explicite et n'est utilisée que pour le matching. Nous ne stockons pas les données faciales de façon permanente et vous pouvez désactiver cette fonctionnalité à tout moment."
+      },
+      "privacySafety": {
+        "question": "Comment HeartWise protège-t-il ma vie privée ?",
+        "answer": "Nous utilisons le chiffrement bout en bout pour les messages, la modération de contenu pour la sécurité, et vous donnons un contrôle total sur les informations que vous partagez."
+      },
+      "speedDating": {
+        "question": "Comment fonctionnent les sessions de speed dating ?",
+        "answer": "Rejoignez des sessions virtuelles basées sur les intérêts où vous rencontrez plusieurs personnes en conversations courtes. Les sessions sont organisées par intérêts partagés."
+      },
+      "aiCoach": {
+        "question": "Qu'est-ce que le Coach Conversationnel IA ?",
+        "answer": "Notre IA analyse vos messages et suggère des améliorations pour vous aider à mieux communiquer. Elle peut détecter des malentendus potentiels et suggérer des façons plus claires de vous exprimer."
+      }
+    }
+  },
+  "Onboarding": {
+    "stepOf": "Étape {current} sur {total}",
+    "previous": "Précédent",
+    "next": "Suivant", 
+    "skip": "Passer",
+    "complete": "Terminer",
+    "welcomeTitle": "Bienvenue sur HeartWise !",
+    "welcomeDescription": "Configurons votre profil pour que vous trouviez des connexions significatives."
+  },
 }
