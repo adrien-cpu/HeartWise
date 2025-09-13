@@ -13,7 +13,6 @@ export default function Home() {
 
 
   return (
-  return (
     <TilesLayout>
       {!user && (
         <section className="py-24 text-center">
