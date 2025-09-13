@@ -139,7 +139,7 @@
     "realWorldMeetingsTitle": "Focus monde réel",
     "realWorldMeetingsDesc": "Bien que nous commencions en ligne, nous encourageons et facilitons des rencontres sûres dans le monde réel dans des espaces publics.",
     "privacyFirstTitle": "Design axé confidentialité", 
-    "privacyFirstDesc": "Vos données sont à vous. Nous utilisons un chiffrement avancé et vous donnons un contrôle total sur ce que vous partagez et quand.",
+    "privacyFirstDesc": "Vos données sont à vous. Nous utilisons un chiffrement avancé et vous donnez un contrôle total sur ce que vous partagez et quand.",
     "ourValuesTitle": "Nos valeurs",
     "authenticConnectionsTitle": "Connexions authentiques",
     "authenticConnectionsDesc": "Nous priorisons les relations genuines plutôt que les matchs superficiels.",
@@ -327,4 +327,33 @@
     "welcomeTitle": "Bienvenue sur HeartWise !",
     "welcomeDescription": "Configurons votre profil pour que vous trouviez des connexions significatives."
   },
+  "Calendar": {
+    "title": "Calendrier d'activités",
+    "subtitle": "Découvrez et participez aux événements HeartWise",
+    "eventsToday": "Événements aujourd'hui",
+    "noEventsToday": "Aucun événement aujourd'hui",
+    "upcomingEvents": "Événements à venir",
+    "joinEvent": "Participer",
+    "eventFull": "Événement complet",
+    "eventDetails": "Détails de l'événement",
+    "participants": "Participants",
+    "duration": "Durée",
+    "difficulty": "Difficulté",
+    "interests": "Centres d'intérêt",
+    "viewMore": "Voir plus",
+    "monthView": "Mois",
+    "weekView": "Semaine",
+    "dayView": "Jour",
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "thisWeek": "Cette semaine",
+    "nextWeek": "Semaine prochaine",
+    "eventTypes": {
+      "speed-dating": "Speed Dating",
+      "game-session": "Session de jeu",
+      "local-meetup": "Rencontre locale",
+      "ai-feature": "Fonctionnalité IA",
+      "special-event": "Événement spécial"
+    }
+  }
 }

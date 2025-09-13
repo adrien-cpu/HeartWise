@@ -205,6 +205,23 @@
   100% { background-color: transparent; }
 }
 
+/* Calendar specific styles */
+.calendar-day-with-events {
+  position: relative;
+}
+
+.calendar-day-with-events::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background-color: hsl(var(--primary));
+  border-radius: 50%;
+}
+
 /* Animation delays for typing indicators */
 .animation-delay-150 {
   animation-delay: 150ms;
