@@ -1,5 +1,3 @@
-import createMiddleware from 'next-intl/middleware';
-import { locales, defaultLocale, pathnames } from '@/i18n/settings';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -19,74 +17,45 @@ const protectedRoutes = [
 
 const publicRoutes = ['/login', '/signup'];
 
-const testRoutes = ['/test-css', '/test-simple', '/debug', '/tailwind-test'];
-
-const intlMiddleware = createMiddleware({
-  locales,
-  defaultLocale,
-  localePrefix: 'always',
-  pathnames,
-});
-
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 🚫 Autorise les routes de test sans locale
-  if (testRoutes.some(route => pathname.startsWith(route))) {
+  // Allow test routes without restrictions
+  if (pathname.startsWith('/test-') || pathname.startsWith('/debug')) {
     return NextResponse.next();
   }
 
-  // ✅ Autorise l'accès à la page racine sans locale
+  // Allow access to home page
   if (pathname === '/') {
     return NextResponse.next();
   }
 
-  // 🔁 Si aucune locale détectée dans l’URL, redirige vers /[defaultLocale]/...
-  const pathHasLocale = locales.some(locale =>
-    pathname.startsWith(`/${locale}`)
-  );
-
-  if (!pathHasLocale) {
-    const url = request.nextUrl.clone();
-    url.pathname = `/${defaultLocale}${pathname}`;
-    return NextResponse.redirect(url);
-  }
-
-  // 🍪 Authentification
+  // Check authentication
   const authToken = request.cookies.get('auth-token')?.value;
 
-  // 🧹 Extrait le chemin sans locale
-  const pathWithoutLocale = pathname.replace(/^\/[a-z]{2}(-[A-Z]{2})?/, '');
-
   const isProtected = protectedRoutes.some(route =>
-    pathWithoutLocale.startsWith(route)
+    pathname.startsWith(route)
   );
 
   const isPublic = publicRoutes.some(route =>
-    pathWithoutLocale.startsWith(route)
+    pathname.startsWith(route)
   );
 
-  const locale = pathname.split('/')[1]; // Sûr car vérifié plus haut
-
-  // 🔒 Redirige vers login si route protégée et pas connecté
+  // Redirect to login if protected route and not authenticated
   if (isProtected && !authToken) {
-    const loginUrl = new URL(`/${locale}/login`, request.url);
+    const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // 🔄 Redirige utilisateur connecté hors de login/signup
+  // Redirect authenticated user away from login/signup
   if (authToken && isPublic) {
-    return NextResponse.redirect(new URL(`/${locale}`, request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
-  // 🌍 Applique l’internationalisation
-  return intlMiddleware(request);
+  return NextResponse.next();
 }
 
-/**
- * ⚙️ Configuration des routes traitées par le middleware
- */
 export const config = {
   matcher: [
     '/((?!_next|.*\\.css$|.*\\.js$|.*\\.png$|.*\\.svg$|.*\\.ico$|.*\\.json$|.*\\.txt$).*)',

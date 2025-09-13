@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
-import { useTranslations } from 'next-intl';
-import { Link } from 'next-intl';
+import Link from 'next/link';
 import { format, isSameDay, addDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { 
@@ -43,7 +42,6 @@ interface CalendarEvent {
 }
 
 export function FeatureCalendar() {
-  const t = useTranslations('Calendar');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [view, setView] = useState<'month' | 'week' | 'day'>('month');

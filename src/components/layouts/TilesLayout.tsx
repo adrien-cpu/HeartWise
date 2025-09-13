@@ -7,8 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { useTranslations } from 'next-intl';
-import { Link } from 'next-intl';
+import Link from 'next/link';
 import { 
   ScanFace, 
   MessageSquare, 
@@ -53,8 +52,6 @@ interface TilesLayoutProps {
 }
 
 export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
-  const t = useTranslations('Home');
-  const tNav = useTranslations('Navigation');
   const [selectedFeature, setSelectedFeature] = useState<TileFeature | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -62,7 +59,7 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
     {
       id: 'dashboard',
       icon: <LayoutDashboard className="w-8 h-8" />,
-      title: tNav('dashboard'),
+      title: 'Tableau de bord',
       description: 'Votre centre de contrôle personnalisé',
       href: '/dashboard',
       gradient: 'from-blue-500 to-cyan-500',
@@ -77,8 +74,8 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
     {
       id: 'facial-analysis',
       icon: <ScanFace className="w-8 h-8" />,
-      title: t('facialAnalysisMatching'),
-      description: t('facialAnalysisMatchingDescription'),
+      title: 'Analyse faciale IA',
+      description: 'Analyse de compatibilité par IA basée sur les traits faciaux et psychologiques',
       href: '/facial-analysis-matching',
       gradient: 'from-purple-500 to-pink-500',
       bgGradient: 'from-purple-50 to-pink-50',
@@ -92,8 +89,8 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
     {
       id: 'ai-coach',
       icon: <MessageSquare className="w-8 h-8" />,
-      title: t('aiConversationCoach'),
-      description: t('aiConversationCoachDescription'),
+      title: 'Coach de conversation',
+      description: 'Coaching IA en temps réel pour améliorer vos conversations',
       href: '/ai-conversation-coach',
       gradient: 'from-emerald-500 to-teal-500',
       bgGradient: 'from-emerald-50 to-teal-50',
@@ -107,8 +104,8 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
     {
       id: 'speed-dating',
       icon: <Zap className="w-8 h-8" />,
-      title: t('speedDating'),
-      description: t('speedDatingDescription'),
+      title: 'Speed Dating',
+      description: 'Sessions rapides pour rencontrer plusieurs personnes basées sur les intérêts',
       href: '/speed-dating',
       gradient: 'from-yellow-500 to-orange-500',
       bgGradient: 'from-yellow-50 to-orange-50',
@@ -122,8 +119,8 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
     {
       id: 'games',
       icon: <Gamepad2 className="w-8 h-8" />,
-      title: t('game'),
-      description: t('gameDescription'),
+      title: 'Jeux interactifs',
+      description: 'Quiz, défis temporels et jeux pour briser la glace',
       href: '/game',
       gradient: 'from-indigo-500 to-purple-500',
       bgGradient: 'from-indigo-50 to-purple-50',
@@ -137,8 +134,8 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
     {
       id: 'blind-exchange',
       icon: <EyeOff className="w-8 h-8" />,
-      title: t('blindExchangeMode'),
-      description: t('blindExchangeModeDescription'),
+      title: 'Échange aveugle',
+      description: 'Connectez-vous sans photos - découvrez d\'abord les personnalités',
       href: '/blind-exchange-mode',
       gradient: 'from-gray-600 to-slate-700',
       bgGradient: 'from-gray-50 to-slate-50',
@@ -148,8 +145,8 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
     {
       id: 'chat',
       icon: <MessageCircle className="w-8 h-8" />,
-      title: t('chat'),
-      description: t('chatDescription'),
+      title: 'Chat intelligent',
+      description: 'Messagerie avec assistance IA et étiquetage d\'intention',
       href: '/chat',
       gradient: 'from-blue-500 to-indigo-500',
       bgGradient: 'from-blue-50 to-indigo-50',
@@ -163,8 +160,8 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
     {
       id: 'geolocation',
       icon: <MapPin className="w-8 h-8" />,
-      title: t('geolocationMeeting'),
-      description: t('geolocationMeetingDescription'),
+      title: 'Rencontres locales',
+      description: 'Rencontrez des gens dans des espaces publics près de chez vous',
       href: '/geolocation-meeting',
       gradient: 'from-red-500 to-rose-500',
       bgGradient: 'from-red-50 to-rose-50',
@@ -207,7 +204,7 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
               </span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
-              {t('heroDescription')}
+              Découvrez des connexions significatives et enflammez votre histoire d'amour avec un matching intelligent et des expériences engageantes.
             </p>
           </div>
 
@@ -338,7 +335,7 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
                     <Link href="/calendar">
                       <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
                         <Calendar className="w-4 h-4 mr-3" />
-                        {tNav('calendar')}
+                        Calendrier
                       </Button>
                     </Link>
                     <Link href="/profile">

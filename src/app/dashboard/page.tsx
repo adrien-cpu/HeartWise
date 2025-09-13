@@ -1,22 +1,19 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, UserCheck, MessageSquareText, Star, Trophy, Users, Play, Sparkles, Zap, Search } from 'lucide-react'; // Added more icons
+import { Lightbulb, UserCheck, MessageSquareText, Star, Trophy, Users, Play, Sparkles, Zap, Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { get_user, UserProfile } from '@/services/user_profile';
-import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 // Mock user ID for demonstration
 const userId = 'user1';
 
-// Mock Match Suggestion Data
 interface MockMatch {
   id: string;
   name: string;
@@ -35,25 +32,7 @@ const mockMatchSuggestion: MockMatch = {
   compatibility: 82,
 };
 
-/**
- * @fileOverview Implements the Intelligent User Dashboard page.
- * @module DashboardPage
- * @description Displays personalized insights, stats, quick links, and a mock match suggestion for the user.
- */
-
-/**
- * DashboardPage component.
- *
- * @component
- * @returns {JSX.Element} The rendered Dashboard page.
- */
 export default function DashboardPage() {
-  const t = useTranslations('DashboardPage');
-  const tProfile = useTranslations('ProfilePage');
-  const tRewards = useTranslations('RewardsPage');
-  const tHome = useTranslations('Home'); // For reusing feature names
-
-  const { toast } = useToast();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentAdvice, setCurrentAdvice] = useState('');
@@ -70,28 +49,25 @@ export default function DashboardPage() {
         if (userProfile.bio && userProfile.bio.length > 10) completeness += 20;
         if (userProfile.profilePicture) completeness += 20;
         if (userProfile.interests && userProfile.interests.length > 0) completeness += 20;
-        if (userProfile.interests && userProfile.interests.length >= 3) completeness += 20; // Bonus for more interests
+        if (userProfile.interests && userProfile.interests.length >= 3) completeness += 20;
         setProfileCompleteness(Math.min(100, completeness));
 
         const mockAdvices = [
-          t('mockAdvice1'),
-          t('mockAdvice2'),
-          t('mockAdvice3'),
+          'Considérez mettre à jour votre bio pour refléter votre humeur ou intérêts actuels.',
+          'Essayez d\'initier une conversation avec quelqu\'un qui partage un intérêt unique.',
+          'Explorez le mode Échange aveugle pour un type de connexion différent.',
         ];
         setCurrentAdvice(mockAdvices[Math.floor(Math.random() * mockAdvices.length)]);
 
       } catch (error) {
         console.error("Error fetching profile:", error);
-        toast({
-          variant: "destructive",
-          title: t('fetchErrorTitle'),
-          description: t('fetchErrorDescription'),
-        });
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [toast, t]);
+  }, []);
 
   const getInitials = (name?: string): string => {
     if (!name) return 'U';
@@ -120,19 +96,19 @@ export default function DashboardPage() {
         ) : profile ? (
           <div className="flex items-center space-x-4">
             <Avatar className="h-16 w-16 border" data-ai-hint={profile.dataAiHint || "user"}>
-              <AvatarImage src={profile.profilePicture || undefined} alt={profile.name || t('userAlt')} />
+              <AvatarImage src={profile.profilePicture || undefined} alt={profile.name || 'User'} />
               <AvatarFallback className="text-2xl">{getInitials(profile.name)}</AvatarFallback>
             </Avatar>
             <div>
-              <h1 className="text-3xl font-bold">{t('welcome', { name: profile.name || t('userAlt') })}</h1>
-              <p className="text-muted-foreground">{t('dashboardOverview')}</p>
+              <h1 className="text-3xl font-bold">Bienvenue {profile.name || 'User'} !</h1>
+              <p className="text-muted-foreground">Voici votre tableau de bord HeartWise personnalisé.</p>
             </div>
           </div>
         ) : (
-          <h1 className="text-3xl font-bold">{t('welcome', { name: t('userAlt') })}</h1>
+          <h1 className="text-3xl font-bold">Bienvenue User !</h1>
         )}
         <Link href="/profile" passHref>
-          <Button variant="outline">{tProfile('editProfile')}</Button>
+          <Button variant="outline">Éditer le profil</Button>
         </Link>
       </div>
 
@@ -142,9 +118,9 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lightbulb className="h-6 w-6 text-primary" />
-              {t('personalizedAdviceTitle')}
+              Conseil personnalisé
             </CardTitle>
-            <CardDescription>{t('personalizedAdviceDesc')}</CardDescription>
+            <CardDescription>Une suggestion pour améliorer votre expérience</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -160,20 +136,20 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserCheck className="h-6 w-6 text-primary" />
-              {t('profileCompletenessTitle')}
+              Complétude du profil
             </CardTitle>
-            <CardDescription>{t('profileCompletenessDesc')}</CardDescription>
+            <CardDescription>Complétez votre profil pour de meilleurs matchs</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
               <Skeleton className="h-8 w-full" />
             ) : (
               <>
-                <Progress value={profileCompleteness} className="w-full mb-2 h-3" aria-label={`${t('profileCompletenessTitle')} ${profileCompleteness}%`} />
+                <Progress value={profileCompleteness} className="w-full mb-2 h-3" />
                 <p className="text-right text-sm font-medium text-primary">{profileCompleteness}%</p>
                 {profileCompleteness < 100 && (
                   <Link href="/profile" passHref>
-                    <Button variant="link" size="sm" className="p-0 h-auto mt-1">{t('completeProfileLink')}</Button>
+                    <Button variant="link" size="sm" className="p-0 h-auto mt-1">Compléter le profil</Button>
                   </Link>
                 )}
               </>
@@ -186,29 +162,29 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Sparkles className="h-6 w-6 text-primary" />
-              {t('quickActionsTitle')}
+              Actions rapides
             </CardTitle>
-            <CardDescription>{t('quickActionsDesc')}</CardDescription>
+            <CardDescription>Accédez directement aux fonctionnalités clés</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3">
             <Link href="/speed-dating" passHref>
               <Button variant="outline" className="w-full flex items-center justify-start gap-2">
-                <Zap className="h-4 w-4" /> {tHome('speedDating')}
+                <Zap className="h-4 w-4" /> Speed Dating
               </Button>
             </Link>
             <Link href="/blind-exchange-mode" passHref>
               <Button variant="outline" className="w-full flex items-center justify-start gap-2">
-                <Users className="h-4 w-4" /> {tHome('blindExchangeMode')}
+                <Users className="h-4 w-4" /> Échange aveugle
               </Button>
             </Link>
             <Link href="/game" passHref>
               <Button variant="outline" className="w-full flex items-center justify-start gap-2">
-                <Play className="h-4 w-4" /> {tHome('game')}
+                <Play className="h-4 w-4" /> Jeux
               </Button>
             </Link>
             <Link href="/chat" passHref>
               <Button variant="outline" className="w-full flex items-center justify-start gap-2">
-                <MessageSquareText className="h-4 w-4" /> {tHome('chat')}
+                <MessageSquareText className="h-4 w-4" /> Chat
               </Button>
             </Link>
           </CardContent>
@@ -219,9 +195,9 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-6 w-6 text-primary" />
-              {t('matchSuggestionTitle')}
+              Suggestion de match
             </CardTitle>
-            <CardDescription>{t('matchSuggestionDesc')}</CardDescription>
+            <CardDescription>Quelqu'un qui pourrait vous plaire !</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -246,20 +222,19 @@ export default function DashboardPage() {
                       <Badge key={interest} variant="secondary" className="text-xs">{interest}</Badge>
                     ))}
                   </div>
-                  <p className="text-sm text-green-600 font-medium">{t('compatibility', { score: mockMatchSuggestion.compatibility })}</p>
+                  <p className="text-sm text-green-600 font-medium">{mockMatchSuggestion.compatibility}% compatible</p>
                 </div>
-                <Button variant="default" size="sm">{t('viewProfileButton')}</Button>
+                <Button variant="default" size="sm">Voir le profil</Button>
               </div>
             )}
           </CardContent>
         </Card>
 
-
         {/* User Stats Card */}
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>{t('quickStatsTitle')}</CardTitle>
-            <CardDescription>{t('quickStatsDesc')}</CardDescription>
+            <CardTitle>Statistiques rapides</CardTitle>
+            <CardDescription>Aperçu de votre activité récente</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {loading ? (
@@ -270,17 +245,16 @@ export default function DashboardPage() {
             ) : (
               <>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t('totalPoints')}</span>
+                  <span className="text-muted-foreground">Points totaux</span>
                   <span className="font-semibold flex items-center gap-1">
                     <Trophy className="h-4 w-4 text-yellow-500" />
                     {profile?.points ?? 0}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t('badgesEarned')}</span>
+                  <span className="text-muted-foreground">Badges gagnés</span>
                   <span className="font-semibold">{profile?.rewards?.length ?? 0}</span>
                 </div>
-                {/* Add more mock stats if relevant, e.g., "Matches Made", "Dates Scheduled" - requires backend */}
               </>
             )}
           </CardContent>
@@ -289,8 +263,8 @@ export default function DashboardPage() {
         {/* Recent Badges Card */}
         <Card className="lg:col-span-2 shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
-            <CardTitle>{t('recentBadgesTitle')}</CardTitle>
-            <CardDescription>{t('recentBadgesDesc')}</CardDescription>
+            <CardTitle>Badges récents</CardTitle>
+            <CardDescription>Vos derniers accomplissements</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -306,31 +280,29 @@ export default function DashboardPage() {
                     key={reward.id}
                     variant="secondary"
                     className="flex items-center gap-1.5 p-1.5 pr-2.5 text-xs cursor-help"
-                    title={`${tRewards(`badge_${reward.type}_name`, { defaultValue: reward.name })}: ${tRewards(`badge_${reward.type}_desc`, { defaultValue: reward.description })}`}
+                    title={`${reward.name}: ${reward.description}`}
                   >
                     {getBadgeIcon(reward.type)}
-                    {tRewards(`badge_${reward.type}_name`, { defaultValue: reward.name })}
+                    {reward.name}
                   </Badge>
                 ))}
                 {profile.rewards.length > 4 && (
                   <Link href="/rewards" passHref>
-                    <Badge variant="outline" className="text-xs cursor-pointer hover:bg-accent p-1.5 pr-2.5">+{profile.rewards.length - 4} {t('moreBadges')}</Badge>
+                    <Badge variant="outline" className="text-xs cursor-pointer hover:bg-accent p-1.5 pr-2.5">+{profile.rewards.length - 4} de plus</Badge>
                   </Link>
                 )}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">{tRewards('noBadges')}</p>
+              <p className="text-sm text-muted-foreground">Aucun badge gagné pour le moment</p>
             )}
           </CardContent>
           <CardFooter>
             <Link href="/rewards" passHref>
-              <Button variant="link" className="p-0 h-auto text-sm">{t('viewAllRewards')}</Button>
+              <Button variant="link" className="p-0 h-auto text-sm">Voir toutes les récompenses</Button>
             </Link>
           </CardFooter>
         </Card>
-
       </div>
     </div>
   );
 }
-
