@@ -9,7 +9,6 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { Link } from 'next-intl';
-import { useAuth } from '@/contexts/AuthContext';
 import { 
   ScanFace, 
   MessageSquare, 
@@ -56,7 +55,6 @@ interface TilesLayoutProps {
 export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
   const t = useTranslations('Home');
   const tNav = useTranslations('Navigation');
-  const { user } = useAuth();
   const [selectedFeature, setSelectedFeature] = useState<TileFeature | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -333,38 +331,34 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
                   <div className="space-y-1">
                     <Link href="/dashboard">
                       <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                        <Home className="w-4 h-4 mr-3" />
+                        <MessageCircle className="w-4 h-4 mr-3" />
                         Tableau de bord
                       </Button>
                     </Link>
                     <Link href="/calendar">
                       <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
                         <Calendar className="w-4 h-4 mr-3" />
-                        Calendrier
+                        {tNav('calendar')}
                       </Button>
                     </Link>
-                    {user && (
-                      <>
-                        <Link href="/profile">
-                          <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                            <User className="w-4 h-4 mr-3" />
-                            Profil
-                          </Button>
-                        </Link>
-                        <Link href="/rewards">
-                          <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                            <Trophy className="w-4 h-4 mr-3" />
-                            Récompenses
-                          </Button>
-                        </Link>
-                        <Link href="/settings">
-                          <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                            <Settings className="w-4 h-4 mr-3" />
-                            Paramètres
-                          </Button>
-                        </Link>
-                      </>
-                    )}
+                    <Link href="/profile">
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
+                        <User className="w-4 h-4 mr-3" />
+                        Profil
+                      </Button>
+                    </Link>
+                    <Link href="/rewards">
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
+                        <Trophy className="w-4 h-4 mr-3" />
+                        Récompenses
+                      </Button>
+                    </Link>
+                    <Link href="/settings">
+                      <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
+                        <Settings className="w-4 h-4 mr-3" />
+                        Paramètres
+                      </Button>
+                    </Link>
                   </div>
                 </div>
 
