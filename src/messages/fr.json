@@ -121,12 +121,12 @@
     "loginLink": "Se connecter",
     "forgotPasswordTitle": "Mot de passe oublié",
     "forgotPasswordDescription": "Entrez votre adresse email pour recevoir un lien de réinitialisation.",
-    "sendResetEmailButton": "Envoyer l'email de réinitialisation"
+    "sendResetEmailButton": "Envoyer l'email de réinitialisation",
     "passwordResetSuccessTitle": "Email de réinitialisation envoyé",
     "passwordResetSuccessDesc": "Si un compte avec cet email existe, vous recevrez bientôt un lien de réinitialisation.",
     "passwordResetErrorTitle": "Échec de la réinitialisation",
     "passwordResetErrorDefault": "Impossible d'envoyer l'email de réinitialisation. Veuillez réessayer.",
-    "backToLoginLink": "Retour à la connexion",
+    "backToLoginLink": "Retour à la connexion"
   },
   "About": {
     "heroDescription": "Nous révolutionnons la façon dont les gens se connectent grâce à l'intelligence émotionnelle et aux relations authentiques.",
