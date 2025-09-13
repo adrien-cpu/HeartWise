@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Send, Phone, PhoneOff, Mic, MicOff, Video, VideoOff, Trophy, ListOrdered, Play, Check, X, RotateCcw, Gamepad2 } from "lucide-react";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import AuthGuard from "@/components/auth-guard";
 import { useRouter } from "next/navigation";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
@@ -55,7 +55,7 @@ const availableCategories = Array.from(new Set(allGKQuestions.map(q => q.theme))
 const GamePage = (): JSX.Element => {
   const t = useTranslations("Game");
   const { toast } = useToast();
-  const { user: currentUser, loading: authLoading } = useAuthContext();
+  const { user: currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
 
   // General State

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { analyzeTextForRiskyWords, RiskyWordAnalysis } from '@/ai/flows/risky-words-dictionary';
 import { submitRiskyWordFeedback, reportMissedRiskyWord } from '@/services/feedback_service';
-import { useAuthContext } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, AlertTriangle, Check, Send, ShieldAlert } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -34,7 +34,6 @@ const RiskyWordsDictionaryPage = () => {
   const t = useTranslations('RiskyWordsDictionary');
   const tChat = useTranslations('Chat'); // For moderation messages
   const { toast } = useToast();
-  const { user: currentUser } = useAuthContext();
 
   const [inputText, setInputText] = useState('');
   const [analysisResult, setAnalysisResult] = useState<RiskyWordAnalysis[]>([]);

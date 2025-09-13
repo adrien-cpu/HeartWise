@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import AuthGuard from "@/components/auth-guard";
 import { tagMessageIntent, IntentionTaggingOutput } from '@/ai/flows/intention-tagging';
 import { moderateText, ModerationResult } from '@/services/moderation_service';
-import { useAuthContext } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import {
   sendMessage as sendChatMessage,
@@ -229,7 +229,7 @@ const REACTION_EMOJIS = ['❤️', '👍', '😂', '😮', '😢', '🙏'];
 export default function ChatPage(): JSX.Element {
   const t = useTranslations("Chat");
   const { toast } = useToast();
-  const { user: currentUser, loading: authLoading } = useAuthContext();
+  const { user: currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
 
   // State

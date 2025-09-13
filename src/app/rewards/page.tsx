@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Progress } from '@/components/ui/progress';
-import { useAuthContext } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
 // Define unlock thresholds and badge types
@@ -52,7 +52,7 @@ const RewardsPage = () => {
   const t = useTranslations('RewardsPage');
   const tProfile = useTranslations('ProfilePage');
   const { toast } = useToast();
-  const { user: currentUser, loading: authLoading } = useAuthContext();
+  const { user: currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
