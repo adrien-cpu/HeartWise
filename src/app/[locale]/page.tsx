@@ -7,6 +7,7 @@ import { TilesLayout } from '@/components/layouts/TilesLayout';
 export default function Home() {
   const t = useTranslations("Home");
 
-  return <TilesLayout />;
+  return (
+    <TilesLayout />
   );
 }
