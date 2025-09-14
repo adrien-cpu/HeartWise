@@ -10,15 +10,19 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  console.warn('Missing Supabase environment variables. Please configure Supabase connection.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key',
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+    }
   }
-});
+);
 
 export type Database = {
   public: {
@@ -69,64 +73,6 @@ export type Database = {
           premium_features?: any;
           fcm_tokens?: string[];
           updated_at?: string;
-        };
-      };
-      conversations: {
-        Row: {
-          id: string;
-          participant_ids: string[];
-          last_message_text: string | null;
-          last_message_timestamp: string | null;
-          last_message_sender_id: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-      };
-      messages: {
-        Row: {
-          id: string;
-          conversation_id: string;
-          sender_id: string;
-          sender_name: string;
-          text: string;
-          intention_tag: string | null;
-          status: string;
-          attachments: any;
-          reply_to: any;
-          is_ephemeral: boolean;
-          expires_at: string | null;
-          created_at: string;
-        };
-      };
-      speed_dating_sessions: {
-        Row: {
-          id: string;
-          creator_id: string;
-          date_time: string;
-          interests: string[];
-          participant_ids: string[];
-          participants_count: number;
-          max_participants: number;
-          status: string;
-          participants: any;
-          current_round: number;
-          pairings: any;
-          duration_per_round_minutes: number;
-          total_rounds: number | null;
-          created_at: string;
-          updated_at: string;
-        };
-      };
-      user_rewards: {
-        Row: {
-          id: string;
-          user_id: string;
-          name: string;
-          description: string | null;
-          type: string;
-          icon: string | null;
-          date_earned: string;
-          created_at: string;
         };
       };
     };

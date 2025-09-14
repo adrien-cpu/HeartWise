@@ -113,3 +113,6 @@ export function useAuth() {
   }
   return context;
 }
+
+// Export useAuthContext as alias for backward compatibility
+export const useAuthContext = useAuth;
