@@ -1,52 +1,60 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'use-intl';
-import { useAuthContext } from '../contexts/AuthContext';
-import { profileService } from '../services/profileService';
-import { UserProfile } from '../types/UserProfile';
+import { useAuth } from '../contexts/AuthContext';
+import { useUserProfile } from '../hooks/useUserProfile';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { User } from 'lucide-react';
 
-interface ProfileDashboardProps {
-    userId: string;
-}
+export const ProfileDashboard = () => {
+    const { user } = useAuth();
+    const { userProfile, loading, error } = useUserProfile();
 
-export function ProfileDashboard({ userId }: ProfileDashboardProps) {
-    const t = useTranslations('ProfileDashboard');
-    const { user } = useAuthContext();
-    const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState<Partial<UserProfile>>({});
+    if (loading) {
+        return (
+            <Card>
+                <CardHeader className="flex flex-row items-center gap-4">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-4 w-32" />
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                </CardContent>
+            </Card>
+        );
+    }
 
-    const loadData = useCallback(async () => {
-        try {
-            setLoading(true);
-            const data = await profileService.getUserProfile(userId);
-            setProfile(data);
-            setFormData(data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Une erreur est survenue');
-        } finally {
-            setLoading(false);
-        }
-    }, [userId]);
+    if (error) {
+        return (
+            <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+            </Alert>
+        );
+    }
 
-    useEffect(() => {
-        loadData();
-    }, [loadData]);
-
-    const handleUpdateProfile = useCallback(async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            setLoading(true);
-            const updatedProfile = await profileService.updateUserProfile(userId, formData);
-            setProfile(updatedProfile);
-            setIsEditing(false);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Une erreur est survenue');
-        } finally {
-            setLoading(false);
-        }
-    }, [userId, formData]);
-
-    // ... existing code ...
-} 
+    return (
+        <Card>
+            <CardHeader className="flex flex-row items-center gap-4">
+                <Avatar className="h-12 w-12">
+                    <AvatarImage src={userProfile?.profilePicture || ''} alt={userProfile?.name || 'User'} />
+                    <AvatarFallback>{userProfile?.name?.[0] || 'U'}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <CardTitle className="flex items-center gap-2">
+                        <User />
+                        {userProfile?.name}
+                    </CardTitle>
+                    <CardDescription>{userProfile?.email}</CardDescription>
+                </div>
+            </CardHeader>
+            <CardContent>
+                <p>{userProfile?.bio || 'No bio available.'}</p>
+            </CardContent>
+        </Card>
+    );
+};

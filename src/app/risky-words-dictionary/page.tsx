@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,17 +11,13 @@ import { useToast } from '@/hooks/use-toast';
 import { analyzeTextForRiskyWords, RiskyWordAnalysis } from '@/ai/flows/risky-words-dictionary';
 import { submitRiskyWordFeedback, reportMissedRiskyWord } from '@/services/feedback_service';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, AlertTriangle, Check, Send, ShieldAlert } from 'lucide-react';
+import { Loader2, AlertTriangle, Check, Send, ShieldAlert, Trash2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { moderateText, ModerationResult } from '@/services/moderation_service';
-
-/**
- * @fileOverview Implements the Risky Words Dictionary page component.
- * Allows users to input text, receive analysis on potentially risky phrases,
- * provide feedback on flagged items, and report words/phrases missed by the AI.
- * Includes content moderation check before analysis and requires authentication for feedback.
- */
+import { firestore } from '@/lib/firebase';
+import { collection, query, where, onSnapshot, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 /**
  * RiskyWordsDictionaryPage component.
@@ -34,6 +30,7 @@ const RiskyWordsDictionaryPage = () => {
   const t = useTranslations('RiskyWordsDictionary');
   const tChat = useTranslations('Chat'); // For moderation messages
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
 
   const [inputText, setInputText] = useState('');
   const [analysisResult, setAnalysisResult] = useState<RiskyWordAnalysis[]>([]);
@@ -47,6 +44,66 @@ const RiskyWordsDictionaryPage = () => {
   const [missedWordReason, setMissedWordReason] = useState('');
   const [isSubmittingMissedWord, setIsSubmittingMissedWord] = useState(false);
 
+  const [riskyWords, setRiskyWords] = useState<any[]>([]);
+  const [newWord, setNewWord] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!currentUser) {
+        // If you want to show a message or redirect, you can do that here.
+        // For now, we just won't fetch the data.
+        setLoading(false);
+        return;
+    }
+
+    const q = query(collection(firestore, "riskyWords"), where("userId", "==", currentUser.uid));
+    
+    setLoading(true);
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const words: any[] = [];
+      querySnapshot.forEach((doc) => {
+        words.push({ id: doc.id, ...doc.data() });
+      });
+      setRiskyWords(words);
+      setLoading(false);
+    }, (err) => {
+        console.error("Error fetching risky words: ", err);
+        setError("Failed to fetch your risky words dictionary. Please try again later.");
+        setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [currentUser]);
+
+  const addWord = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newWord.trim() || !currentUser) return;
+
+    setIsSubmitting(true);
+    try {
+        await addDoc(collection(firestore, "riskyWords"), {
+          word: newWord.toLowerCase().trim(),
+          userId: currentUser.uid,
+        });
+        setNewWord("");
+    } catch (err) {
+        console.error("Error adding word: ", err);
+        setError("Failed to add the word. Please try again.")
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
+  const deleteWord = async (wordId: string) => {
+    try {
+        await deleteDoc(doc(firestore, "riskyWords", wordId));
+    } catch (err) {
+        console.error("Error deleting word: ", err);
+        setError("Failed to delete the word. Please try again.");
+    }
+  };
 
   const handleAnalyzeText = async () => {
     if (!inputText.trim()) {
@@ -102,232 +159,73 @@ const RiskyWordsDictionaryPage = () => {
       setIsLoadingAnalysis(false);
     }
   };
-
-  const handleFeedbackSubmit = async (item: RiskyWordAnalysis, feedbackType: 'accurate' | 'not_risky') => {
-    if (!currentUser) {
-      toast({ variant: 'destructive', title: t('errorTitle'), description: t('authRequiredError') });
-      return;
-    }
-    if (submittedFeedbackItems[item.id]) {
-      toast({ variant: 'default', title: t('feedbackAlreadySubmittedTitle'), description: t('feedbackAlreadySubmittedDesc') });
-      return;
-    }
-
-    setSubmittingFeedbackId(item.id);
-    try {
-      await submitRiskyWordFeedback({
-        userId: currentUser.uid,
-        originalText: inputText,
-        flaggedWord: item.word,
-        feedbackType: feedbackType,
-        analysisItemId: item.id,
-      });
-      setSubmittedFeedbackItems(prev => ({ ...prev, [item.id]: feedbackType }));
-      toast({ title: t('feedbackThanksTitle'), description: t('feedbackThanksDesc') });
-    } catch (error) {
-      console.error('Error submitting feedback:', error);
-      toast({ variant: 'destructive', title: t('errorTitle'), description: t('feedbackSubmitError') });
-    } finally {
-      setSubmittingFeedbackId(null);
-    }
-  };
-
-  const handleReportMissedWord = async () => {
-    if (!currentUser) {
-      toast({ variant: 'destructive', title: t('errorTitle'), description: t('authRequiredError') });
-      return;
-    }
-    if (!missedWordReport.trim()) {
-      toast({ variant: 'destructive', title: t('errorTitle'), description: t('missedWordEmptyError') });
-      return;
-    }
-    setIsSubmittingMissedWord(true);
-    try {
-      await reportMissedRiskyWord({
-        userId: currentUser.uid,
-        originalText: inputText,
-        missedWord: missedWordReport,
-        reason: missedWordReason,
-      });
-      toast({ title: t('reportSubmittedTitle'), description: t('reportSubmittedDesc') });
-      setMissedWordReport('');
-      setMissedWordReason('');
-    } catch (error) {
-      console.error('Error reporting missed word:', error);
-      toast({ variant: 'destructive', title: t('errorTitle'), description: t('reportSubmitError') });
-    } finally {
-      setIsSubmittingMissedWord(false);
-    }
-  };
-
+  
+  if (!currentUser) {
+    return (
+        <div className="container mx-auto p-4 flex justify-center">
+             <Alert variant="destructive" className="max-w-lg">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Authentication Required</AlertTitle>
+              <AlertDescription>You must be logged in to manage your risky words dictionary.</AlertDescription>
+            </Alert>
+        </div>
+    )
+  }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold text-center mb-8">{t('title')}</h1>
-      <p className="text-center text-muted-foreground mb-6">{t('description')}</p>
-
-      <Card className="max-w-2xl mx-auto shadow-lg border">
+    <div className="container mx-auto p-4">
+      <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>{t('inputTextTitle')}</CardTitle>
-          <CardDescription>{t('inputTextDescription')}</CardDescription>
+          <CardTitle>My Risky Words Dictionary</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid w-full gap-1.5">
-            <Label htmlFor="message">{t('messageLabel')}</Label>
-            <Textarea
-              id="message"
-              placeholder={t('placeholder')}
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              rows={5}
-              disabled={isLoadingAnalysis}
-              aria-describedby="message-description"
+          <p className="mb-4 text-sm text-gray-600">
+            Add words to this dictionary to get alerts in your chats. This can help you avoid topics you find sensitive or uncomfortable.
+          </p>
+
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>An Error Occurred</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <form onSubmit={addWord} className="flex items-center space-x-2 mb-4">
+            <Input 
+                value={newWord} 
+                onChange={e => setNewWord(e.target.value)} 
+                placeholder="Add a new word..." 
+                disabled={isSubmitting}
             />
-            <p id="message-description" className="text-xs text-muted-foreground">{t('messageHelperText')}</p>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={handleAnalyzeText} disabled={isLoadingAnalysis || !inputText.trim()}>
-            {isLoadingAnalysis && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isLoadingAnalysis ? t('analyzingButton') : t('analyzeButton')}
-          </Button>
-        </CardFooter>
-      </Card>
-
-      {analysisError && (
-        <Alert variant="destructive" className="max-w-2xl mx-auto mt-6">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>{t('errorTitle')}</AlertTitle>
-          <AlertDescription>{analysisError}</AlertDescription>
-        </Alert>
-      )}
-
-      {analysisResult.length > 0 && (
-        <Card className="max-w-2xl mx-auto mt-8 shadow-lg border">
-          <CardHeader>
-            <CardTitle>{t('analysisResultsTitle')}</CardTitle>
-            <CardDescription>{t('analysisResultsDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Accordion type="single" collapsible className="w-full">
-              {analysisResult.map((item) => (
-                <AccordionItem value={item.id} key={item.id}>
-                  <AccordionTrigger>
-                    <span className="flex items-center gap-2 text-left">
-                      <ShieldAlert className="h-4 w-4 text-destructive flex-shrink-0" />
-                      &quot;{item.word}&quot;
-                    </span>
-                  </AccordionTrigger>
-                  <AccordionContent className="space-y-3 pl-6">
-                    <div>
-                      <h4 className="font-semibold mb-1 text-sm">{t('possibleInterpretations')}</h4>
-                      <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                        {item.possibleInterpretations.map((interp, i) => (
-                          <li key={i}>{interp}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-1 text-sm">{t('clarificationSuggestion')}</h4>
-                      <p className="text-sm text-muted-foreground italic">&quot;{item.clarificationSuggestion}&quot;</p>
-                    </div>
-                    {currentUser ? (
-                      <div>
-                        <h4 className="font-semibold text-sm mt-4 mb-2">{t('feedbackTitle')}</h4>
-                        <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant={submittedFeedbackItems[item.id] === 'accurate' ? 'default' : 'outline'}
-                            onClick={() => handleFeedbackSubmit(item, 'accurate')}
-                            disabled={submittingFeedbackId === item.id || !!submittedFeedbackItems[item.id]}
-                            aria-live="polite"
-                          >
-                            {submittingFeedbackId === item.id && submittedFeedbackItems[item.id] !== 'accurate' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {submittedFeedbackItems[item.id] === 'accurate' && <Check className="mr-2 h-4 w-4" />}
-                            {t('feedbackAccurate')}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant={submittedFeedbackItems[item.id] === 'not_risky' ? 'default' : 'outline'}
-                            onClick={() => handleFeedbackSubmit(item, 'not_risky')}
-                            disabled={submittingFeedbackId === item.id || !!submittedFeedbackItems[item.id]}
-                            aria-live="polite"
-                          >
-                            {submittingFeedbackId === item.id && submittedFeedbackItems[item.id] !== 'not_risky' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {submittedFeedbackItems[item.id] === 'not_risky' && <Check className="mr-2 h-4 w-4" />}
-                            {t('feedbackNotRisky')}
-                          </Button>
-                        </div>
-                        {submittedFeedbackItems[item.id] && (
-                          <p className="text-xs text-muted-foreground mt-2">
-                            {t('feedbackThanks')}
-                          </p>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground mt-3">{t('loginForFeedback')}</p>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </CardContent>
-        </Card>
-      )}
-      {!isLoadingAnalysis && analysisResult.length === 0 && inputText && !analysisError && (
-        <p className="mt-6 text-center text-muted-foreground">{t('noRiskyWordsFound')}</p>
-      )}
-
-      {currentUser && (
-        <Card className="max-w-2xl mx-auto mt-8 shadow-lg border">
-          <CardHeader>
-            <CardTitle>{t('reportMissedTitle')}</CardTitle>
-            <CardDescription>{t('reportMissedDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <Label htmlFor="missedWordInput">{t('missedWordLabel')}</Label>
-              <Input
-                id="missedWordInput"
-                placeholder={t('missedWordPlaceholder')}
-                value={missedWordReport}
-                onChange={(e) => setMissedWordReport(e.target.value)}
-                disabled={isSubmittingMissedWord}
-                aria-describedby="missedWordInput-description"
-              />
-              <p id="missedWordInput-description" className="text-xs text-muted-foreground">{t('missedWordHelperText')}</p>
-            </div>
-            <div className="space-y-2 mt-4">
-              <Label htmlFor="missedWordReason">{t('missedWordReasonLabel')}</Label>
-              <Textarea
-                id="missedWordReason"
-                placeholder={t('missedWordReasonPlaceholder')}
-                value={missedWordReason}
-                onChange={(e) => setMissedWordReason(e.target.value)}
-                rows={2}
-                disabled={isSubmittingMissedWord}
-                aria-describedby="missedWordReason-description"
-              />
-              <p id="missedWordReason-description" className="text-xs text-muted-foreground">{t('missedWordReasonHelperText')}</p>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button
-              onClick={handleReportMissedWord}
-              disabled={isSubmittingMissedWord || !missedWordReport.trim()}
-            >
-              {isSubmittingMissedWord && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Send className="mr-2 h-4 w-4" />
-              {t('submitReportButton')}
+            <Button type="submit" disabled={isSubmitting || !newWord.trim()}>
+                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add"}
             </Button>
-          </CardFooter>
-        </Card>
-      )}
-      {!currentUser && (
-        <p className="max-w-2xl mx-auto text-center text-muted-foreground">{t('loginForFeedback')}</p>
-      )}
+          </form>
+
+          <h3 className="font-semibold mb-2">Your Words:</h3>
+          {loading ? (
+            <Loader2 className="mx-auto my-4 h-8 w-8 animate-spin" />
+          ) : riskyWords.length > 0 ? (
+            <ScrollArea className="h-60 w-full rounded-md border">
+              <div className="p-4">
+                {riskyWords.map(word => (
+                  <div key={word.id} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-md">
+                    <span className="text-gray-800">{word.word}</span>
+                    <Button variant="ghost" size="icon" onClick={() => deleteWord(word.id)}>
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          ) : (
+            <p className="text-center text-gray-500 py-4">Your dictionary is empty.</p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
-};
+}
 
 export default RiskyWordsDictionaryPage;

@@ -1,19 +1,14 @@
-"use client";
-
-import { useState, useEffect } from 'react';
-import { get_user, UserProfile } from '@/services/user_profile';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { useTranslations } from 'next-intl';
+import { useState, useEffect } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { firestore } from '@/lib/firebase';
+import { UserProfile } from '@/types/UserProfile';
 
 export function useUserProfile() {
   const { user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
-  const t = useTranslations('ProfilePage');
-
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<any>(null);
 
   useEffect(() => {
     if (authLoading) {
@@ -23,33 +18,33 @@ export function useUserProfile() {
 
     if (!user) {
       setLoading(false);
-      setProfile(null);
-      // No need to set an error here, the component will handle the redirect.
+      setUserProfile(null);
       return;
     }
 
     const fetchProfile = async () => {
-      setLoading(true);
-      setError(null);
       try {
-        const userProfile = await get_user(user.uid);
-        setProfile(userProfile);
-      } catch (err) {
-        console.error("Failed to fetch user profile:", err);
-        const errorMessage = t('fetchErrorDescription');
-        setError(errorMessage);
-        toast({
-          variant: "destructive",
-          title: t('fetchErrorTitle'),
-          description: errorMessage,
-        });
+        setLoading(true);
+        const docRef = doc(firestore, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setUserProfile(docSnap.data() as UserProfile);
+        } else {
+          console.log("No such document!");
+          // You might want to create a default profile here
+          setError('User profile not found.');
+        }
+      } catch (e) {
+        console.error("Error fetching user profile:", e);
+        setError(e);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [user, authLoading, t, toast]);
+  }, [user, authLoading]);
 
-  return { profile, loading, error, user, authLoading };
+  return { user, userProfile, loading, error };
 }
