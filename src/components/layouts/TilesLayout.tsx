@@ -23,9 +23,8 @@ import {
   Settings,
   Calendar,
   ArrowRight,
-  X,
-  Home,
-  ChevronRight
+  ChevronRight,
+  Sparkles
 } from 'lucide-react';
 
 interface TileFeature {
@@ -34,8 +33,7 @@ interface TileFeature {
   title: string;
   description: string;
   href: string;
-  gradient: string;
-  bgGradient: string;
+  color: string;
   category: 'ai' | 'social' | 'entertainment' | 'core';
   status: 'available' | 'partial' | 'premium';
   subFeatures?: Array<{
@@ -53,17 +51,15 @@ interface TilesLayoutProps {
 
 export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
   const [selectedFeature, setSelectedFeature] = useState<TileFeature | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const features: TileFeature[] = [
     {
       id: 'dashboard',
       icon: <LayoutDashboard className="w-8 h-8" />,
       title: 'Tableau de bord',
-      description: 'Votre centre de contrôle personnalisé',
+      description: 'Votre centre de contrôle personnalisé.',
       href: '/dashboard',
-      gradient: 'from-blue-500 to-cyan-500',
-      bgGradient: 'from-blue-50 to-cyan-50',
+      color: 'blue',
       category: 'core',
       status: 'available',
       subFeatures: [
@@ -75,10 +71,9 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
       id: 'facial-analysis',
       icon: <ScanFace className="w-8 h-8" />,
       title: 'Analyse faciale IA',
-      description: 'Analyse de compatibilité par IA basée sur les traits faciaux et psychologiques',
+      description: 'Analyse de compatibilité par IA.',
       href: '/facial-analysis-matching',
-      gradient: 'from-purple-500 to-pink-500',
-      bgGradient: 'from-purple-50 to-pink-50',
+      color: 'purple',
       category: 'ai',
       status: 'available',
       subFeatures: [
@@ -90,25 +85,23 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
       id: 'ai-coach',
       icon: <MessageSquare className="w-8 h-8" />,
       title: 'Coach de conversation',
-      description: 'Coaching IA en temps réel pour améliorer vos conversations',
+      description: 'Coaching IA en temps réel.',
       href: '/ai-conversation-coach',
-      gradient: 'from-emerald-500 to-teal-500',
-      bgGradient: 'from-emerald-50 to-teal-50',
+      color: 'teal',
       category: 'ai',
       status: 'available',
       subFeatures: [
         { id: 'advice', title: 'Conseils de conversation', href: '/ai-conversation-coach', icon: <MessageSquare className="w-4 h-4" /> },
-        { id: 'styles', title: 'Suggestions de style', href: '/ai-conversation-coach#styles', icon: <Zap className="w-4 h-4" /> }
+        { id: 'styles', title: 'Suggestions de style', href: '/ai-conversation-coach#styles', icon: <Sparkles className="w-4 h-4" /> }
       ]
     },
     {
       id: 'speed-dating',
       icon: <Zap className="w-8 h-8" />,
       title: 'Speed Dating',
-      description: 'Sessions rapides pour rencontrer plusieurs personnes basées sur les intérêts',
+      description: 'Sessions rapides pour rencontrer plusieurs personnes.',
       href: '/speed-dating',
-      gradient: 'from-yellow-500 to-orange-500',
-      bgGradient: 'from-yellow-50 to-orange-50',
+      color: 'orange',
       category: 'social',
       status: 'available',
       subFeatures: [
@@ -120,10 +113,9 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
       id: 'games',
       icon: <Gamepad2 className="w-8 h-8" />,
       title: 'Jeux interactifs',
-      description: 'Quiz, défis temporels et jeux pour briser la glace',
+      description: 'Quiz, défis et jeux pour briser la glace.',
       href: '/game',
-      gradient: 'from-indigo-500 to-purple-500',
-      bgGradient: 'from-indigo-50 to-purple-50',
+      color: 'indigo',
       category: 'entertainment',
       status: 'available',
       subFeatures: [
@@ -135,10 +127,9 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
       id: 'blind-exchange',
       icon: <EyeOff className="w-8 h-8" />,
       title: 'Échange aveugle',
-      description: 'Connectez-vous sans photos - découvrez d\'abord les personnalités',
+      description: 'Découvrez d\'abord les personnalités.',
       href: '/blind-exchange-mode',
-      gradient: 'from-gray-600 to-slate-700',
-      bgGradient: 'from-gray-50 to-slate-50',
+      color: 'slate',
       category: 'ai',
       status: 'available'
     },
@@ -146,10 +137,9 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
       id: 'chat',
       icon: <MessageCircle className="w-8 h-8" />,
       title: 'Chat intelligent',
-      description: 'Messagerie avec assistance IA et étiquetage d\'intention',
+      description: 'Messagerie avec assistance IA.',
       href: '/chat',
-      gradient: 'from-blue-500 to-indigo-500',
-      bgGradient: 'from-blue-50 to-indigo-50',
+      color: 'blue-600',
       category: 'social',
       status: 'partial',
       subFeatures: [
@@ -161,10 +151,9 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
       id: 'geolocation',
       icon: <MapPin className="w-8 h-8" />,
       title: 'Rencontres locales',
-      description: 'Rencontrez des gens dans des espaces publics près de chez vous',
+      description: 'Rencontrez des gens près de chez vous.',
       href: '/geolocation-meeting',
-      gradient: 'from-red-500 to-rose-500',
-      bgGradient: 'from-red-50 to-rose-50',
+      color: 'rose',
       category: 'social',
       status: 'available'
     }
@@ -172,20 +161,30 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
 
   const handleTileClick = (feature: TileFeature) => {
     setSelectedFeature(feature);
-    setSidebarOpen(true);
   };
 
-  const categoryColors = {
-    ai: 'text-purple-600 bg-purple-100',
-    social: 'text-blue-600 bg-blue-100',
-    entertainment: 'text-green-600 bg-green-100',
-    core: 'text-gray-600 bg-gray-100'
+  const categoryStyles: { [key: string]: string } = {
+    ai: 'text-purple-600 bg-purple-100 dark:text-purple-300 dark:bg-purple-900/50',
+    social: 'text-blue-600 bg-blue-100 dark:text-blue-300 dark:bg-blue-900/50',
+    entertainment: 'text-green-600 bg-green-100 dark:text-green-300 dark:bg-green-900/50',
+    core: 'text-gray-600 bg-gray-100 dark:text-gray-300 dark:bg-gray-700/50'
   };
 
-  const statusColors = {
-    available: 'text-green-600 bg-green-100',
-    partial: 'text-yellow-600 bg-yellow-100',
-    premium: 'text-purple-600 bg-purple-100'
+  const statusStyles: { [key: string]: string } = {
+    available: 'text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900/50',
+    partial: 'text-yellow-700 bg-yellow-100 dark:text-yellow-300 dark:bg-yellow-900/50',
+    premium: 'text-rose-600 bg-rose-100 dark:text-rose-300 dark:bg-rose-900/50'
+  };
+
+  const colorGradients: { [key: string]: string } = {
+    blue: 'from-blue-500 to-cyan-400',
+    purple: 'from-purple-500 to-pink-500',
+    teal: 'from-emerald-500 to-teal-500',
+    orange: 'from-yellow-500 to-orange-500',
+    indigo: 'from-indigo-500 to-violet-500',
+    slate: 'from-gray-600 to-slate-500',
+    rose: 'from-red-500 to-rose-500',
+    'blue-600': 'from-blue-600 to-indigo-600'
   };
 
   if (children && !showTiles) {
@@ -193,202 +192,133 @@ export function TilesLayout({ children, showTiles = true }: TilesLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-purple-50 to-pink-50">
-      {/* Hero Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h1 className="text-6xl md:text-8xl font-black mb-8">
-              <span className="bg-gradient-to-r from-rose-600 via-purple-600 to-rose-600 bg-clip-text text-transparent">
-                HeartWise
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto">
-              Découvrez des connexions significatives et enflammez votre histoire d'amour avec un matching intelligent et des expériences engageantes.
-            </p>
-          </div>
+    <div className="min-h-screen bg-background gradient-hero">
+      <header className="py-20 text-center">
+        <div className="container mx-auto px-6">
+          <h1 className="text-5xl md:text-7xl font-black mb-6 animate-float">
+            <span className="bg-gradient-to-r from-primary via-rose-500 to-amber-400 bg-clip-text text-transparent">
+              HeartWise
+            </span>
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+            Explorez des connexions authentiques et intelligentes grâce à nos outils innovants.
+          </p>
+        </div>
+      </header>
 
-          {/* Features Tiles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
-            {features.map((feature) => (
-              <Card 
-                key={feature.id}
-                className="group cursor-pointer overflow-hidden border-2 border-transparent hover:border-rose-200 bg-gradient-to-br from-white to-gray-50 shadow-lg hover:shadow-xl transition-all duration-500 transform hover:-translate-y-2"
-                onClick={() => handleTileClick(feature)}
-              >
-                <CardHeader className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+      <main className="container mx-auto px-6 pb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {features.map((feature, index) => (
+            <Sheet key={feature.id} onOpenChange={(isOpen) => !isOpen && setSelectedFeature(null)}>
+              <SheetTrigger asChild>
+                <Card 
+                  className="group cursor-pointer overflow-hidden bg-card border-2 border-transparent hover:border-primary/50 shadow-soft hover:shadow-card-hover transition-all duration-300 ease-in-out transform hover:-translate-y-1.5 animate-slide-up-fast"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  onClick={() => handleTileClick(feature)}
+                >
+                  <CardHeader className="p-5">
+                    <div className={`mb-4 w-14 h-14 rounded-2xl bg-gradient-to-br ${colorGradients[feature.color]} flex items-center justify-center text-white shadow-lg group-hover:scale-105 transition-transform duration-300`}>
                       {feature.icon}
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${categoryColors[feature.category]} border-0`}
-                      >
-                        {feature.category.toUpperCase()}
+                    <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-300">
+                      {feature.title}
+                    </CardTitle>
+                    <CardDescription className="text-sm text-muted-foreground">
+                      {feature.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-5 pt-0">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <Badge variant="outline" className={`border-0 ${categoryStyles[feature.category]}`}>
+                        {feature.category}
                       </Badge>
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${statusColors[feature.status]} border-0`}
-                      >
+                      <Badge variant="outline" className={`border-0 ${statusStyles[feature.status]}`}>
                         {feature.status}
                       </Badge>
                     </div>
-                  </div>
-                  <CardTitle className="text-lg font-bold group-hover:text-rose-600 transition-colors duration-300 mb-2">
-                    {feature.title}
-                  </CardTitle>
-                  <CardDescription className="text-sm leading-relaxed text-gray-600 group-hover:text-gray-700 transition-colors duration-300">
-                    {feature.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-6 pt-0">
-                  <div className="flex items-center text-rose-600 group-hover:translate-x-2 transition-transform duration-300">
-                    <span className="font-semibold text-sm">Explorer</span>
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Sidebar avec menu des fonctionnalités */}
-      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="right" className="w-80 sm:w-96">
-          <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b">
-              <div className="flex items-center gap-3">
-                {selectedFeature && (
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${selectedFeature.gradient} flex items-center justify-center text-white shadow-lg`}>
-                    {selectedFeature.icon}
-                  </div>
-                )}
-                <div>
-                  <h2 className="text-xl font-bold">{selectedFeature?.title}</h2>
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs ${selectedFeature ? categoryColors[selectedFeature.category] : ''} border-0`}
-                  >
-                    {selectedFeature?.category.toUpperCase()}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            {/* Navigation Content */}
-            <ScrollArea className="flex-1 p-6">
-              <div className="space-y-6">
-                {/* Action principale */}
-                {selectedFeature && (
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-gray-900">Action principale</h3>
-                    <Link href={selectedFeature.href}>
-                      <Button className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                        {selectedFeature.icon}
-                        <span className="ml-3">Accéder à {selectedFeature.title}</span>
-                        <ArrowRight className="ml-auto w-4 h-4" />
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-
-                <Separator />
-
-                {/* Sous-fonctionnalités */}
-                {selectedFeature?.subFeatures && (
-                  <div className="space-y-3">
-                    <h3 className="font-semibold text-gray-900">Options disponibles</h3>
-                    <div className="space-y-2">
-                      {selectedFeature.subFeatures.map((subFeature) => (
-                        <Link key={subFeature.id} href={subFeature.href}>
-                          <Button 
-                            variant="ghost" 
-                            className="w-full justify-start h-auto py-3"
-                            onClick={() => setSidebarOpen(false)}
-                          >
-                            {subFeature.icon}
-                            <span className="ml-3">{subFeature.title}</span>
-                            <ChevronRight className="ml-auto w-4 h-4" />
-                          </Button>
-                        </Link>
-                      ))}
+                  </CardContent>
+                </Card>
+              </SheetTrigger>
+              {selectedFeature && selectedFeature.id === feature.id && (
+                <SheetContent side="right" className="w-full max-w-md bg-card p-0">
+                  <div className="flex flex-col h-full">
+                    <div className={`p-6 bg-gradient-to-br ${colorGradients[selectedFeature.color]} text-white`}>
+                      <div className="flex items-center gap-4">
+                        <div className="bg-white/20 p-3 rounded-xl">
+                          {selectedFeature.icon}
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-bold">{selectedFeature.title}</h2>
+                          <p className="text-sm opacity-90">{selectedFeature.description}</p>
+                        </div>
+                      </div>
                     </div>
+
+                    <ScrollArea className="flex-1">
+                      <div className="p-6 space-y-6">
+                        <div className="space-y-2">
+                          <h3 className="font-semibold text-foreground">Action principale</h3>
+                          <Link href={selectedFeature.href} passHref>
+                            <Button className="w-full justify-start h-auto py-3 text-base" size="lg">
+                              <Sparkles className="w-5 h-5 mr-3" />
+                              Accéder à {selectedFeature.title}
+                              <ArrowRight className="ml-auto w-5 h-5" />
+                            </Button>
+                          </Link>
+                        </div>
+
+                        {selectedFeature.subFeatures && selectedFeature.subFeatures.length > 0 && (
+                          <>
+                            <Separator />
+                            <div className="space-y-2">
+                              <h3 className="font-semibold text-foreground">Options</h3>
+                              <div className="space-y-1">
+                                {selectedFeature.subFeatures.map((sub) => (
+                                  <Link key={sub.id} href={sub.href} passHref>
+                                    <Button variant="ghost" className="w-full justify-start">
+                                      {sub.icon}
+                                      <span className="ml-3">{sub.title}</span>
+                                      <ChevronRight className="ml-auto w-4 h-4 text-muted-foreground" />
+                                    </Button>
+                                  </Link>
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        
+                        <Separator />
+
+                        <div className="space-y-3">
+                          <h3 className="font-semibold text-foreground">Explorer d\'autres fonctionnalités</h3>
+                          <div className="grid grid-cols-3 gap-2">
+                            {features
+                              .filter(f => f.id !== selectedFeature.id)
+                              .slice(0, 6)
+                              .map(f => (
+                                <Button 
+                                  key={f.id} 
+                                  variant="outline"
+                                  className="h-20 flex flex-col items-center justify-center gap-1.5 p-2 text-center"
+                                  onClick={() => handleTileClick(f)}
+                                >
+                                  <div className={`w-8 h-8 flex items-center justify-center text-white rounded-lg bg-gradient-to-br ${colorGradients[f.color]}`}>
+                                    {React.cloneElement(f.icon, {className: "w-5 h-5"})}
+                                  </div>
+                                  <span className="text-xs font-medium text-center text-muted-foreground">{f.title}</span>
+                                </Button>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
+                    </ScrollArea>
                   </div>
-                )}
-
-                <Separator />
-
-                {/* Navigation générale */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900">Navigation</h3>
-                  <div className="space-y-1">
-                    <Link href="/dashboard">
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                        <MessageCircle className="w-4 h-4 mr-3" />
-                        Tableau de bord
-                      </Button>
-                    </Link>
-                    <Link href="/calendar">
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                        <Calendar className="w-4 h-4 mr-3" />
-                        Calendrier
-                      </Button>
-                    </Link>
-                    <Link href="/profile">
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                        <User className="w-4 h-4 mr-3" />
-                        Profil
-                      </Button>
-                    </Link>
-                    <Link href="/rewards">
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                        <Trophy className="w-4 h-4 mr-3" />
-                        Récompenses
-                      </Button>
-                    </Link>
-                    <Link href="/settings">
-                      <Button variant="ghost" className="w-full justify-start" onClick={() => setSidebarOpen(false)}>
-                        <Settings className="w-4 h-4 mr-3" />
-                        Paramètres
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Autres fonctionnalités */}
-                <div className="space-y-3">
-                  <h3 className="font-semibold text-gray-900">Autres fonctionnalités</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {features
-                      .filter(f => f.id !== selectedFeature?.id)
-                      .slice(0, 6)
-                      .map((feature) => (
-                        <Button
-                          key={feature.id}
-                          variant="outline"
-                          size="sm"
-                          className="h-auto py-3 flex flex-col gap-1"
-                          onClick={() => {
-                            setSelectedFeature(feature);
-                          }}
-                        >
-                          {feature.icon}
-                          <span className="text-xs font-medium">{feature.title}</span>
-                        </Button>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            </ScrollArea>
-          </div>
-        </SheetContent>
-      </Sheet>
+                </SheetContent>
+              )}
+            </Sheet>
+          ))}
+        </div>
+      </main>
 
       {children}
     </div>

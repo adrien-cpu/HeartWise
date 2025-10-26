@@ -5,7 +5,7 @@ export default getRequestConfig(async ({ locale }) => {
   const effectiveLocale = locale || defaultLocale;
   return {
     locale: effectiveLocale,
-    messages: (await import(`./messages/${effectiveLocale}.json`)).default,
+    messages: (await import(`../messages/${effectiveLocale}.json`)).default,
     timeZone: 'Europe/Paris'
   };
 });

@@ -1,12 +1,12 @@
 "use client";
 
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { analyzeFaceData, compareFaces } from '@/services/face-analysis'; // Réécriture de l'import
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 
 interface FaceData {
   imageUrl: string;

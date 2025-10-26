@@ -1,8 +1,8 @@
 const nextIntl = require('next-intl/plugin');
 
 // Wrap the config with the next-intl plugin
-// The path now points to the consolidated i18n configuration file.
-const withNextIntl = nextIntl('./src/i18n/settings.ts');
+// The path now points to the main i18n configuration file.
+const withNextIntl = nextIntl('./src/i18n/i18n.ts');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -73,4 +73,4 @@ const nextConfig = {
     }
 };
 
-module.exports = withNextIntl(nextConfig); 
+module.exports = withNextIntl(nextConfig);

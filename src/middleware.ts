@@ -1,6 +1,8 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import createIntlMiddleware from 'next-intl/middleware';
+import { NextRequest, NextResponse } from 'next/server';
+import { locales, defaultLocale, pathnames, localePrefix } from './i18n/settings';
 
+// List of protected and public routes
 const protectedRoutes = [
   '/profile',
   '/game',
@@ -14,50 +16,65 @@ const protectedRoutes = [
   '/rewards',
   '/dashboard',
 ];
-
 const publicRoutes = ['/login', '/signup'];
 
-export default async function middleware(request: NextRequest) {
+export default function middleware(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
 
-  // Allow test routes without restrictions
-  if (pathname.startsWith('/test-') || pathname.startsWith('/debug')) {
-    return NextResponse.next();
-  }
+  // Create a regex to match the locales in the path
+  const localePattern = `^/(${locales.join('|')})`;
+  const localeRegex = new RegExp(localePattern);
 
-  // Allow access to home page
-  if (pathname === '/') {
-    return NextResponse.next();
+  // Get the pathname without the locale prefix
+  let pathnameWithoutLocale = pathname.replace(localeRegex, '');
+  if (pathnameWithoutLocale === '') {
+    pathnameWithoutLocale = '/';
+  } else if (pathnameWithoutLocale.startsWith('/')) {
+    // No change needed
   }
-
-  // Check authentication
+  else {
+    pathnameWithoutLocale = `/${pathnameWithoutLocale}`;
+  }
+  
+  // Check for authentication token from cookies
   const authToken = request.cookies.get('auth-token')?.value;
 
-  const isProtected = protectedRoutes.some(route =>
-    pathname.startsWith(route)
+  const isProtectedRoute = protectedRoutes.some(route =>
+    pathnameWithoutLocale.startsWith(route)
   );
 
-  const isPublic = publicRoutes.some(route =>
-    pathname.startsWith(route)
+  const isPublicRoute = publicRoutes.some(route =>
+    pathnameWithoutLocale.startsWith(route)
   );
 
-  // Redirect to login if protected route and not authenticated
-  if (isProtected && !authToken) {
-    const loginUrl = new URL('/login', request.url);
+  // Redirect to login if trying to access a protected route without being authenticated
+  if (isProtectedRoute && !authToken) {
+    const loginUrl = new URL(`/${defaultLocale}/login`, request.url);
     loginUrl.searchParams.set('from', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect authenticated user away from login/signup
-  if (authToken && isPublic) {
+  // Redirect authenticated users away from public routes like login/signup
+  if (authToken && isPublicRoute) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
-  return NextResponse.next();
+  // If authentication checks pass, proceed with the i18n middleware
+  const handleI18nRouting = createIntlMiddleware({
+    locales,
+    defaultLocale,
+    pathnames,
+    localePrefix,
+  });
+
+  const response = handleI18nRouting(request);
+
+  return response;
 }
 
 export const config = {
+  // Match all routes except for static files, API routes, and specific image formats.
   matcher: [
-    '/((?!_next|.*\\.css$|.*\\.js$|.*\\.png$|.*\\.svg$|.*\\.ico$|.*\\.json$|.*\\.txt$).*)',
+    '/((?!api|_next/static|_next/image|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|favicon.ico).*)'
   ],
 };
