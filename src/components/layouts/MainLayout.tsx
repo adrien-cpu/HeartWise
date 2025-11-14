@@ -1,27 +1,19 @@
-"use client";
-
-import React from 'react';
-import { Toaster } from '@/components/ui/toaster';
-import { Header } from '@/components/navigation/Header';
-import { usePathname } from 'next/navigation';
+import { ReactNode } from 'react';
+import Sidebar from '@/components/ui/sidebar';
 
 interface MainLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export function MainLayout({ children }: MainLayoutProps) {
-  const pathname = usePathname();
-  
-  // Don't show header on home page when using tiles layout
-  const showHeader = !pathname.endsWith('/') && !pathname.endsWith('/fr') && !pathname.endsWith('/en');
-
+const MainLayout = ({ children }: MainLayoutProps) => {
   return (
-    <div className="min-h-screen bg-background">
-      {showHeader && <Header />}
-      <main className={showHeader ? "pt-20" : ""}>
+    <div className="flex min-h-screen bg-secondary/50">
+      <Sidebar />
+      <main className="flex-1 p-8">
         {children}
       </main>
-      <Toaster />
     </div>
   );
-}
+};
+
+export default MainLayout;

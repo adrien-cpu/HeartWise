@@ -64,7 +64,7 @@ import {
 } from '@/services/webrtc_service';
 import { debounce } from 'lodash';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db, storage } from '@/lib/firebase';
+import { firestore, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { VideoCall } from '@/components/video-call';
 import { videoCallService } from '@/services/videoCall';
@@ -504,7 +504,7 @@ export default function ChatPage(): JSX.Element {
   const handleAddReaction = async (messageId: string, emoji: string) => {
     if (!currentUser?.uid) return;
 
-    const messageRef = doc(db, 'messages', messageId);
+    const messageRef = doc(firestore, 'messages', messageId);
     const messageDoc = await getDoc(messageRef);
 
     if (!messageDoc.exists()) return;

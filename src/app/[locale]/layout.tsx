@@ -30,16 +30,13 @@ export default function LocaleLayout({ children, params: { locale } }: LocaleLay
   }
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <head />
-      <body className={`${inter.className} min-h-screen bg-background text-foreground antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <AuthProvider>
-            {children}
-            <Toaster />
-          </AuthProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+    <div className={`${inter.className} min-h-screen bg-background text-foreground antialiased`}>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
+      </ThemeProvider>
+    </div>
   );
 }
