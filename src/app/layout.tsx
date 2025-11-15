@@ -5,7 +5,7 @@
  *              including <html> and <body> tags, global CSS, and font setup.
  */
 
-import './globals.css';
+import 'src/app/globals.css';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/contexts/AuthContext';

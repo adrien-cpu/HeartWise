@@ -1,120 +1,86 @@
-"use client";
+'use client';
 
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useUserProfile } from '@/hooks/useUserProfile';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { firestore } from '@/lib/firebase';
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast"
-import AuthGuard from '@/components/auth-guard';
-import { Loader2 } from 'lucide-react';
-
+import { UserProfile } from '@/types/UserProfile';
+import { ProfileForm } from '@/components/profile/ProfileForm';
+import { QuestionnaireSection } from '@/components/profile/QuestionnaireSection';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
   const { user, loading: authLoading } = useAuth();
-  const { userProfile, loading: profileLoading, error: profileError } = useUserProfile();
-  const router = useRouter();
   const { toast } = useToast();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
-  const [name, setName] = useState('');
-  const [bio, setBio] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (userProfile) {
-      setName(userProfile.name || '');
-      setBio(userProfile.bio || '');
-    }
-  }, [userProfile]);
-
-  const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!user) {
-        toast({
-            variant: "destructive",
-            title: "Not Authenticated",
-            description: "You must be logged in to update your profile.",
-        })
-        return;
-    }
-
-    setIsSubmitting(true);
+  const fetchUserProfile = async () => {
+    if (!user) return;
     try {
-        const userDocRef = doc(firestore, "users", user.uid);
-        await updateDoc(userDocRef, {
-            name,
-            bio
-        });
-        toast({
-            title: "Profile Updated",
-            description: "Your profile has been successfully updated.",
-        })
+      const docRef = doc(firestore, 'users', user.id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setUserProfile({ id: docSnap.id, ...docSnap.data() } as UserProfile);
+      } else {
+        console.log("No such document!");
+      }
     } catch (error) {
-        console.error("Error updating profile: ", error);
-        toast({
-            variant: "destructive",
-            title: "Update Failed",
-            description: "There was an error updating your profile. Please try again.",
-        })
+      console.error("Error fetching user profile:", error);
+      toast({ title: "Erreur", description: "Impossible de charger le profil.", variant: "destructive" });
     } finally {
-        setIsSubmitting(false);
+      setLoadingProfile(false);
     }
   };
-  
-  if (authLoading || profileLoading) {
-      return <div className="flex h-screen items-center justify-center"><Loader2 className="h-10 w-10 animate-spin" /></div>;
+
+  useEffect(() => {
+    if (!authLoading) {
+      fetchUserProfile();
+    }
+  }, [user, authLoading]);
+
+  const handleUpdateProfile = async (formData: Partial<UserProfile>) => {
+    if (!user) return;
+    try {
+      const userDocRef = doc(firestore, 'users', user.id);
+      await updateDoc(userDocRef, formData);
+      await fetchUserProfile(); // Re-fetch to update the state
+      toast({ title: "Succès", description: "Votre profil a été mis à jour." });
+    } catch (error) {
+      console.error("Error updating profile: ", error);
+      toast({ title: "Erreur", description: "La mise à jour du profil a échoué.", variant: "destructive" });
+    }
+  };
+
+  if (authLoading || loadingProfile) {
+    return (
+      <div className="container mx-auto py-10 px-4">
+        <Skeleton className="h-8 w-1/4 mb-4" />
+        <Skeleton className="h-12 w-full mb-6" />
+        <Skeleton className="h-96 w-full" />
+      </div>
+    );
+  }
+
+  if (!userProfile) {
+    return <p>Impossible de charger le profil.</p>;
   }
 
   return (
-      <AuthGuard>
-        <div className="flex items-center justify-center min-h-screen bg-background">
-            <Card className="w-full max-w-md">
-                <CardHeader>
-                    <CardTitle>Edit Your Profile</CardTitle>
-                    <CardDescription>Update your public information.</CardDescription>
-                </CardHeader>
-                <form onSubmit={handleUpdateProfile}>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input 
-                                id="name" 
-                                value={name} 
-                                onChange={(e) => setName(e.target.value)} 
-                                placeholder="Your full name"
-                                disabled={isSubmitting}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" value={userProfile?.email || ''} disabled />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="bio">Bio</Label>
-                            <Textarea 
-                                id="bio" 
-                                value={bio} 
-                                onChange={(e) => setBio(e.target.value)} 
-                                placeholder="Tell us a little about yourself"
-                                disabled={isSubmitting}
-                            />
-                        </div>
-                    </CardContent>
-                    <CardFooter>
-                        <Button type="submit" className="w-full" disabled={isSubmitting}>
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} 
-                            Update Profile
-                        </Button>
-                    </CardFooter>
-                </form>
-            </Card>
+    <div className="container mx-auto py-10 px-4">
+      <h1 className="text-3xl font-bold mb-6">Gérer votre profil</h1>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-1">
+          <ProfileForm userProfile={userProfile} onUpdate={handleUpdateProfile} />
         </div>
-      </AuthGuard>
+        <div className="lg:col-span-2">
+          <QuestionnaireSection 
+            userProfile={userProfile} 
+            onUpdate={handleUpdateProfile}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

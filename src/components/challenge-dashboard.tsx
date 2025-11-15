@@ -1,34 +1,31 @@
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState, useEffect } from 'react';
-import { get_user_challenges } from '@/services/challenge_service';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getUserChallenges, UserChallenge } from '@/services/challenge_service';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Flame } from 'lucide-react';
 
-interface Challenge {
-  id: string;
-  name: string;
-  description: string;
-  progress: number;
-  goal: number;
-}
-
-export const ChallengeDashboard = () => {
+const ChallengeDashboard = () => {
     const { user } = useAuth();
-    const [challenges, setChallenges] = useState<Challenge[]>([]);
+    const [challenges, setChallenges] = useState<UserChallenge[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchChallenges = async () => {
-            if (!user) return;
+            if (!user) {
+                setLoading(false);
+                return;
+            }
+
             try {
-                const userChallenges = await get_user_challenges(user.uid);
-                setChallenges(userChallenges as Challenge[]);
-            } catch (err: any) {
-                setError(err.message);
+                setLoading(true);
+                const userChallenges = await getUserChallenges(user.id);
+                setChallenges(userChallenges);
+            } catch (err) {
+                setError('Failed to load challenges.');
+                console.error(err);
             } finally {
                 setLoading(false);
             }
@@ -38,39 +35,41 @@ export const ChallengeDashboard = () => {
     }, [user]);
 
     if (loading) {
-        return <Skeleton className="h-64 w-full" />;
+        return <Skeleton className="h-48 w-full" />;
     }
 
     if (error) {
-        return (
-            <Alert variant="destructive">
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-            </Alert>
-        );
+        return <Card><CardHeader><CardTitle>Error</CardTitle></CardHeader><CardContent><p>{error}</p></CardContent></Card>;
     }
 
     return (
-        <Card>
+        <Card className="shadow-lg">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Flame className="text-orange-500" />
-                    Active Challenges
-                </CardTitle>
+                <CardTitle>Active Challenges</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
                 {challenges.length > 0 ? (
-                    challenges.map((challenge) => (
-                        <div key={challenge.id}>
-                            <p className="font-semibold">{challenge.name}</p>
-                            <p className="text-sm text-muted-foreground">{challenge.description}</p>
-                            <Progress value={(challenge.progress / challenge.goal) * 100} className="mt-2" />
-                        </div>
-                    ))
+                    <div className="space-y-4">
+                        {challenges.map((challenge) => (
+                            <div key={challenge.id}>
+                                <div className="flex justify-between items-center mb-1">
+                                    <h4 className="font-semibold">{challenge.title}</h4>
+                                    <Badge variant={challenge.completed ? "default" : "secondary"}>
+                                        {challenge.completed ? 'Completed' : 'In Progress'}
+                                    </Badge>
+                                </div>
+                                <p className="text-sm text-gray-500 mb-2">{challenge.description}</p>
+                                <Progress value={(challenge.progress / challenge.goal) * 100} />
+                                <p className="text-xs text-right mt-1">{challenge.progress}/{challenge.goal} {challenge.task}</p>
+                            </div>
+                        ))}
+                    </div>
                 ) : (
-                    <p>No active challenges. Go start one!</p>
+                    <p>No active challenges. New challenges appear weekly!</p>
                 )}
             </CardContent>
         </Card>
     );
 };
+
+export default ChallengeDashboard;

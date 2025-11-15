@@ -1,90 +1,115 @@
-/**
- * @fileOverview Provides functions for calculating compatibility scores and generating profile descriptions.
- *
- * @module CompatibilityService
- *
- * @description This module contains helper functions used by the Blind Exchange AI flow
- * to determine compatibility between users based on psychological traits and interests,
- * and to generate a neutral profile description.
- */
+import { UserProfile } from "@/types/UserProfile";
+import { personalityTraits, Trait } from "./traits_data";
 
-import { PsychologicalTraits } from '@/services/face-analysis';
+// --- Trait Calculation Logic ---
 
-/**
- * Calculates a compatibility score based on interests and psychological traits.
- * @param traits1 Psychological traits of the first user.
- * @param traits2 Psychological traits of the second user.
- * @param interests1 Interests of the first user.
- * @param interests2 Interests of the second user.
- * @returns A number representing the compatibility score (0-100).
- */
-export function calculateCompatibilityScore(
-  traits1: PsychologicalTraits,
-  traits2: PsychologicalTraits,
-  interests1: string[],
-  interests2: string[]
-): number {
-  let score = 0;
+const getUserTraitScores = (user: UserProfile): Map<string, number> => {
+    const scores = new Map<string, number>();
+    personalityTraits.forEach(trait => scores.set(trait.name, 0));
 
-  // Award points for shared interests
-  const sharedInterests = interests1.filter(interest => interests2.includes(interest)).length;
-  score += sharedInterests * 5;
+    if (!user.questionnaireAnswers) return scores;
 
-  // Award points for complementary traits (e.g., one high extroversion, one low)
-  const extroversionDiff = Math.abs(traits1.extroversion - traits2.extroversion);
-  if (extroversionDiff > 0.5) {
-    score += 10;
-  }
+    const answeredTraits: string[] = [];
+    Object.values(user.questionnaireAnswers).forEach(answer => {
+        if (answer.traits) {
+            answeredTraits.push(...answer.traits);
+        }
+    });
 
-  // Award points for similar traits (e.g., both high agreeableness)
-  if (Math.abs(traits1.agreeableness - traits2.agreeableness) < 0.3) {
-    score += 10;
-  }
+    const traitCounts = answeredTraits.reduce((acc, trait) => {
+        acc.set(trait, (acc.get(trait) || 0) + 1);
+        return acc;
+    }, new Map<string, number>());
 
-  // Normalize the score to a percentage
-  score = Math.max(0, Math.min(100, score));
-  return score;
+    traitCounts.forEach((count, trait) => {
+        // Normalize score to a 0-100 scale. Max possible count is number of questions.
+        const maxCount = Object.keys(user.questionnaireAnswers!).length;
+        const normalizedScore = (count / maxCount) * 100;
+        scores.set(trait, normalizedScore);
+    });
+
+    return scores;
+};
+
+export const calculateTraitCompatibility = (user1: UserProfile, user2: UserProfile): number => {
+    if (!user1.questionnaireAnswers || !user2.questionnaireAnswers) return 0;
+
+    const scores1 = getUserTraitScores(user1);
+    const scores2 = getUserTraitScores(user2);
+
+    let totalDifference = 0;
+    let traitCount = 0;
+
+    scores1.forEach((score1, trait) => {
+        const score2 = scores2.get(trait);
+        if (score2 !== undefined) {
+            totalDifference += Math.abs(score1 - score2);
+            traitCount++;
+        }
+    });
+
+    if (traitCount === 0) return 0;
+
+    const averageDifference = totalDifference / traitCount;
+    const compatibility = 100 - averageDifference;
+
+    return Math.round(Math.max(0, compatibility));
+};
+
+// --- Compatibility Breakdown Logic ---
+
+export interface CompatibilityBreakdown {
+    overallScore: number;
+    traitBreakdowns: TraitBreakdown[];
 }
 
-/**
- * Generates a profile description based on similar and opposing traits and shared interests.
- * @param interests1 Interests of the first user.
- * @param interests2 Interests of the second user.
- * @param traits1 Psychological traits of the first user.
- * @param traits2 Psychological traits of the second user.
- * @returns A string representing the generated profile description.
- */
-export function generateProfileDescription(
-  interests1: string[],
-  interests2: string[],
-  traits1: PsychologicalTraits,
-  traits2: PsychologicalTraits
-): string {
-  let description = '';
-
-  // Highlight shared interests
-  const sharedInterests = interests1.filter(interest => interests2.includes(interest));
-  if (sharedInterests.length > 0) {
-    description += `Both users share an interest in ${sharedInterests.join(', ')}. `;
-  }
-
-  // Highlight complementary traits
-  const extroversionDiff = Math.abs(traits1.extroversion - traits2.extroversion);
-  if (extroversionDiff > 0.5) {
-    description += 'One user is more outgoing, while the other is more reserved, which could lead to a balanced dynamic. ';
-  }
-
-  // Highlight similar traits
-  if (Math.abs(traits1.agreeableness - traits2.agreeableness) < 0.3) {
-    description += 'Both users value agreeableness and getting along with others. ';
-  }
-
-  if (description === '') {
-    description = 'These users have the potential for an interesting connection.';
-  }
-
-  return description;
+export interface TraitBreakdown {
+    trait: Trait;
+    user1Score: number;
+    user2Score: number;
+    compatibility: number;
+    explanation: string;
 }
 
-// Note: The calculateCompatibilityRate function was deemed redundant with calculateCompatibilityScore
-// and has not been included in this refactored file.
+export const getCompatibilityBreakdown = (user1: UserProfile, user2: UserProfile): CompatibilityBreakdown => {
+    const overallScore = calculateTraitCompatibility(user1, user2);
+    const scores1 = getUserTraitScores(user1);
+    const scores2 = getUserTraitScores(user2);
+
+    const traitBreakdowns: TraitBreakdown[] = personalityTraits.map(trait => {
+        const user1Score = scores1.get(trait.name) || 0;
+        const user2Score = scores2.get(trait.name) || 0;
+        const difference = Math.abs(user1Score - user2Score);
+        const compatibility = 100 - difference;
+        
+        let explanation = ``;
+        if (compatibility > 80) {
+            explanation = `Vous êtes très similaires sur ce point ! Vous partagez une vision et des réactions communes en ce qui concerne l'${trait.name.toLowerCase()}.`;
+        } else if (compatibility > 60) {
+            explanation = `Vous avez une bonne compatibilité ici. Il y a suffisamment de points communs pour une bonne entente, et assez de différences pour vous stimuler.`;
+        } else if (compatibility > 40) {
+            explanation = `Vos approches concernant l'${trait.name.toLowerCase()} diffèrent un peu. Cela pourrait être une source de découverte mutuelle.`;
+        } else {
+            explanation = `C'est un domaine où vous êtes assez différents. Comprendre le point de vue de l'autre sera la clé.`;
+        }
+
+        return { trait, user1Score, user2Score, compatibility, explanation };
+    });
+
+    return { overallScore, traitBreakdowns };
+};
+
+// --- Blind Exchange Description Logic ---
+
+export const generateBlindExchangeDescription = (user1: UserProfile, user2: UserProfile): string => {
+    const breakdown = getCompatibilityBreakdown(user1, user2);
+    
+    const topMatch = breakdown.traitBreakdowns.reduce((max, current) => current.compatibility > max.compatibility ? current : max);
+    const lowestMatch = breakdown.traitBreakdowns.reduce((min, current) => current.compatibility < min.compatibility ? current : min);
+
+    const intro = `Basé sur vos profils, vous et votre partenaire mystère semblez avoir une compatibilité intrigante de ${breakdown.overallScore}%. `;
+    const highPoint = `Votre plus grand point commun réside dans votre approche de l'**${topMatch.trait.name}**. Attendez-vous à des conversations fluides et une compréhension mutuelle sur ce sujet. `;
+    const interestingDifference = `Là où les choses deviennent intéressantes, c'est votre vision de l'**${lowestMatch.trait.name}**. C'est une opportunité parfaite pour apprendre l'un de l'autre et voir le monde sous un nouvel angle.`;
+
+    return intro + highPoint + interestingDifference;
+}; 

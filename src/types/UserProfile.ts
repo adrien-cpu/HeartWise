@@ -1,16 +1,13 @@
+import { Answer } from "@/ai/questionnaires/questionnaire_structure";
+
 export interface UserProfile {
     id: string;
-    username: string;
-    email: string;
-    firstName?: string;
-    lastName?: string;
+    name?: string;
+    email?: string;
     bio?: string;
-    avatarUrl?: string;
-    preferences?: {
-        language?: string;
-        theme?: string;
-        notifications?: boolean;
-    };
-    createdAt: Date;
-    updatedAt: Date;
-} 
+    profilePicture?: string;
+    interests?: string[];
+    questionnaireAnswers?: Record<string, Answer>;
+    createdAt?: any; 
+    updatedAt?: any;
+}

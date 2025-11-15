@@ -1,20 +1,13 @@
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState, useEffect } from 'react';
-import { get_user_achievements } from '@/services/achievement_service';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getUserAchievements } from '@/services/achievement_service';
+import { Achievement } from '@/types/Achievement';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Trophy } from 'lucide-react';
 
-interface Achievement {
-  id: string;
-  name: string;
-  description: string;
-  date: string;
-}
-
-export const AchievementDashboard = () => {
+const AchievementDashboard = () => {
     const { user } = useAuth();
     const [achievements, setAchievements] = useState<Achievement[]>([]);
     const [loading, setLoading] = useState(true);
@@ -22,12 +15,17 @@ export const AchievementDashboard = () => {
 
     useEffect(() => {
         const fetchAchievements = async () => {
-            if (!user) return;
+            if (!user) {
+                setLoading(false);
+                return;
+            }
             try {
-                const userAchievements = await get_user_achievements(user.uid);
-                setAchievements(userAchievements as Achievement[]);
-            } catch (err: any) {
-                setError(err.message);
+                setLoading(true);
+                const userAchievements = await getUserAchievements(user.id);
+                setAchievements(userAchievements);
+            } catch (err) {
+                setError('Failed to load achievements.');
+                console.error(err);
             } finally {
                 setLoading(false);
             }
@@ -41,33 +39,40 @@ export const AchievementDashboard = () => {
     }
 
     if (error) {
-        return (
-            <Alert variant="destructive">
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-            </Alert>
-        );
+        return <Card><CardHeader><CardTitle>Error</CardTitle></CardHeader><CardContent><p>{error}</p></CardContent></Card>;
     }
 
     return (
-        <Card>
+        <Card className="shadow-lg">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <Trophy className="text-yellow-500" />
-                    My Achievements
-                </CardTitle>
+                <CardTitle>My Achievements</CardTitle>
             </CardHeader>
             <CardContent>
                 {achievements.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="space-y-4">
                         {achievements.map((ach) => (
-                            <Badge key={ach.id} variant="secondary">{ach.name}</Badge>
+                            <div key={ach.id} className="flex items-center justify-between">
+                                <div>
+                                    <h4 className="font-semibold">{ach.title}</h4>
+                                    <p className="text-sm text-gray-500">{ach.description}</p>
+                                </div>
+                                {ach.unlocked ? (
+                                    <Badge>Unlocked</Badge>
+                                ) : (
+                                    <div className="w-1/3">
+                                        <Progress value={(ach.progress / ach.goal) * 100} />
+                                        <p className="text-xs text-right">{ach.progress}/{ach.goal}</p>
+                                    </div>
+                                )}
+                            </div>
                         ))}
                     </div>
                 ) : (
-                    <p>No achievements yet. Keep it up!</p>
+                    <p>No achievements yet. Keep exploring!</p>
                 )}
             </CardContent>
         </Card>
     );
 };
+
+export default AchievementDashboard;
