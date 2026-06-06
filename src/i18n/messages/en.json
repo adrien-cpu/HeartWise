@@ -1,0 +1,416 @@
+{
+    "Home": {
+        "welcome": "Welcome to HeartWise",
+        "description": "Your smart and secure dating platform",
+        "features": {
+            "matchmaking": {
+                "title": "Facial Analysis",
+                "description": "Find your soulmate with our advanced facial analysis technology",
+                "cta": "Start Analysis"
+            },
+            "chat": {
+                "title": "Smart Chat",
+                "description": "Chat with our AI coach to improve your conversations",
+                "cta": "Start Chat"
+            },
+            "speedDating": {
+                "title": "Speed Dating",
+                "description": "Meet multiple people in a short time",
+                "cta": "Join Now"
+            },
+            "rewards": {
+                "title": "Rewards",
+                "description": "Earn points and unlock exclusive badges",
+                "cta": "View Rewards"
+            }
+        }
+    },
+    "GeolocationMeeting": {
+        "title": "Geolocation Meetings",
+        "mapTitle": "Interactive Map",
+        "mapDescription": "Find meeting places and nearby users",
+        "yourLocation": "Your location",
+        "filters": "Filters",
+        "maxDistance": "Maximum distance",
+        "category": "Category",
+        "selectCategory": "Select a category",
+        "allCategories": "All categories",
+        "cafe": "Cafe",
+        "restaurant": "Restaurant",
+        "bar": "Bar",
+        "park": "Park",
+        "info": "Information",
+        "booking": "Booking",
+        "people": "people",
+        "available": "Available",
+        "booked": "Booked",
+        "viewDetails": "View details",
+        "slotUnavailable": "Slot unavailable",
+        "slotUnavailableDescription": "This time slot has already been booked",
+        "bookingSuccess": "Booking successful",
+        "bookingSuccessDescription": "You have booked the slot at {time}",
+        "loadingLocation": "Loading your location...",
+        "locationUnavailable": "Unable to access your location",
+        "errorTitle": "Error",
+        "latitude": "Latitude",
+        "longitude": "Longitude",
+        "interests": "Interests",
+        "availability": "Availability",
+        "viewProfile": "View profile",
+        "connect": "Connect",
+        "connectionRequestSent": "Connection request sent",
+        "fetchError": "Error fetching data",
+        "geolocationError": "Geolocation error: {message}",
+        "geolocationErrorTitle": "Geolocation Error",
+        "geolocationNotSupported": "Geolocation is not supported by your browser"
+    },
+    "FacialAnalysis": {
+        "title": "Facial Analysis and Compatibility",
+        "consent": {
+            "title": "Facial Analysis Consent",
+            "description": "To use this feature, we need your consent to analyze your face. This analysis will help us suggest more relevant matches.",
+            "dataCollection": "Data collected:",
+            "dataPoints": {
+                "facialFeatures": "Facial landmarks",
+                "emotions": "Emotional expressions",
+                "attributes": "Physical attributes"
+            },
+            "dataUsage": "Data usage:",
+            "usagePoints": {
+                "matching": "Matching with other users",
+                "recommendations": "Personalized recommendations",
+                "improvements": "User experience improvements"
+            },
+            "accept": "I accept facial analysis"
+        },
+        "camera": {
+            "title": "Camera",
+            "start": "Start camera",
+            "stop": "Stop camera"
+        },
+        "analysis": {
+            "start": "Start analysis",
+            "analyzing": "Analyzing..."
+        },
+        "results": {
+            "title": "Analysis Results",
+            "emotions": "Detected emotions",
+            "attributes": "Attributes",
+            "compatibility": "Compatibility score"
+        },
+        "emotions": {
+            "happiness": "Happiness",
+            "sadness": "Sadness",
+            "anger": "Anger",
+            "surprise": "Surprise",
+            "fear": "Fear",
+            "disgust": "Disgust",
+            "neutral": "Neutral"
+        },
+        "attributes": {
+            "age": "Estimated age",
+            "gender": "Gender",
+            "smile": "Smile",
+            "glasses": "Glasses"
+        },
+        "genders": {
+            "male": "Male",
+            "female": "Female",
+            "other": "Other"
+        },
+        "compatibility": {
+            "overall": "Overall compatibility",
+            "facial": "Facial compatibility",
+            "psychological": "Psychological compatibility"
+        },
+        "cameraError": {
+            "title": "Camera access error",
+            "description": "Unable to access your camera. Please check your browser permissions."
+        },
+        "consentRequired": {
+            "title": "Consent required",
+            "description": "You must accept facial analysis to continue."
+        },
+        "analysisSuccess": {
+            "title": "Analysis successful",
+            "description": "Your facial analysis has been completed successfully."
+        },
+        "analysisError": {
+            "title": "Analysis error",
+            "description": "An error occurred during analysis. Please try again."
+        }
+    },
+    "Compatibility": {
+        "title": "Compatibility between {user1} and {user2}",
+        "overall": "Overall score",
+        "facial": {
+            "title": "Facial features",
+            "symmetry": "Symmetry",
+            "expression": "Expression",
+            "attractiveness": "Attractiveness"
+        },
+        "personality": {
+            "title": "Personality",
+            "values": "Values",
+            "interests": "Interests",
+            "communication": "Communication"
+        },
+        "insights": {
+            "title": "Analysis",
+            "high": "Exceptional compatibility! Your facial features and personality seem to harmonize perfectly.",
+            "medium": "Good compatibility. There's interesting potential for a fulfilling relationship.",
+            "low": "Moderate compatibility. This doesn't mean a relationship is impossible, but it might require more effort."
+        }
+    },
+    "VideoCall": {
+        "title": "Video Call",
+        "mute": "Mute",
+        "unmute": "Unmute",
+        "enableVideo": "Enable video",
+        "disableVideo": "Disable video",
+        "shareScreen": "Share screen",
+        "stopSharing": "Stop sharing",
+        "endCall": "End call",
+        "connecting": "Connecting...",
+        "callEnded": "Call ended",
+        "error": {
+            "cameraAccess": "Unable to access camera",
+            "microphoneAccess": "Unable to access microphone",
+            "screenShare": "Unable to share screen",
+            "connection": "Connection error",
+            "general": "An error occurred"
+        }
+    },
+    "ContentModeration": {
+        "approved": "Content approved",
+        "rejected": "Content rejected",
+        "violations": "Detected violations",
+        "suggestions": "Suggestions",
+        "confidence": "Confidence: {value}%",
+        "edit": "Edit",
+        "reject": "Reject",
+        "approve": "Approve",
+        "report": "Report",
+        "reportReason": "Reason for report",
+        "reportDescription": "Problem description",
+        "submitReport": "Submit report",
+        "reportSubmitted": "Report submitted",
+        "reportError": "Error submitting report",
+        "pendingReports": "Pending reports",
+        "noPendingReports": "No pending reports",
+        "reviewReport": "Review report",
+        "takeAction": "Take action",
+        "warn": "Warn",
+        "mute": "Mute",
+        "ban": "Ban",
+        "actionTaken": "Action taken",
+        "actionError": "Error taking action"
+    },
+    "NotificationPreferences": {
+        "title": "Notification Preferences",
+        "loading": "Loading preferences...",
+        "permissionRequired": "Notifications are disabled. Enable them to receive important updates.",
+        "enableNotifications": "Enable Notifications",
+        "newMessages": "New Messages",
+        "newMatches": "New Matches",
+        "profileViews": "Profile Views",
+        "eventReminders": "Event Reminders",
+        "systemUpdates": "System Updates"
+    },
+    "BookingManager": {
+        "title": "Booking Manager",
+        "loading": "Loading bookings...",
+        "pickDate": "Pick a date",
+        "noBookings": "No bookings found",
+        "participants": "participants",
+        "cancel": "Cancel",
+        "statusPending": "Pending",
+        "statusConfirmed": "Confirmed",
+        "statusCancelled": "Cancelled",
+        "loadError": "Loading error",
+        "loadErrorDescription": "Unable to load your bookings",
+        "unavailableDate": "Date unavailable",
+        "unavailableDateDescription": "This date is not available for booking",
+        "cancelSuccess": "Booking cancelled",
+        "cancelSuccessDescription": "Your booking has been successfully cancelled",
+        "cancelError": "Cancellation error",
+        "cancelErrorDescription": "Unable to cancel the booking"
+    },
+    "ReviewManager": {
+        "title": "Review Manager",
+        "loading": "Loading reviews...",
+        "statsTitle": "Statistics",
+        "reviews": "reviews",
+        "commonTags": "Popular tags",
+        "writeReview": "Write a review",
+        "rating": "Rating",
+        "comment": "Comment",
+        "tags": "Tags",
+        "addTag": "Add a tag (press Enter)",
+        "photos": "Photos",
+        "uploadPhotos": "Upload photos",
+        "submit": "Submit review",
+        "loadError": "Loading error",
+        "loadErrorDescription": "Unable to load reviews",
+        "submitSuccess": "Review published",
+        "submitSuccessDescription": "Your review has been published successfully",
+        "submitError": "Publication error",
+        "submitErrorDescription": "Unable to publish the review",
+        "photoUploadNotImplemented": "Coming soon",
+        "photoUploadNotImplementedDescription": "Photo upload will be available soon"
+    },
+    "ReminderList": {
+        "title": "Reminders",
+        "loading": "Loading reminders...",
+        "noReminders": "No reminders to display",
+        "statusPending": "Pending",
+        "statusSent": "Sent",
+        "statusCancelled": "Cancelled",
+        "loadError": "Loading error",
+        "loadErrorDescription": "Unable to load reminders"
+    },
+    "UserRating": {
+        "overallRating": "Overall Rating",
+        "totalRatings": "total ratings",
+        "verifiedRatings": "verified ratings",
+        "commonTags": "Most Used Tags",
+        "recentReviews": "Recent Reviews",
+        "writeReview": "Write a Review",
+        "cancel": "Cancel",
+        "yourRating": "Your Rating",
+        "tags": "Tags",
+        "comment": "Comment",
+        "commentPlaceholder": "Share your experience with this user...",
+        "submit": "Submit",
+        "loading": "Loading reviews...",
+        "errorLoading": "Error loading reviews",
+        "errorSubmitting": "Error submitting review"
+    },
+    "RatingModeration": {
+        "totalReports": "Total Reports",
+        "pendingReports": "Pending Reports",
+        "resolvedReports": "Resolved Reports",
+        "avgResolutionTime": "Average Resolution Time",
+        "minutes": "minutes",
+        "reportDetails": "Report Details",
+        "reportedOn": "Reported on",
+        "reportReason": "Report Reason",
+        "ratingContent": "Rating Content",
+        "approve": "Approve",
+        "reject": "Reject",
+        "edit": "Edit",
+        "loading": "Loading reports...",
+        "errorLoading": "Error loading reports",
+        "errorAction": "Error taking moderation action"
+    },
+    "UserRatingDashboard": {
+        "averageRating": "Average Rating",
+        "totalRatings": "Total Ratings",
+        "verifiedRatings": "Verified Ratings",
+        "ratingDistribution": "Rating Distribution",
+        "sentimentAnalysis": "Sentiment Analysis",
+        "positive": "Positive",
+        "neutral": "Neutral",
+        "negative": "Negative",
+        "commonTags": "Most Used Tags",
+        "loading": "Loading dashboard...",
+        "errorLoading": "Error loading dashboard",
+        "impact": {
+            "high": "High Impact",
+            "medium": "Medium Impact",
+            "low": "Low Impact"
+        },
+        "recommendationMessages": {
+            "improveRating": "Your average rating is below 4 stars. Try to improve the quality of your interactions to get better ratings.",
+            "improveTag": "You receive few mentions for the '{tag}' tag. Work on this aspect to improve your profile.",
+            "improveSentiment": "You have more negative than positive reviews. Focus on improving the user experience."
+        }
+    },
+    "RatingAnalytics": {
+        "loading": "Loading analytics...",
+        "error": "Error loading analytics",
+        "trends": "Trends",
+        "goals": "Goals",
+        "comparison": "Comparison",
+        "trendsTitle": "Rating Evolution",
+        "week": "Week",
+        "month": "Month",
+        "year": "Year",
+        "averageRating": "Average Rating",
+        "goalsTitle": "Your Goals",
+        "createGoal": "Create Goal",
+        "goalTypes": {
+            "rating": "Average Rating",
+            "tags": "Positive Tags",
+            "sentiment": "Positive Sentiment"
+        },
+        "deadline": "Deadline",
+        "comparisonTitle": "Comparison with Average",
+        "userAverage": "Your Average",
+        "globalAverage": "Global Average",
+        "percentile": "Percentile",
+        "improvement": "Improvement"
+    },
+    "AchievementDashboard": {
+        "loading": "Loading achievements...",
+        "error": "Error loading achievements",
+        "achievements": "Achievements",
+        "recommendations": "Recommendations",
+        "achievementsTitle": "Your Achievements",
+        "recommendationsTitle": "Personalized Recommendations",
+        "completed": "Completed",
+        "priority": {
+            "high": "High Priority",
+            "medium": "Medium Priority",
+            "low": "Low Priority"
+        }
+    },
+    "ChallengeDashboard": {
+        "loading": "Loading challenges...",
+        "error": "Error loading challenges",
+        "currentChallenges": "Current Challenges",
+        "completed": "Completed",
+        "progress": "Progress",
+        "timeLeft": "Time left",
+        "days": "days",
+        "join": "Join",
+        "reward": {
+            "badge": "Badge",
+            "points": "Points",
+            "premium": "Premium feature"
+        }
+    },
+    "LeaderboardDashboard": {
+        "weeklyLeaderboard": "Weekly Leaderboard",
+        "specialEvents": "Special Events",
+        "yourRank": "Your Rank",
+        "rank": "Rank #{rank}",
+        "points": "points",
+        "streak": "Streak",
+        "days": "days",
+        "topRankings": "Top Rankings",
+        "eventType": {
+            "holiday": "Holiday",
+            "seasonal": "Seasonal",
+            "community": "Community",
+            "premium": "Premium"
+        },
+        "eventDate": "From {start} to {end}",
+        "participants": "{count} participants",
+        "rewards": "Rewards",
+        "rewards.top1": "1st Place",
+        "rewards.top10": "Top 10",
+        "joinEvent": "Join Event",
+        "retry": "Retry"
+    },
+    "location": {
+        "currentLocation": "Current Location",
+        "updateLocation": "Update Location",
+        "locationUpdated": "Location Updated",
+        "nearbyUsers": "Nearby Users",
+        "noLocation": "No Location Available",
+        "locationError": "Location Error",
+        "locationPermission": "Location Permission Required",
+        "locationDisabled": "Location Disabled"
+    }
+}
